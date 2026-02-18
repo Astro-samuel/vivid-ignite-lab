@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { User, Camera, Edit3, Save, Star, Zap, Trophy, CheckCircle, Flame } from "lucide-react";
 import Layout from "@/components/Layout";
+import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
   name: string;
@@ -27,6 +28,7 @@ const initialProfile: UserProfile = {
 };
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile>(initialProfile);
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState({ name: profile.name, username: profile.username, bio: profile.bio });
@@ -206,7 +208,7 @@ export default function ProfilePage() {
         <div
           className="rounded-2xl p-5 border cursor-pointer transition-all hover:border-orange-500/50 group"
           style={{ background: "hsl(229, 45%, 16%)", borderColor: "hsl(229, 42%, 28%)" }}
-          onClick={() => {}}
+          onClick={() => navigate("/achievements")}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Lightbulb, Zap, RefreshCw, Loader2, ArrowRight } from "lucide-react";
 import Layout from "@/components/Layout";
+import { useNavigate } from "react-router-dom";
 
 const bigIdeas = [
   {
@@ -39,6 +40,7 @@ const impactColors: Record<string, string> = {
 };
 
 export default function ThinkBiggerPage() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [ideas, setIdeas] = useState(bigIdeas);
 
@@ -123,7 +125,11 @@ export default function ThinkBiggerPage() {
                         ))}
                       </div>
 
-                      <button className="btn-neon-teal px-4 py-2 text-sm font-bold flex items-center gap-2 transition-all group-hover:gap-3">
+                      <button
+                        onClick={() => navigate("/ide")}
+                        className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 group-hover:gap-3"
+                        style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 12px rgba(0,245,255,0.3)" }}
+                      >
                         <Zap size={14} /> Start Building <ArrowRight size={14} />
                       </button>
                     </div>
