@@ -27,8 +27,8 @@ export default function Sidebar() {
       className="flex flex-col h-screen sticky top-0 transition-all duration-300 border-r relative flex-shrink-0"
       style={{
         width: collapsed ? "60px" : "200px",
-        background: "hsl(229, 48%, 8%)",
-        borderColor: "hsl(229, 42%, 20%)",
+        background: "hsl(232, 48%, 6%)",
+        borderColor: "hsl(232, 40%, 16%)",
       }}
     >
       {/* Logo */}
@@ -46,7 +46,7 @@ export default function Sidebar() {
         {!collapsed && (
           <div className="min-w-0">
             <p className="font-bold text-sm truncate" style={{ color: "#FFFFFF" }}>Arduino AI</p>
-            <p className="text-xs truncate" style={{ color: "hsl(226, 35%, 72%)" }}>Project Generator</p>
+            <p className="text-xs truncate" style={{ color: "hsl(226, 35%, 55%)" }}>Project Generator</p>
           </div>
         )}
       </div>
@@ -59,14 +59,16 @@ export default function Sidebar() {
             <Link
               key={path}
               to={path}
-              className={`flex items-center gap-3 px-2.5 py-2.5 rounded-lg transition-all duration-150 cursor-pointer group`}
+              className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg transition-all duration-150 cursor-pointer group"
               style={
                 isActive
                   ? {
                       background: "rgba(0,245,255,0.12)",
                       color: "#00F5FF",
+                      borderLeft: "3px solid #00F5FF",
+                      paddingLeft: "7px",
                     }
-                  : { color: "hsl(226, 35%, 72%)" }
+                  : { color: "hsl(226, 35%, 65%)" }
               }
               title={collapsed ? label : undefined}
             >
@@ -84,7 +86,19 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom section */}
-      <div className="border-t" style={{ borderColor: "hsl(229, 42%, 20%)" }}>
+      <div className="border-t" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
+        {/* Sign Out */}
+        <div className="px-2 pt-3">
+          <button
+            className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg w-full transition-all duration-150 hover:bg-white/5"
+            style={{ color: "hsl(226, 35%, 65%)" }}
+            title={collapsed ? "Sign Out" : undefined}
+          >
+            <LogOut size={16} className="flex-shrink-0" style={{ color: "#FF4500" }} />
+            {!collapsed && <span className="text-sm font-medium">Sign Out</span>}
+          </button>
+        </div>
+
         {/* Pro Tip */}
         {!collapsed && (
           <div
@@ -95,22 +109,11 @@ export default function Sidebar() {
               <Star size={11} style={{ color: "#FFD700" }} />
               <span className="text-xs font-bold" style={{ color: "#FFD700" }}>Pro Tip</span>
             </div>
-            <p className="text-xs" style={{ color: "hsl(226, 35%, 72%)" }}>
+            <p className="text-xs" style={{ color: "hsl(226, 35%, 65%)" }}>
               Add all your components to get the best project recommendations!
             </p>
           </div>
         )}
-
-        <div className="px-2 pb-3">
-          <button
-            className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg w-full transition-all duration-150 hover:bg-white/5"
-            style={{ color: "hsl(226, 35%, 72%)" }}
-            title={collapsed ? "Sign Out" : undefined}
-          >
-            <LogOut size={16} className="flex-shrink-0" style={{ color: "#FF4500" }} />
-            {!collapsed && <span className="text-sm font-medium">Sign Out</span>}
-          </button>
-        </div>
       </div>
 
       {/* Collapse toggle */}
@@ -118,7 +121,7 @@ export default function Sidebar() {
         onClick={() => setCollapsed(!collapsed)}
         className="absolute -right-3 top-16 w-6 h-6 rounded-full border flex items-center justify-center transition-all duration-200 hover:scale-110 z-10"
         style={{
-          background: "hsl(229, 45%, 16%)",
+          background: "hsl(232, 42%, 13%)",
           borderColor: "rgba(0,245,255,0.4)",
           color: "#00F5FF",
         }}

@@ -1,175 +1,264 @@
 import { useState } from "react";
-import { Package, Zap, Star, CheckCircle } from "lucide-react";
+import { Package, Zap, CheckCircle } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 
 const kits = [
   {
-    id: 1, emoji: "🌟", name: "Starter Kit",
-    desc: "Perfect for absolute beginners. Everything you need to get started with Arduino.",
-    components: ["Arduino Uno", "Breadboard", "LED (5x)", "220Ω Resistor (10x)", "Jumper Wires", "USB Cable"],
-    projects: 8, difficulty: "beginner", color: "#00FF88",
-    features: ["8 beginner projects included", "Step-by-step tutorials", "No soldering required"],
+    id: 1,
+    emoji: "🌱",
+    name: "Basic Starter Kit",
+    price: "$25",
+    desc: "Perfect for absolute beginners. Learn the fundamentals of Arduino.",
+    components: [
+      "Arduino Uno", "Breadboard", "Jumper Wires", "LED (Red) ×5",
+      "LED (Green) ×5", "LED (Blue) ×5", "Resistor (220Ω) ×10",
+      "Resistor (1kΩ) ×10", "Push Button ×5", "Potentiometer ×2", "Buzzer",
+    ],
+    componentCount: 11,
+    projects: "15+",
+    color: "#00FF88",
+    borderColor: "rgba(0,255,136,0.5)",
   },
   {
-    id: 2, emoji: "⚡", name: "Sensor Pack",
-    desc: "Explore the world of sensors and environmental monitoring.",
-    components: ["DHT22", "HC-SR04 Ultrasonic", "PIR Motion", "LDR Light Sensor", "Soil Moisture", "BMP180 Pressure"],
-    projects: 12, difficulty: "intermediate", color: "#00F5FF",
-    features: ["12 sensor projects", "IoT ready", "Cloud dashboard compatible"],
+    id: 2,
+    emoji: "📊",
+    name: "Sensor Explorer Kit",
+    price: "$45",
+    desc: "Dive into the world of sensors. Measure temperature, distance, light, and more.",
+    components: [
+      "Arduino Uno", "Breadboard", "Jumper Wires", "Temperature Sensor (DHT11)",
+      "Ultrasonic Sensor (HC-SR04)", "PIR Motion Sensor", "Photoresistor (LDR) ×2",
+      "IR Sensor ×2", "Soil Moisture Sensor", "BMP180 Pressure", "Sound Sensor", "Rain Sensor",
+    ],
+    componentCount: 12,
+    projects: "25+",
+    color: "#00F5FF",
+    borderColor: "rgba(0,245,255,0.5)",
   },
   {
-    id: 3, emoji: "🤖", name: "Robotics Kit",
-    desc: "Build robots and autonomous vehicles with this comprehensive robotics bundle.",
-    components: ["L298N Motor Driver", "DC Motors (2x)", "Servo Motor (2x)", "IR Sensors (3x)", "HC-SR04", "Chassis Kit"],
-    projects: 10, difficulty: "intermediate", color: "#FFD700",
-    features: ["10 robotics projects", "Line following + obstacle avoidance", "Bluetooth control ready"],
+    id: 3,
+    emoji: "🤖",
+    name: "Robotics Kit",
+    price: "$65",
+    desc: "Build moving robots! Includes motors, drivers, and chassis components.",
+    components: [
+      "Arduino Uno", "Motor Driver (L298N)", "DC Motor ×4", "Servo Motor (SG90) ×2",
+      "Ultrasonic Sensor (HC-SR04) ×2", "IR Sensor ×3", "Battery Holder", "Breadboard",
+      "Chassis Kit",
+    ],
+    componentCount: 9,
+    projects: "20+",
+    color: "#FFD700",
+    borderColor: "rgba(255,215,0,0.5)",
   },
   {
-    id: 4, emoji: "📡", name: "IoT Connectivity Kit",
-    desc: "Connect your projects to the internet and control them from anywhere.",
-    components: ["ESP32", "ESP8266 NodeMCU", "HC-05 Bluetooth", "LoRa Module", "SIM800L GSM", "RFID RC522"],
-    projects: 15, difficulty: "advanced", color: "#B744FF",
-    features: ["15 IoT projects", "WiFi + Bluetooth + LoRa", "Cloud & mobile app integration"],
+    id: 4,
+    emoji: "🌐",
+    name: "IoT & WiFi Kit",
+    price: "$55",
+    desc: "Connect your projects to the internet. Build smart home devices.",
+    components: [
+      "ESP32", "ESP8266", "Relay Module ×2", "Temperature Sensor (DHT22)",
+      "PIR Motion Sensor", "OLED Display (0.96\")", "LED Strip (WS2812B)",
+      "Buzzer", "Jumper Wires", "Breadboard",
+    ],
+    componentCount: 10,
+    projects: "30+",
+    color: "#B744FF",
+    borderColor: "rgba(183,68,255,0.5)",
   },
   {
-    id: 5, emoji: "🎨", name: "LED Art Kit",
-    desc: "Create stunning light art installations and interactive displays.",
-    components: ["WS2812B LED Strip (1m)", "RGB LED (10x)", "LED Matrix 8x8", "IR Remote", "Potentiometer (3x)", "Capacitor 1000µF"],
-    projects: 9, difficulty: "beginner", color: "#FF1493",
-    features: ["9 LED art projects", "Full color control", "Music reactive effects"],
-  },
-  {
-    id: 6, emoji: "🔊", name: "Audio Kit",
-    desc: "Build sound-reactive projects, music players, and voice-controlled devices.",
-    components: ["Piezo Buzzer", "MAX9814 Microphone", "DF Player Mini", "Speaker (2W)", "Potentiometer", "3.5mm Jack"],
-    projects: 7, difficulty: "intermediate", color: "#FF4500",
-    features: ["7 audio projects", "Music visualization", "Voice command support"],
+    id: 5,
+    emoji: "⭐",
+    name: "Complete Maker Kit",
+    price: "$120",
+    desc: "Everything you need! The ultimate kit for serious Arduino enthusiasts.",
+    components: [
+      "Arduino Uno", "Arduino Nano", "ESP32", "Breadboard ×2", "Jumper Wires",
+      "LED (Red) ×10", "LED (Green) ×10", "RGB LED ×5", "Resistor (220Ω) ×20",
+      "Resistor (10kΩ) ×10", "DHT22", "HC-SR04", "Servo Motor ×3", "DC Motor ×4",
+      "L298N Motor Driver", "OLED Display", "16x2 LCD", "Buzzer", "Relay Module ×2", "Potentiometer ×3",
+    ],
+    componentCount: 20,
+    projects: "50+",
+    color: "#FF1493",
+    borderColor: "rgba(255,20,147,0.5)",
+    bestValue: true,
   },
 ];
 
-function DifficultyBadge({ difficulty }: { difficulty: string }) {
-  const cls = difficulty === "beginner" ? "badge-beginner" : difficulty === "intermediate" ? "badge-intermediate" : "badge-advanced";
-  return <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${cls}`}>{difficulty}</span>;
-}
+// Shared inventory state (in a real app this would be in context/store)
+export let sharedInventory: string[] = [
+  "Arduino Uno", "LED (Red)", "220Ω Resistor", "DHT22 (Temp/Humidity)", "Servo Motor",
+];
 
 export default function KitsPage() {
   const navigate = useNavigate();
-  const [selected, setSelected] = useState<number | null>(null);
-  const [toast, setToast] = useState(false);
+  const [selectedKits, setSelectedKits] = useState<Set<number>>(new Set());
+  const [toast, setToast] = useState("");
 
-  const handleSelect = (id: number) => {
-    setSelected(id);
-    setToast(true);
-    setTimeout(() => { setToast(false); navigate("/generate"); }, 2000);
+  const handleHaveKit = (kit: typeof kits[0]) => {
+    if (selectedKits.has(kit.id)) return;
+    setSelectedKits((prev) => new Set([...prev, kit.id]));
+
+    // Add kit components to shared inventory
+    kit.components.forEach((c) => {
+      const base = c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "");
+      if (!sharedInventory.includes(base)) {
+        sharedInventory.push(base);
+      }
+    });
+
+    setToast(`✓ ${kit.name} added to inventory!`);
+    setTimeout(() => {
+      setToast("");
+      navigate("/generate");
+    }, 2000);
   };
 
   return (
     <Layout>
       <div className="px-8 py-10 max-w-6xl mx-auto">
+        {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Package size={22} style={{ color: "#FFD700" }} />
-            <h1 className="text-3xl font-bold" style={{ color: "#FFFFFF" }}>
-              Starter <span className="gradient-text-gold">Kits</span>
-            </h1>
+          <div className="flex items-center gap-2 mb-2">
+            <Package size={14} style={{ color: "#00FF88" }} />
+            <span className="text-xs font-semibold" style={{ color: "#00FF88" }}>Component Kits</span>
           </div>
-          <p style={{ color: "hsl(226, 35%, 72%)" }}>
-            Pre-configured component bundles to jumpstart your learning journey
+          <h1 className="text-3xl font-bold mb-2" style={{ color: "#FFFFFF" }}>Starter Kits</h1>
+          <p style={{ color: "#A0AED9" }}>
+            Don't have components yet? Choose a kit that matches your interests and we'll set up your inventory automatically.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {kits.map((kit, i) => (
-            <div
-              key={kit.id}
-              className="card-neon p-5 cursor-pointer group transition-all duration-300"
-              style={
-                selected === kit.id
-                  ? { borderColor: `${kit.color}66`, boxShadow: `0 0 20px ${kit.color}22` }
-                  : {}
-              }
-              onClick={() => handleSelect(kit.id)}
-            >
-              {/* Header */}
-              <div className="flex items-start justify-between gap-3 mb-4">
-                <div className="flex items-center gap-3">
+          {kits.map((kit) => {
+            const owned = selectedKits.has(kit.id);
+            return (
+              <div
+                key={kit.id}
+                className="rounded-2xl border overflow-hidden transition-all duration-300 relative"
+                style={{
+                  background: "hsl(229, 45%, 14%)",
+                  borderColor: owned ? kit.borderColor : "hsl(229, 42%, 26%)",
+                  boxShadow: owned ? `0 0 20px ${kit.color}18` : "none",
+                }}
+              >
+                {/* Best Value badge */}
+                {kit.bestValue && (
                   <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-transform group-hover:scale-110"
-                    style={{ background: `${kit.color}18`, border: `1px solid ${kit.color}33` }}
+                    className="absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-xl"
+                    style={{ background: "linear-gradient(135deg, #FFD700, #FFA500)", color: "#0A0E27" }}
                   >
-                    {kit.emoji}
+                    BEST VALUE
                   </div>
-                  <div>
-                    <h3 className="font-bold" style={{ color: "#FFFFFF" }}>{kit.name}</h3>
-                    <DifficultyBadge difficulty={kit.difficulty} />
-                  </div>
-                </div>
-                {selected === kit.id && (
-                  <CheckCircle size={20} style={{ color: kit.color }} className="flex-shrink-0" />
                 )}
-              </div>
 
-              <p className="text-sm mb-4" style={{ color: "hsl(226, 35%, 72%)" }}>{kit.desc}</p>
-
-              {/* Components */}
-              <div className="mb-4">
-                <p className="text-xs font-semibold mb-2" style={{ color: kit.color }}>Includes:</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {kit.components.slice(0, 4).map((c) => (
-                    <span
-                      key={c}
-                      className="text-xs px-2 py-0.5 rounded-lg"
-                      style={{ background: `${kit.color}10`, color: kit.color, border: `1px solid ${kit.color}25` }}
-                    >
-                      {c}
-                    </span>
-                  ))}
-                  {kit.components.length > 4 && (
-                    <span className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "hsl(229, 42%, 22%)", color: "hsl(226, 35%, 72%)" }}>
-                      +{kit.components.length - 4} more
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Features */}
-              <div className="mb-4 space-y-1.5">
-                {kit.features.map((f) => (
-                  <div key={f} className="flex items-center gap-2 text-xs" style={{ color: "hsl(226, 35%, 72%)" }}>
-                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: kit.color }} />
-                    {f}
+                <div className="p-5">
+                  {/* Kit header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">{kit.emoji}</span>
+                      <div>
+                        <h3 className="font-bold text-base" style={{ color: "#FFFFFF" }}>{kit.name}</h3>
+                      </div>
+                    </div>
+                    <span className="text-xl font-black" style={{ color: kit.color }}>{kit.price}</span>
                   </div>
-                ))}
-              </div>
 
-              {/* Footer */}
-              <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: "hsl(229, 42%, 28%)" }}>
-                <div className="flex items-center gap-1 text-xs" style={{ color: "hsl(226, 35%, 72%)" }}>
-                  <Star size={11} style={{ color: kit.color }} /> {kit.projects} projects
+                  {/* Progress-like bar with project count */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex-1 h-1 rounded-full mr-3" style={{ background: "hsl(229, 42%, 22%)" }}>
+                      <div className="h-full rounded-full" style={{ width: "40%", background: kit.color }} />
+                    </div>
+                    <span className="text-xs flex items-center gap-1" style={{ color: kit.color }}>
+                      <Zap size={11} /> {kit.projects} projects
+                    </span>
+                  </div>
+
+                  <p className="text-sm mb-4" style={{ color: "#A0AED9" }}>{kit.desc}</p>
+
+                  {/* Component count */}
+                  <p className="text-xs font-semibold mb-2" style={{ color: "hsl(226, 35%, 65%)" }}>
+                    {kit.componentCount} components
+                  </p>
+
+                  {/* Includes */}
+                  <p className="text-xs font-semibold mb-2" style={{ color: kit.color }}>Includes:</p>
+                  <div className="flex flex-wrap gap-1.5 mb-5">
+                    {kit.components.slice(0, 8).map((c) => (
+                      <span
+                        key={c}
+                        className="text-xs px-2 py-0.5 rounded-lg"
+                        style={{
+                          background: "hsl(229, 42%, 20%)",
+                          color: "hsl(226, 35%, 75%)",
+                          border: "1px solid hsl(229, 42%, 30%)",
+                        }}
+                      >
+                        {c}
+                      </span>
+                    ))}
+                    {kit.components.length > 8 && (
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-lg"
+                        style={{ background: "hsl(229, 42%, 20%)", color: "hsl(226, 35%, 65%)", border: "1px solid hsl(229, 42%, 30%)" }}
+                      >
+                        +{kit.components.length - 8} more
+                      </span>
+                    )}
+                  </div>
+
+                  {/* I Have This Kit button */}
+                  <button
+                    onClick={() => handleHaveKit(kit)}
+                    disabled={owned}
+                    className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:cursor-default"
+                    style={
+                      owned
+                        ? {
+                            background: `${kit.color}22`,
+                            color: kit.color,
+                            border: `1px solid ${kit.color}44`,
+                          }
+                        : {
+                            background: `linear-gradient(135deg, ${kit.color}, ${kit.color}BB)`,
+                            color: kit.id === 1 || kit.id === 2 ? "#0A0E27" : "#FFFFFF",
+                            boxShadow: `0 0 20px ${kit.color}44`,
+                          }
+                    }
+                  >
+                    {owned ? (
+                      <><CheckCircle size={16} /> ✓ Added to Inventory!</>
+                    ) : (
+                      <><CheckCircle size={16} /> I Have This Kit</>
+                    )}
+                  </button>
                 </div>
-                <button
-                  className="px-4 py-1.5 rounded-xl text-xs font-bold transition-all hover:scale-105"
-                  style={{
-                    background: `${kit.color}22`,
-                    color: kit.color,
-                    border: `1px solid ${kit.color}44`,
-                  }}
-                >
-                  <Zap size={11} className="inline mr-1" /> Select Kit
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
+        </div>
+
+        {/* No kit section */}
+        <div
+          className="mt-8 rounded-2xl p-6 border text-center"
+          style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
+        >
+          <h3 className="font-bold mb-2" style={{ color: "#FFFFFF" }}>Don't have a kit?</h3>
+          <p className="text-sm mb-4" style={{ color: "#A0AED9" }}>
+            You can manually add individual components in the "My Components" section, or let our AI suggest projects based on common beginner setups.
+          </p>
         </div>
       </div>
 
       {toast && (
         <div
-          className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up"
+          className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up z-50"
           style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}
         >
-          <CheckCircle size={16} /> ✓ Kit Selected!
+          <CheckCircle size={16} /> {toast}
         </div>
       )}
     </Layout>
