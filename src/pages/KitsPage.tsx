@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Package, Zap, Star, Clock, CheckCircle } from "lucide-react";
+import { Package, Zap, Star, CheckCircle } from "lucide-react";
 import Layout from "@/components/Layout";
+import { useNavigate } from "react-router-dom";
 
 const kits = [
   {
@@ -53,13 +54,14 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
 }
 
 export default function KitsPage() {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<number | null>(null);
   const [toast, setToast] = useState(false);
 
   const handleSelect = (id: number) => {
     setSelected(id);
     setToast(true);
-    setTimeout(() => setToast(false), 3000);
+    setTimeout(() => { setToast(false); navigate("/generate"); }, 2000);
   };
 
   return (

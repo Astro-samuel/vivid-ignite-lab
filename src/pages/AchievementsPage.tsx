@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Trophy, Star, Zap, Target, Award, Lock, CheckCircle } from "lucide-react";
+import { Trophy, Star, Zap, Target, Lock, CheckCircle } from "lucide-react";
 import Layout from "@/components/Layout";
+import { useNavigate } from "react-router-dom";
 
 interface Achievement {
   id: number;
@@ -28,6 +29,7 @@ const achievements: Achievement[] = [
 const streakDays = [true, true, true, false, false, false, false];
 
 export default function AchievementsPage() {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<"all" | "unlocked" | "locked">("all");
 
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
@@ -75,6 +77,7 @@ export default function AchievementsPage() {
               🔥 Daily Streak
             </h3>
             <button
+              onClick={() => navigate("/dashboard")}
               className="text-sm font-semibold px-3 py-1 rounded-lg transition-all hover:scale-105"
               style={{ background: "rgba(255,69,0,0.1)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}
             >

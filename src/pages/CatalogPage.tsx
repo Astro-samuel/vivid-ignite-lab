@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Search, Filter, Clock, Star } from "lucide-react";
+import { Search, Clock, Star } from "lucide-react";
 import Layout from "@/components/Layout";
+import { useNavigate } from "react-router-dom";
 
 const projects = [
   { id: 1, emoji: "💡", title: "LED Blink Tutorial", desc: "The classic 'Hello World' of Arduino - make an LED blink!", difficulty: "beginner", time: "15 mins", xp: 50, tags: ["LED", "GPIO"] },
@@ -18,11 +19,17 @@ const projects = [
 ];
 
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
-  const cls = difficulty === "beginner" ? "badge-beginner" : difficulty === "intermediate" ? "badge-intermediate" : "badge-advanced";
-  return <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${cls}`}>{difficulty}</span>;
+  const styles =
+    difficulty === "beginner"
+      ? { background: "rgba(0,255,136,0.15)", color: "#00FF88", border: "1px solid rgba(0,255,136,0.3)" }
+      : difficulty === "intermediate"
+      ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
+      : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
+  return <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold capitalize" style={styles}>{difficulty}</span>;
 }
 
 export default function CatalogPage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [diffFilter, setDiffFilter] = useState<string>("all");
 
@@ -115,7 +122,11 @@ export default function CatalogPage() {
                 <span className="font-bold" style={{ color: "#FFD700" }}>+{p.xp} XP</span>
               </div>
 
-              <button className="btn-neon-teal w-full py-2 text-sm font-bold">
+              <button
+                onClick={() => navigate("/ide")}
+                className="w-full py-2 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
+                style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 12px rgba(0,245,255,0.25)" }}
+              >
                 Start This Project
               </button>
             </div>
