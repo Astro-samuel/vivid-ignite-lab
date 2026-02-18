@@ -2,95 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@400;600;700;900&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* === NEON MAKERLAB DESIGN SYSTEM === */
+    
+    /* Backgrounds */
+    --background: 229 48% 10%;       /* #0A0E27 */
+    --background-card: 229 45% 16%;  /* #141B3D */
+    --background-hover: 229 42% 22%; /* #1E2749 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 100%;         /* #FFFFFF */
+    --foreground-secondary: 228 100% 94%; /* #E0E7FF */
+    --foreground-muted: 226 35% 72%; /* #A0AED9 */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Neon Teal (Primary) */
+    --primary: 182 100% 50%;         /* #00F5FF */
+    --primary-mid: 197 100% 42%;     /* #00D4FF */
+    --primary-deep: 210 100% 50%;    /* #0099FF */
+    --primary-foreground: 229 48% 10%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Neon Gold (Secondary) */
+    --secondary: 51 100% 50%;        /* #FFD700 */
+    --secondary-bright: 52 100% 60%; /* #FFE135 */
+    --secondary-warm: 38 100% 50%;   /* #FFA500 */
+    --secondary-foreground: 229 48% 10%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Vivid Green (Success) */
+    --success: 150 100% 50%;         /* #00FF88 */
+    --success-mid: 143 100% 45%;     /* #00E676 */
+    --success-deep: 144 100% 39%;    /* #00C853 */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Hot Pink (Special/Alerts) */
+    --pink: 328 100% 54%;            /* #FF1493 */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Electric Purple (Advanced) */
+    --purple: 284 100% 63%;          /* #B744FF */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Fiery Orange (Danger) */
+    --destructive: 16 100% 50%;      /* #FF4500 */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Shadcn Aliases */
+    --card: 229 45% 16%;
+    --card-foreground: 0 0% 100%;
+    --popover: 229 45% 16%;
+    --popover-foreground: 0 0% 100%;
+    --muted: 229 42% 22%;
+    --muted-foreground: 226 35% 72%;
+    --accent: 229 42% 22%;
+    --accent-foreground: 0 0% 100%;
+    --border: 229 42% 28%;
+    --input: 229 42% 22%;
+    --ring: 182 100% 50%;
+    --radius: 0.75rem;
 
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 229 48% 8%;
+    --sidebar-foreground: 228 100% 94%;
+    --sidebar-primary: 182 100% 50%;
+    --sidebar-primary-foreground: 229 48% 10%;
+    --sidebar-accent: 229 42% 22%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 229 42% 20%;
+    --sidebar-ring: 182 100% 50%;
   }
 }
 
@@ -101,5 +76,287 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Space Grotesk', sans-serif;
+    background-color: hsl(229, 48%, 10%);
   }
+
+  h1, h2, h3 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .font-orbitron {
+    font-family: 'Orbitron', sans-serif;
+  }
+}
+
+@layer components {
+  /* === NEON GLOW EFFECTS === */
+  .glow-teal {
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.5), 0 0 40px rgba(0, 245, 255, 0.2);
+  }
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.2);
+  }
+  .glow-green {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.5), 0 0 40px rgba(0, 255, 136, 0.2);
+  }
+  .glow-pink {
+    box-shadow: 0 0 20px rgba(255, 20, 147, 0.5), 0 0 40px rgba(255, 20, 147, 0.2);
+  }
+  .glow-purple {
+    box-shadow: 0 0 20px rgba(183, 68, 255, 0.5), 0 0 40px rgba(183, 68, 255, 0.2);
+  }
+
+  /* Text glow */
+  .text-glow-teal {
+    text-shadow: 0 0 20px rgba(0, 245, 255, 0.8), 0 0 40px rgba(0, 245, 255, 0.4);
+  }
+  .text-glow-gold {
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4);
+  }
+  .text-glow-green {
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.8), 0 0 40px rgba(0, 255, 136, 0.4);
+  }
+
+  /* === NEON BUTTONS === */
+  .btn-neon-teal {
+    @apply relative rounded-xl font-semibold transition-all duration-300 overflow-hidden;
+    background: linear-gradient(135deg, #00F5FF, #00D4FF, #0099FF);
+    color: #0A0E27;
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+  }
+  .btn-neon-teal:hover {
+    box-shadow: 0 0 30px rgba(0, 245, 255, 0.7), 0 0 60px rgba(0, 245, 255, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .btn-neon-gold {
+    @apply relative rounded-xl font-semibold transition-all duration-300;
+    background: linear-gradient(135deg, #FFE135, #FFD700, #FFA500);
+    color: #0A0E27;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  }
+  .btn-neon-gold:hover {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.7), 0 0 60px rgba(255, 215, 0, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .btn-neon-green {
+    @apply relative rounded-xl font-semibold transition-all duration-300;
+    background: linear-gradient(135deg, #00FF88, #00E676, #00C853);
+    color: #0A0E27;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+  }
+  .btn-neon-green:hover {
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.7);
+    transform: translateY(-2px);
+  }
+
+  .btn-neon-outline-teal {
+    @apply relative rounded-xl font-semibold transition-all duration-300 border-2;
+    border-color: #00F5FF;
+    color: #00F5FF;
+    background: transparent;
+  }
+  .btn-neon-outline-teal:hover {
+    background: rgba(0, 245, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+    transform: translateY(-2px);
+  }
+
+  /* === NEON CARDS === */
+  .card-neon {
+    @apply rounded-2xl border transition-all duration-300;
+    background: hsl(229, 45%, 16%);
+    border-color: hsl(229, 42%, 28%);
+  }
+  .card-neon:hover {
+    border-color: rgba(0, 245, 255, 0.4);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.1), 0 4px 20px rgba(0, 0, 0, 0.4);
+    transform: translateY(-3px);
+  }
+
+  .card-neon-gold:hover {
+    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+  }
+
+  /* === NEON BADGES === */
+  .badge-beginner {
+    background: rgba(0, 255, 136, 0.15);
+    color: #00FF88;
+    border: 1px solid rgba(0, 255, 136, 0.4);
+  }
+  .badge-intermediate {
+    background: rgba(255, 215, 0, 0.15);
+    color: #FFD700;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+  }
+  .badge-advanced {
+    background: rgba(183, 68, 255, 0.15);
+    color: #B744FF;
+    border: 1px solid rgba(183, 68, 255, 0.4);
+  }
+
+  /* === GRADIENT TEXT === */
+  .gradient-text-teal {
+    background: linear-gradient(135deg, #00F5FF, #00D4FF, #0099FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-text-gold {
+    background: linear-gradient(135deg, #FFE135, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-text-hero {
+    background: linear-gradient(135deg, #00F5FF 0%, #B744FF 50%, #FFD700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* === SIDEBAR === */
+  .sidebar-nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer;
+    color: hsl(226, 35%, 72%);
+  }
+  .sidebar-nav-item:hover {
+    background: rgba(0, 245, 255, 0.08);
+    color: #00F5FF;
+  }
+  .sidebar-nav-item.active {
+    background: rgba(0, 245, 255, 0.12);
+    color: #00F5FF;
+    box-shadow: inset 3px 0 0 #00F5FF;
+  }
+
+  /* === PROGRESS BAR === */
+  .progress-neon {
+    @apply rounded-full overflow-hidden;
+    background: hsl(229, 42%, 22%);
+  }
+  .progress-neon-fill {
+    @apply h-full rounded-full transition-all duration-700;
+    background: linear-gradient(90deg, #00F5FF, #00D4FF, #0099FF);
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.6);
+  }
+
+  /* === STAT CARD === */
+  .stat-card {
+    @apply rounded-2xl p-5 border transition-all duration-300;
+    background: hsl(229, 45%, 16%);
+    border-color: hsl(229, 42%, 28%);
+  }
+
+  /* === CODE EDITOR === */
+  .code-editor {
+    font-family: 'JetBrains Mono', monospace;
+    background: hsl(229, 48%, 8%);
+    color: #E0E7FF;
+    border: 1px solid hsl(229, 42%, 28%);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(229, 48%, 10%);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(182, 100%, 50%, 0.3);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(182, 100%, 50%, 0.6);
+  }
+}
+
+@layer utilities {
+  .bg-gradient-teal {
+    background: linear-gradient(135deg, #00F5FF, #00D4FF, #0099FF);
+  }
+  .bg-gradient-gold {
+    background: linear-gradient(135deg, #FFE135, #FFD700, #FFA500);
+  }
+  .bg-gradient-green {
+    background: linear-gradient(135deg, #00FF88, #00E676, #00C853);
+  }
+  .bg-gradient-hero {
+    background: linear-gradient(135deg, rgba(0,245,255,0.1) 0%, rgba(183,68,255,0.1) 50%, rgba(255,215,0,0.05) 100%);
+  }
+  .border-neon-teal {
+    border-color: rgba(0, 245, 255, 0.4);
+  }
+  .border-neon-gold {
+    border-color: rgba(255, 215, 0, 0.4);
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+}
+
+/* Fade in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes neonPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(0, 245, 255, 0.8), 0 0 50px rgba(0, 245, 255, 0.3);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-neon-pulse {
+  animation: neonPulse 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, #00F5FF 0%, #B744FF 25%, #FFD700 50%, #B744FF 75%, #00F5FF 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
 }
