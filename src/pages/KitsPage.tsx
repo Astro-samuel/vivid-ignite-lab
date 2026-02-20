@@ -88,10 +88,16 @@ const kits = [
   },
 ];
 
-// Shared inventory state (in a real app this would be in context/store)
-export let sharedInventory: string[] = [
-  "Arduino Uno", "LED (Red)", "220Ω Resistor", "DHT22 (Temp/Humidity)", "Servo Motor",
-];
+// Get inventory from localStorage
+function getInventory(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem("userInventory") || '["Arduino Uno"]');
+  } catch { return ["Arduino Uno"]; }
+}
+
+function saveInventory(items: string[]) {
+  localStorage.setItem("userInventory", JSON.stringify(items));
+}
 
 export default function KitsPage() {
   const navigate = useNavigate();
@@ -102,18 +108,20 @@ export default function KitsPage() {
     if (selectedKits.has(kit.id)) return;
     setSelectedKits((prev) => new Set([...prev, kit.id]));
 
-    // Add kit components to shared inventory
+    // Add kit components to localStorage inventory
+    const inventory = getInventory();
     kit.components.forEach((c) => {
       const base = c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "");
-      if (!sharedInventory.includes(base)) {
-        sharedInventory.push(base);
+      if (!inventory.includes(base)) {
+        inventory.push(base);
       }
     });
+    saveInventory(inventory);
 
     setToast(`✓ ${kit.name} added to inventory!`);
     setTimeout(() => {
       setToast("");
-      navigate("/generate");
+      navigate("/components");
     }, 2000);
   };
 

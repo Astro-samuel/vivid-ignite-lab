@@ -25,7 +25,14 @@ const projectPool: Project[] = [
   { id: 8, emoji: "🎮", title: "Joystick-Controlled LED Matrix", difficulty: "beginner", time: "40 mins", xp: 90, description: "Use a joystick to draw and animate patterns on an 8x8 LED matrix display. Includes multiple animation modes.", components: ["8x8 LED Matrix", "MAX7219", "Joystick Module", "Arduino Uno"] },
 ];
 
-const defaultComponents = ["Arduino Uno", "Breadboard", "Jumper Wires", "LED (Red) ×5", "LED (Green) ×10", "LED (Blue) ×5", "Resistor (220Ω) ×10", "Resistor (1kΩ) ×10", "Push Button ×5", "Potentiometer ×2", "Buzzer"];
+function getInventoryComponents(): string[] {
+  try {
+    const inv = JSON.parse(localStorage.getItem("userInventory") || "[]");
+    return inv.length > 0 ? inv : ["Arduino Uno", "Breadboard", "Jumper Wires", "LED (Red)", "Resistor (220Ω)", "Push Button", "Buzzer"];
+  } catch { return ["Arduino Uno"]; }
+}
+
+const defaultComponents = getInventoryComponents();
 
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
   const styles =

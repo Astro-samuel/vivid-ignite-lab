@@ -123,11 +123,11 @@ export default function CatalogPage() {
               </div>
 
               <button
-                onClick={() => navigate("/ide")}
+                onClick={() => navigate(`/project/${p.id}`)}
                 className="w-full py-2 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
                 style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 12px rgba(0,245,255,0.25)" }}
               >
-                Start This Project
+                View Project
               </button>
             </div>
           ))}

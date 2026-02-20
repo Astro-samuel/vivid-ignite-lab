@@ -80,7 +80,18 @@ const categories: Category[] = ["Microcontroller", "Sensor", "Actuator", "Displa
 export default function ComponentsPage() {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState<Category>("Microcontroller");
-  const [quantities, setQuantities] = useState<Record<string, number>>({ "Arduino Uno": 1 });
+  
+  // Load from localStorage
+  const loadQuantities = (): Record<string, number> => {
+    try {
+      const inv = JSON.parse(localStorage.getItem("userInventory") || "[]") as string[];
+      const q: Record<string, number> = {};
+      inv.forEach((name) => { q[name] = 1; });
+      return Object.keys(q).length > 0 ? q : { "Arduino Uno": 1 };
+    } catch { return { "Arduino Uno": 1 }; }
+  };
+  
+  const [quantities, setQuantities] = useState<Record<string, number>>(loadQuantities);
   const [saved, setSaved] = useState(false);
 
   const filteredComponents = allComponents.filter((c) => c.category === activeCategory);
@@ -106,6 +117,8 @@ export default function ComponentsPage() {
   };
 
   const handleSave = () => {
+    const inventory = Object.keys(quantities);
+    localStorage.setItem("userInventory", JSON.stringify(inventory));
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
