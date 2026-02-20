@@ -14,6 +14,7 @@ import ProfilePage from "./pages/ProfilePage";
 import ThinkBiggerPage from "./pages/ThinkBiggerPage";
 import IDEPage from "./pages/IDEPage";
 import KitsPage from "./pages/KitsPage";
+import ProjectDetailPage from "./pages/ProjectDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/achievements" element={<AchievementsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/ide" element={<IDEPage />} />
+          <Route path="/project/:id" element={<ProjectDetailPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
