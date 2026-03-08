@@ -52,15 +52,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    const userId = user?.id;
     await supabase.auth.signOut();
-    // Clear all app data so new sign-ins start fresh
-    const keysToRemove = [
-      "userInventory",
-      "activeGeneratedProject",
-      "savedProjects",
-      "removedCatalogProjects",
-    ];
-    keysToRemove.forEach((key) => localStorage.removeItem(key));
+    // Clear all user-scoped and legacy app data
+    const legacyKeys = ["userInventory", "activeGeneratedProject", "savedProjects", "removedCatalogProjects"];
+    legacyKeys.forEach((key) => localStorage.removeItem(key));
+    if (userId) {
+      localStorage.removeItem(`inventory_${userId}`);
+      localStorage.removeItem(`onboarding_${userId}`);
+    }
   };
 
   return (

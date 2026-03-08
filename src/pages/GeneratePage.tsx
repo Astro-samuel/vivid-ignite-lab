@@ -178,7 +178,7 @@ export default function GeneratePage() {
   const [toast, setToast] = useState("");
   const [difficulty, setDifficulty] = useState("Any Difficulty");
   const [category, setCategory] = useState("Any Category");
-  const [components, setComponents] = useState<string[]>(getInventoryComponents);
+  const [components, setComponents] = useState<string[]>(() => getInventoryComponents(user?.id));
   const [newComponent, setNewComponent] = useState("");
   const [previouslyShown, setPreviouslyShown] = useState<Set<number>>(new Set());
   const [communityProjects, setCommunityProjects] = useState<Project[]>([]);
