@@ -106,11 +106,17 @@ export default function CatalogPage() {
           {filtered.map((p, i) => (
             <div
               key={p.id}
-              className="card-neon p-5 cursor-pointer group"
+              className="card-neon p-5 cursor-pointer group relative"
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className="text-3xl mb-3 animate-float" style={{ animationDelay: `${i * 0.3}s` }}>
-                {p.emoji}
+              <button
+                onClick={(e) => { e.stopPropagation(); handleRemove(p.id); }}
+                className="absolute top-3 right-3 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
+                style={{ background: "rgba(255,80,80,0.15)", color: "#FF5050", border: "1px solid rgba(255,80,80,0.3)" }}
+                title="Remove project"
+              >
+                <X size={14} />
+              </button>
               </div>
               <h3 className="font-bold mb-2" style={{ color: "#FFFFFF" }}>{p.title}</h3>
               <p className="text-sm mb-4 line-clamp-2" style={{ color: "hsl(226, 35%, 72%)" }}>{p.desc}</p>
