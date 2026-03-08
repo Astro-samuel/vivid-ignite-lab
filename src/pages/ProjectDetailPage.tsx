@@ -965,12 +965,8 @@ void loop() {
   },
 ];
 
-// Wokwi project IDs mapping
-const wokwiProjects: Record<number, string> = {
-  1: "https://wokwi.com/projects/new/arduino-uno",
-  2: "https://wokwi.com/projects/new/arduino-uno",
-  3: "https://wokwi.com/projects/new/arduino-uno",
-};
+// Wokwi project IDs mapping — every project gets a simulator
+const getWokwiUrl = (_id: number) => "https://wokwi.com/projects/new/arduino-uno";
 
 type ActiveTab = "instructions" | "code" | "simulate";
 type CodeMode = "basic" | "optimized";
