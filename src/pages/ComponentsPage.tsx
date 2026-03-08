@@ -113,6 +113,13 @@ export default function ComponentsPage() {
   const [wishlist, setWishlist] = useState<string[]>(() => loadWishlist(user?.id));
   const [showWishlist, setShowWishlist] = useState(false);
 
+  // Visual Search state
+  const [showVisualSearch, setShowVisualSearch] = useState(false);
+  const [visualSearching, setVisualSearching] = useState(false);
+  const [visualResults, setVisualResults] = useState<{name: string; confidence: string}[]>([]);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const filteredComponents = allComponents.filter((c) => c.category === activeCategory);
   const totalSelected = Object.keys(quantities).length;
 
