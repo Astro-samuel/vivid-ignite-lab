@@ -16,6 +16,7 @@ import ThinkBiggerPage from "./pages/ThinkBiggerPage";
 import IDEPage from "./pages/IDEPage";
 import KitsPage from "./pages/KitsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
+import FeedbackPage from "./pages/FeedbackPage";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ function AnimatedRoutes() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/ide" element={<IDEPage />} />
         <Route path="/project/:id" element={<ProjectDetailPage />} />
+        <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>

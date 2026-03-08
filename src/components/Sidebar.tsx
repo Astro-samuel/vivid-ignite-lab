@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, LayoutDashboard, BookOpen, Cpu, Package, Zap, Lightbulb,
-  Trophy, User, LogOut, Star
+  Trophy, User, LogOut, Star, MessageSquareHeart
 } from "lucide-react";
 
 const navItems = [
@@ -14,6 +14,7 @@ const navItems = [
   { icon: Lightbulb, label: "Think Bigger", path: "/think-bigger" },
   { icon: Trophy, label: "Achievements", path: "/achievements" },
   { icon: User, label: "Profile", path: "/profile" },
+  { icon: MessageSquareHeart, label: "Feedback", path: "/feedback" },
 ];
 
 interface SidebarProps {
