@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn, Loader2 } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn, Loader2, Zap } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
@@ -10,6 +10,26 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
 
 type Tab = "inProgress" | "completed" | "saved";
+
+// Quick project pool for "What Can I Make?" widget
+const quickProjects = [
+  { id: 104, emoji: "🚦", title: "Traffic Light Controller", difficulty: "beginner", time: "20 mins", xp: 55, components: ["LED", "Arduino Uno", "220Ω Resistor", "Breadboard"] },
+  { id: 105, emoji: "🎹", title: "Button Piano", difficulty: "beginner", time: "25 mins", xp: 65, components: ["Push Button", "Buzzer", "Arduino Uno", "Breadboard"] },
+  { id: 107, emoji: "🎲", title: "Electronic Dice", difficulty: "beginner", time: "25 mins", xp: 60, components: ["LED", "Push Button", "Arduino Uno", "220Ω Resistor"] },
+  { id: 109, emoji: "🌈", title: "Rainbow LED Fader", difficulty: "beginner", time: "25 mins", xp: 65, components: ["RGB LED", "Arduino Uno", "220Ω Resistor", "Breadboard"] },
+  { id: 101, emoji: "💡", title: "Smart LED Mood Lamp", difficulty: "beginner", time: "30 mins", xp: 75, components: ["LED", "Photoresistor", "Arduino Uno", "220Ω Resistor"] },
+  { id: 209, emoji: "🔔", title: "Motion Detection Alarm", difficulty: "intermediate", time: "40 mins", xp: 95, components: ["PIR Sensor", "Buzzer", "LED", "Arduino Uno"] },
+  { id: 207, emoji: "🎯", title: "Laser Tripwire Alarm", difficulty: "intermediate", time: "45 mins", xp: 100, components: ["Laser Module", "Photoresistor", "Buzzer", "Arduino Uno"] },
+  { id: 305, emoji: "🚁", title: "Ultrasonic Radar Scanner", difficulty: "advanced", time: "90 mins", xp: 200, components: ["HC-SR04", "Servo Motor", "Arduino Uno", "Breadboard"] },
+  { id: 303, emoji: "🏠", title: "Smart Home Controller", difficulty: "advanced", time: "100 mins", xp: 220, components: ["ESP8266", "Relay Module", "LED", "Arduino Uno"] },
+];
+
+function getInventoryComponents(userId?: string): string[] {
+  try {
+    const key = userId ? `inventory_${userId}` : "userInventory";
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  } catch { return []; }
+}
 
 const days = ["M", "T", "W", "T", "F", "S", "S"];
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
