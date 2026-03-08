@@ -977,7 +977,8 @@ export default function ProjectDetailPage() {
   const projectId = parseInt(id || "1");
   const project = allProjects.find((p) => p.id === projectId) || allProjects[0];
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>("code");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("instructions");
+  const [simExpanded, setSimExpanded] = useState(false);
   const [codeMode, setCodeMode] = useState<CodeMode>("basic");
   const [saved, setSaved] = useState(false);
   const [completed, setCompleted] = useState(false);
