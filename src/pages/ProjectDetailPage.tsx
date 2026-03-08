@@ -1119,7 +1119,7 @@ void loop() {
   })();
 
   const { user } = useAuth();
-  const { saveProject, isProjectSaved, updateProgress, projects: userDbProjects } = useUserProjects();
+  const { saveProject, isProjectSaved, updateProgress, deleteProject, projects: userDbProjects } = useUserProjects();
 
   // Load saved progress from DB
   const dbProject = userDbProjects.find(p => p.project_id === projectId);
