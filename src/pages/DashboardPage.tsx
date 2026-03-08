@@ -1,31 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 
 type Tab = "inProgress" | "completed" | "saved";
 
-const inProgressProjects = [
-  {
-    id: 1,
-    emoji: "💧",
-    title: "Eco-Water Monitor",
-    desc: "The Eco-Water Monitor is an Arduino-based project designed to track and regulate water usage in real-time. By using a...",
-    step: 5,
-    totalSteps: 6,
-    progress: 83,
-    difficulty: "intermediate",
-    time: "3 hours",
-    xp: 150,
-    lastModified: "2 hours ago",
-  },
-];
+interface SavedProject {
+  id: number;
+  emoji: string;
+  title: string;
+  description?: string;
+  difficulty: string;
+  time: string;
+  xp: number;
+  status: string;
+  savedAt: number;
+  progress?: number;
+  step?: number;
+  totalSteps?: number;
+}
 
-const completedProjects = [
-  { id: 6, emoji: "🌈", title: "RGB LED Mixer", difficulty: "beginner", xp: 80, completedOn: "5 days ago" },
-];
-
-const savedProjects: typeof inProgressProjects = [];
+function loadSavedProjects(): SavedProject[] {
+  try {
+    return JSON.parse(localStorage.getItem("savedProjects") || "[]");
+  } catch { return []; }
+}
 
 const days = ["M", "T", "W", "T", "F", "S", "S"];
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
