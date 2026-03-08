@@ -988,15 +988,66 @@ export default function ProjectDetailPage() {
     return null;
   })();
 
-  // Use the generated project's data to find a matching catalog project by title,
-  // or fall back to ID-based lookup
+  // First try exact ID match in catalog, then title match from generated data,
+  // then build a fallback from the generated project data
   const project = (() => {
+    // If we have generated project data, try to find a matching catalog entry by title
     if (generatedProject) {
       const byTitle = allProjects.find(
         (p) => p.title.toLowerCase() === generatedProject.title?.toLowerCase()
       );
       if (byTitle) return byTitle;
+
+      // Build a fallback project detail from the generated data
+      return {
+        id: generatedProject.id,
+        emoji: generatedProject.emoji || "🔧",
+        title: generatedProject.title,
+        desc: generatedProject.description || "A custom AI-generated Arduino project.",
+        difficulty: generatedProject.difficulty || "beginner",
+        time: generatedProject.time || "30 mins",
+        xp: generatedProject.xp || 75,
+        components: generatedProject.components || ["Arduino Uno"],
+        instructions: [
+          "Review the project components and gather your materials",
+          "Wire up the circuit following the pin assignments in the code",
+          "Read through the starter code and understand each section",
+          "Fill in the TODO sections and test your implementation",
+        ],
+        basicCode: `/*
+  🎯 Project: ${generatedProject.title}
+
+  Goal: ${generatedProject.description || "Complete this project"}
+
+  📦 Components: ${(generatedProject.components || ["Arduino Uno"]).join(", ")}
+
+  🧩 Write your implementation below!
+*/
+
+void setup() {
+  Serial.begin(9600);
+  // TODO: Initialize your pins and components
+  Serial.println("${generatedProject.title} Starting...");
+}
+
+void loop() {
+  // TODO: Add your main project logic here
+
+  delay(100);
+}`,
+        optimizedCode: `// Optimized version coming soon!
+// Complete the basic version first.
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  delay(100);
+}`,
+      };
     }
+
     return allProjects.find((p) => p.id === projectId) || allProjects[0];
   })();
 
