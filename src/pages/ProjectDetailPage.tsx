@@ -980,11 +980,43 @@ export default function ProjectDetailPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("instructions");
   const [simExpanded, setSimExpanded] = useState(false);
   const [codeMode, setCodeMode] = useState<CodeMode>("basic");
+  const [showSolution, setShowSolution] = useState(false);
   const [saved, setSaved] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [copyToast, setCopyToast] = useState(false);
 
-  const currentCode = codeMode === "basic" ? project.basicCode : project.optimizedCode;
+  // Build a starter template with hints instead of full code
+  const starterTemplate = `/*
+  Project: ${project.title}
+  
+  🎯 Goal: ${project.desc}
+  
+  📦 Components needed:
+${project.components.map(c => `     - ${c}`).join("\n")}
+  
+  🧩 Hints:
+${project.instructions.map((inst, i) => `     Step ${i + 1}: ${inst}`).join("\n")}
+  
+  💡 Your task: Write the code below!
+     Use the AI Mentor (bottom-right) if you get stuck.
+     Click "Reveal Solution" only after trying on your own.
+*/
+
+void setup() {
+  // TODO: Initialize your pins and Serial
+  // Hint: Use pinMode() for outputs and Serial.begin() for debugging
+  
+}
+
+void loop() {
+  // TODO: Write your main logic here
+  // Hint: Think about what should happen repeatedly
+  
+}`;
+
+  const currentCode = showSolution
+    ? (codeMode === "basic" ? project.basicCode : project.optimizedCode)
+    : starterTemplate;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentCode);
@@ -1184,44 +1216,67 @@ export default function ProjectDetailPage() {
               style={{ borderColor: "hsl(229, 42%, 22%)" }}
             >
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCodeMode("basic")}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
-                  style={
-                    codeMode === "basic"
-                      ? { background: "transparent", color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }
-                      : { background: "transparent", color: "hsl(226, 35%, 50%)" }
-                  }
-                >
-                  <Code size={13} /> Basic
-                </button>
-                <button
-                  onClick={() => setCodeMode("optimized")}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
-                  style={
-                    codeMode === "optimized"
-                      ? { background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27" }
-                      : { background: "transparent", color: "hsl(226, 35%, 50%)" }
-                  }
-                >
-                  <Sparkles size={13} /> Optimized
-                </button>
+                {showSolution ? (
+                  <>
+                    <button
+                      onClick={() => setCodeMode("basic")}
+                      className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
+                      style={
+                        codeMode === "basic"
+                          ? { background: "transparent", color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }
+                          : { background: "transparent", color: "hsl(226, 35%, 50%)" }
+                      }
+                    >
+                      <Code size={13} /> Basic
+                    </button>
+                    <button
+                      onClick={() => setCodeMode("optimized")}
+                      className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
+                      style={
+                        codeMode === "optimized"
+                          ? { background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27" }
+                          : { background: "transparent", color: "hsl(226, 35%, 50%)" }
+                      }
+                    >
+                      <Sparkles size={13} /> Optimized
+                    </button>
+                  </>
+                ) : (
+                  <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: "#FFD700" }}>
+                    <Sparkles size={14} /> Starter Template — Try it yourself first!
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
-                  style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
+                  onClick={() => setShowSolution(!showSolution)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105"
+                  style={
+                    showSolution
+                      ? { background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }
+                      : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" }
+                  }
                 >
-                  <Copy size={12} /> Copy
+                  {showSolution ? "Hide Solution" : "🔓 Reveal Solution"}
                 </button>
-                <button
-                  onClick={handleDownload}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
-                  style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
-                >
-                  <Download size={12} /> Download .ino
-                </button>
+                {showSolution && (
+                  <>
+                    <button
+                      onClick={handleCopy}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
+                      style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
+                    >
+                      <Copy size={12} /> Copy
+                    </button>
+                    <button
+                      onClick={handleDownload}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
+                      style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
+                    >
+                      <Download size={12} /> .ino
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
