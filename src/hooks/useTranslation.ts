@@ -18,19 +18,26 @@ const languages = [
 // Cache translations to avoid re-translating
 const translationCache: Record<string, Record<string, string>> = {};
 
+// Track nodes we've already translated to avoid re-processing
+const translatedNodes = new WeakSet<Text>();
+
+function isTranslatableText(node: Node): boolean {
+  const parent = node.parentElement;
+  if (!parent) return false;
+  const tag = parent.tagName;
+  if (["SCRIPT", "STYLE", "NOSCRIPT", "SVG", "TEXTAREA", "CODE", "PRE"].includes(tag)) return false;
+  if (parent.closest("[data-no-translate]")) return false;
+  if (parent.closest("code, pre, textarea")) return false;
+  const text = node.textContent?.trim();
+  if (!text || text.length < 2) return false;
+  if (/^[\d\s\W]+$/.test(text)) return false;
+  return true;
+}
+
 function getTextNodes(root: Node): Text[] {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
-      const parent = node.parentElement;
-      if (!parent) return NodeFilter.FILTER_REJECT;
-      const tag = parent.tagName;
-      if (["SCRIPT", "STYLE", "NOSCRIPT", "SVG"].includes(tag)) return NodeFilter.FILTER_REJECT;
-      if (parent.closest("[data-no-translate]")) return NodeFilter.FILTER_REJECT;
-      const text = node.textContent?.trim();
-      if (!text || text.length < 2) return NodeFilter.FILTER_REJECT;
-      // Skip pure numbers/symbols
-      if (/^[\d\s\W]+$/.test(text)) return NodeFilter.FILTER_REJECT;
-      return NodeFilter.FILTER_ACCEPT;
+      return isTranslatableText(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
     },
   });
 
@@ -57,34 +64,23 @@ export function useTranslation() {
   const [translating, setTranslating] = useState(false);
   const originalTextsRef = useRef<Map<Text, string>>(new Map());
   const location = useLocation();
+  const observerRef = useRef<MutationObserver | null>(null);
+  const pendingNodesRef = useRef<Text[]>([]);
+  const batchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentLangRef = useRef(getSavedLang());
 
-  // Re-translate on route change if a non-English language is selected
-  useEffect(() => {
-    if (selectedLang.code !== "en") {
-      originalTextsRef.current.clear();
-      const timer = setTimeout(() => {
-        translatePage(selectedLang.code, selectedLang.label);
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [location.pathname]);
-
-  const translatePage = useCallback(async (langCode: string, langLabel: string) => {
-    // Translate the entire app, not just <main>
-    const root = document.body;
-    if (!root) return;
-
-    const textNodes = getTextNodes(root);
+  // Batch-translate a set of new text nodes
+  const translateNodes = useCallback(async (textNodes: Text[], langCode: string, langLabel: string) => {
     if (textNodes.length === 0) return;
 
-    // Store originals on first translation
-    if (originalTextsRef.current.size === 0) {
-      textNodes.forEach((node) => {
+    // Store originals
+    textNodes.forEach((node) => {
+      if (!originalTextsRef.current.has(node)) {
         originalTextsRef.current.set(node, node.textContent || "");
-      });
-    }
+      }
+    });
 
-    // Collect texts to translate
+    // Separate cached vs uncached
     const textsToTranslate: string[] = [];
     const nodeIndices: number[] = [];
     const cacheKey = langCode;
@@ -92,8 +88,8 @@ export function useTranslation() {
     textNodes.forEach((node, i) => {
       const original = originalTextsRef.current.get(node) || node.textContent || "";
       if (translationCache[cacheKey]?.[original]) {
-        // Use cached
         node.textContent = translationCache[cacheKey][original];
+        translatedNodes.add(node);
       } else {
         textsToTranslate.push(original);
         nodeIndices.push(i);
@@ -105,7 +101,6 @@ export function useTranslation() {
     setTranslating(true);
 
     try {
-      // Batch in chunks of 50
       const BATCH_SIZE = 50;
       for (let i = 0; i < textsToTranslate.length; i += BATCH_SIZE) {
         const batch = textsToTranslate.slice(i, i + BATCH_SIZE);
@@ -128,7 +123,10 @@ export function useTranslation() {
           const node = textNodes[nodeIdx];
           const original = originalTextsRef.current.get(node) || "";
           translationCache[cacheKey][original] = translated;
-          node.textContent = translated;
+          if (node.parentNode) {
+            node.textContent = translated;
+          }
+          translatedNodes.add(node);
         });
       }
     } catch (err) {
@@ -137,6 +135,99 @@ export function useTranslation() {
       setTranslating(false);
     }
   }, []);
+
+  // Translate the full page
+  const translatePage = useCallback(async (langCode: string, langLabel: string) => {
+    const root = document.body;
+    if (!root) return;
+
+    const textNodes = getTextNodes(root);
+    // Mark all as needing translation
+    translatedNodes.delete = translatedNodes.delete; // no-op, just for clarity
+    await translateNodes(textNodes, langCode, langLabel);
+  }, [translateNodes]);
+
+  // Queue new nodes for batch translation (from MutationObserver)
+  const queueNewNodes = useCallback((nodes: Text[]) => {
+    pendingNodesRef.current.push(...nodes);
+
+    if (batchTimerRef.current) clearTimeout(batchTimerRef.current);
+    batchTimerRef.current = setTimeout(async () => {
+      const lang = currentLangRef.current;
+      if (lang.code === "en") return;
+
+      const toTranslate = pendingNodesRef.current.filter(
+        (n) => n.parentNode && !translatedNodes.has(n)
+      );
+      pendingNodesRef.current = [];
+
+      if (toTranslate.length > 0) {
+        await translateNodes(toTranslate, lang.code, lang.label);
+      }
+    }, 300);
+  }, [translateNodes]);
+
+  // Set up MutationObserver to catch dynamically added content
+  useEffect(() => {
+    if (currentLangRef.current.code === "en") {
+      // Clean up observer if switching back to English
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+      return;
+    }
+
+    observerRef.current = new MutationObserver((mutations) => {
+      const newTextNodes: Text[] = [];
+
+      for (const mutation of mutations) {
+        if (mutation.type === "childList") {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.TEXT_NODE && isTranslatableText(node) && !translatedNodes.has(node as Text)) {
+              newTextNodes.push(node as Text);
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+              const el = node as Element;
+              if (el.closest("[data-no-translate]")) return;
+              const textNodes = getTextNodes(el);
+              textNodes.forEach((tn) => {
+                if (!translatedNodes.has(tn)) {
+                  newTextNodes.push(tn);
+                }
+              });
+            }
+          });
+        }
+      }
+
+      if (newTextNodes.length > 0) {
+        queueNewNodes(newTextNodes);
+      }
+    });
+
+    observerRef.current.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+    };
+  }, [selectedLang.code, queueNewNodes]);
+
+  // Re-translate on route change if a non-English language is selected
+  useEffect(() => {
+    if (selectedLang.code !== "en") {
+      originalTextsRef.current.clear();
+      const timer = setTimeout(() => {
+        translatePage(selectedLang.code, selectedLang.label);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname]);
 
   const restoreOriginal = useCallback(() => {
     originalTextsRef.current.forEach((original, node) => {
@@ -150,14 +241,13 @@ export function useTranslation() {
   const selectLanguage = useCallback(
     async (lang: typeof languages[0]) => {
       setSelectedLang(lang);
+      currentLangRef.current = lang;
       localStorage.setItem("app-language", lang.code);
       if (lang.code === "en") {
         restoreOriginal();
       } else {
-        // Restore first so we translate from originals
         restoreOriginal();
-        // Small delay to let DOM settle
-        await new Promise((r) => setTimeout(r, 50));
+        await new Promise((r) => setTimeout(r, 100));
         await translatePage(lang.code, lang.label);
       }
     },
