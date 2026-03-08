@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { ArrowLeft, Clock, Zap, CheckCircle, Settings, Code, Play, Copy, Download, Sparkles, Save, Loader2, XCircle, AlertTriangle, Brain, Eye, RefreshCw } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ArrowLeft, Clock, Zap, CheckCircle, Settings, Code, Play, Copy, Download, Sparkles, Save, Loader2, XCircle, AlertTriangle, Brain, Eye, RefreshCw, ChevronDown, ChevronUp, BookOpen, Lightbulb, Award, Info, ExternalLink, CheckSquare, Square, Star, MessageCircle, ThumbsUp, Share2 } from "lucide-react";
 import ExplainCode from "@/components/ExplainCode";
 import InteractiveSchematic from "@/components/InteractiveSchematic";
 import Layout from "@/components/Layout";
