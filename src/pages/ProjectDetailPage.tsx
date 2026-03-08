@@ -1373,28 +1373,27 @@ void loop() {
     URL.revokeObjectURL(url);
   };
 
-  const handleSaveToProfile = () => {
-    // Save to dashboard (localStorage for now)
-    const savedProjects = JSON.parse(localStorage.getItem("savedProjects") || "[]");
-    if (savedProjects.length >= 5) {
-      alert("You can only save up to 5 projects. Please remove one first.");
+  const handleSaveToProfile = async () => {
+    if (!user) {
+      navigate("/auth");
       return;
     }
-    const exists = savedProjects.find((p: any) => p.id === project.id);
-    if (!exists) {
-      savedProjects.push({
-        id: project.id,
-        emoji: project.emoji,
-        title: project.title,
-        difficulty: project.difficulty,
-        time: project.time,
-        xp: project.xp,
-        desc: project.desc,
-        savedAt: new Date().toISOString(),
-      });
-      localStorage.setItem("savedProjects", JSON.stringify(savedProjects));
+    const result = await saveProject({
+      project_id: project.id,
+      emoji: project.emoji,
+      title: project.title,
+      description: project.desc,
+      difficulty: project.difficulty,
+      time: project.time,
+      xp: project.xp,
+      components: project.components,
+      source: generatedProject?.source || "catalog",
+    });
+    if (result.error) {
+      alert(result.error);
+    } else {
+      setSaved(true);
     }
-    setSaved(true);
   };
 
   const diffBadgeStyle =
