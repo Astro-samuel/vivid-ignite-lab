@@ -1060,48 +1060,77 @@ void loop() {
   const [saved, setSaved] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [copyToast, setCopyToast] = useState(false);
+  const [checkedSteps, setCheckedSteps] = useState<boolean[]>(new Array(project.instructions.length).fill(false));
+  const [expandedComponents, setExpandedComponents] = useState<Record<string, boolean>>({});
+  const [activeNote, setActiveNote] = useState<Record<number, string>>({});
+  const [showConceptDetails, setShowConceptDetails] = useState<string | null>(null);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 80) + 20);
+  const [shareToast, setShareToast] = useState(false);
 
-  // Editable code state
-  const starterTemplate = `/*
-  Project: ${project.title}
-  
-  🎯 Goal: ${project.desc}
-  
-  📦 Components needed:
-${project.components.map(c => `     - ${c}`).join("\n")}
-  
-  🧩 Hints:
-${project.instructions.map((inst, i) => `     Step ${i + 1}: ${inst}`).join("\n")}
-  
-  💡 Your task: Write the code below!
-     Use the AI Mentor (bottom-right) if you get stuck.
-     Click "Reveal Solution" only after trying on your own.
-*/
+  // Extract learning concepts from code comments
+  const learningConcepts = (() => {
+    const code = project.basicCode;
+    const goalMatch = code.match(/Learning Goals:\n([\s\S]*?)\*\//);
+    if (goalMatch) {
+      return goalMatch[1]
+        .split("\n")
+        .map(l => l.replace(/^\s*\d+\.\s*/, "").trim())
+        .filter(l => l.length > 0);
+    }
+    return ["Digital I/O", "Serial Communication", "Timing Functions"];
+  })();
 
-void setup() {
-  // TODO: Initialize your pins and Serial
-  // Hint: Use pinMode() for outputs and Serial.begin() for debugging
-  
-}
+  // Component info database
+  const componentInfo: Record<string, { description: string; pins: string; tipIcon: string; buyLink?: string }> = {
+    "Arduino Uno": { description: "ATmega328P microcontroller board with 14 digital I/O pins and 6 analog inputs.", pins: "Digital: 0-13 | Analog: A0-A5 | PWM: 3,5,6,9,10,11", tipIcon: "🎛️" },
+    "LED (Red)": { description: "Light-emitting diode. Forward voltage ~2V, max current 20mA.", pins: "Anode (+) → Resistor → Pin | Cathode (−) → GND", tipIcon: "💡" },
+    "Resistor (220Ω)": { description: "Current-limiting resistor to protect LEDs. Color bands: Red-Red-Brown.", pins: "In series with LED anode", tipIcon: "⚡" },
+    "Resistor (10kΩ)": { description: "Pull-up/pull-down resistor. Color bands: Brown-Black-Orange.", pins: "Used in voltage dividers or pull-up circuits", tipIcon: "⚡" },
+    "Breadboard": { description: "Solderless prototyping board. Rails (+/−) run horizontally, rows vertically.", pins: "Power rails on sides, component rows in center", tipIcon: "🔲" },
+    "Jumper Wires": { description: "Male-to-male wires for breadboard connections. Use color coding!", pins: "Red=5V, Black=GND, Others=signals", tipIcon: "🔌" },
+    "Temperature Sensor (DHT22)": { description: "Digital temp & humidity sensor. Range: -40°C to 80°C, ±0.5°C accuracy.", pins: "VCC → 5V | DATA → Digital Pin | GND → GND", tipIcon: "🌡️" },
+    "Temperature Sensor (DHT11)": { description: "Basic digital temp sensor. Range: 0-50°C, ±2°C accuracy.", pins: "VCC → 5V | DATA → Digital Pin | GND → GND", tipIcon: "🌡️" },
+    "Servo Motor (SG90)": { description: "Micro servo with 180° rotation. Torque: 1.8kg·cm at 4.8V.", pins: "Red → 5V | Brown → GND | Orange → PWM Pin", tipIcon: "⚙️" },
+    "Potentiometer": { description: "Variable resistor (10kΩ typical). Turn the knob to change resistance.", pins: "Outer pins → 5V & GND | Middle → Analog Pin", tipIcon: "🎚️" },
+    "RGB LED": { description: "Common cathode LED with 3 color channels. Mix R+G+B for any color.", pins: "Longest pin (cathode) → GND | R,G,B → PWM pins via 220Ω", tipIcon: "🌈" },
+    "HC-05 Bluetooth": { description: "Bluetooth SPP module. Default baud: 9600. Pair code: 1234.", pins: "TX → Arduino RX | RX → Arduino TX | VCC → 5V | GND → GND", tipIcon: "📡" },
+    "Buzzer": { description: "Piezoelectric buzzer. Use tone() to generate frequencies 31Hz-65kHz.", pins: "+ → Digital Pin | − → GND", tipIcon: "🔊" },
+    "Push Button": { description: "Momentary tactile switch. Normally open, closes when pressed.", pins: "One side → Digital Pin + Pull-down | Other → 5V or GND", tipIcon: "🔘" },
+    "Soil Moisture Sensor": { description: "Analog sensor. Low value = wet soil, high value = dry soil.", pins: "VCC → 5V | GND → GND | AO → Analog Pin", tipIcon: "🌱" },
+    "Relay Module": { description: "Electrically controlled switch for high-power devices (up to 10A/250V AC).", pins: "IN → Digital Pin | VCC → 5V | GND → GND", tipIcon: "🔌" },
+    "Water Pump": { description: "Small submersible DC water pump. 3-6V, ~130mA.", pins: "Connected through relay module", tipIcon: "💧" },
+    "16x2 LCD": { description: "Character LCD with I2C adapter. 16 columns × 2 rows display.", pins: "SDA → A4 | SCL → A5 | VCC → 5V | GND → GND", tipIcon: "📺" },
+    "Ultrasonic Sensor (HC-SR04)": { description: "Distance sensor using sound waves. Range: 2cm-400cm.", pins: "Trig → Digital Pin | Echo → Digital Pin | VCC → 5V | GND → GND", tipIcon: "📏" },
+    "Motor Driver (L298N)": { description: "Dual H-bridge motor driver. Controls 2 DC motors or 1 stepper.", pins: "IN1-IN4 → Digital Pins | ENA/ENB → PWM | VCC → 12V | GND → GND", tipIcon: "🏎️" },
+    "DC Motor": { description: "Simple DC motor. Speed controlled by PWM, direction by H-bridge.", pins: "Connected through L298N motor driver", tipIcon: "⚡" },
+    "Photoresistor (LDR)": { description: "Light-dependent resistor. Resistance decreases with more light.", pins: "One leg → 5V | Other → Analog Pin + 10kΩ to GND", tipIcon: "☀️" },
+    "OLED Display (0.96\")": { description: "128×64 pixel I2C OLED. SSD1306 driver. No backlight needed.", pins: "SDA → A4 | SCL → A5 | VCC → 3.3/5V | GND → GND", tipIcon: "📊" },
+    "LED Matrix 8x8": { description: "64 LEDs in an 8×8 grid controlled via MAX7219 driver.", pins: "DIN → Digital Pin | CS → Digital Pin | CLK → Digital Pin", tipIcon: "🎮" },
+    "Battery Holder": { description: "Holds AA batteries for portable power. 4xAA = 6V.", pins: "+ → VIN or Motor Driver | − → GND", tipIcon: "🔋" },
+  };
 
-void loop() {
-  // TODO: Write your main logic here
-  // Hint: Think about what should happen repeatedly
-  
-}`;
+  const stepProgress = checkedSteps.filter(Boolean).length;
+  const totalSteps = project.instructions.length;
+  const progressPercent = totalSteps > 0 ? (stepProgress / totalSteps) * 100 : 0;
 
-  const [userCode, setUserCode] = useState(starterTemplate);
-  const [runStep, setRunStep] = useState<"idle" | "compiling" | "simulating" | "success" | "error">("idle");
-  const [errors, setErrors] = useState<string[]>([]);
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
-  const [debugMessages, setDebugMessages] = useState<Array<{ role: "ai" | "user"; content: string }>>([]);
-  const [debugInput, setDebugInput] = useState("");
-  const [aiTyping, setAiTyping] = useState(false);
-  const debugBottomRef = useRef<HTMLDivElement>(null);
+  const toggleStep = (index: number) => {
+    setCheckedSteps(prev => {
+      const next = [...prev];
+      next[index] = !next[index];
+      return next;
+    });
+  };
 
-  const currentCode = showSolution
-    ? (codeMode === "basic" ? project.basicCode : project.optimizedCode)
-    : userCode;
+  const toggleComponentExpand = (name: string) => {
+    setExpandedComponents(prev => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setShareToast(true);
+    setTimeout(() => setShareToast(false), 2000);
+  };
 
   const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
