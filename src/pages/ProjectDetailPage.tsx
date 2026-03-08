@@ -1842,6 +1842,13 @@ void loop() {
           <Copy size={16} /> Code copied to clipboard!
         </div>
       )}
+      {shareToast && (
+        <div
+          className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in z-50"
+          style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)", color: "#FFFFFF", boxShadow: "0 0 20px rgba(183,68,255,0.4)" }}
+        >
+          <Share2 size={16} /> Link copied to clipboard!
+        </div>
     </Layout>
   );
 }
