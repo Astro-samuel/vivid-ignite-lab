@@ -288,8 +288,13 @@ export default function GeneratePage() {
     setSelected((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   };
 
+  const [savingAll, setSavingAll] = useState(false);
+  const [startingId, setStartingId] = useState<number | null>(null);
+
   const handleSave = async () => {
     if (!user) { navigate("/auth"); return; }
+    setSavingAll(true);
+    await new Promise(r => setTimeout(r, 500));
     const projectsToSave = selected.size > 0 
       ? projects.filter(p => selected.has(p.id))
       : projects.filter(Boolean);
@@ -309,10 +314,13 @@ export default function GeneratePage() {
       });
       if (!result.error) savedCount++;
     }
+    setSavingAll(false);
     showToast(`✓ ${savedCount} project${savedCount !== 1 ? "s" : ""} saved to dashboard!`);
   };
 
   const handleStartProject = async (project: Project) => {
+    setStartingId(project.id);
+    await new Promise(r => setTimeout(r, 500));
     if (user) {
       await saveProject({
         project_id: project.id,
