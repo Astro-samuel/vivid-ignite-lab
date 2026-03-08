@@ -52,7 +52,7 @@ export default function Layout({ children }: LayoutProps) {
             <motion.button
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
+              transition={{ type: "spring", stiffness: 400, damping: 22, delay: 0.1 }}
               onClick={() => setLangOpen(!langOpen)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
               style={{
