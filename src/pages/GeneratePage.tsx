@@ -174,6 +174,30 @@ export default function GeneratePage() {
   const [category, setCategory] = useState("Any Category");
   const [components, setComponents] = useState<string[]>(getInventoryComponents);
   const [newComponent, setNewComponent] = useState("");
+  const [previouslyShown, setPreviouslyShown] = useState<Set<number>>(new Set());
+  const [communityProjects, setCommunityProjects] = useState<Project[]>([]);
+
+  // Fetch approved community projects on mount
+  useEffect(() => {
+    supabase
+      .from("community_projects")
+      .select("*")
+      .then(({ data }) => {
+        if (data) {
+          const mapped: Project[] = data.map((p, i) => ({
+            id: 900 + i,
+            emoji: "🌐",
+            title: p.title,
+            description: p.description,
+            difficulty: (p.difficulty as Project["difficulty"]) || "beginner",
+            time: p.estimated_time || "30 mins",
+            xp: p.difficulty === "advanced" ? 200 : p.difficulty === "intermediate" ? 120 : 75,
+            components: p.components || [],
+          }));
+          setCommunityProjects(mapped);
+        }
+      });
+  }, []);
 
   const showToast = (msg: string) => {
     setToast(msg);
