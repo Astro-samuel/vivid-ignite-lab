@@ -274,7 +274,7 @@ export default function IDEPage() {
               {projectSteps.map((step) => (
                 <div
                   key={step.id}
-                  className="rounded-xl overflow-hidden border cursor-pointer transition-all"
+                  className="rounded-xl overflow-hidden border cursor-pointer transition-all duration-200"
                   style={{
                     borderColor: step.id === activeStep
                       ? "rgba(0,245,255,0.4)"
@@ -306,7 +306,7 @@ export default function IDEPage() {
                   </div>
 
                   {step.id === activeStep && (
-                    <div className="px-3 pb-3">
+                    <div className="px-3 pb-3 animate-fade-in">
                       <ul className="space-y-1.5">
                         {step.instructions.map((inst, i) => (
                           <li key={i} className="flex items-start gap-2 text-xs" style={{ color: "hsl(228, 30%, 70%)" }}>
@@ -331,21 +331,22 @@ export default function IDEPage() {
               <span style={{ color: "#00F5FF" }}>sketch.ino</span>
               <span>•</span>
               <span>Arduino Uno</span>
+              <span className="ml-auto text-xs" style={{ color: "#00FF88" }}>✎ Editable</span>
             </div>
             <div className="relative flex-1">
               <textarea
                 ref={codeRef}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="code-editor w-full h-full p-4 text-sm resize-none focus:outline-none"
-                style={{ fontFamily: "'JetBrains Mono', monospace", lineHeight: "1.7", fontSize: "13px" }}
+                className="code-editor w-full h-full p-4 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-[hsl(182,100%,50%)]"
+                style={{ fontFamily: "'JetBrains Mono', monospace", lineHeight: "1.7", fontSize: "13px", caretColor: "#00F5FF" }}
                 spellCheck={false}
               />
             </div>
 
             {/* Error panel */}
             {errors.length > 0 && (
-              <div className="border-t p-4 flex-shrink-0" style={{ background: "rgba(255,69,0,0.08)", borderColor: "rgba(255,69,0,0.3)" }}>
+              <div className="border-t p-4 flex-shrink-0 animate-fade-in" style={{ background: "rgba(255,69,0,0.08)", borderColor: "rgba(255,69,0,0.3)" }}>
                 <div className="flex items-center gap-2 mb-3">
                   <AlertTriangle size={16} style={{ color: "#FF4500" }} />
                   <span className="font-bold text-sm" style={{ color: "#FF4500" }}>Compilation Errors</span>
@@ -362,9 +363,29 @@ export default function IDEPage() {
             )}
           </div>
 
+          {/* Wokwi Simulator Panel */}
+          <div
+            className="w-80 flex-shrink-0 border-l flex flex-col"
+            style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}
+          >
+            <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
+              <Play size={14} style={{ color: "#00FF88" }} />
+              <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>Simulator</span>
+            </div>
+            <div className="flex-1 relative">
+              <iframe
+                src="https://wokwi.com/projects/new/arduino-uno"
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
+                style={{ border: "none" }}
+                title="Wokwi Simulator"
+              />
+            </div>
+          </div>
+
           {/* AI Debug Panel */}
           {showDebug && (
-            <div className="w-72 flex flex-col border-l flex-shrink-0" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
+            <div className="w-72 flex flex-col border-l flex-shrink-0 animate-slide-in-right" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
               <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
                 <Brain size={16} style={{ color: "#B744FF" }} />
                 <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Debug Assistant</span>
