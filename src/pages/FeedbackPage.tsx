@@ -3,6 +3,8 @@ import Layout from "@/components/Layout";
 import { Star, Send, MessageSquareHeart, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import FadeInView from "@/components/motion/FadeInView";
+import { motion } from "framer-motion";
 
 const feedbackSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Name too long"),
