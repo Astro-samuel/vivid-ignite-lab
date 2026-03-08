@@ -975,7 +975,30 @@ export default function ProjectDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const projectId = parseInt(id || "1");
-  const project = allProjects.find((p) => p.id === projectId) || allProjects[0];
+
+  // Check if this project came from the Generate page
+  const generatedProject = (() => {
+    try {
+      const stored = localStorage.getItem("activeGeneratedProject");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.id === projectId) return parsed;
+      }
+    } catch {}
+    return null;
+  })();
+
+  // Use the generated project's data to find a matching catalog project by title,
+  // or fall back to ID-based lookup
+  const project = (() => {
+    if (generatedProject) {
+      const byTitle = allProjects.find(
+        (p) => p.title.toLowerCase() === generatedProject.title?.toLowerCase()
+      );
+      if (byTitle) return byTitle;
+    }
+    return allProjects.find((p) => p.id === projectId) || allProjects[0];
+  })();
 
   const [activeTab, setActiveTab] = useState<ActiveTab>("instructions");
   const [simExpanded, setSimExpanded] = useState(false);
