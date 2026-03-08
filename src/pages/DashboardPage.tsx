@@ -59,6 +59,25 @@ export default function DashboardPage() {
   const [toast, setToast] = useState("");
   const [allProjects, setAllProjects] = useState<SavedProject[]>([]);
 
+  const openProject = (project: SavedProject) => {
+    localStorage.setItem(
+      "activeGeneratedProject",
+      JSON.stringify({
+        id: project.id,
+        emoji: project.emoji,
+        title: project.title,
+        description: project.description,
+        desc: (project as any).desc,
+        difficulty: project.difficulty,
+        time: project.time,
+        xp: project.xp,
+        components: (project as any).components || [],
+        source: "dashboard",
+      })
+    );
+    navigate(`/project/${project.id}`);
+  };
+
   useEffect(() => {
     setAllProjects(loadSavedProjects());
   }, []);
@@ -286,7 +305,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         <button
-                          onClick={() => navigate(`/project/${p.id}`)}
+                          onClick={() => openProject(p)}
                           className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105"
                           style={{
                             background: "linear-gradient(135deg, #00F5FF, #0099FF)",
@@ -363,7 +382,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <button
-                        onClick={() => navigate(`/project/${p.id}`)}
+                        onClick={() => openProject(p)}
                         className="px-4 py-1.5 rounded-full text-xs font-bold border transition-all hover:scale-105"
                         style={{ borderColor: "rgba(0,245,255,0.4)", color: "#00F5FF" }}
                       >
@@ -402,7 +421,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <button
-                        onClick={() => navigate(`/project/${p.id}`)}
+                        onClick={() => openProject(p)}
                         className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105"
                         style={{
                           background: "linear-gradient(135deg, #B744FF, #FF1493)",
