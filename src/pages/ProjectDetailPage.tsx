@@ -1372,7 +1372,11 @@ void loop() {
         <button
           onClick={() => {
             if (generatedProject?.source === "think-bigger") {
-              navigate("/think-bigger");
+            navigate("/think-bigger");
+            } else if (generatedProject?.source === "dashboard") {
+              navigate("/dashboard");
+            } else if (generatedProject?.source === "catalog") {
+              navigate("/catalog");
             } else if (generatedProject) {
               navigate("/generate");
             } else {
@@ -1382,7 +1386,7 @@ void loop() {
           className="flex items-center gap-2 text-sm font-medium mb-6 transition-all hover:gap-3"
           style={{ color: "#00F5FF" }}
         >
-          <ArrowLeft size={16} /> {generatedProject?.source === "think-bigger" ? "Back to Think Bigger" : generatedProject ? "Back to Generate" : "Back to Catalog"}
+          <ArrowLeft size={16} /> {generatedProject?.source === "think-bigger" ? "Back to Think Bigger" : generatedProject?.source === "dashboard" ? "Back to Dashboard" : generatedProject?.source === "catalog" ? "Back to Catalog" : generatedProject ? "Back to Generate" : "Back to Catalog"}
         </button>
 
         {/* Project Header */}
