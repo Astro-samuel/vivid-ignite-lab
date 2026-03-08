@@ -170,7 +170,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex gap-2 justify-between">
               {days.map((d, i) => {
-                const active = i < 3;
+                const active = false;
                 return (
                   <div key={i} className="flex flex-col items-center gap-1.5">
                     <div
