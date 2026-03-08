@@ -148,6 +148,7 @@ function WhatCanIMakeWidget({ navigate, userId }: { navigate: (path: string) => 
   );
 }
 
+export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>("inProgress");
   const navigate = useNavigate();
   const [toast, setToast] = useState("");
