@@ -121,20 +121,20 @@ export default function KitsPage() {
   const [toast, setToast] = useState("");
 
   const handleHaveKit = (kit: typeof kits[0]) => {
-    if (selectedKits.has(kit.id)) return;
-    setSelectedKits((prev) => new Set([...prev, kit.id]));
+    // Clear previous kit selection and inventory
+    setSelectedKits(new Set([kit.id]));
 
-    // Add kit components to localStorage inventory
-    const inventory = getInventory();
+    // Build fresh inventory from only this kit's components (normalized)
+    const inventory: string[] = [];
     kit.components.forEach((c) => {
-      const base = c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "");
-      if (!inventory.includes(base)) {
-        inventory.push(base);
+      const normalized = normalizeKitComponent(c);
+      if (!inventory.includes(normalized)) {
+        inventory.push(normalized);
       }
     });
     saveInventory(inventory);
 
-    setToast(`✓ ${kit.name} added to inventory!`);
+    setToast(`✓ ${kit.name} added to inventory! (${inventory.length} components)`);
     setTimeout(() => {
       setToast("");
       navigate("/components");
