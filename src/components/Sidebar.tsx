@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, LayoutDashboard, BookOpen, Cpu, Package, Zap, Lightbulb,
-  Trophy, User, ChevronLeft, ChevronRight, LogOut, Star
+  Trophy, User, LogOut, Star, Menu, X
 } from "lucide-react";
 
 const navItems = [
