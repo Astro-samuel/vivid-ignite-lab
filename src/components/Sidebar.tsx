@@ -16,6 +16,7 @@ const navItems = [
   { icon: User, label: "Profile", path: "/profile" },
   { icon: MessageSquareHeart, label: "Feedback", path: "/feedback" },
   { icon: PlusCircle, label: "Submit Project", path: "/submit-project" },
+  { icon: BookOpen, label: "Resources", path: "/resources" },
 ];
 
 interface SidebarProps {

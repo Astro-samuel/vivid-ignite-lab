@@ -40,6 +40,8 @@ function AnimatedRoutes() {
         <Route path="/project/:id" element={<ProjectDetailPage />} />
         <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="/submit-project" element={<SubmitProjectPage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="*" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>
