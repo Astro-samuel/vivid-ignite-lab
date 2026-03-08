@@ -201,6 +201,44 @@ export default function ComponentsPage() {
     });
   };
 
+  // Visual Search
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target?.result as string;
+      setPreviewImage(base64);
+      setVisualSearching(true);
+      setVisualResults([]);
+      try {
+        const { data, error } = await supabase.functions.invoke("visual-search", {
+          body: { image: base64 },
+        });
+        if (error) throw error;
+        if (data?.components) {
+          setVisualResults(data.components);
+        }
+      } catch (e) {
+        console.error("Visual search error:", e);
+      }
+      setVisualSearching(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addVisualResultsToInventory = () => {
+    setQuantities(prev => {
+      const next = { ...prev };
+      visualResults.forEach(item => { if (!next[item.name]) next[item.name] = 1; });
+      return next;
+    });
+    setVisualResults([]);
+    setPreviewImage(null);
+    setShowVisualSearch(false);
+  };
+
   // "One component away" - components on wishlist that if added would complete a project's requirements
   const ownedNames = Object.keys(quantities);
 
