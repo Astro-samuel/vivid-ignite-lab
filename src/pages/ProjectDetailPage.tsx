@@ -566,9 +566,15 @@ void loop() {
     difficulty: "intermediate", time: "70 mins", xp: 140,
     components: ["Arduino Uno", "16x2 LCD", "Push Button", "Buzzer", "LED (Green)", "LED (Red)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect LCD using I2C (SDA to A4, SCL to A5)",
-      "Connect buttons for code input on pins 2-5",
-      "Connect buzzer to pin 8, LEDs to pins 12, 13",
+      "Gather components: 1x Arduino Uno, 1x 16×2 LCD with I2C backpack, 4x push buttons, 1x buzzer, 2x LEDs (red & green), 2x 220Ω resistors, breadboard, jumper wires",
+      "Connect the I2C LCD module: SDA → Arduino pin A4, SCL → Arduino pin A5, VCC → 5V, GND → GND. The I2C backpack simplifies wiring from 16 pins to just 4",
+      "Install the 'LiquidCrystal_I2C' library from Library Manager. The default I2C address is usually 0x27 — if the LCD doesn't display, try 0x3F. Use an I2C scanner sketch to find your address",
+      "Place 4 push buttons on the breadboard. Connect each button between its digital pin (2, 3, 4, 5) and GND. We use INPUT_PULLUP mode so no external resistors are needed — buttons read LOW when pressed",
+      "Connect the buzzer: positive → pin 8, negative → GND. Connect green LED (pin 12) and red LED (pin 13) through 220Ω resistors to GND",
+      "Upload the code. The LCD displays 'Enter Code:' and each button press adds a digit (1-4) shown as '*' on the display, with an audible click from the buzzer",
+      "Enter the password '1234' (buttons 1→2→3→4). Green LED lights up and LCD shows 'Access Granted!'. Wrong code triggers red LED and 'Access Denied!'",
+      "🧪 Experiment: Change the password in code. Add a lockout after 3 failed attempts (see Optimized version). Try adding a 'master reset' button combination",
+      "⚠️ Troubleshooting: If LCD shows squares, adjust contrast with the potentiometer on the I2C backpack. If nothing displays, verify the I2C address and check SDA/SCL connections aren't swapped",
     ],
     basicCode: `/*
   Learning Goals:
