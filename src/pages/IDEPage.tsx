@@ -105,6 +105,7 @@ const aiHints = [
 ];
 
 export default function IDEPage() {
+  const navigate = useNavigate();
   const [code, setCode] = useState(starterCode);
   const [runStep, setRunStep] = useState<RunStep>("idle");
   const [errors, setErrors] = useState<string[]>([]);
@@ -114,6 +115,8 @@ export default function IDEPage() {
   const [xpAwarded, setXpAwarded] = useState(false);
   const [autoSaveCountdown, setAutoSaveCountdown] = useState(30);
   const [activeStep, setActiveStep] = useState(3);
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [showSimulator, setShowSimulator] = useState(true);
   const codeRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-save countdown
