@@ -104,7 +104,7 @@ const aiHints = [
 ];
 
 export default function IDEPage() {
-  const [code, setCode] = useState(sampleCode);
+  const [code, setCode] = useState(starterCode);
   const [runStep, setRunStep] = useState<RunStep>("idle");
   const [errors, setErrors] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
