@@ -17,6 +17,7 @@ import IDEPage from "./pages/IDEPage";
 import KitsPage from "./pages/KitsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
 import FeedbackPage from "./pages/FeedbackPage";
+import SubmitProjectPage from "./pages/SubmitProjectPage";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ function AnimatedRoutes() {
         <Route path="/ide" element={<IDEPage />} />
         <Route path="/project/:id" element={<ProjectDetailPage />} />
         <Route path="/feedback" element={<FeedbackPage />} />
+        <Route path="/submit-project" element={<SubmitProjectPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>

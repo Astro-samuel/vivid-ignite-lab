@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      community_projects: {
+        Row: {
+          author_email: string | null
+          author_name: string
+          components: string[]
+          created_at: string
+          description: string
+          difficulty: string
+          estimated_time: string
+          id: string
+          status: string
+          title: string
+        }
+        Insert: {
+          author_email?: string | null
+          author_name: string
+          components?: string[]
+          created_at?: string
+          description: string
+          difficulty?: string
+          estimated_time?: string
+          id?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          author_email?: string | null
+          author_name?: string
+          components?: string[]
+          created_at?: string
+          description?: string
+          difficulty?: string
+          estimated_time?: string
+          id?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           category: string
