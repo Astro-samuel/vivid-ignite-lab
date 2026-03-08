@@ -286,6 +286,61 @@ export default function GeneratePage() {
     });
   };
 
+  const generateAIRecommendations = async () => {
+    if (!user) { navigate("/auth"); return; }
+    setAiRecommending(true);
+    setProjects([]);
+    setLoadingStates([true, true, true, true, true]);
+    setSelected(new Set());
+    setShowAll(false);
+
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("level, projects_completed")
+        .eq("id", user.id)
+        .single();
+
+      const { data, error } = await supabase.functions.invoke("recommend-projects", {
+        body: {
+          components,
+          level: profile?.level || 1,
+          projectsCompleted: profile?.projects_completed || 0,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.projects && Array.isArray(data.projects)) {
+        const aiProjects: Project[] = data.projects.map((p: any, i: number) => ({
+          id: 700 + i + Math.floor(Math.random() * 100),
+          emoji: p.emoji || "🤖",
+          title: p.title,
+          description: p.description,
+          difficulty: p.difficulty || "beginner",
+          time: p.time || "30 mins",
+          xp: p.xp || 75,
+          components: p.components || [],
+        }));
+
+        aiProjects.forEach((project, i) => {
+          setTimeout(() => {
+            setProjects(prev => { const next = [...prev]; next[i] = project; return next; });
+            setLoadingStates(prev => { const next = [...prev]; next[i] = false; return next; });
+            if (i === aiProjects.length - 1) setAiRecommending(false);
+          }, (i + 1) * 600);
+        });
+      } else {
+        throw new Error("No projects returned");
+      }
+    } catch (e: any) {
+      console.error("AI recommendation error:", e);
+      setAiRecommending(false);
+      setLoadingStates([]);
+      sonnerToast.error(e?.message || "AI recommendation failed. Try the regular generator instead.");
+    }
+  };
+
   const toggleSelect = (id: number) => {
     setSelected((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   };
