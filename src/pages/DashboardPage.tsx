@@ -84,14 +84,14 @@ export default function DashboardPage() {
     <Layout>
       <div className="px-6 py-8 max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
+        <FadeInView className="mb-6">
           <div className="flex items-center gap-2 mb-1">
             <Target size={14} style={{ color: "#00F5FF" }} />
             <span className="text-xs font-semibold" style={{ color: "#00F5FF" }}>Your Workspace</span>
           </div>
           <h1 className="text-3xl font-bold mb-1" style={{ color: "#FFFFFF" }}>Dashboard</h1>
           <p className="text-sm" style={{ color: "#A0AED9" }}>Track your projects and see your progress</p>
-        </div>
+        </FadeInView>
 
         {/* Stats Row */}
         <div className="grid grid-cols-4 gap-4 mb-6">
