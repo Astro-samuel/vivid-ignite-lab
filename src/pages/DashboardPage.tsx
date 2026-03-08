@@ -16,7 +16,7 @@ const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 
 const dailyChallenges = [
   { icon: "🎯", title: "Complete a Project", desc: "Finish any project from the catalog", xp: 50, done: false },
-  { icon: "🔧", title: "Add 3 Components", desc: "Add components to your inventory", xp: 25, done: true },
+  { icon: "🔧", title: "Add 3 Components", desc: "Add components to your inventory", xp: 25, done: false },
   { icon: "✨", title: "Generate AI Project", desc: "Use AI to generate a custom project", xp: 35, done: false },
 ];
 
