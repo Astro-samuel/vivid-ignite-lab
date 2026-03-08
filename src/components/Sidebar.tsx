@@ -13,7 +13,6 @@ const navItems = [
   { icon: Zap, label: "Generate", path: "/generate" },
   { icon: Lightbulb, label: "Think Bigger", path: "/think-bigger" },
   { icon: Trophy, label: "Achievements", path: "/achievements" },
-  { icon: User, label: "Profile", path: "/profile" },
   { icon: MessageSquareHeart, label: "Feedback", path: "/feedback" },
   { icon: PlusCircle, label: "Submit Project", path: "/submit-project" },
   { icon: BookOpen, label: "Resources", path: "/resources" },
@@ -88,7 +87,24 @@ export default function Sidebar({ collapsed }: SidebarProps) {
 
       {/* Bottom section */}
       <div className="border-t" style={{ borderColor: "hsl(232, 40%, 16%)", minWidth: "200px" }}>
-        <div className="px-2 pt-3">
+        <div className="px-2 pt-3 space-y-0.5">
+          <Link
+            to="/profile"
+            className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg w-full transition-all duration-150 whitespace-nowrap"
+            style={
+              location.pathname === "/profile"
+                ? {
+                    background: "rgba(0,245,255,0.12)",
+                    color: "#00F5FF",
+                    borderLeft: "3px solid #00F5FF",
+                    paddingLeft: "7px",
+                  }
+                : { color: "hsl(226, 35%, 65%)" }
+            }
+          >
+            <User size={16} className="flex-shrink-0" style={{ color: location.pathname === "/profile" ? "#00F5FF" : "inherit" }} />
+            <span className="text-sm font-medium">Profile</span>
+          </Link>
           <button
             className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg w-full transition-all duration-150 hover:bg-white/5 whitespace-nowrap"
             style={{ color: "hsl(226, 35%, 65%)" }}
