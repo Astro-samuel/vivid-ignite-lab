@@ -32,8 +32,6 @@ function getInventoryComponents(): string[] {
   } catch { return ["Arduino Uno"]; }
 }
 
-const defaultComponents = getInventoryComponents();
-
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
   const styles =
     difficulty === "beginner"
@@ -148,7 +146,7 @@ export default function GeneratePage() {
   const [toast, setToast] = useState("");
   const [difficulty, setDifficulty] = useState("Any Difficulty");
   const [category, setCategory] = useState("Any Category");
-  const [components, setComponents] = useState<string[]>(defaultComponents);
+  const [components, setComponents] = useState<string[]>(getInventoryComponents);
   const [newComponent, setNewComponent] = useState("");
 
   const showToast = (msg: string) => {
@@ -189,7 +187,36 @@ export default function GeneratePage() {
   };
 
   const handleSave = () => {
-    showToast(`✓ ${selected.size > 0 ? selected.size + " projects" : "All projects"} saved!`);
+    const projectsToSave = selected.size > 0 
+      ? projects.filter(p => selected.has(p.id))
+      : projects.filter(Boolean);
+    
+    try {
+      const existing = JSON.parse(localStorage.getItem("savedProjects") || "[]");
+      const merged = [...existing];
+      projectsToSave.forEach(p => {
+        if (!merged.find((e: Project) => e.id === p.id)) {
+          merged.push({ ...p, savedAt: Date.now(), status: "saved" });
+        }
+      });
+      // Enforce 5 project limit
+      const limited = merged.slice(-5);
+      localStorage.setItem("savedProjects", JSON.stringify(limited));
+      showToast(`✓ ${projectsToSave.length} project${projectsToSave.length !== 1 ? "s" : ""} saved to dashboard!`);
+    } catch {
+      showToast("Error saving projects");
+    }
+  };
+
+  const handleStartProject = (project: Project) => {
+    try {
+      const existing = JSON.parse(localStorage.getItem("savedProjects") || "[]");
+      if (!existing.find((e: Project) => e.id === project.id)) {
+        const merged = [...existing, { ...project, savedAt: Date.now(), status: "inProgress" }].slice(-5);
+        localStorage.setItem("savedProjects", JSON.stringify(merged));
+      }
+    } catch {}
+    navigate(`/project/${project.id}`);
   };
 
   return (
@@ -367,7 +394,7 @@ export default function GeneratePage() {
               return loadingStates[i] ? (
                 <ProjectCard key={`loading-${i}`} project={{ id: -i, emoji: "⏳", title: "", difficulty: "beginner", time: "", xp: 0, description: "", components: [] }} index={i} isLoading={true} isSelected={false} onSelect={() => {}} onStart={() => {}} />
               ) : projects[i] ? (
-                <ProjectCard key={`proj-${projects[i].id}`} project={projects[i]} index={i} isLoading={false} isSelected={selected.has(projects[i].id)} onSelect={() => toggleSelect(projects[i].id)} onStart={() => navigate("/ide")} />
+                <ProjectCard key={`proj-${projects[i].id}`} project={projects[i]} index={i} isLoading={false} isSelected={selected.has(projects[i].id)} onSelect={() => toggleSelect(projects[i].id)} onStart={() => handleStartProject(projects[i])} />
               ) : null;
             })}
 

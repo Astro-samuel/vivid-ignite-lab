@@ -1,31 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 
 type Tab = "inProgress" | "completed" | "saved";
 
-const inProgressProjects = [
-  {
-    id: 1,
-    emoji: "💧",
-    title: "Eco-Water Monitor",
-    desc: "The Eco-Water Monitor is an Arduino-based project designed to track and regulate water usage in real-time. By using a...",
-    step: 5,
-    totalSteps: 6,
-    progress: 83,
-    difficulty: "intermediate",
-    time: "3 hours",
-    xp: 150,
-    lastModified: "2 hours ago",
-  },
-];
+interface SavedProject {
+  id: number;
+  emoji: string;
+  title: string;
+  description?: string;
+  difficulty: string;
+  time: string;
+  xp: number;
+  status: string;
+  savedAt: number;
+  progress?: number;
+  step?: number;
+  totalSteps?: number;
+}
 
-const completedProjects = [
-  { id: 6, emoji: "🌈", title: "RGB LED Mixer", difficulty: "beginner", xp: 80, completedOn: "5 days ago" },
-];
-
-const savedProjects: typeof inProgressProjects = [];
+function loadSavedProjects(): SavedProject[] {
+  try {
+    return JSON.parse(localStorage.getItem("savedProjects") || "[]");
+  } catch { return []; }
+}
 
 const days = ["M", "T", "W", "T", "F", "S", "S"];
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
@@ -54,6 +53,15 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>("inProgress");
   const navigate = useNavigate();
   const [toast, setToast] = useState("");
+  const [allProjects, setAllProjects] = useState<SavedProject[]>([]);
+
+  useEffect(() => {
+    setAllProjects(loadSavedProjects());
+  }, []);
+
+  const inProgressProjects = allProjects.filter(p => p.status === "inProgress");
+  const completedProjects = allProjects.filter(p => p.status === "completed");
+  const savedProjects = allProjects.filter(p => p.status === "saved");
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -269,11 +277,11 @@ export default function DashboardPage() {
                     <div className="flex items-start justify-between gap-3 mb-1">
                       <div>
                         <h3 className="font-bold" style={{ color: "#FFFFFF" }}>{p.title}</h3>
-                        <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "#A0AED9" }}>{p.desc}</p>
+                        <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "#A0AED9" }}>{p.description || ""}</p>
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         <button
-                          onClick={() => navigate("/ide")}
+                          onClick={() => navigate(`/project/${p.id}`)}
                           className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105"
                           style={{
                             background: "linear-gradient(135deg, #00F5FF, #0099FF)",
@@ -345,12 +353,12 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                           <DifficultyBadge difficulty={p.difficulty} />
-                          <span className="text-xs" style={{ color: "#A0AED9" }}>Completed {p.completedOn}</span>
+                          <span className="text-xs" style={{ color: "#A0AED9" }}>Completed</span>
                           <span className="text-xs font-bold" style={{ color: "#00FF88" }}>+{p.xp} XP</span>
                         </div>
                       </div>
                       <button
-                        onClick={() => navigate("/ide")}
+                        onClick={() => navigate(`/project/${p.id}`)}
                         className="px-4 py-1.5 rounded-full text-xs font-bold border transition-all hover:scale-105"
                         style={{ borderColor: "rgba(0,245,255,0.4)", color: "#00F5FF" }}
                       >
@@ -372,6 +380,37 @@ export default function DashboardPage() {
 
         {activeTab === "saved" && (
           <div className="space-y-4">
+            {savedProjects.map((p) => (
+              <div key={p.id} className="rounded-2xl border p-5" style={{ background: "hsl(229, 45%, 16%)", borderColor: "rgba(183,68,255,0.2)" }}>
+                <div className="flex items-center gap-4">
+                  <div className="text-3xl">{p.emoji}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <h3 className="font-bold" style={{ color: "#FFFFFF" }}>{p.title}</h3>
+                        <div className="flex items-center gap-2 mt-1">
+                          <DifficultyBadge difficulty={p.difficulty} />
+                          <span className="flex items-center gap-1 text-xs" style={{ color: "#A0AED9" }}>
+                            <Clock size={10} /> {p.time}
+                          </span>
+                          <span className="text-xs font-bold" style={{ color: "#FFD700" }}>+{p.xp} XP</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => navigate(`/project/${p.id}`)}
+                        className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105"
+                        style={{
+                          background: "linear-gradient(135deg, #B744FF, #FF1493)",
+                          color: "#FFFFFF",
+                        }}
+                      >
+                        Start Project
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
             {savedProjects.length === 0 && (
               <div className="text-center py-16">
                 <div className="text-5xl mb-4">📚</div>
