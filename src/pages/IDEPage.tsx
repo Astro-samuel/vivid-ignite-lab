@@ -222,7 +222,7 @@ export default function IDEPage() {
         {/* Run workflow indicator */}
         {runStep !== "idle" && (
           <div
-            className="px-6 py-3 border-b flex items-center gap-6 flex-shrink-0"
+            className="px-4 py-2 border-b flex items-center gap-4 flex-shrink-0"
             style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}
           >
             {(["compiling", "simulating", "safety"] as RunStep[]).map((step, i) => {
