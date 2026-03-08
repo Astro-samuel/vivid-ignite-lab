@@ -4,30 +4,38 @@ import Layout from "@/components/Layout";
 
 type RunStep = "idle" | "compiling" | "simulating" | "safety" | "success" | "error";
 
-const sampleCode = `// Smart LED Mood Lamp
-// Controls LED brightness based on ambient light
+const starterCode = `/*
+  🎯 Project: Smart LED Mood Lamp
+  
+  Goal: Control LED brightness based on ambient light.
+  
+  📦 Components: LED (pin 9), Photoresistor (A0)
+  
+  🧩 Hints:
+     1. Use pinMode() to set LED_PIN as OUTPUT
+     2. Use analogRead() to get light sensor value (0-1023)
+     3. Use map() to convert sensor range to LED brightness (0-255)
+     4. Use analogWrite() to set LED brightness
+     5. Add Serial.print() to debug your values
+  
+  💡 Try writing it yourself first!
+     Use "Debug with AI" if you get stuck.
+*/
 
 const int LED_PIN = 9;
 const int SENSOR_PIN = A0;
-int brightness = 0;
-int sensorValue = 0;
 
 void setup() {
-  pinMode(LED_PIN, OUTPUT);
-  Serial.begin(9600);
-  Serial.println("Smart LED Lamp Starting...");
+  // TODO: Set LED_PIN as OUTPUT
+  // TODO: Start Serial at 9600 baud
 }
 
 void loop() {
-  sensorValue = analogRead(SENSOR_PIN);
-  // Map sensor value (0-1023) to LED brightness (0-255)
-  brightness = map(sensorValue, 0, 1023, 255, 0);
-  analogWrite(LED_PIN, brightness);
-  
-  Serial.print("Sensor: ");
-  Serial.print(sensorValue);
-  Serial.print(" | Brightness: ");
-  Serial.println(brightness);
+  // TODO: Read the sensor value with analogRead()
+  // TODO: Map sensor value (0-1023) to brightness (0-255)
+  //       Hint: brighter room = dimmer LED, so invert the range
+  // TODO: Write brightness to LED with analogWrite()
+  // TODO: Print values to Serial for debugging
   
   delay(100);
 }`;
