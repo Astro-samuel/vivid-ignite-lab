@@ -1369,7 +1369,41 @@ void loop() {
           </div>
         </div>
 
-        {/* Components Required */}
+        {/* Learning Concepts */}
+        <div
+          className="rounded-2xl p-5 border mb-6"
+          style={{ background: "linear-gradient(135deg, hsl(229, 45%, 14%), hsl(260, 40%, 16%))", borderColor: "hsl(260, 42%, 28%)" }}
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Lightbulb size={16} style={{ color: "#FFD700" }} />
+            <span className="font-bold text-sm" style={{ color: "#FFD700" }}>What You'll Learn</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {learningConcepts.map((concept) => (
+              <button
+                key={concept}
+                onClick={() => setShowConceptDetails(showConceptDetails === concept ? null : concept)}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 cursor-pointer"
+                style={{
+                  background: showConceptDetails === concept ? "rgba(255,215,0,0.2)" : "hsl(260, 35%, 20%)",
+                  color: showConceptDetails === concept ? "#FFD700" : "#E0E7FF",
+                  border: `1px solid ${showConceptDetails === concept ? "rgba(255,215,0,0.4)" : "hsl(260, 35%, 30%)"}`,
+                }}
+              >
+                <BookOpen size={12} className="inline mr-1.5" />
+                {concept}
+              </button>
+            ))}
+          </div>
+          {showConceptDetails && (
+            <div className="mt-3 p-3 rounded-xl text-xs leading-relaxed animate-fade-in" style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.2)", color: "#E0E7FF" }}>
+              <strong style={{ color: "#FFD700" }}>{showConceptDetails}</strong>
+              <p className="mt-1">This concept is covered in the code. Look for related functions and experiment with different values to deepen your understanding.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Components Required - Interactive */}
         <div
           className="rounded-2xl p-5 border mb-6"
           style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
@@ -1377,18 +1411,67 @@ void loop() {
           <div className="flex items-center gap-2 mb-4">
             <Settings size={16} style={{ color: "#00F5FF" }} />
             <span className="font-bold text-sm" style={{ color: "#00F5FF" }}>Components Required</span>
+            <span className="text-xs px-2 py-0.5 rounded-full ml-auto" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>
+              {project.components.length} parts
+            </span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {project.components.map((c) => (
-              <span
-                key={c}
-                className="px-3 py-1.5 rounded-lg text-sm font-medium"
-                style={{ background: "hsl(229, 42%, 20%)", color: "#E0E7FF", border: "1px solid hsl(229, 42%, 30%)" }}
-              >
-                {c}
-              </span>
-            ))}
+          <div className="space-y-2">
+            {project.components.map((c) => {
+              const info = componentInfo[c];
+              const isExpanded = expandedComponents[c];
+              return (
+                <div key={c}>
+                  <button
+                    onClick={() => toggleComponentExpand(c)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-[1.01]"
+                    style={{
+                      background: isExpanded ? "hsl(229, 42%, 22%)" : "hsl(229, 42%, 18%)",
+                      color: "#E0E7FF",
+                      border: `1px solid ${isExpanded ? "rgba(0,245,255,0.3)" : "hsl(229, 42%, 28%)"}`,
+                    }}
+                  >
+                    <span className="text-lg">{info?.tipIcon || "🔧"}</span>
+                    <span className="flex-1 text-left">{c}</span>
+                    {info && (
+                      <Info size={14} style={{ color: isExpanded ? "#00F5FF" : "#A0AED9" }} />
+                    )}
+                    {info && (isExpanded ? <ChevronUp size={14} style={{ color: "#A0AED9" }} /> : <ChevronDown size={14} style={{ color: "#A0AED9" }} />)}
+                  </button>
+                  {isExpanded && info && (
+                    <div className="ml-4 mt-1 mb-2 p-3 rounded-xl text-xs space-y-2 animate-fade-in" style={{ background: "hsl(229, 42%, 15%)", border: "1px solid hsl(229, 42%, 25%)" }}>
+                      <p style={{ color: "#E0E7FF" }}>{info.description}</p>
+                      <div className="flex items-start gap-2">
+                        <span className="font-bold flex-shrink-0" style={{ color: "#00F5FF" }}>Pins:</span>
+                        <span style={{ color: "#A0AED9" }}>{info.pins}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
+        </div>
+
+        {/* Social / Like / Share bar */}
+        <div className="flex items-center gap-3 mb-6">
+          <button
+            onClick={() => { setLiked(!liked); setLikeCount(prev => liked ? prev - 1 : prev + 1); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
+            style={{
+              background: liked ? "rgba(255,69,0,0.15)" : "hsl(229, 42%, 18%)",
+              color: liked ? "#FF4500" : "#A0AED9",
+              border: `1px solid ${liked ? "rgba(255,69,0,0.3)" : "hsl(229, 42%, 28%)"}`,
+            }}
+          >
+            <ThumbsUp size={14} fill={liked ? "currentColor" : "none"} /> {likeCount}
+          </button>
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
+            style={{ background: "hsl(229, 42%, 18%)", color: "#A0AED9", border: "1px solid hsl(229, 42%, 28%)" }}
+          >
+            <Share2 size={14} /> Share
+          </button>
         </div>
 
         {/* Tabs: Instructions | Code | Simulate */}
@@ -1432,17 +1515,75 @@ void loop() {
             className="rounded-2xl p-6 border"
             style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
           >
-            <h3 className="font-bold mb-4" style={{ color: "#FFFFFF" }}>Step-by-Step Instructions</h3>
-            <div className="space-y-3">
+            {/* Progress bar */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold" style={{ color: "#FFFFFF" }}>Step-by-Step Instructions</h3>
+              <div className="flex items-center gap-3">
+                <div className="w-32 h-2 rounded-full overflow-hidden" style={{ background: "hsl(229, 42%, 22%)" }}>
+                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progressPercent}%`, background: progressPercent === 100 ? "linear-gradient(90deg, #00FF88, #00C853)" : "linear-gradient(90deg, #00F5FF, #0099FF)" }} />
+                </div>
+                <span className="text-xs font-bold" style={{ color: progressPercent === 100 ? "#00FF88" : "#00F5FF" }}>
+                  {stepProgress}/{totalSteps}
+                </span>
+              </div>
+            </div>
+
+            {progressPercent === 100 && (
+              <div className="mb-4 p-3 rounded-xl flex items-center gap-3 animate-fade-in" style={{ background: "rgba(0,255,136,0.1)", border: "1px solid rgba(0,255,136,0.3)" }}>
+                <Award size={20} style={{ color: "#00FF88" }} />
+                <span className="text-sm font-bold" style={{ color: "#00FF88" }}>🎉 All steps completed! Great job wiring up the circuit.</span>
+              </div>
+            )}
+
+            <div className="space-y-2">
               {project.instructions.map((inst, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
-                    style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                <div
+                  key={i}
+                  className="flex items-start gap-3 p-3 rounded-xl transition-all cursor-pointer group"
+                  style={{
+                    background: checkedSteps[i] ? "rgba(0,255,136,0.06)" : "transparent",
+                    border: `1px solid ${checkedSteps[i] ? "rgba(0,255,136,0.2)" : "transparent"}`,
+                  }}
+                  onClick={() => toggleStep(i)}
+                >
+                  <div className="flex-shrink-0 mt-0.5 transition-all group-hover:scale-110">
+                    {checkedSteps[i] ? (
+                      <CheckSquare size={20} style={{ color: "#00FF88" }} />
+                    ) : (
+                      <Square size={20} style={{ color: "#A0AED9" }} />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-sm transition-all ${checkedSteps[i] ? "line-through opacity-60" : ""}`} style={{ color: "#E0E7FF" }}>{inst}</p>
+                    {/* Step note input */}
+                    <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <input
+                        value={activeNote[i] || ""}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          setActiveNote(prev => ({ ...prev, [i]: e.target.value }));
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Add a note..."
+                        className="w-full bg-transparent text-xs focus:outline-none px-2 py-1 rounded-lg"
+                        style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 25%)" }}
+                      />
+                    </div>
+                    {activeNote[i] && (
+                      <p className="mt-1 text-xs italic flex items-center gap-1" style={{ color: "#A0AED9" }}>
+                        <MessageCircle size={10} /> {activeNote[i]}
+                      </p>
+                    )}
+                  </div>
+                  <span
+                    className="text-xs font-bold flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
+                    style={{
+                      background: checkedSteps[i] ? "rgba(0,255,136,0.15)" : "rgba(0,245,255,0.15)",
+                      color: checkedSteps[i] ? "#00FF88" : "#00F5FF",
+                    }}
                   >
                     {i + 1}
-                  </div>
-                  <p className="text-sm pt-1" style={{ color: "#E0E7FF" }}>{inst}</p>
+                  </span>
                 </div>
               ))}
             </div>
