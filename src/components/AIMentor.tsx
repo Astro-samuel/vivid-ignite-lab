@@ -178,7 +178,7 @@ export default function AIMentor() {
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.4 }}
+        transition={{ type: "spring", stiffness: 400, damping: 22, delay: 0.2 }}
         onClick={() => setOpen((o) => !o)}
         className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center z-50 shadow-2xl"
         whileHover={{ scale: 1.1 }}
@@ -201,10 +201,10 @@ export default function AIMentor() {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 100 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 40, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.97 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
             className={`fixed bottom-24 right-6 ${panelWidth} rounded-2xl border z-50 flex flex-col overflow-hidden shadow-2xl`}
             style={{
               background: "hsl(229, 45%, 14%)",

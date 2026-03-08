@@ -52,7 +52,7 @@ export default function Layout({ children }: LayoutProps) {
             <motion.button
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
+              transition={{ type: "spring", stiffness: 400, damping: 22, delay: 0.1 }}
               onClick={() => setLangOpen(!langOpen)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
               style={{
@@ -75,10 +75,10 @@ export default function Layout({ children }: LayoutProps) {
             <AnimatePresence>
               {langOpen && (
                 <motion.div
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 100 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  initial={{ opacity: 0, x: 60, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: 60, scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                   className="absolute right-0 top-full mt-1 w-44 rounded-xl border py-1 z-50 shadow-xl max-h-64 overflow-y-auto"
                   style={{
                     background: "hsl(229, 45%, 14%)",
