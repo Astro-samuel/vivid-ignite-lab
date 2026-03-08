@@ -1900,14 +1900,6 @@ void loop() {
       </div>
 
       {/* Toasts */}
-      {saved && (
-        <div
-          className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in z-50"
-          style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}
-        >
-          <CheckCircle size={16} /> ✓ Project Saved to Dashboard!
-        </div>
-      )}
       {copyToast && (
         <div
           className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in z-50"
