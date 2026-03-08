@@ -70,10 +70,11 @@ export function useTranslation() {
   }, [location.pathname]);
 
   const translatePage = useCallback(async (langCode: string, langLabel: string) => {
-    const mainEl = document.querySelector("main");
-    if (!mainEl) return;
+    // Translate the entire app, not just <main>
+    const root = document.body;
+    if (!root) return;
 
-    const textNodes = getTextNodes(mainEl);
+    const textNodes = getTextNodes(root);
     if (textNodes.length === 0) return;
 
     // Store originals on first translation
