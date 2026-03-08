@@ -227,37 +227,53 @@ export default function GeneratePage() {
     setSelected(new Set());
     setShowAll(false);
 
-    // Normalize component names for matching (lowercase, strip quantities)
     const ownedNorm = components.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
 
-    let pool = [...projectPool].sort(() => Math.random() - 0.5);
+    // Combine static pool + community projects
+    let pool = [...projectPool, ...communityProjects].sort(() => Math.random() - 0.5);
     if (difficulty !== "Any Difficulty") pool = pool.filter((p) => p.difficulty === difficulty.toLowerCase());
 
-    // Filter to projects where ALL required components are in user's inventory
-    const matching = pool.filter((p) =>
-      p.components.every((req) => ownedNorm.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned)))
-    );
+    // Exclude previously shown projects to ensure variety
+    const fresh = pool.filter((p) => !previouslyShown.has(p.id));
+    const candidates = fresh.length >= 5 ? fresh : pool; // reset if pool exhausted
 
-    // Fall back to partial matches (≥50% components owned) if no full matches
-    const fallback = matching.length > 0 ? matching : pool
-      .map((p) => ({ ...p, matchScore: p.components.filter((req) => ownedNorm.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))).length / p.components.length }))
-      .filter((p) => p.matchScore >= 0.5)
-      .sort((a, b) => b.matchScore - a.matchScore);
+    // Score by component match
+    const scored = candidates.map((p) => {
+      const matchCount = p.components.filter((req) =>
+        ownedNorm.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
+      ).length;
+      return { ...p, matchScore: p.components.length > 0 ? matchCount / p.components.length : 0 };
+    });
 
-    const shuffled = (matching.length > 0 ? matching : fallback).slice(0, 5);
+    // Prioritize full matches, then partial (≥30%), then any
+    const fullMatch = scored.filter((p) => p.matchScore === 1);
+    const partialMatch = scored.filter((p) => p.matchScore >= 0.3 && p.matchScore < 1);
+    const rest = scored.filter((p) => p.matchScore < 0.3);
 
-    if (shuffled.length === 0) {
+    const ranked = [...fullMatch.sort(() => Math.random() - 0.5), ...partialMatch.sort(() => Math.random() - 0.5), ...rest.sort(() => Math.random() - 0.5)];
+    const selected5 = ranked.slice(0, 5);
+
+    if (selected5.length === 0) {
       setGenerating(false);
       setLoadingStates([]);
       showToast("No projects match your components. Try adding more to your inventory!");
       return;
     }
 
-    shuffled.forEach((project, i) => {
+    // Track shown IDs
+    setPreviouslyShown((prev) => {
+      const next = new Set(prev);
+      selected5.forEach((p) => next.add(p.id));
+      // Reset if we've shown most of the pool
+      if (next.size > pool.length * 0.8) return new Set(selected5.map((p) => p.id));
+      return next;
+    });
+
+    selected5.forEach((project, i) => {
       setTimeout(() => {
         setProjects((prev) => { const next = [...prev]; next[i] = project; return next; });
         setLoadingStates((prev) => { const next = [...prev]; next[i] = false; return next; });
-        if (i === Math.min(shuffled.length, 5) - 1) setGenerating(false);
+        if (i === Math.min(selected5.length, 5) - 1) setGenerating(false);
       }, (i + 1) * 800);
     });
   };
