@@ -419,7 +419,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <button
-                        onClick={() => navigate(`/project/${p.id}`)}
+                        onClick={() => openProject(p)}
                         className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105"
                         style={{
                           background: "linear-gradient(135deg, #B744FF, #FF1493)",
