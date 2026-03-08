@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import FadeInView from "@/components/motion/FadeInView";
@@ -24,7 +25,33 @@ export default function AuthPage() {
     setLoading(true);
 
     if (mode === "signup") {
-      const { error } = await signUp(email, password, username);
+      if (!username.trim()) {
+        setError("Username is required");
+        setLoading(false);
+        return;
+      }
+      if (username.trim().length < 3) {
+        setError("Username must be at least 3 characters");
+        setLoading(false);
+        return;
+      }
+
+      // Check username availability
+      const { data: available, error: checkErr } = await supabase.rpc("check_username_available", {
+        desired_username: username.trim(),
+      });
+      if (checkErr) {
+        setError("Could not verify username. Try again.");
+        setLoading(false);
+        return;
+      }
+      if (!available) {
+        setError("Username is already taken");
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await signUp(email, password, username.trim());
       if (error) setError(error.message);
       else setConfirmMsg("Check your email to confirm your account!");
     } else {
@@ -110,6 +137,9 @@ export default function AuthPage() {
                 <input
                   type="text"
                   placeholder="Username"
+                  required
+                  minLength={3}
+                  maxLength={30}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2"
