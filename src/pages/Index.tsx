@@ -38,7 +38,7 @@ export default function Index() {
     <Layout>
       <div className="min-h-screen">
         {/* Hero Section */}
-        <section className="relative px-8 pt-20 pb-24 overflow-hidden" style={{ background: "hsl(232, 48%, 6%)" }}>
+        <section className="relative px-8 pt-16 pb-20 overflow-hidden" style={{ background: "hsl(232, 48%, 6%)" }}>
           <div
             className="absolute inset-0"
             style={{

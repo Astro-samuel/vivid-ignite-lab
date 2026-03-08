@@ -189,7 +189,7 @@ export default function IDEPage() {
       <div className="flex flex-col" style={{ height: "calc(100vh - 48px)" }}>
         {/* Top Bar */}
         <div
-          className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0"
+          className="flex items-center justify-between px-6 py-2.5 border-b flex-shrink-0"
           style={{ background: "hsl(232, 48%, 6%)", borderColor: "hsl(232, 40%, 16%)" }}
         >
           <div>
@@ -199,22 +199,22 @@ export default function IDEPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button onClick={loadErrorCode} className="btn-neon-outline-teal px-3 py-1.5 text-xs flex items-center gap-1.5">
-              <Bug size={12} /> Load Error Code
+          <div className="flex items-center gap-2">
+            <button onClick={loadErrorCode} className="btn-neon-outline-teal px-2.5 py-1.5 text-xs flex items-center gap-1.5">
+              <Bug size={11} /> Load Errors
             </button>
-            <button onClick={resetCode} className="px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105" style={{ background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
-              <RefreshCw size={12} /> Reset
+            <button onClick={resetCode} className="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105" style={{ background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
+              <RefreshCw size={11} /> Reset
             </button>
             <button
               onClick={runAndCheck}
               disabled={runStep === "compiling" || runStep === "simulating" || runStep === "safety"}
-              className="btn-neon-green px-5 py-2 text-sm font-bold flex items-center gap-2 disabled:opacity-60"
+              className="btn-neon-green px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 disabled:opacity-60"
             >
-              {runStep === "compiling" && <><Loader2 size={14} className="animate-spin" /> Compiling...</>}
-              {runStep === "simulating" && <><Loader2 size={14} className="animate-spin" /> Simulating...</>}
-              {runStep === "safety" && <><Loader2 size={14} className="animate-spin" /> Safety Check...</>}
-              {(runStep === "idle" || runStep === "success" || runStep === "error") && <><Play size={14} /> ▶ Run &amp; Check</>}
+              {runStep === "compiling" && <><Loader2 size={12} className="animate-spin" /> Compiling...</>}
+              {runStep === "simulating" && <><Loader2 size={12} className="animate-spin" /> Simulating...</>}
+              {runStep === "safety" && <><Loader2 size={12} className="animate-spin" /> Safety Check...</>}
+              {(runStep === "idle" || runStep === "success" || runStep === "error") && <><Play size={12} /> Run &amp; Check</>}
             </button>
           </div>
         </div>
@@ -222,7 +222,7 @@ export default function IDEPage() {
         {/* Run workflow indicator */}
         {runStep !== "idle" && (
           <div
-            className="px-6 py-3 border-b flex items-center gap-6 flex-shrink-0"
+            className="px-4 py-2 border-b flex items-center gap-4 flex-shrink-0"
             style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}
           >
             {(["compiling", "simulating", "safety"] as RunStep[]).map((step, i) => {
@@ -271,7 +271,7 @@ export default function IDEPage() {
         <div className="flex flex-1 overflow-hidden">
           {/* Instructions Panel */}
           <div
-            className="w-64 flex-shrink-0 border-r flex flex-col overflow-y-auto"
+            className="w-56 flex-shrink-0 border-r flex flex-col overflow-y-auto"
             style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}
           >
             <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
@@ -373,7 +373,7 @@ export default function IDEPage() {
 
           {/* Wokwi Simulator Panel */}
           <div
-            className="w-80 flex-shrink-0 border-l flex flex-col"
+            className="w-72 flex-shrink-0 border-l flex flex-col"
             style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}
           >
             <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
@@ -393,7 +393,7 @@ export default function IDEPage() {
 
           {/* AI Debug Panel */}
           {showDebug && (
-            <div className="w-72 flex flex-col border-l flex-shrink-0 animate-slide-in-right" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
+            <div className="w-64 flex flex-col border-l flex-shrink-0 animate-slide-in-right" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
               <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
                 <Brain size={16} style={{ color: "#B744FF" }} />
                 <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Debug Assistant</span>
