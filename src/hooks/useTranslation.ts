@@ -140,8 +140,6 @@ export function useTranslation() {
     if (!root) return;
 
     const textNodes = getTextNodes(root);
-    // Mark all as needing translation
-    translatedNodes.delete = translatedNodes.delete; // no-op, just for clarity
     await translateNodes(textNodes, langCode, langLabel);
   }, [translateNodes]);
 
