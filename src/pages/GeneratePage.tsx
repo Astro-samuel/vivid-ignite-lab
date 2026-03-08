@@ -77,10 +77,10 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
 }
 
 function ProjectCard({
-  project, index, isLoading, isSelected, onSelect, onStart,
+  project, index, isLoading, isSelected, onSelect, onStart, isStarting,
 }: {
   project: Project; index: number; isLoading: boolean; isSelected: boolean;
-  onSelect: () => void; onStart: () => void;
+  onSelect: () => void; onStart: () => void; isStarting?: boolean;
 }) {
   const [expanded, setExpanded] = useState(index < 3);
 
