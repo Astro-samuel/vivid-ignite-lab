@@ -2,49 +2,104 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { MessageSquare, X, Send, Bot, Sparkles, ChevronDown, Maximize2, Minimize2, GripVertical } from "lucide-react";
 
 interface Message {
-  role: "user" | "ai";
-  text: string;
+  role: "user" | "assistant";
+  content: string;
 }
 
-const greetings = [
-  "Hi! I'm your AI Mentor 🤖 Ask me anything about Arduino, electronics, or your projects!",
-];
+const MENTOR_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-mentor`;
 
-const responses: Record<string, string> = {
-  default: "That's a great question! Can you tell me a bit more about what you're trying to build? Knowing your specific components and goal will help me give you better guidance. 🤔",
-  led: "LEDs are a great starting point! 💡 Here's a question for you: do you know why we need a resistor with an LED? Think about what happens to current without one. The longer leg is the anode (+) and goes through a 220Ω resistor to your Arduino pin.",
-  servo: "Servos are fun! 🤖 Quick question: do you know the difference between a servo and a DC motor? A servo has 3 wires — can you figure out which one carries the signal? Hint: it's usually the orange/yellow one. Try using `myServo.write(angle)` with the Servo library.",
-  sensor: "Sensors are the 'eyes and ears' of your project! 🌡️ What sensor are you working with? Each one communicates differently. Before I help further — have you checked the datasheet? It'll tell you whether it's analog or digital output.",
-  error: "Errors are actually great teachers! 🎓 Let's debug together. Can you tell me: 1) What's the exact error message? 2) What line does it point to? 3) Did it work before you made changes? Let's narrow it down step by step.",
-  beginner: "Welcome to the Arduino world! 🌟 I'd recommend starting with LED blink — it teaches digital output. Then try a button input. Each project builds on the last. What components do you have available?",
-  wifi: "WiFi opens up so many possibilities! 🌐 Are you using ESP32 or ESP8266? The basic flow is: include WiFi.h → call WiFi.begin(ssid, password) → check WiFi.status(). What are you trying to connect to?",
-  motor: "Motors need some extra care — never connect them directly to Arduino! ⚡ You'll need a motor driver like L298N. Think of it as a translator between Arduino's small signals and the motor's big power needs. What type of motor are you using?",
-  wiring: "Good thinking to ask about wiring! 🔧 Always double-check: is power going to the right rails? Are your grounds connected? A common mistake is forgetting the common ground between components. Can you describe your current setup?",
-  code: "Let's look at your code together! 📝 Before I help, try these checks: 1) Does every line end with a semicolon? 2) Are your pin numbers matching the wiring? 3) Did you call pinMode() in setup()? Which part is giving you trouble?",
-};
+async function streamMentor({
+  messages,
+  onDelta,
+  onDone,
+  onError,
+}: {
+  messages: Message[];
+  onDelta: (text: string) => void;
+  onDone: () => void;
+  onError: (msg: string) => void;
+}) {
+  try {
+    const resp = await fetch(MENTOR_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ messages }),
+    });
 
-function getAIResponse(input: string): string {
-  const lower = input.toLowerCase();
-  if (lower.includes("led") || lower.includes("light") || lower.includes("blink")) return responses.led;
-  if (lower.includes("servo")) return responses.servo;
-  if (lower.includes("motor") || lower.includes("drive")) return responses.motor;
-  if (lower.includes("sensor") || lower.includes("temperature") || lower.includes("dht") || lower.includes("ultrasonic")) return responses.sensor;
-  if (lower.includes("error") || lower.includes("not working") || lower.includes("help") || lower.includes("bug") || lower.includes("fix")) return responses.error;
-  if (lower.includes("beginner") || lower.includes("start") || lower.includes("new") || lower.includes("learn")) return responses.beginner;
-  if (lower.includes("wifi") || lower.includes("esp") || lower.includes("internet") || lower.includes("iot")) return responses.wifi;
-  if (lower.includes("wir") || lower.includes("connect") || lower.includes("circuit") || lower.includes("breadboard")) return responses.wiring;
-  if (lower.includes("code") || lower.includes("program") || lower.includes("script") || lower.includes("sketch")) return responses.code;
-  return responses.default;
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      onError(data.error || "Something went wrong — try again?");
+      return;
+    }
+
+    if (!resp.body) {
+      onError("No response received");
+      return;
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let newlineIdx: number;
+      while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
+        let line = buffer.slice(0, newlineIdx);
+        buffer = buffer.slice(newlineIdx + 1);
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") break;
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) onDelta(content);
+        } catch {
+          buffer = line + "\n" + buffer;
+          break;
+        }
+      }
+    }
+
+    // Flush remaining
+    if (buffer.trim()) {
+      for (let raw of buffer.split("\n")) {
+        if (!raw || raw.startsWith(":") || !raw.startsWith("data: ")) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const c = parsed.choices?.[0]?.delta?.content;
+          if (c) onDelta(c);
+        } catch {}
+      }
+    }
+
+    onDone();
+  } catch (err) {
+    onError("Connection failed — check your internet?");
+  }
 }
 
 export default function AIMentor() {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "ai", text: greetings[0] },
+    { role: "assistant", content: "Hey! 👋 I'm your Arduino mentor. Whether you're wiring your first LED or debugging a sensor project, I'm here to help you figure it out. What are you working on?" },
   ]);
   const [input, setInput] = useState("");
-  const [typing, setTyping] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Dragging state
@@ -81,20 +136,40 @@ export default function AIMentor() {
     };
   }, [isDragging]);
 
-  const send = () => {
-    if (!input.trim()) return;
+  const send = async () => {
+    if (!input.trim() || streaming) return;
     const userMsg = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", text: userMsg }]);
-    setTyping(true);
-    setTimeout(() => {
-      setTyping(false);
-      setMessages((prev) => [...prev, { role: "ai", text: getAIResponse(userMsg) }]);
-    }, 800 + Math.random() * 600);
+
+    const newMessages: Message[] = [...messages, { role: "user", content: userMsg }];
+    setMessages(newMessages);
+    setStreaming(true);
+
+    let assistantText = "";
+
+    const updateAssistant = (chunk: string) => {
+      assistantText += chunk;
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant" && prev.length > newMessages.length) {
+          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantText } : m));
+        }
+        return [...prev, { role: "assistant", content: assistantText }];
+      });
+    };
+
+    await streamMentor({
+      messages: newMessages,
+      onDelta: updateAssistant,
+      onDone: () => setStreaming(false),
+      onError: (msg) => {
+        setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
+        setStreaming(false);
+      },
+    });
   };
 
   const panelWidth = expanded ? "w-[480px]" : "w-80";
-  const panelHeight = expanded ? "max-h-[680px]" : "max-h-[480px]";
 
   return (
     <>
@@ -129,17 +204,15 @@ export default function AIMentor() {
             transition: isDragging ? "none" : "width 0.3s, max-height 0.3s",
           }}
         >
-          {/* Header with drag handle */}
+          {/* Header */}
           <div
             className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0"
             style={{
               background: "linear-gradient(135deg, rgba(183,68,255,0.2), rgba(255,20,147,0.1))",
               borderColor: "rgba(183,68,255,0.3)",
-              cursor: "default",
             }}
           >
             <div className="flex items-center gap-2.5">
-              {/* Drag handle */}
               <div
                 onMouseDown={handleMouseDown}
                 className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-white/10 transition-colors"
@@ -166,7 +239,6 @@ export default function AIMentor() {
                 onClick={() => setExpanded(!expanded)}
                 className="p-1 rounded transition-all hover:bg-white/10"
                 style={{ color: "#A0AED9" }}
-                title={expanded ? "Minimize" : "Expand"}
               >
                 {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
               </button>
@@ -180,7 +252,7 @@ export default function AIMentor() {
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ minHeight: 0 }}>
             {messages.map((m, i) => (
               <div key={i} className={`flex gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                {m.role === "ai" && (
+                {m.role === "assistant" && (
                   <div
                     className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                     style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}
@@ -189,7 +261,7 @@ export default function AIMentor() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${expanded ? "text-sm" : ""}`}
+                  className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${expanded ? "text-sm" : ""}`}
                   style={
                     m.role === "user"
                       ? {
@@ -205,11 +277,11 @@ export default function AIMentor() {
                         }
                   }
                 >
-                  {m.text}
+                  {m.content}
                 </div>
               </div>
             ))}
-            {typing && (
+            {streaming && messages[messages.length - 1]?.role !== "assistant" && (
               <div className="flex gap-2 justify-start">
                 <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}>
                   <Sparkles size={11} color="#fff" />
@@ -234,12 +306,13 @@ export default function AIMentor() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send()}
               placeholder="Ask your mentor..."
-              className={`flex-1 bg-transparent focus:outline-none ${expanded ? "text-sm" : "text-xs"}`}
+              disabled={streaming}
+              className={`flex-1 bg-transparent focus:outline-none disabled:opacity-50 ${expanded ? "text-sm" : "text-xs"}`}
               style={{ color: "#FFFFFF" }}
             />
             <button
               onClick={send}
-              disabled={!input.trim()}
+              disabled={!input.trim() || streaming}
               className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110 disabled:opacity-40"
               style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}
             >
