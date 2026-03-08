@@ -36,6 +36,7 @@ function AnimatedRoutes() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/ide" element={<IDEPage />} />
         <Route path="/project/:id" element={<ProjectDetailPage />} />
+        <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>

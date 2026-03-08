@@ -14,6 +14,7 @@ const navItems = [
   { icon: Lightbulb, label: "Think Bigger", path: "/think-bigger" },
   { icon: Trophy, label: "Achievements", path: "/achievements" },
   { icon: User, label: "Profile", path: "/profile" },
+  { icon: MessageSquareHeart, label: "Feedback", path: "/feedback" },
 ];
 
 interface SidebarProps {
