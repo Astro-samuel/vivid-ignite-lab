@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { ArrowLeft, Clock, Zap, CheckCircle, Settings, Code, Play, Copy, Download, Sparkles, Save, Loader2, XCircle, AlertTriangle, Brain, Eye, RefreshCw } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ArrowLeft, Clock, Zap, CheckCircle, Settings, Code, Play, Copy, Download, Sparkles, Save, Loader2, XCircle, AlertTriangle, Brain, Eye, RefreshCw, ChevronDown, ChevronUp, BookOpen, Lightbulb, Award, Info, ExternalLink, CheckSquare, Square, Star, MessageCircle, ThumbsUp, Share2 } from "lucide-react";
 import ExplainCode from "@/components/ExplainCode";
 import InteractiveSchematic from "@/components/InteractiveSchematic";
 import Layout from "@/components/Layout";
@@ -1060,6 +1060,71 @@ void loop() {
   const [saved, setSaved] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [copyToast, setCopyToast] = useState(false);
+  const [checkedSteps, setCheckedSteps] = useState<boolean[]>(new Array(project.instructions.length).fill(false));
+  const [expandedComponents, setExpandedComponents] = useState<Record<string, boolean>>({});
+  const [activeNote, setActiveNote] = useState<Record<number, string>>({});
+  const [showConceptDetails, setShowConceptDetails] = useState<string | null>(null);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 80) + 20);
+  const [shareToast, setShareToast] = useState(false);
+
+  // Extract learning concepts from code comments
+  const learningConcepts = (() => {
+    const code = project.basicCode;
+    const goalMatch = code.match(/Learning Goals:\n([\s\S]*?)\*\//);
+    if (goalMatch) {
+      return goalMatch[1]
+        .split("\n")
+        .map(l => l.replace(/^\s*\d+\.\s*/, "").trim())
+        .filter(l => l.length > 0);
+    }
+    return ["Digital I/O", "Serial Communication", "Timing Functions"];
+  })();
+
+  // Component info database
+  const componentInfo: Record<string, { description: string; pins: string; tipIcon: string; buyLink?: string }> = {
+    "Arduino Uno": { description: "ATmega328P microcontroller board with 14 digital I/O pins and 6 analog inputs.", pins: "Digital: 0-13 | Analog: A0-A5 | PWM: 3,5,6,9,10,11", tipIcon: "🎛️" },
+    "LED (Red)": { description: "Light-emitting diode. Forward voltage ~2V, max current 20mA.", pins: "Anode (+) → Resistor → Pin | Cathode (−) → GND", tipIcon: "💡" },
+    "Resistor (220Ω)": { description: "Current-limiting resistor to protect LEDs. Color bands: Red-Red-Brown.", pins: "In series with LED anode", tipIcon: "⚡" },
+    "Resistor (10kΩ)": { description: "Pull-up/pull-down resistor. Color bands: Brown-Black-Orange.", pins: "Used in voltage dividers or pull-up circuits", tipIcon: "⚡" },
+    "Breadboard": { description: "Solderless prototyping board. Rails (+/−) run horizontally, rows vertically.", pins: "Power rails on sides, component rows in center", tipIcon: "🔲" },
+    "Jumper Wires": { description: "Male-to-male wires for breadboard connections. Use color coding!", pins: "Red=5V, Black=GND, Others=signals", tipIcon: "🔌" },
+    "Temperature Sensor (DHT22)": { description: "Digital temp & humidity sensor. Range: -40°C to 80°C, ±0.5°C accuracy.", pins: "VCC → 5V | DATA → Digital Pin | GND → GND", tipIcon: "🌡️" },
+    "Temperature Sensor (DHT11)": { description: "Basic digital temp sensor. Range: 0-50°C, ±2°C accuracy.", pins: "VCC → 5V | DATA → Digital Pin | GND → GND", tipIcon: "🌡️" },
+    "Servo Motor (SG90)": { description: "Micro servo with 180° rotation. Torque: 1.8kg·cm at 4.8V.", pins: "Red → 5V | Brown → GND | Orange → PWM Pin", tipIcon: "⚙️" },
+    "Potentiometer": { description: "Variable resistor (10kΩ typical). Turn the knob to change resistance.", pins: "Outer pins → 5V & GND | Middle → Analog Pin", tipIcon: "🎚️" },
+    "RGB LED": { description: "Common cathode LED with 3 color channels. Mix R+G+B for any color.", pins: "Longest pin (cathode) → GND | R,G,B → PWM pins via 220Ω", tipIcon: "🌈" },
+    "HC-05 Bluetooth": { description: "Bluetooth SPP module. Default baud: 9600. Pair code: 1234.", pins: "TX → Arduino RX | RX → Arduino TX | VCC → 5V | GND → GND", tipIcon: "📡" },
+    "Buzzer": { description: "Piezoelectric buzzer. Use tone() to generate frequencies 31Hz-65kHz.", pins: "+ → Digital Pin | − → GND", tipIcon: "🔊" },
+    "Push Button": { description: "Momentary tactile switch. Normally open, closes when pressed.", pins: "One side → Digital Pin + Pull-down | Other → 5V or GND", tipIcon: "🔘" },
+    "Soil Moisture Sensor": { description: "Analog sensor. Low value = wet soil, high value = dry soil.", pins: "VCC → 5V | GND → GND | AO → Analog Pin", tipIcon: "🌱" },
+    "Relay Module": { description: "Electrically controlled switch for high-power devices (up to 10A/250V AC).", pins: "IN → Digital Pin | VCC → 5V | GND → GND", tipIcon: "🔌" },
+    "Water Pump": { description: "Small submersible DC water pump. 3-6V, ~130mA.", pins: "Connected through relay module", tipIcon: "💧" },
+    "16x2 LCD": { description: "Character LCD with I2C adapter. 16 columns × 2 rows display.", pins: "SDA → A4 | SCL → A5 | VCC → 5V | GND → GND", tipIcon: "📺" },
+    "Ultrasonic Sensor (HC-SR04)": { description: "Distance sensor using sound waves. Range: 2cm-400cm.", pins: "Trig → Digital Pin | Echo → Digital Pin | VCC → 5V | GND → GND", tipIcon: "📏" },
+    "Motor Driver (L298N)": { description: "Dual H-bridge motor driver. Controls 2 DC motors or 1 stepper.", pins: "IN1-IN4 → Digital Pins | ENA/ENB → PWM | VCC → 12V | GND → GND", tipIcon: "🏎️" },
+    "DC Motor": { description: "Simple DC motor. Speed controlled by PWM, direction by H-bridge.", pins: "Connected through L298N motor driver", tipIcon: "⚡" },
+    "Photoresistor (LDR)": { description: "Light-dependent resistor. Resistance decreases with more light.", pins: "One leg → 5V | Other → Analog Pin + 10kΩ to GND", tipIcon: "☀️" },
+    "OLED Display (0.96\")": { description: "128×64 pixel I2C OLED. SSD1306 driver. No backlight needed.", pins: "SDA → A4 | SCL → A5 | VCC → 3.3/5V | GND → GND", tipIcon: "📊" },
+    "LED Matrix 8x8": { description: "64 LEDs in an 8×8 grid controlled via MAX7219 driver.", pins: "DIN → Digital Pin | CS → Digital Pin | CLK → Digital Pin", tipIcon: "🎮" },
+    "Battery Holder": { description: "Holds AA batteries for portable power. 4xAA = 6V.", pins: "+ → VIN or Motor Driver | − → GND", tipIcon: "🔋" },
+  };
+
+  const stepProgress = checkedSteps.filter(Boolean).length;
+  const totalSteps = project.instructions.length;
+  const progressPercent = totalSteps > 0 ? (stepProgress / totalSteps) * 100 : 0;
+
+  const toggleStep = (index: number) => {
+    setCheckedSteps(prev => {
+      const next = [...prev];
+      next[index] = !next[index];
+      return next;
+    });
+  };
+
+  const toggleComponentExpand = (name: string) => {
+    setExpandedComponents(prev => ({ ...prev, [name]: !prev[name] }));
+  };
 
   // Editable code state
   const starterTemplate = `/*
@@ -1102,6 +1167,12 @@ void loop() {
   const currentCode = showSolution
     ? (codeMode === "basic" ? project.basicCode : project.optimizedCode)
     : userCode;
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setShareToast(true);
+    setTimeout(() => setShareToast(false), 2000);
+  };
 
   const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -1298,7 +1369,41 @@ void loop() {
           </div>
         </div>
 
-        {/* Components Required */}
+        {/* Learning Concepts */}
+        <div
+          className="rounded-2xl p-5 border mb-6"
+          style={{ background: "linear-gradient(135deg, hsl(229, 45%, 14%), hsl(260, 40%, 16%))", borderColor: "hsl(260, 42%, 28%)" }}
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Lightbulb size={16} style={{ color: "#FFD700" }} />
+            <span className="font-bold text-sm" style={{ color: "#FFD700" }}>What You'll Learn</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {learningConcepts.map((concept) => (
+              <button
+                key={concept}
+                onClick={() => setShowConceptDetails(showConceptDetails === concept ? null : concept)}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 cursor-pointer"
+                style={{
+                  background: showConceptDetails === concept ? "rgba(255,215,0,0.2)" : "hsl(260, 35%, 20%)",
+                  color: showConceptDetails === concept ? "#FFD700" : "#E0E7FF",
+                  border: `1px solid ${showConceptDetails === concept ? "rgba(255,215,0,0.4)" : "hsl(260, 35%, 30%)"}`,
+                }}
+              >
+                <BookOpen size={12} className="inline mr-1.5" />
+                {concept}
+              </button>
+            ))}
+          </div>
+          {showConceptDetails && (
+            <div className="mt-3 p-3 rounded-xl text-xs leading-relaxed animate-fade-in" style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.2)", color: "#E0E7FF" }}>
+              <strong style={{ color: "#FFD700" }}>{showConceptDetails}</strong>
+              <p className="mt-1">This concept is covered in the code. Look for related functions and experiment with different values to deepen your understanding.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Components Required - Interactive */}
         <div
           className="rounded-2xl p-5 border mb-6"
           style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
@@ -1306,18 +1411,67 @@ void loop() {
           <div className="flex items-center gap-2 mb-4">
             <Settings size={16} style={{ color: "#00F5FF" }} />
             <span className="font-bold text-sm" style={{ color: "#00F5FF" }}>Components Required</span>
+            <span className="text-xs px-2 py-0.5 rounded-full ml-auto" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>
+              {project.components.length} parts
+            </span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {project.components.map((c) => (
-              <span
-                key={c}
-                className="px-3 py-1.5 rounded-lg text-sm font-medium"
-                style={{ background: "hsl(229, 42%, 20%)", color: "#E0E7FF", border: "1px solid hsl(229, 42%, 30%)" }}
-              >
-                {c}
-              </span>
-            ))}
+          <div className="space-y-2">
+            {project.components.map((c) => {
+              const info = componentInfo[c];
+              const isExpanded = expandedComponents[c];
+              return (
+                <div key={c}>
+                  <button
+                    onClick={() => toggleComponentExpand(c)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-[1.01]"
+                    style={{
+                      background: isExpanded ? "hsl(229, 42%, 22%)" : "hsl(229, 42%, 18%)",
+                      color: "#E0E7FF",
+                      border: `1px solid ${isExpanded ? "rgba(0,245,255,0.3)" : "hsl(229, 42%, 28%)"}`,
+                    }}
+                  >
+                    <span className="text-lg">{info?.tipIcon || "🔧"}</span>
+                    <span className="flex-1 text-left">{c}</span>
+                    {info && (
+                      <Info size={14} style={{ color: isExpanded ? "#00F5FF" : "#A0AED9" }} />
+                    )}
+                    {info && (isExpanded ? <ChevronUp size={14} style={{ color: "#A0AED9" }} /> : <ChevronDown size={14} style={{ color: "#A0AED9" }} />)}
+                  </button>
+                  {isExpanded && info && (
+                    <div className="ml-4 mt-1 mb-2 p-3 rounded-xl text-xs space-y-2 animate-fade-in" style={{ background: "hsl(229, 42%, 15%)", border: "1px solid hsl(229, 42%, 25%)" }}>
+                      <p style={{ color: "#E0E7FF" }}>{info.description}</p>
+                      <div className="flex items-start gap-2">
+                        <span className="font-bold flex-shrink-0" style={{ color: "#00F5FF" }}>Pins:</span>
+                        <span style={{ color: "#A0AED9" }}>{info.pins}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
+        </div>
+
+        {/* Social / Like / Share bar */}
+        <div className="flex items-center gap-3 mb-6">
+          <button
+            onClick={() => { setLiked(!liked); setLikeCount(prev => liked ? prev - 1 : prev + 1); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
+            style={{
+              background: liked ? "rgba(255,69,0,0.15)" : "hsl(229, 42%, 18%)",
+              color: liked ? "#FF4500" : "#A0AED9",
+              border: `1px solid ${liked ? "rgba(255,69,0,0.3)" : "hsl(229, 42%, 28%)"}`,
+            }}
+          >
+            <ThumbsUp size={14} fill={liked ? "currentColor" : "none"} /> {likeCount}
+          </button>
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
+            style={{ background: "hsl(229, 42%, 18%)", color: "#A0AED9", border: "1px solid hsl(229, 42%, 28%)" }}
+          >
+            <Share2 size={14} /> Share
+          </button>
         </div>
 
         {/* Tabs: Instructions | Code | Simulate */}
@@ -1361,17 +1515,75 @@ void loop() {
             className="rounded-2xl p-6 border"
             style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
           >
-            <h3 className="font-bold mb-4" style={{ color: "#FFFFFF" }}>Step-by-Step Instructions</h3>
-            <div className="space-y-3">
+            {/* Progress bar */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold" style={{ color: "#FFFFFF" }}>Step-by-Step Instructions</h3>
+              <div className="flex items-center gap-3">
+                <div className="w-32 h-2 rounded-full overflow-hidden" style={{ background: "hsl(229, 42%, 22%)" }}>
+                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progressPercent}%`, background: progressPercent === 100 ? "linear-gradient(90deg, #00FF88, #00C853)" : "linear-gradient(90deg, #00F5FF, #0099FF)" }} />
+                </div>
+                <span className="text-xs font-bold" style={{ color: progressPercent === 100 ? "#00FF88" : "#00F5FF" }}>
+                  {stepProgress}/{totalSteps}
+                </span>
+              </div>
+            </div>
+
+            {progressPercent === 100 && (
+              <div className="mb-4 p-3 rounded-xl flex items-center gap-3 animate-fade-in" style={{ background: "rgba(0,255,136,0.1)", border: "1px solid rgba(0,255,136,0.3)" }}>
+                <Award size={20} style={{ color: "#00FF88" }} />
+                <span className="text-sm font-bold" style={{ color: "#00FF88" }}>🎉 All steps completed! Great job wiring up the circuit.</span>
+              </div>
+            )}
+
+            <div className="space-y-2">
               {project.instructions.map((inst, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
-                    style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                <div
+                  key={i}
+                  className="flex items-start gap-3 p-3 rounded-xl transition-all cursor-pointer group"
+                  style={{
+                    background: checkedSteps[i] ? "rgba(0,255,136,0.06)" : "transparent",
+                    border: `1px solid ${checkedSteps[i] ? "rgba(0,255,136,0.2)" : "transparent"}`,
+                  }}
+                  onClick={() => toggleStep(i)}
+                >
+                  <div className="flex-shrink-0 mt-0.5 transition-all group-hover:scale-110">
+                    {checkedSteps[i] ? (
+                      <CheckSquare size={20} style={{ color: "#00FF88" }} />
+                    ) : (
+                      <Square size={20} style={{ color: "#A0AED9" }} />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-sm transition-all ${checkedSteps[i] ? "line-through opacity-60" : ""}`} style={{ color: "#E0E7FF" }}>{inst}</p>
+                    {/* Step note input */}
+                    <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <input
+                        value={activeNote[i] || ""}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          setActiveNote(prev => ({ ...prev, [i]: e.target.value }));
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Add a note..."
+                        className="w-full bg-transparent text-xs focus:outline-none px-2 py-1 rounded-lg"
+                        style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 25%)" }}
+                      />
+                    </div>
+                    {activeNote[i] && (
+                      <p className="mt-1 text-xs italic flex items-center gap-1" style={{ color: "#A0AED9" }}>
+                        <MessageCircle size={10} /> {activeNote[i]}
+                      </p>
+                    )}
+                  </div>
+                  <span
+                    className="text-xs font-bold flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
+                    style={{
+                      background: checkedSteps[i] ? "rgba(0,255,136,0.15)" : "rgba(0,245,255,0.15)",
+                      color: checkedSteps[i] ? "#00FF88" : "#00F5FF",
+                    }}
                   >
                     {i + 1}
-                  </div>
-                  <p className="text-sm pt-1" style={{ color: "#E0E7FF" }}>{inst}</p>
+                  </span>
                 </div>
               ))}
             </div>
@@ -1628,6 +1840,14 @@ void loop() {
           style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,245,255,0.4)" }}
         >
           <Copy size={16} /> Code copied to clipboard!
+        </div>
+      )}
+      {shareToast && (
+        <div
+          className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in z-50"
+          style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)", color: "#FFFFFF", boxShadow: "0 0 20px rgba(183,68,255,0.4)" }}
+        >
+          <Share2 size={16} /> Link copied to clipboard!
         </div>
       )}
     </Layout>
