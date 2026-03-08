@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Zap, RefreshCw, Save, CheckSquare, Square, ChevronDown, ChevronUp, Clock, Star, Loader2, X, Plus } from "lucide-react";
+import { Zap, RefreshCw, Save, CheckSquare, Square, ChevronDown, ChevronUp, Clock, Star, Loader2, X, Plus, Brain } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FadeInView from "@/components/motion/FadeInView";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
+import { toast as sonnerToast } from "sonner";
 
 interface Project {
   id: number;
@@ -77,10 +78,10 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
 }
 
 function ProjectCard({
-  project, index, isLoading, isSelected, onSelect, onStart,
+  project, index, isLoading, isSelected, onSelect, onStart, isStarting,
 }: {
   project: Project; index: number; isLoading: boolean; isSelected: boolean;
-  onSelect: () => void; onStart: () => void;
+  onSelect: () => void; onStart: () => void; isStarting?: boolean;
 }) {
   const [expanded, setExpanded] = useState(index < 3);
 
@@ -149,15 +150,15 @@ function ProjectCard({
             </div>
             <button
               onClick={onStart}
-              className="px-5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
+              disabled={isStarting}
+              className="px-5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{
                 background: "linear-gradient(135deg, #00F5FF, #0099FF)",
                 color: "#0A0E27",
                 boxShadow: "0 0 15px rgba(0,245,255,0.3)",
               }}
             >
-              <Zap size={14} />
-              Start This Project
+              {isStarting ? <><Loader2 size={14} className="animate-spin" /> Starting...</> : <><Zap size={14} /> Start This Project</>}
             </button>
           </div>
         )}
@@ -182,6 +183,7 @@ export default function GeneratePage() {
   const [newComponent, setNewComponent] = useState("");
   const [previouslyShown, setPreviouslyShown] = useState<Set<number>>(new Set());
   const [communityProjects, setCommunityProjects] = useState<Project[]>([]);
+  const [aiRecommending, setAiRecommending] = useState(false);
 
   // Fetch approved community projects on mount
   useEffect(() => {
@@ -284,12 +286,72 @@ export default function GeneratePage() {
     });
   };
 
+  const generateAIRecommendations = async () => {
+    if (!user) { navigate("/auth"); return; }
+    setAiRecommending(true);
+    setProjects([]);
+    setLoadingStates([true, true, true, true, true]);
+    setSelected(new Set());
+    setShowAll(false);
+
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("level, projects_completed")
+        .eq("id", user.id)
+        .single();
+
+      const { data, error } = await supabase.functions.invoke("recommend-projects", {
+        body: {
+          components,
+          level: profile?.level || 1,
+          projectsCompleted: profile?.projects_completed || 0,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.projects && Array.isArray(data.projects)) {
+        const aiProjects: Project[] = data.projects.map((p: any, i: number) => ({
+          id: 700 + i + Math.floor(Math.random() * 100),
+          emoji: p.emoji || "🤖",
+          title: p.title,
+          description: p.description,
+          difficulty: p.difficulty || "beginner",
+          time: p.time || "30 mins",
+          xp: p.xp || 75,
+          components: p.components || [],
+        }));
+
+        aiProjects.forEach((project, i) => {
+          setTimeout(() => {
+            setProjects(prev => { const next = [...prev]; next[i] = project; return next; });
+            setLoadingStates(prev => { const next = [...prev]; next[i] = false; return next; });
+            if (i === aiProjects.length - 1) setAiRecommending(false);
+          }, (i + 1) * 600);
+        });
+      } else {
+        throw new Error("No projects returned");
+      }
+    } catch (e: any) {
+      console.error("AI recommendation error:", e);
+      setAiRecommending(false);
+      setLoadingStates([]);
+      sonnerToast.error(e?.message || "AI recommendation failed. Try the regular generator instead.");
+    }
+  };
+
   const toggleSelect = (id: number) => {
     setSelected((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   };
 
+  const [savingAll, setSavingAll] = useState(false);
+  const [startingId, setStartingId] = useState<number | null>(null);
+
   const handleSave = async () => {
     if (!user) { navigate("/auth"); return; }
+    setSavingAll(true);
+    await new Promise(r => setTimeout(r, 500));
     const projectsToSave = selected.size > 0 
       ? projects.filter(p => selected.has(p.id))
       : projects.filter(Boolean);
@@ -309,10 +371,13 @@ export default function GeneratePage() {
       });
       if (!result.error) savedCount++;
     }
+    setSavingAll(false);
     showToast(`✓ ${savedCount} project${savedCount !== 1 ? "s" : ""} saved to dashboard!`);
   };
 
   const handleStartProject = async (project: Project) => {
+    setStartingId(project.id);
+    await new Promise(r => setTimeout(r, 500));
     if (user) {
       await saveProject({
         project_id: project.id,
@@ -437,23 +502,41 @@ export default function GeneratePage() {
           </div>
         </div>
 
-        {/* Generate Button */}
-        <button
-          onClick={generateProjects}
-          disabled={generating}
-          className="w-full py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 mb-6 transition-all hover:scale-[1.01] disabled:opacity-70"
-          style={{
-            background: generating ? "rgba(183,68,255,0.3)" : "linear-gradient(135deg, #B744FF, #FF1493, #FF4500)",
-            color: "#FFFFFF",
-            boxShadow: generating ? "none" : "0 0 30px rgba(183,68,255,0.4)",
-          }}
-        >
-          {generating ? (
-            <><Loader2 size={18} className="animate-spin" /> Generating Projects...</>
-          ) : (
-            <><Zap size={18} /> ✦ Generate Project</>
-          )}
-        </button>
+        {/* Generate Buttons */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <button
+            onClick={generateProjects}
+            disabled={generating || aiRecommending}
+            className="py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70"
+            style={{
+              background: generating ? "rgba(183,68,255,0.3)" : "linear-gradient(135deg, #B744FF, #FF1493, #FF4500)",
+              color: "#FFFFFF",
+              boxShadow: generating ? "none" : "0 0 30px rgba(183,68,255,0.4)",
+            }}
+          >
+            {generating ? (
+              <><Loader2 size={18} className="animate-spin" /> Generating...</>
+            ) : (
+              <><Zap size={18} /> ✦ Generate Project</>
+            )}
+          </button>
+          <button
+            onClick={generateAIRecommendations}
+            disabled={generating || aiRecommending}
+            className="py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70"
+            style={{
+              background: aiRecommending ? "rgba(0,245,255,0.15)" : "linear-gradient(135deg, #00F5FF, #0099FF, #00FF88)",
+              color: aiRecommending ? "#00F5FF" : "#0A0E27",
+              boxShadow: aiRecommending ? "none" : "0 0 30px rgba(0,245,255,0.3)",
+            }}
+          >
+            {aiRecommending ? (
+              <><Loader2 size={18} className="animate-spin" /> AI Thinking...</>
+            ) : (
+              <><Brain size={18} /> 🤖 AI Recommend for My Level</>
+            )}
+          </button>
+        </div>
 
         {/* Action buttons when projects exist */}
         {projects.length > 0 && (
@@ -467,10 +550,11 @@ export default function GeneratePage() {
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
+              disabled={savingAll}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.3)" }}
             >
-              <Save size={14} /> {selected.size > 0 ? `Save Selected (${selected.size})` : "Save All"}
+              {savingAll ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Save size={14} /> {selected.size > 0 ? `Save Selected (${selected.size})` : "Save All"}</>}
             </button>
           </div>
         )}
@@ -504,9 +588,9 @@ export default function GeneratePage() {
               if (!showAll && i >= 3) return null;
               if (loadingStates[i] === undefined && !generating) return null;
               return loadingStates[i] ? (
-                <ProjectCard key={`loading-${i}`} project={{ id: -i, emoji: "⏳", title: "", difficulty: "beginner", time: "", xp: 0, description: "", components: [] }} index={i} isLoading={true} isSelected={false} onSelect={() => {}} onStart={() => {}} />
+                <ProjectCard key={`loading-${i}`} project={{ id: -i, emoji: "⏳", title: "", difficulty: "beginner", time: "", xp: 0, description: "", components: [] }} index={i} isLoading={true} isSelected={false} onSelect={() => {}} onStart={() => {}} isStarting={false} />
               ) : projects[i] ? (
-                <ProjectCard key={`proj-${projects[i].id}`} project={projects[i]} index={i} isLoading={false} isSelected={selected.has(projects[i].id)} onSelect={() => toggleSelect(projects[i].id)} onStart={() => handleStartProject(projects[i])} />
+                <ProjectCard key={`proj-${projects[i].id}`} project={projects[i]} index={i} isLoading={false} isSelected={selected.has(projects[i].id)} onSelect={() => toggleSelect(projects[i].id)} onStart={() => handleStartProject(projects[i])} isStarting={startingId === projects[i].id} />
               ) : null;
             })}
 

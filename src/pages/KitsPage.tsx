@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Package, Zap, CheckCircle } from "lucide-react";
+import { Package, Zap, CheckCircle, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
@@ -76,8 +76,11 @@ export default function KitsPage() {
   const { user } = useAuth();
   const [selectedKits, setSelectedKits] = useState<Set<number>>(new Set());
   const [toast, setToast] = useState("");
+  const [savingId, setSavingId] = useState<number | null>(null);
 
-  const handleHaveKit = (kit: typeof kits[0]) => {
+  const handleHaveKit = async (kit: typeof kits[0]) => {
+    setSavingId(kit.id);
+    await new Promise(r => setTimeout(r, 700));
     setSelectedKits(new Set([kit.id]));
     const inventory: string[] = [];
     kit.components.forEach((c) => {
@@ -85,6 +88,7 @@ export default function KitsPage() {
       if (!inventory.includes(normalized)) inventory.push(normalized);
     });
     saveInventory(inventory, user?.id);
+    setSavingId(null);
     setToast(`✓ ${kit.name} added to inventory! (${inventory.length} components)`);
     setTimeout(() => { setToast(""); navigate("/components"); }, 3000);
   };
@@ -106,6 +110,7 @@ export default function KitsPage() {
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {kits.map((kit) => {
             const owned = selectedKits.has(kit.id);
+            const isSaving = savingId === kit.id;
             return (
               <motion.div key={kit.id} variants={staggerItem}>
                 <MotionCard
@@ -150,14 +155,14 @@ export default function KitsPage() {
                     </div>
                     <button
                       onClick={() => handleHaveKit(kit)}
-                      disabled={owned}
+                      disabled={owned || isSaving}
                       className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:cursor-default"
                       style={owned
                         ? { background: `${kit.color}22`, color: kit.color, border: `1px solid ${kit.color}44` }
                         : { background: `linear-gradient(135deg, ${kit.color}, ${kit.color}BB)`, color: kit.id === 1 || kit.id === 2 ? "#0A0E27" : "#FFFFFF", boxShadow: `0 0 20px ${kit.color}44` }
                       }
                     >
-                      {owned ? <><CheckCircle size={16} /> ✓ Added to Inventory!</> : <><CheckCircle size={16} /> I Have This Kit</>}
+                      {isSaving ? <><Loader2 size={16} className="animate-spin" /> Adding to Inventory...</> : owned ? <><CheckCircle size={16} /> ✓ Added to Inventory!</> : <><CheckCircle size={16} /> I Have This Kit</>}
                     </button>
                   </div>
                 </MotionCard>
