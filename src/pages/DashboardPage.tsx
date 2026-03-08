@@ -411,10 +411,11 @@ export default function DashboardPage() {
                       </div>
                       <button
                         onClick={() => openProject(p)}
-                        className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105"
+                        disabled={navigatingId === p.project_id}
+                        className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-1.5"
                         style={{ background: "linear-gradient(135deg, hsl(var(--purple)), hsl(var(--pink)))", color: "hsl(var(--foreground))" }}
                       >
-                        Start Project
+                        {navigatingId === p.project_id ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : "Start Project"}
                       </button>
                     </div>
                   </div>
