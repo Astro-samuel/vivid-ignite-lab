@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Zap, RefreshCw, Save, CheckSquare, Square, ChevronDown, ChevronUp, Clock, Star, Loader2, X, Plus } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Project {
   id: number;
@@ -15,14 +16,39 @@ interface Project {
 }
 
 const projectPool: Project[] = [
-  { id: 1, emoji: "💡", title: "Smart LED Mood Lamp", difficulty: "beginner", time: "30 mins", xp: 75, description: "Build a responsive LED lamp that changes color based on ambient light levels, featuring PWM dimming and a photoresistor input for automatic adjustment.", components: ["LED", "Photoresistor", "Arduino Uno", "220Ω Resistor"] },
-  { id: 2, emoji: "🌡️", title: "Weather Station Dashboard", difficulty: "intermediate", time: "60 mins", xp: 150, description: "Create a comprehensive weather monitoring system with temperature, humidity, and pressure sensors that logs data to your computer via serial communication.", components: ["DHT22", "BMP180", "LCD Display", "Arduino Mega"] },
-  { id: 3, emoji: "🤖", title: "Line-Following Robot", difficulty: "intermediate", time: "90 mins", xp: 200, description: "Program a robot that autonomously follows a black line on white surface using IR sensors and differential motor control with PID algorithm.", components: ["IR Sensors", "Motor Driver L298N", "DC Motors", "Arduino Uno"] },
-  { id: 4, emoji: "🔊", title: "Theremin Music Synthesizer", difficulty: "advanced", time: "75 mins", xp: 175, description: "Build a touchless musical instrument using ultrasonic sensors to detect hand distance and generate corresponding musical tones through a piezo buzzer.", components: ["HC-SR04", "Piezo Buzzer", "Arduino Uno", "LED Strip"] },
-  { id: 5, emoji: "🌱", title: "Smart Plant Watering System", difficulty: "beginner", time: "45 mins", xp: 100, description: "Automate plant care with a soil moisture sensor that triggers a water pump when plants need watering, with LED status indicators.", components: ["Soil Moisture Sensor", "Water Pump", "Relay Module", "Arduino Uno"] },
-  { id: 6, emoji: "🔐", title: "RFID Door Lock", difficulty: "intermediate", time: "60 mins", xp: 140, description: "Create a secure door lock system using RFID tags and a servo motor. Supports multiple authorized cards and logs access attempts.", components: ["RFID RC522", "Servo Motor", "LCD 16x2", "Arduino Uno"] },
-  { id: 7, emoji: "📡", title: "Wireless Sensor Network", difficulty: "advanced", time: "120 mins", xp: 250, description: "Build a multi-node sensor network using NRF24L01 radio modules to transmit temperature and humidity data to a central hub.", components: ["NRF24L01", "DHT11", "Arduino Nano", "OLED Display"] },
-  { id: 8, emoji: "🎮", title: "Joystick-Controlled LED Matrix", difficulty: "beginner", time: "40 mins", xp: 90, description: "Use a joystick to draw and animate patterns on an 8x8 LED matrix display. Includes multiple animation modes.", components: ["8x8 LED Matrix", "MAX7219", "Joystick Module", "Arduino Uno"] },
+  // Beginner
+  { id: 101, emoji: "💡", title: "Smart LED Mood Lamp", difficulty: "beginner", time: "30 mins", xp: 75, description: "Build a responsive LED lamp that changes color based on ambient light levels using a photoresistor.", components: ["LED", "Photoresistor", "Arduino Uno", "220Ω Resistor"] },
+  { id: 102, emoji: "🌱", title: "Smart Plant Watering System", difficulty: "beginner", time: "45 mins", xp: 100, description: "Automate plant care with a soil moisture sensor that triggers a water pump when plants need watering.", components: ["Soil Moisture Sensor", "Water Pump", "Relay Module", "Arduino Uno"] },
+  { id: 103, emoji: "🎮", title: "Joystick-Controlled LED Matrix", difficulty: "beginner", time: "40 mins", xp: 90, description: "Use a joystick to draw and animate patterns on an 8x8 LED matrix display.", components: ["8x8 LED Matrix", "MAX7219", "Joystick Module", "Arduino Uno"] },
+  { id: 104, emoji: "🚦", title: "Traffic Light Controller", difficulty: "beginner", time: "20 mins", xp: 55, description: "Simulate a real traffic light sequence with red, yellow, and green LEDs and timed delays.", components: ["LED", "Arduino Uno", "220Ω Resistor", "Breadboard"] },
+  { id: 105, emoji: "🎹", title: "Button Piano", difficulty: "beginner", time: "25 mins", xp: 65, description: "Create a mini piano using push buttons mapped to musical notes on a piezo buzzer.", components: ["Push Button", "Buzzer", "Arduino Uno", "Breadboard"] },
+  { id: 106, emoji: "🌙", title: "Automatic Night Light", difficulty: "beginner", time: "20 mins", xp: 55, description: "An LED that turns on automatically when ambient light drops below a threshold.", components: ["LED", "Photoresistor", "Arduino Uno", "10kΩ Resistor"] },
+  { id: 107, emoji: "🎲", title: "Electronic Dice", difficulty: "beginner", time: "25 mins", xp: 60, description: "Press a button to roll a virtual die displayed on 7 LEDs arranged in a dice pattern.", components: ["LED", "Push Button", "Arduino Uno", "220Ω Resistor"] },
+  { id: 108, emoji: "⏰", title: "Countdown Timer", difficulty: "beginner", time: "30 mins", xp: 70, description: "Build a countdown timer with a 7-segment display and buzzer alert.", components: ["7-Segment Display", "Buzzer", "Push Button", "Arduino Uno"] },
+  { id: 109, emoji: "🌈", title: "Rainbow LED Fader", difficulty: "beginner", time: "25 mins", xp: 65, description: "Smoothly cycle through all rainbow colors on an RGB LED using PWM.", components: ["RGB LED", "Arduino Uno", "220Ω Resistor", "Breadboard"] },
+  { id: 110, emoji: "📢", title: "Clap Switch", difficulty: "beginner", time: "30 mins", xp: 70, description: "Toggle an LED on/off by clapping, using a sound sensor module.", components: ["Sound Sensor", "LED", "Arduino Uno", "Relay Module"] },
+
+  // Intermediate
+  { id: 201, emoji: "🌡️", title: "Weather Station Dashboard", difficulty: "intermediate", time: "60 mins", xp: 150, description: "Monitor temperature, humidity, and pressure with sensor data displayed on an OLED screen.", components: ["DHT22", "BMP180", "OLED Display", "Arduino Uno"] },
+  { id: 202, emoji: "🔐", title: "RFID Door Lock", difficulty: "intermediate", time: "60 mins", xp: 140, description: "Create a secure door lock using RFID tags and a servo motor with LCD feedback.", components: ["RFID RC522", "Servo Motor", "LCD 16x2", "Arduino Uno"] },
+  { id: 203, emoji: "🤖", title: "Line-Following Robot", difficulty: "intermediate", time: "90 mins", xp: 200, description: "Program a robot that autonomously follows a black line using IR sensors and differential motor control.", components: ["IR Sensors", "Motor Driver L298N", "DC Motors", "Arduino Uno"] },
+  { id: 204, emoji: "📻", title: "IR Remote Decoder", difficulty: "intermediate", time: "35 mins", xp: 85, description: "Capture and decode infrared signals from any TV remote control.", components: ["IR Receiver", "Arduino Uno", "Breadboard", "Jumper Wires"] },
+  { id: 205, emoji: "⏱️", title: "Reaction Time Game", difficulty: "intermediate", time: "40 mins", xp: 90, description: "Test your reflexes — press the button as fast as possible when the LED lights up.", components: ["LED", "Push Button", "LCD 16x2", "Arduino Uno"] },
+  { id: 206, emoji: "🧭", title: "Digital Compass", difficulty: "intermediate", time: "50 mins", xp: 110, description: "Build a compass using an I2C magnetometer and display heading on an OLED.", components: ["HMC5883L", "OLED Display", "Arduino Uno", "Breadboard"] },
+  { id: 207, emoji: "🎯", title: "Laser Tripwire Alarm", difficulty: "intermediate", time: "45 mins", xp: 100, description: "Create a security beam — when the laser is broken, an alarm buzzer sounds.", components: ["Laser Module", "Photoresistor", "Buzzer", "Arduino Uno"] },
+  { id: 208, emoji: "📊", title: "Data Logger to SD Card", difficulty: "intermediate", time: "55 mins", xp: 120, description: "Log sensor readings to an SD card with timestamps for offline analysis.", components: ["SD Card Module", "DHT11", "Arduino Uno", "Breadboard"] },
+  { id: 209, emoji: "🔔", title: "Motion Detection Alarm", difficulty: "intermediate", time: "40 mins", xp: 95, description: "Detect movement with a PIR sensor and trigger a buzzer and LED alert.", components: ["PIR Sensor", "Buzzer", "LED", "Arduino Uno"] },
+  { id: 210, emoji: "🖥️", title: "Serial LCD Menu System", difficulty: "intermediate", time: "50 mins", xp: 105, description: "Build a navigable menu system on an LCD using rotary encoder input.", components: ["LCD 16x2", "Rotary Encoder", "Arduino Uno", "Breadboard"] },
+
+  // Advanced
+  { id: 301, emoji: "🔊", title: "Theremin Music Synthesizer", difficulty: "advanced", time: "75 mins", xp: 175, description: "Build a touchless instrument using ultrasonic distance to generate musical tones.", components: ["HC-SR04", "Piezo Buzzer", "Arduino Uno", "LED Strip"] },
+  { id: 302, emoji: "📡", title: "Wireless Sensor Network", difficulty: "advanced", time: "120 mins", xp: 250, description: "Build a multi-node sensor network using NRF24L01 radio modules.", components: ["NRF24L01", "DHT11", "Arduino Nano", "OLED Display"] },
+  { id: 303, emoji: "🏠", title: "Smart Home Controller", difficulty: "advanced", time: "100 mins", xp: 220, description: "Control lights and fans via WiFi using an ESP8266 shield and a web interface.", components: ["ESP8266", "Relay Module", "LED", "Arduino Uno"] },
+  { id: 304, emoji: "🦾", title: "Robotic Arm with Inverse Kinematics", difficulty: "advanced", time: "130 mins", xp: 260, description: "Control a multi-servo robotic arm with calculated joint angles for precise positioning.", components: ["Servo Motor", "Joystick Module", "Arduino Mega", "Breadboard"] },
+  { id: 305, emoji: "🚁", title: "Ultrasonic Radar Scanner", difficulty: "advanced", time: "90 mins", xp: 200, description: "Sweep an ultrasonic sensor on a servo and display a radar-style map on Processing.", components: ["HC-SR04", "Servo Motor", "Arduino Uno", "Breadboard"] },
+  { id: 306, emoji: "🎵", title: "Audio Spectrum Analyzer", difficulty: "advanced", time: "80 mins", xp: 185, description: "Visualize audio frequencies on an LED matrix using FFT analysis.", components: ["Microphone Module", "8x8 LED Matrix", "MAX7219", "Arduino Uno"] },
+  { id: 307, emoji: "⚡", title: "Power Consumption Monitor", difficulty: "advanced", time: "85 mins", xp: 190, description: "Measure voltage and current with INA219 and display real-time power graphs on OLED.", components: ["INA219", "OLED Display", "Arduino Uno", "Breadboard"] },
+  { id: 308, emoji: "🤖", title: "Gesture-Controlled Robot", difficulty: "advanced", time: "110 mins", xp: 240, description: "Control a robot using hand gestures detected by an accelerometer on a glove.", components: ["MPU6050", "Motor Driver L298N", "DC Motors", "Arduino Uno"] },
 ];
 
 function getInventoryComponents(): string[] {
@@ -148,6 +174,30 @@ export default function GeneratePage() {
   const [category, setCategory] = useState("Any Category");
   const [components, setComponents] = useState<string[]>(getInventoryComponents);
   const [newComponent, setNewComponent] = useState("");
+  const [previouslyShown, setPreviouslyShown] = useState<Set<number>>(new Set());
+  const [communityProjects, setCommunityProjects] = useState<Project[]>([]);
+
+  // Fetch approved community projects on mount
+  useEffect(() => {
+    supabase
+      .from("community_projects")
+      .select("*")
+      .then(({ data }) => {
+        if (data) {
+          const mapped: Project[] = data.map((p, i) => ({
+            id: 900 + i,
+            emoji: "🌐",
+            title: p.title,
+            description: p.description,
+            difficulty: (p.difficulty as Project["difficulty"]) || "beginner",
+            time: p.estimated_time || "30 mins",
+            xp: p.difficulty === "advanced" ? 200 : p.difficulty === "intermediate" ? 120 : 75,
+            components: p.components || [],
+          }));
+          setCommunityProjects(mapped);
+        }
+      });
+  }, []);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -177,37 +227,53 @@ export default function GeneratePage() {
     setSelected(new Set());
     setShowAll(false);
 
-    // Normalize component names for matching (lowercase, strip quantities)
     const ownedNorm = components.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
 
-    let pool = [...projectPool].sort(() => Math.random() - 0.5);
+    // Combine static pool + community projects
+    let pool = [...projectPool, ...communityProjects].sort(() => Math.random() - 0.5);
     if (difficulty !== "Any Difficulty") pool = pool.filter((p) => p.difficulty === difficulty.toLowerCase());
 
-    // Filter to projects where ALL required components are in user's inventory
-    const matching = pool.filter((p) =>
-      p.components.every((req) => ownedNorm.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned)))
-    );
+    // Exclude previously shown projects to ensure variety
+    const fresh = pool.filter((p) => !previouslyShown.has(p.id));
+    const candidates = fresh.length >= 5 ? fresh : pool; // reset if pool exhausted
 
-    // Fall back to partial matches (≥50% components owned) if no full matches
-    const fallback = matching.length > 0 ? matching : pool
-      .map((p) => ({ ...p, matchScore: p.components.filter((req) => ownedNorm.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))).length / p.components.length }))
-      .filter((p) => p.matchScore >= 0.5)
-      .sort((a, b) => b.matchScore - a.matchScore);
+    // Score by component match
+    const scored = candidates.map((p) => {
+      const matchCount = p.components.filter((req) =>
+        ownedNorm.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
+      ).length;
+      return { ...p, matchScore: p.components.length > 0 ? matchCount / p.components.length : 0 };
+    });
 
-    const shuffled = (matching.length > 0 ? matching : fallback).slice(0, 5);
+    // Prioritize full matches, then partial (≥30%), then any
+    const fullMatch = scored.filter((p) => p.matchScore === 1);
+    const partialMatch = scored.filter((p) => p.matchScore >= 0.3 && p.matchScore < 1);
+    const rest = scored.filter((p) => p.matchScore < 0.3);
 
-    if (shuffled.length === 0) {
+    const ranked = [...fullMatch.sort(() => Math.random() - 0.5), ...partialMatch.sort(() => Math.random() - 0.5), ...rest.sort(() => Math.random() - 0.5)];
+    const selected5 = ranked.slice(0, 5);
+
+    if (selected5.length === 0) {
       setGenerating(false);
       setLoadingStates([]);
       showToast("No projects match your components. Try adding more to your inventory!");
       return;
     }
 
-    shuffled.forEach((project, i) => {
+    // Track shown IDs
+    setPreviouslyShown((prev) => {
+      const next = new Set(prev);
+      selected5.forEach((p) => next.add(p.id));
+      // Reset if we've shown most of the pool
+      if (next.size > pool.length * 0.8) return new Set(selected5.map((p) => p.id));
+      return next;
+    });
+
+    selected5.forEach((project, i) => {
       setTimeout(() => {
         setProjects((prev) => { const next = [...prev]; next[i] = project; return next; });
         setLoadingStates((prev) => { const next = [...prev]; next[i] = false; return next; });
-        if (i === Math.min(shuffled.length, 5) - 1) setGenerating(false);
+        if (i === Math.min(selected5.length, 5) - 1) setGenerating(false);
       }, (i + 1) * 800);
     });
   };
