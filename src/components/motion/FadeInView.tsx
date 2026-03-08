@@ -11,10 +11,10 @@ interface FadeInViewProps {
 export default function FadeInView({ children, className, delay = 0, style }: FadeInViewProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-20px" }}
-      transition={{ duration: 0.2, delay, ease: "easeOut" }}
+      viewport={{ once: true, margin: "-10px" }}
+      transition={{ duration: 0.25, delay, ease: "easeOut" }}
       className={className}
       style={style}
     >

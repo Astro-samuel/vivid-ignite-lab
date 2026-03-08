@@ -218,16 +218,9 @@ export function useTranslation() {
     };
   }, [selectedLang.code, queueNewNodes]);
 
-  // Re-translate on route change if a non-English language is selected
-  useEffect(() => {
-    if (selectedLang.code !== "en") {
-      originalTextsRef.current.clear();
-      const timer = setTimeout(() => {
-        translatePage(selectedLang.code, selectedLang.label);
-      }, 200);
-      return () => clearTimeout(timer);
-    }
-  }, [location.pathname]);
+  // On route change, the MutationObserver will automatically pick up
+  // new DOM nodes and translate them. No need to re-translate the full page
+  // or clear originals — that causes a flash of untranslated content.
 
   const restoreOriginal = useCallback(() => {
     originalTextsRef.current.forEach((original, node) => {
