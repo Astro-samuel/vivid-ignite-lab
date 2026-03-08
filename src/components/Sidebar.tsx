@@ -15,6 +15,7 @@ const navItems = [
   { icon: Trophy, label: "Achievements", path: "/achievements" },
   { icon: User, label: "Profile", path: "/profile" },
   { icon: MessageSquareHeart, label: "Feedback", path: "/feedback" },
+  { icon: PlusCircle, label: "Submit Project", path: "/submit-project" },
 ];
 
 interface SidebarProps {
