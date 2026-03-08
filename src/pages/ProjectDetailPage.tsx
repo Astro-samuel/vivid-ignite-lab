@@ -12,9 +12,16 @@ const allProjects = [
     difficulty: "beginner", time: "15 mins", xp: 50,
     components: ["Arduino Uno", "LED (Red)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect the LED's anode (long leg) to a 220Ω resistor, then to pin 13",
-      "Connect the LED's cathode (short leg) to GND",
-      "Upload the code and watch it blink!",
+      "Gather your components: 1x Arduino Uno, 1x red LED, 1x 220Ω resistor (Red-Red-Brown bands), 1x breadboard, and 2x jumper wires",
+      "Place the LED on the breadboard — identify the anode (longer leg) and cathode (shorter leg). The anode goes into one row, cathode into an adjacent row",
+      "Connect one end of the 220Ω resistor to the same row as the LED's anode. Connect the other end to a new row — this limits current to ~15mA, protecting the LED",
+      "Use a jumper wire to connect the resistor's free row to Arduino digital pin 13. This is the signal wire that will turn the LED on/off",
+      "Use another jumper wire to connect the LED's cathode row to the Arduino GND pin. This completes the circuit",
+      "Connect the Arduino to your computer via USB cable. Open the Arduino IDE and select 'Arduino Uno' under Tools → Board",
+      "Copy the code from the Code tab, paste it into the Arduino IDE, and click the Upload button (→ arrow icon)",
+      "Once uploaded, the LED should blink on and off every second. Open Serial Monitor (Tools → Serial Monitor) at 9600 baud to see status messages",
+      "🧪 Experiment: Try changing the delay values (e.g., delay(500) for faster blinking, or delay(2000) for slower). What happens with delay(50)?",
+      "⚠️ Troubleshooting: If the LED doesn't light up, check polarity (swap legs), verify the resistor is connected properly, and ensure pin 13 is selected in code",
     ],
     basicCode: `/*
   Learning Goals:
@@ -76,10 +83,15 @@ void loop() {
     difficulty: "beginner", time: "30 mins", xp: 75,
     components: ["Arduino Uno", "Temperature Sensor (DHT22)", "Resistor (10kΩ)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect DHT22 VCC to 5V, GND to GND",
-      "Connect data pin to digital pin 2 with a 10kΩ pull-up resistor",
-      "Install the DHT library from Library Manager",
-      "Upload code and open Serial Monitor at 9600 baud",
+      "Gather components: 1x Arduino Uno, 1x DHT22 sensor (4-pin), 1x 10kΩ resistor (Brown-Black-Orange), 1x breadboard, jumper wires",
+      "Place the DHT22 on the breadboard. Facing the front (grid side): Pin 1 = VCC, Pin 2 = DATA, Pin 3 = NC (unused), Pin 4 = GND",
+      "Connect DHT22 Pin 1 (VCC) to the Arduino 5V rail using a jumper wire. Connect Pin 4 (GND) to the Arduino GND rail",
+      "Connect DHT22 Pin 2 (DATA) to Arduino digital pin 2. Then place a 10kΩ pull-up resistor between Pin 2 (DATA) and Pin 1 (VCC) — this ensures stable signal readings",
+      "In the Arduino IDE, go to Sketch → Include Library → Manage Libraries. Search for 'DHT sensor library' by Adafruit and click Install. Also install 'Adafruit Unified Sensor' if prompted",
+      "Copy the code from the Code tab, paste it into a new sketch, and upload to your Arduino",
+      "Open Serial Monitor (Tools → Serial Monitor) and set baud rate to 9600. You should see temperature (°C) and humidity (%) readings every 2 seconds",
+      "🧪 Experiment: Try breathing on the sensor — you'll see humidity spike! Move it near a window to see temperature changes. Try changing the delay to read faster",
+      "⚠️ Troubleshooting: If you see 'nan' readings, check the pull-up resistor and verify DATA is on pin 2. DHT22 needs ~2 seconds between reads — don't set delay below 2000",
     ],
     basicCode: `/*
   Learning Goals:
@@ -155,9 +167,14 @@ void loop() {
     difficulty: "intermediate", time: "45 mins", xp: 100,
     components: ["Arduino Uno", "Servo Motor (SG90)", "Potentiometer", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect servo red wire to 5V, brown to GND, orange to pin 9",
-      "Connect potentiometer: outer pins to 5V and GND, middle to A0",
-      "Upload code and turn the potentiometer to control the servo",
+      "Gather components: 1x Arduino Uno, 1x SG90 micro servo, 1x 10kΩ potentiometer, 1x breadboard, jumper wires",
+      "Identify the servo wires: Red = VCC (power), Brown/Black = GND, Orange/Yellow = Signal (PWM). Connect Red to Arduino 5V and Brown to GND",
+      "Connect the servo's orange signal wire to Arduino digital pin 9 — this must be a PWM-capable pin (marked with ~ on the board)",
+      "Place the potentiometer on the breadboard. Connect the left outer pin to GND, the right outer pin to 5V, and the middle (wiper) pin to Arduino analog pin A0",
+      "Upload the code from the Code tab. The potentiometer's position (0-1023) is mapped to servo angle (0-180°)",
+      "Slowly turn the potentiometer knob — the servo should follow! Open Serial Monitor to see the raw pot value and mapped angle in real-time",
+      "🧪 Experiment: Try changing the map() range to limit servo travel (e.g., 45° to 135°). What happens if you use map(potValue, 0, 1023, 180, 0) — reversed direction!",
+      "⚠️ Troubleshooting: If the servo jitters, add a 100μF capacitor between 5V and GND near the servo. If using multiple servos, use an external 5V power supply — USB can't provide enough current",
     ],
     basicCode: `/*
   Learning Goals:
@@ -230,9 +247,14 @@ void loop() {
     difficulty: "beginner", time: "30 mins", xp: 80,
     components: ["Arduino Uno", "RGB LED", "Potentiometer", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect RGB LED pins through 220Ω resistors to pins 9, 10, 11",
-      "Connect three potentiometers to A0, A1, A2",
-      "Each pot controls one color channel (R, G, B)",
+      "Gather components: 1x Arduino Uno, 1x common-cathode RGB LED, 3x 220Ω resistors, 3x 10kΩ potentiometers, 1x breadboard, jumper wires",
+      "Place the RGB LED on the breadboard. Identify the longest pin — that's the common cathode (GND). The other three pins control Red, Green, and Blue (order varies by manufacturer — check the datasheet)",
+      "Connect the common cathode (longest pin) to Arduino GND. Connect each color pin through its own 220Ω resistor to Arduino PWM pins: Red → pin 9, Green → pin 10, Blue → pin 11",
+      "Place three potentiometers on the breadboard. For each: left pin → GND, right pin → 5V, middle pin → A0 (red pot), A1 (green pot), A2 (blue pot)",
+      "Upload the code. Each potentiometer now controls one color channel (0-255 via analogWrite PWM). Turn them to mix any color!",
+      "Open Serial Monitor to see live R, G, B values. Try making: pure red (255,0,0), white (255,255,255), purple (255,0,255), orange (255,165,0)",
+      "🧪 Experiment: Try adding a rainbow fade by removing the pots and cycling through hue values in code. Can you make the LED smoothly transition through all colors?",
+      "⚠️ Troubleshooting: If colors look wrong, you may have a common-anode LED (use 255-value for analogWrite). Verify each resistor is in the correct color channel",
     ],
     basicCode: `/*
   Learning Goals:
@@ -312,10 +334,15 @@ void loop() {
     difficulty: "intermediate", time: "60 mins", xp: 130,
     components: ["Arduino Uno", "HC-05 Bluetooth", "LED (Red)", "LED (Green)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect HC-05 TX to Arduino RX (pin 0), RX to TX (pin 1)",
-      "Power HC-05 with 5V and GND",
-      "Connect LEDs to pins 12 and 13 through resistors",
-      "Pair with phone and use a Bluetooth terminal app",
+      "Gather components: 1x Arduino Uno, 1x HC-05 Bluetooth module, 2x LEDs (red & green), 2x 220Ω resistors, 1x breadboard, jumper wires",
+      "⚠️ Important: Disconnect the Arduino from USB before wiring the HC-05. The module uses 3.3V logic on RX — use a voltage divider (1kΩ + 2kΩ) between Arduino TX and HC-05 RX to avoid damage",
+      "Connect HC-05: VCC → 5V, GND → GND, TX → Arduino pin 0 (RX), RX → Arduino pin 1 (TX) through the voltage divider",
+      "Connect the red LED through a 220Ω resistor to pin 12, and the green LED through a 220Ω resistor to pin 13. Both cathodes to GND",
+      "⚠️ You must disconnect HC-05 TX/RX wires before uploading code (they share the same serial lines as USB). Upload first, then reconnect HC-05",
+      "On your phone, enable Bluetooth and pair with 'HC-05' (default PIN: 1234 or 0000). Download a Bluetooth terminal app (e.g., 'Serial Bluetooth Terminal' on Android)",
+      "Open the Bluetooth terminal, connect to HC-05, and send commands: '1' = LED1 ON, '2' = LED1 OFF, '3' = LED2 ON, '4' = LED2 OFF",
+      "🧪 Experiment: Modify the code to accept text commands like 'RED_ON' instead of single characters. Add a 'STATUS' command that reports which LEDs are currently on",
+      "⚠️ Troubleshooting: If HC-05 LED blinks fast, it's not paired. If slow blink, it's paired. If no response, check baud rate matches (9600 default)",
     ],
     basicCode: `/*
   Learning Goals:
@@ -391,9 +418,13 @@ void processCommand(String cmd) {
     difficulty: "beginner", time: "25 mins", xp: 70,
     components: ["Arduino Uno", "Buzzer", "Push Button", "Resistor (10kΩ)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect buzzer positive to pin 8, negative to GND",
-      "Connect push button to pin 2 with a pull-down resistor",
-      "Press button to play melody",
+      "Gather components: 1x Arduino Uno, 1x piezo buzzer, 1x push button, 1x 10kΩ resistor, 1x breadboard, jumper wires",
+      "Place the piezo buzzer on the breadboard. Connect the positive leg (marked + or longer) to Arduino digital pin 8. Connect the negative leg to GND",
+      "Place the push button on the breadboard, straddling the center gap. Connect one side to Arduino digital pin 2 and through a 10kΩ pull-down resistor to GND. Connect the other side to 5V",
+      "Upload the code from the Code tab. The melody array contains frequencies for notes C4 through C5: {262, 294, 330, 349, 392, 440, 494, 523} Hz",
+      "Press and hold the button — you'll hear a C major scale! Each note plays for 200ms with a 50ms gap between notes",
+      "🧪 Experiment: Try changing frequencies to play different melodies. 440 Hz = A4 (concert pitch). Try the Super Mario theme: {660, 660, 0, 660, 0, 520, 660, 0, 784}",
+      "⚠️ Troubleshooting: If no sound, verify buzzer polarity. If the button doesn't trigger, check the pull-down resistor is connected to GND (not floating). Use Serial.println(digitalRead(buttonPin)) to debug",
     ],
     basicCode: `/*
   Learning Goals:
@@ -453,10 +484,15 @@ void loop() {
     difficulty: "intermediate", time: "55 mins", xp: 115,
     components: ["Arduino Uno", "Soil Moisture Sensor", "Relay Module", "Water Pump", "LED (Green)", "LED (Red)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect soil moisture sensor analog output to A0",
-      "Connect relay signal pin to digital pin 7",
-      "Connect water pump through the relay",
-      "LEDs on pins 12 (green = moist) and 13 (red = dry)",
+      "Gather components: 1x Arduino Uno, 1x soil moisture sensor (capacitive preferred), 1x 5V relay module, 1x small water pump, 2x LEDs (red & green), 2x 220Ω resistors, breadboard, jumper wires, and a water container",
+      "Connect the soil moisture sensor: VCC → 5V, GND → GND, Analog Output (AO) → Arduino pin A0. Insert the probe forks into the soil of your plant",
+      "Connect the relay module: VCC → 5V, GND → GND, IN (signal) → Arduino digital pin 7. The relay acts as an electrically-controlled switch for the pump",
+      "Wire the water pump through the relay: Connect pump positive wire to the relay's NO (Normally Open) terminal, relay COM to your power supply positive, and pump negative to power supply negative",
+      "Connect green LED through 220Ω resistor to pin 12 (indicates moist soil). Connect red LED through 220Ω resistor to pin 13 (indicates dry soil). Both cathodes to GND",
+      "Upload the code. The sensor reads moisture level (0-1023): lower values = wetter soil. The threshold (500) triggers watering — adjust based on your soil type",
+      "Test by inserting the sensor probe into dry vs. wet soil. The Serial Monitor shows real-time readings. When dry (>500), the relay clicks on and the pump runs",
+      "🧪 Experiment: Add a cooldown timer to prevent over-watering. Try logging moisture data over time. Add an OLED display to show moisture percentage",
+      "⚠️ Safety: Never submerge the electronics part of the moisture sensor. Use a separate power supply for the pump if it draws more than 500mA. Capacitive sensors last longer than resistive ones",
     ],
     basicCode: `/*
   Learning Goals:
@@ -530,9 +566,15 @@ void loop() {
     difficulty: "intermediate", time: "70 mins", xp: 140,
     components: ["Arduino Uno", "16x2 LCD", "Push Button", "Buzzer", "LED (Green)", "LED (Red)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect LCD using I2C (SDA to A4, SCL to A5)",
-      "Connect buttons for code input on pins 2-5",
-      "Connect buzzer to pin 8, LEDs to pins 12, 13",
+      "Gather components: 1x Arduino Uno, 1x 16×2 LCD with I2C backpack, 4x push buttons, 1x buzzer, 2x LEDs (red & green), 2x 220Ω resistors, breadboard, jumper wires",
+      "Connect the I2C LCD module: SDA → Arduino pin A4, SCL → Arduino pin A5, VCC → 5V, GND → GND. The I2C backpack simplifies wiring from 16 pins to just 4",
+      "Install the 'LiquidCrystal_I2C' library from Library Manager. The default I2C address is usually 0x27 — if the LCD doesn't display, try 0x3F. Use an I2C scanner sketch to find your address",
+      "Place 4 push buttons on the breadboard. Connect each button between its digital pin (2, 3, 4, 5) and GND. We use INPUT_PULLUP mode so no external resistors are needed — buttons read LOW when pressed",
+      "Connect the buzzer: positive → pin 8, negative → GND. Connect green LED (pin 12) and red LED (pin 13) through 220Ω resistors to GND",
+      "Upload the code. The LCD displays 'Enter Code:' and each button press adds a digit (1-4) shown as '*' on the display, with an audible click from the buzzer",
+      "Enter the password '1234' (buttons 1→2→3→4). Green LED lights up and LCD shows 'Access Granted!'. Wrong code triggers red LED and 'Access Denied!'",
+      "🧪 Experiment: Change the password in code. Add a lockout after 3 failed attempts (see Optimized version). Try adding a 'master reset' button combination",
+      "⚠️ Troubleshooting: If LCD shows squares, adjust contrast with the potentiometer on the I2C backpack. If nothing displays, verify the I2C address and check SDA/SCL connections aren't swapped",
     ],
     basicCode: `/*
   Learning Goals:
@@ -624,10 +666,16 @@ void loop() {
     difficulty: "advanced", time: "120 mins", xp: 250,
     components: ["Arduino Uno", "Ultrasonic Sensor (HC-SR04)", "Motor Driver (L298N)", "DC Motor", "Battery Holder", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Assemble the chassis with DC motors",
-      "Connect L298N motor driver inputs to pins 5-8",
-      "Mount HC-SR04 on the front, trig pin 9, echo pin 10",
-      "Power motors from battery pack through L298N",
+      "Gather components: 1x Arduino Uno, 1x HC-SR04 ultrasonic sensor, 1x L298N motor driver, 2x DC gear motors, 1x robot chassis with wheels, 1x 4×AA battery holder, breadboard, jumper wires",
+      "Assemble the chassis: mount the two DC motors on the chassis plate using the included brackets. Attach wheels to the motor shafts and add a caster wheel at the front for balance",
+      "Wire the L298N motor driver: connect IN1→pin 5, IN2→pin 6 (Motor A), IN3→pin 7, IN4→pin 8 (Motor B). Connect ENA and ENB jumpers or to PWM pins for speed control",
+      "Connect L298N power: Battery pack positive → L298N 12V input, Battery negative → L298N GND. Also connect L298N GND to Arduino GND (common ground is critical!). If the 5V jumper is in place, L298N provides 5V to Arduino",
+      "Connect motors to L298N: Motor A wires → OUT1/OUT2 terminals, Motor B wires → OUT3/OUT4 terminals. If a motor spins backwards, swap its two wires",
+      "Mount the HC-SR04 on the front of the chassis, facing forward. Connect: VCC → 5V, GND → GND, Trig → pin 9, Echo → pin 10",
+      "Upload the code. The robot measures distance: >20cm = drive forward, <20cm = stop and turn right for 500ms. The getDistance() function uses pulseIn() to calculate centimeters",
+      "Place the robot on the floor and power it on. It should drive forward and turn when it detects walls or objects within 20cm",
+      "🧪 Experiment: Add a servo with the ultrasonic sensor to scan left/right before deciding which way to turn. Try adding speed control with analogWrite() on ENA/ENB pins",
+      "⚠️ Safety: Always test with the car lifted off the ground first. Use fresh batteries — low voltage causes erratic behavior. Keep wires away from wheels",
     ],
     basicCode: `/*
   Learning Goals:
@@ -724,10 +772,14 @@ void loop() {
     difficulty: "advanced", time: "90 mins", xp: 200,
     components: ["Arduino Uno", "Servo Motor (SG90)", "Photoresistor (LDR)", "Resistor (10kΩ)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Mount two LDRs on either side of a divider",
-      "Connect LDRs to A0 and A1 with voltage dividers",
-      "Connect servo to pin 9",
-      "Servo moves toward the brighter LDR",
+      "Gather components: 1x Arduino Uno, 1x SG90 servo, 2x photoresistors (LDRs), 2x 10kΩ resistors, 1x breadboard, jumper wires, and a small cardboard divider",
+      "Build the sensor mount: glue or tape a small vertical divider (cardboard/plastic, ~3cm tall) to the servo horn. Place one LDR on each side of the divider — when the sun is off-center, the divider casts a shadow on one LDR",
+      "Create voltage dividers for each LDR: connect one leg of each LDR to 5V, the other leg to both a 10kΩ resistor (to GND) and an analog pin. Left LDR → A0, Right LDR → A1",
+      "Connect the servo: Red → 5V, Brown → GND, Orange → pin 9. Mount the servo on a stable base so the sensor platform can rotate freely",
+      "Upload the code. The program reads both LDRs, calculates the difference, and moves the servo 1° toward the brighter side when the difference exceeds 50 (deadband)",
+      "Test with a flashlight: shine it from different angles and watch the servo track toward the light source. Open Serial Monitor to see L/R readings and servo position",
+      "🧪 Experiment: Add a second servo for vertical (dual-axis) tracking. Try reducing the deadband threshold for more sensitive tracking, or add averaging to smooth jittery movement",
+      "⚠️ Troubleshooting: If the servo jitters, increase the deadband threshold or add a small delay. Ensure both LDRs have matching resistance ranges — mismatched sensors cause offset bias",
     ],
     basicCode: `/*
   Learning Goals:
@@ -800,9 +852,14 @@ void loop() {
     difficulty: "intermediate", time: "40 mins", xp: 95,
     components: ["Arduino Uno", "OLED Display (0.96\")", "Temperature Sensor (DHT11)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect OLED via I2C: SDA to A4, SCL to A5",
-      "Connect DHT11 data pin to pin 2",
-      "Install Adafruit SSD1306 and DHT libraries",
+      "Gather components: 1x Arduino Uno, 1x 0.96\" OLED display (SSD1306, I2C), 1x DHT11 temperature/humidity sensor, breadboard, jumper wires",
+      "Connect the OLED display via I2C: SDA → Arduino pin A4, SCL → Arduino pin A5, VCC → 3.3V or 5V (check your module), GND → GND",
+      "Connect the DHT11 sensor: VCC → 5V, GND → GND, DATA → digital pin 2. Some DHT11 modules have a built-in pull-up resistor; if yours doesn't, add a 10kΩ resistor between DATA and VCC",
+      "In the Arduino IDE Library Manager, install: 'Adafruit SSD1306', 'Adafruit GFX Library', and 'DHT sensor library'. These are required for display and sensor functions",
+      "Upload the code. The OLED shows a dashboard with '== Dashboard ==' header, temperature in °C, and humidity in %. Data updates every 2 seconds",
+      "The display uses 128×64 pixels. setTextSize(1) = 6×8px characters (21 chars per line). setTextSize(2) = 12×16px (10 chars per line). setCursor(x,y) positions text in pixels",
+      "🧪 Experiment: Add a mini graph by plotting temperature history as pixels on the bottom half of the display. Try adding a boot animation or status icons",
+      "⚠️ Troubleshooting: If the OLED is blank, try address 0x3C instead of 0x27. Run an I2C scanner sketch to find the correct address. Make sure SDA/SCL aren't swapped",
     ],
     basicCode: `/*
   Learning Goals:
@@ -881,9 +938,13 @@ void loop() {
     difficulty: "beginner", time: "35 mins", xp: 85,
     components: ["Arduino Uno", "LED Matrix 8x8", "Push Button", "Potentiometer", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect joystick X to A0, Y to A1, button to pin 2",
-      "Connect LED matrix via MAX7219",
-      "Use joystick to move a dot and avoid obstacles",
+      "Gather components: 1x Arduino Uno, 1x joystick module (or 2x potentiometers + 1 button), 1x 8×8 LED matrix with MAX7219 driver, breadboard, jumper wires",
+      "Connect the joystick module: VRx (X-axis) → A0, VRy (Y-axis) → A1, SW (button) → digital pin 2, VCC → 5V, GND → GND. The joystick outputs ~512 at center, 0-1023 at extremes",
+      "Connect the MAX7219 LED matrix: DIN → pin 11, CS → pin 10, CLK → pin 13, VCC → 5V, GND → GND. Install the 'LedControl' library from Library Manager",
+      "Upload the code. The player starts at position (4,4) on an invisible 8×8 grid. Move the joystick to change position — values <300 = left/up, >700 = right/down",
+      "Open Serial Monitor to see player coordinates and score. The score increases each game loop cycle — survive as long as possible!",
+      "🧪 Experiment: Add obstacles that move across the grid. Implement collision detection — if the player hits an obstacle, trigger game over. Add a high score that persists using EEPROM.write()",
+      "⚠️ Troubleshooting: If the joystick drifts, calibrate the center value (read A0/A1 at rest and adjust the 300/700 thresholds). If the matrix shows garbage, check DIN/CLK/CS pin assignments",
     ],
     basicCode: `/*
   Learning Goals:
