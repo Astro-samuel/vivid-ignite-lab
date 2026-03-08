@@ -393,7 +393,7 @@ export default function IDEPage() {
 
           {/* AI Debug Panel */}
           {showDebug && (
-            <div className="w-72 flex flex-col border-l flex-shrink-0 animate-slide-in-right" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
+            <div className="w-64 flex flex-col border-l flex-shrink-0 animate-slide-in-right" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
               <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
                 <Brain size={16} style={{ color: "#B744FF" }} />
                 <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Debug Assistant</span>
