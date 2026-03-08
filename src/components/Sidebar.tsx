@@ -26,6 +26,7 @@ interface SidebarProps {
 export default function Sidebar({ collapsed }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   return (
     <aside
