@@ -380,6 +380,37 @@ export default function DashboardPage() {
 
         {activeTab === "saved" && (
           <div className="space-y-4">
+            {savedProjects.map((p) => (
+              <div key={p.id} className="rounded-2xl border p-5" style={{ background: "hsl(229, 45%, 16%)", borderColor: "rgba(183,68,255,0.2)" }}>
+                <div className="flex items-center gap-4">
+                  <div className="text-3xl">{p.emoji}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <h3 className="font-bold" style={{ color: "#FFFFFF" }}>{p.title}</h3>
+                        <div className="flex items-center gap-2 mt-1">
+                          <DifficultyBadge difficulty={p.difficulty} />
+                          <span className="flex items-center gap-1 text-xs" style={{ color: "#A0AED9" }}>
+                            <Clock size={10} /> {p.time}
+                          </span>
+                          <span className="text-xs font-bold" style={{ color: "#FFD700" }}>+{p.xp} XP</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => navigate(`/project/${p.id}`)}
+                        className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105"
+                        style={{
+                          background: "linear-gradient(135deg, #B744FF, #FF1493)",
+                          color: "#FFFFFF",
+                        }}
+                      >
+                        Start Project
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
             {savedProjects.length === 0 && (
               <div className="text-center py-16">
                 <div className="text-5xl mb-4">📚</div>
