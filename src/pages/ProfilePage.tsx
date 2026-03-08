@@ -86,10 +86,10 @@ export default function ProfilePage() {
     <Layout>
       <div className="px-8 py-10 max-w-3xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
+        <FadeInView className="flex items-center gap-3 mb-8">
           <User size={22} style={{ color: "#00F5FF" }} />
           <h1 className="text-2xl font-bold" style={{ color: "#FFFFFF" }}>My Profile</h1>
-        </div>
+        </FadeInView>
 
         {/* Profile Card */}
         <div
