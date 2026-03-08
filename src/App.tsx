@@ -18,6 +18,7 @@ import KitsPage from "./pages/KitsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import SubmitProjectPage from "./pages/SubmitProjectPage";
+import ResourcesPage from "./pages/ResourcesPage";
 
 const queryClient = new QueryClient();
 
