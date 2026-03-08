@@ -271,7 +271,7 @@ export default function IDEPage() {
         <div className="flex flex-1 overflow-hidden">
           {/* Instructions Panel */}
           <div
-            className="w-64 flex-shrink-0 border-r flex flex-col overflow-y-auto"
+            className="w-56 flex-shrink-0 border-r flex flex-col overflow-y-auto"
             style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}
           >
             <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
