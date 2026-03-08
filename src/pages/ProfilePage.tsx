@@ -1,10 +1,13 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { User, Camera, Edit3, Save, Star, Zap, Trophy, CheckCircle, Flame, ChevronRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
 import MotionCard from "@/components/motion/MotionCard";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserProjects } from "@/hooks/useUserProjects";
 
 interface UserProfile {
   name: string;
@@ -18,40 +21,65 @@ interface UserProfile {
   avatar: string | null;
 }
 
-const initialProfile: UserProfile = {
-  name: "Alex Maker",
-  username: "alex_maker",
-  bio: "Passionate about Arduino and electronics. Building the future one circuit at a time! ⚡",
-  level: 7,
-  xp: 245,
-  maxXP: 500,
-  streak: 3,
-  projectsCompleted: 5,
+const emptyProfile: UserProfile = {
+  name: "",
+  username: "",
+  bio: "",
+  level: 1,
+  xp: 0,
+  maxXP: 200,
+  streak: 0,
+  projectsCompleted: 0,
   avatar: null,
 };
 
 const skillProgress = [
-  { name: "Electronics Basics", level: "Intermediate", percent: 65, color: "#00F5FF" },
-  { name: "Programming", level: "Beginner", percent: 40, color: "#00FF88" },
-  { name: "Sensors & Actuators", level: "Intermediate", percent: 55, color: "#FFD700" },
-  { name: "IoT & Connectivity", level: "Beginner", percent: 20, color: "#B744FF" },
-  { name: "Robotics", level: "Beginner", percent: 15, color: "#FF1493" },
+  { name: "Electronics Basics", level: "Beginner", percent: 0, color: "#00F5FF" },
+  { name: "Programming", level: "Beginner", percent: 0, color: "#00FF88" },
+  { name: "Sensors & Actuators", level: "Beginner", percent: 0, color: "#FFD700" },
+  { name: "IoT & Connectivity", level: "Beginner", percent: 0, color: "#B744FF" },
+  { name: "Robotics", level: "Beginner", percent: 0, color: "#FF1493" },
 ];
 
-const recentActivity = [
-  { icon: "🏆", text: "Completed RGB LED Mixer", time: "5 days ago", color: "#FFD700" },
-  { icon: "⚡", text: "Generated Eco-Water Monitor", time: "2 days ago", color: "#00F5FF" },
-  { icon: "🔧", text: "Added 5 components to inventory", time: "1 day ago", color: "#00FF88" },
-];
+const recentActivity: { icon: string; text: string; time: string; color: string }[] = [];
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<UserProfile>(initialProfile);
+  const { user } = useAuth();
+  const { projects } = useUserProjects();
+  const [profile, setProfile] = useState<UserProfile>(emptyProfile);
   const [editing, setEditing] = useState(false);
-  const [editData, setEditData] = useState({ name: profile.name, username: profile.username, bio: profile.bio });
+  const [editData, setEditData] = useState({ name: "", username: "", bio: "" });
   const [savedToast, setSavedToast] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Load profile from database
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("*").eq("id", user.id).single().then(({ data }) => {
+      if (data) {
+        const completedCount = projects.filter(p => p.status === "completed").length;
+        const totalXp = projects.filter(p => p.status === "completed").reduce((s, p) => s + (p.xp || 0), 0);
+        setProfile({
+          name: data.display_name || "",
+          username: data.username || "",
+          bio: "",
+          level: data.level || 1,
+          xp: totalXp || data.total_xp || 0,
+          maxXP: (data.level || 1) * 200,
+          streak: data.streak_days || 0,
+          projectsCompleted: completedCount || data.projects_completed || 0,
+          avatar: data.avatar_url || null,
+        });
+        setEditData({
+          name: data.display_name || "",
+          username: data.username || "",
+          bio: "",
+        });
+      }
+    });
+  }, [user, projects]);
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

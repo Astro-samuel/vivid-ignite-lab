@@ -7,7 +7,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signUp: (email: string, password: string, username?: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any; data?: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -47,20 +47,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+    return { error, data };
   };
 
   const signOut = async () => {
+    const userId = user?.id;
     await supabase.auth.signOut();
-    // Clear all app data so new sign-ins start fresh
-    const keysToRemove = [
-      "userInventory",
-      "activeGeneratedProject",
-      "savedProjects",
-      "removedCatalogProjects",
-    ];
-    keysToRemove.forEach((key) => localStorage.removeItem(key));
+    // Clear all user-scoped and legacy app data
+    const legacyKeys = ["userInventory", "activeGeneratedProject", "savedProjects", "removedCatalogProjects"];
+    legacyKeys.forEach((key) => localStorage.removeItem(key));
+    if (userId) {
+      localStorage.removeItem(`inventory_${userId}`);
+      localStorage.removeItem(`onboarding_${userId}`);
+    }
   };
 
   return (

@@ -6,6 +6,7 @@ import FadeInView from "@/components/motion/FadeInView";
 import MotionCard from "@/components/motion/MotionCard";
 import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Map kit component names to canonical ComponentsPage names
 const componentNameMap: Record<string, string> = {
@@ -56,18 +57,23 @@ const kits = [
   },
 ];
 
-// Get inventory from localStorage
-function getInventory(): string[] {
-  try { return JSON.parse(localStorage.getItem("userInventory") || '["Arduino Uno"]'); }
-  catch { return ["Arduino Uno"]; }
+// Get inventory from user-scoped localStorage
+function getInventory(userId?: string): string[] {
+  try {
+    const key = userId ? `inventory_${userId}` : "userInventory";
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  }
+  catch { return []; }
 }
 
-function saveInventory(items: string[]) {
-  localStorage.setItem("userInventory", JSON.stringify(items));
+function saveInventory(items: string[], userId?: string) {
+  const key = userId ? `inventory_${userId}` : "userInventory";
+  localStorage.setItem(key, JSON.stringify(items));
 }
 
 export default function KitsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedKits, setSelectedKits] = useState<Set<number>>(new Set());
   const [toast, setToast] = useState("");
 
@@ -78,7 +84,7 @@ export default function KitsPage() {
       const normalized = normalizeKitComponent(c);
       if (!inventory.includes(normalized)) inventory.push(normalized);
     });
-    saveInventory(inventory);
+    saveInventory(inventory, user?.id);
     setToast(`✓ ${kit.name} added to inventory! (${inventory.length} components)`);
     setTimeout(() => { setToast(""); navigate("/components"); }, 3000);
   };

@@ -41,6 +41,13 @@ export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const { projects, loading: projectsLoading, deleteProject } = useUserProjects();
 
+  // Redirect to onboarding if not completed
+  useEffect(() => {
+    if (user && !localStorage.getItem(`onboarding_${user.id}`)) {
+      navigate("/onboarding");
+    }
+  }, [user, navigate]);
+
   const openProject = (p: typeof projects[0]) => {
     localStorage.setItem(
       "activeGeneratedProject",

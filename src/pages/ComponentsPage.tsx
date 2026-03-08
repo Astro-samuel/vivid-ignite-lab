@@ -3,6 +3,7 @@ import { Minus, Plus, Save, Zap, Lightbulb, Package } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Category = "Microcontroller" | "Sensor" | "Actuator" | "Display" | "Communication" | "Module" | "Power" | "Passive" | "Other";
 
@@ -80,16 +81,18 @@ const categories: Category[] = ["Microcontroller", "Sensor", "Actuator", "Displa
 
 export default function ComponentsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeCategory, setActiveCategory] = useState<Category>("Microcontroller");
   
-  // Load from localStorage
+  // Load from user-scoped localStorage
   const loadQuantities = (): Record<string, number> => {
     try {
-      const inv = JSON.parse(localStorage.getItem("userInventory") || "[]") as string[];
+      const key = user ? `inventory_${user.id}` : "userInventory";
+      const inv = JSON.parse(localStorage.getItem(key) || "[]") as string[];
       const q: Record<string, number> = {};
       inv.forEach((name) => { q[name] = 1; });
-      return Object.keys(q).length > 0 ? q : { "Arduino Uno": 1 };
-    } catch { return { "Arduino Uno": 1 }; }
+      return q;
+    } catch { return {}; }
   };
   
   const [quantities, setQuantities] = useState<Record<string, number>>(loadQuantities);
@@ -119,7 +122,8 @@ export default function ComponentsPage() {
 
   const handleSave = () => {
     const inventory = Object.keys(quantities);
-    localStorage.setItem("userInventory", JSON.stringify(inventory));
+    const key = user ? `inventory_${user.id}` : "userInventory";
+    localStorage.setItem(key, JSON.stringify(inventory));
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
