@@ -772,10 +772,14 @@ void loop() {
     difficulty: "advanced", time: "90 mins", xp: 200,
     components: ["Arduino Uno", "Servo Motor (SG90)", "Photoresistor (LDR)", "Resistor (10kΩ)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Mount two LDRs on either side of a divider",
-      "Connect LDRs to A0 and A1 with voltage dividers",
-      "Connect servo to pin 9",
-      "Servo moves toward the brighter LDR",
+      "Gather components: 1x Arduino Uno, 1x SG90 servo, 2x photoresistors (LDRs), 2x 10kΩ resistors, 1x breadboard, jumper wires, and a small cardboard divider",
+      "Build the sensor mount: glue or tape a small vertical divider (cardboard/plastic, ~3cm tall) to the servo horn. Place one LDR on each side of the divider — when the sun is off-center, the divider casts a shadow on one LDR",
+      "Create voltage dividers for each LDR: connect one leg of each LDR to 5V, the other leg to both a 10kΩ resistor (to GND) and an analog pin. Left LDR → A0, Right LDR → A1",
+      "Connect the servo: Red → 5V, Brown → GND, Orange → pin 9. Mount the servo on a stable base so the sensor platform can rotate freely",
+      "Upload the code. The program reads both LDRs, calculates the difference, and moves the servo 1° toward the brighter side when the difference exceeds 50 (deadband)",
+      "Test with a flashlight: shine it from different angles and watch the servo track toward the light source. Open Serial Monitor to see L/R readings and servo position",
+      "🧪 Experiment: Add a second servo for vertical (dual-axis) tracking. Try reducing the deadband threshold for more sensitive tracking, or add averaging to smooth jittery movement",
+      "⚠️ Troubleshooting: If the servo jitters, increase the deadband threshold or add a small delay. Ensure both LDRs have matching resistance ranges — mismatched sensors cause offset bias",
     ],
     basicCode: `/*
   Learning Goals:
