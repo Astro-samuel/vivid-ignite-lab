@@ -2,6 +2,9 @@ import { useState, useRef } from "react";
 import { User, Camera, Edit3, Save, Star, Zap, Trophy, CheckCircle, Flame, ChevronRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
+import FadeInView from "@/components/motion/FadeInView";
+import MotionCard from "@/components/motion/MotionCard";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface UserProfile {
   name: string;
