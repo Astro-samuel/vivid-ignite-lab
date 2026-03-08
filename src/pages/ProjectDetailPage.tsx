@@ -81,15 +81,14 @@ void loop() {
     difficulty: "beginner", time: "30 mins", xp: 75,
     components: ["Arduino Uno", "Temperature Sensor (DHT22)", "Resistor (10kΩ)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Gather components: 1x Arduino Uno, 1x DHT22 sensor (4-pin), 1x 10kΩ resistor (Brown-Black-Orange), 1x breadboard, jumper wires",
-      "Place the DHT22 on the breadboard. Facing the front (grid side): Pin 1 = VCC, Pin 2 = DATA, Pin 3 = NC (unused), Pin 4 = GND",
-      "Connect DHT22 Pin 1 (VCC) to the Arduino 5V rail using a jumper wire. Connect Pin 4 (GND) to the Arduino GND rail",
-      "Connect DHT22 Pin 2 (DATA) to Arduino digital pin 2. Then place a 10kΩ pull-up resistor between Pin 2 (DATA) and Pin 1 (VCC) — this ensures stable signal readings",
-      "In the Arduino IDE, go to Sketch → Include Library → Manage Libraries. Search for 'DHT sensor library' by Adafruit and click Install. Also install 'Adafruit Unified Sensor' if prompted",
-      "Copy the code from the Code tab, paste it into a new sketch, and upload to your Arduino",
-      "Open Serial Monitor (Tools → Serial Monitor) and set baud rate to 9600. You should see temperature (°C) and humidity (%) readings every 2 seconds",
-      "🧪 Experiment: Try breathing on the sensor — you'll see humidity spike! Move it near a window to see temperature changes. Try changing the delay to read faster",
-      "⚠️ Troubleshooting: If you see 'nan' readings, check the pull-up resistor and verify DATA is on pin 2. DHT22 needs ~2 seconds between reads — don't set delay below 2000",
+      "Gather: Arduino Uno, DHT22 sensor, 10kΩ resistor, breadboard, wires",
+      "Wire DHT22: Pin 1→5V, Pin 2→digital pin 2, Pin 4→GND",
+      "Add 10kΩ pull-up resistor between DATA and VCC",
+      "Install 'DHT sensor library' from Library Manager",
+      "Upload code and open Serial Monitor at 9600 baud",
+      "You should see temperature and humidity every 2 seconds",
+      "🧪 Breathe on the sensor to see humidity spike",
+      "⚠️ Seeing 'nan'? Check pull-up resistor and pin 2 connection",
     ],
     basicCode: `/*
   Learning Goals:
