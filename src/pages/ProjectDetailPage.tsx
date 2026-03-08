@@ -985,7 +985,7 @@ export default function ProjectDetailPage() {
   const [completed, setCompleted] = useState(false);
   const [copyToast, setCopyToast] = useState(false);
 
-  // Build a starter template with hints instead of full code
+  // Editable code state
   const starterTemplate = `/*
   Project: ${project.title}
   
@@ -1014,9 +1014,98 @@ void loop() {
   
 }`;
 
+  const [userCode, setUserCode] = useState(starterTemplate);
+  const [runStep, setRunStep] = useState<"idle" | "compiling" | "simulating" | "success" | "error">("idle");
+  const [errors, setErrors] = useState<string[]>([]);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  const [debugMessages, setDebugMessages] = useState<Array<{ role: "ai" | "user"; content: string }>>([]);
+  const [debugInput, setDebugInput] = useState("");
+  const [aiTyping, setAiTyping] = useState(false);
+  const debugBottomRef = useRef<HTMLDivElement>(null);
+
   const currentCode = showSolution
     ? (codeMode === "basic" ? project.basicCode : project.optimizedCode)
-    : starterTemplate;
+    : userCode;
+
+  const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  const runAndCheck = async () => {
+    setErrors([]);
+    setRunStep("compiling");
+    await delay(1200);
+
+    const code = showSolution ? currentCode : userCode;
+    const foundErrors: string[] = [];
+
+    // Check for common Arduino errors
+    if (code.includes("pinMod(")) foundErrors.push("Error: 'pinMod' is not defined. Did you mean 'pinMode'?");
+    if (/delay\(\d+;/.test(code)) foundErrors.push("Syntax error: missing closing parenthesis ')' in delay()");
+    if (code.includes("void setup()") && !code.includes("pinMode") && !code.includes("Serial.begin") && !code.includes("// TODO")) {
+      foundErrors.push("Warning: setup() is empty. Initialize your pins with pinMode() and Serial with Serial.begin().");
+    }
+    if (code.includes("// TODO: Initialize") || code.includes("// TODO: Write your main")) {
+      foundErrors.push("Incomplete: You still have TODO sections. Fill in your code before running!");
+    }
+    if (!code.includes("void setup()")) foundErrors.push("Error: Missing setup() function.");
+    if (!code.includes("void loop()")) foundErrors.push("Error: Missing loop() function.");
+
+    if (foundErrors.length > 0) {
+      setErrors(foundErrors);
+      setRunStep("error");
+      return;
+    }
+
+    setRunStep("simulating");
+    await delay(1500);
+    setRunStep("success");
+    setCompleted(true);
+  };
+
+  const getAIDebugResponse = (input: string): string => {
+    const lower = input.toLowerCase();
+    const code = showSolution ? currentCode : userCode;
+
+    if (lower.includes("review") || lower.includes("improve") || lower.includes("suggestion") || lower.includes("look at")) {
+      if (code.includes("delay(") && !code.includes("millis(")) {
+        return "📝 I see you're using `delay()` which blocks execution. Consider using `millis()` for non-blocking timing — this lets your Arduino do other things while waiting. Want me to explain how?";
+      }
+      if (!code.includes("Serial.begin")) {
+        return "📝 I'd suggest adding `Serial.begin(9600)` in setup() and some `Serial.print()` calls in loop(). It's the easiest way to debug and see what your values are!";
+      }
+      return "📝 Your code structure looks solid! A few suggestions:\n• Add comments explaining key logic\n• Consider edge cases (what if sensor returns 0?)\n• Use `constrain()` to keep values in safe ranges";
+    }
+    if (lower.includes("error") || lower.includes("fix") || lower.includes("wrong") || lower.includes("help")) {
+      if (errors.length > 0) {
+        return `🔍 I see ${errors.length} issue(s). Let's tackle the first one:\n\n"${errors[0]}"\n\nHint: Check for typos in function names and make sure every statement ends with a semicolon. Can you spot the issue?`;
+      }
+      return "🔍 Try clicking 'Run & Check' first so I can see what errors come up. Then I can help you debug step by step!";
+    }
+    if (lower.includes("todo") || lower.includes("start") || lower.includes("begin") || lower.includes("how")) {
+      return `🧩 Great question! For "${project.title}", start with setup():\n\n1. Use \`pinMode(pin, OUTPUT)\` for each output device\n2. Use \`Serial.begin(9600)\` so you can debug\n\nThen in loop(), think about what needs to happen repeatedly. What sensor are you reading?`;
+    }
+    return "🤔 I'm here to help! Try asking me to:\n• **Review your code** for improvements\n• **Debug errors** after running\n• **Explain a concept** like PWM, analogRead, etc.\n• Help you **get started** with the TODO sections";
+  };
+
+  const sendDebugMessage = () => {
+    if (!debugInput.trim()) return;
+    const msg = debugInput.trim();
+    setDebugInput("");
+    setDebugMessages((prev) => [...prev, { role: "user", content: msg }]);
+    setAiTyping(true);
+    setTimeout(() => {
+      setAiTyping(false);
+      setDebugMessages((prev) => [...prev, { role: "ai", content: getAIDebugResponse(msg) }]);
+      setTimeout(() => debugBottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }, 800 + Math.random() * 500);
+  };
+
+  const handleRevealSolution = () => {
+    if (!showSolution) {
+      setShowSolution(true);
+    } else {
+      setShowSolution(false);
+    }
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentCode);
