@@ -154,11 +154,19 @@ export default function GeneratePage() {
     setTimeout(() => setToast(""), 3000);
   };
 
-  const removeComponent = (c: string) => setComponents((prev) => prev.filter((x) => x !== c));
+  const removeComponent = (c: string) => {
+    setComponents((prev) => prev.filter((x) => x !== c));
+    setProjects([]);
+    setLoadingStates([]);
+    setSelected(new Set());
+  };
   const addComponent = () => {
     if (newComponent.trim() && !components.includes(newComponent.trim())) {
       setComponents((prev) => [...prev, newComponent.trim()]);
       setNewComponent("");
+      setProjects([]);
+      setLoadingStates([]);
+      setSelected(new Set());
     }
   };
 
