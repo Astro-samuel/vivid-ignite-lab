@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Minus, Plus, Save, Zap, Lightbulb, Package } from "lucide-react";
+import { Minus, Plus, Save, Zap, Lightbulb, Package, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
@@ -97,6 +97,7 @@ export default function ComponentsPage() {
   
   const [quantities, setQuantities] = useState<Record<string, number>>(loadQuantities);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const filteredComponents = allComponents.filter((c) => c.category === activeCategory);
   const totalSelected = Object.keys(quantities).length;
@@ -120,10 +121,13 @@ export default function ComponentsPage() {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaving(true);
+    await new Promise(r => setTimeout(r, 600));
     const inventory = Object.keys(quantities);
     const key = user ? `inventory_${user.id}` : "userInventory";
     localStorage.setItem(key, JSON.stringify(inventory));
+    setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -168,7 +172,8 @@ export default function ComponentsPage() {
             <div className="px-5 py-3 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
               <button
                 onClick={handleSave}
-                className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                disabled={saving}
+                className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-80 disabled:cursor-not-allowed"
                 style={{
                   background: saved
                     ? "linear-gradient(135deg, #00FF88, #00C853)"
@@ -177,8 +182,7 @@ export default function ComponentsPage() {
                   boxShadow: saved ? "0 0 20px rgba(0,255,136,0.4)" : "0 0 20px rgba(0,245,255,0.3)",
                 }}
               >
-                <Save size={15} />
-                {saved ? "✓ Inventory Saved!" : "Save Inventory"}
+                {saving ? <><Loader2 size={15} className="animate-spin" /> Saving...</> : saved ? <><Save size={15} /> ✓ Inventory Saved!</> : <><Save size={15} /> Save Inventory</>}
               </button>
             </div>
 
