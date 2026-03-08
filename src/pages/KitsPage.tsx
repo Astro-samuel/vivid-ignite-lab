@@ -6,6 +6,7 @@ import FadeInView from "@/components/motion/FadeInView";
 import MotionCard from "@/components/motion/MotionCard";
 import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Map kit component names to canonical ComponentsPage names
 const componentNameMap: Record<string, string> = {
