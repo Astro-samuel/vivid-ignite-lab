@@ -1118,16 +1118,17 @@ void loop() {
     return allProjects[0];
   })();
 
+  const { user } = useAuth();
+  const { saveProject, isProjectSaved, updateProgress, projects: userDbProjects } = useUserProjects();
+
+  // Load saved progress from DB
+  const dbProject = userDbProjects.find(p => p.project_id === projectId);
+
   const [activeTab, setActiveTab] = useState<ActiveTab>("instructions");
   const [simExpanded, setSimExpanded] = useState(false);
   const [codeMode, setCodeMode] = useState<CodeMode>("basic");
   const [showSolution, setShowSolution] = useState(false);
-  const [saved, setSaved] = useState(() => {
-    try {
-      const savedProjects = JSON.parse(localStorage.getItem("savedProjects") || "[]");
-      return savedProjects.some((p: any) => p.id === projectId);
-    } catch { return false; }
-  });
+  const [saved, setSaved] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [copyToast, setCopyToast] = useState(false);
   const [checkedSteps, setCheckedSteps] = useState<boolean[]>(new Array(project.instructions.length).fill(false));
@@ -1137,6 +1138,38 @@ void loop() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 80) + 20);
   const [shareToast, setShareToast] = useState(false);
+
+  // Sync saved state and checked steps from DB
+  useEffect(() => {
+    setSaved(isProjectSaved(projectId));
+    if (dbProject) {
+      if (dbProject.checked_steps?.length > 0) setCheckedSteps(dbProject.checked_steps);
+      if (dbProject.notes && Object.keys(dbProject.notes).length > 0) {
+        const parsed: Record<number, string> = {};
+        Object.entries(dbProject.notes).forEach(([k, v]) => { parsed[Number(k)] = v; });
+        setActiveNote(parsed);
+      }
+      if (dbProject.status === "completed") setCompleted(true);
+    }
+  }, [dbProject, isProjectSaved, projectId]);
+
+  // Auto-save progress to DB when steps change
+  const autoSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!user || !saved) return;
+    if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
+    autoSaveTimeout.current = setTimeout(() => {
+      const completedCount = checkedSteps.filter(Boolean).length;
+      const progress = project.instructions.length > 0 ? Math.round((completedCount / project.instructions.length) * 100) : 0;
+      updateProgress(projectId, {
+        checked_steps: checkedSteps,
+        notes: activeNote as any,
+        progress,
+        status: progress >= 100 ? "completed" : "inProgress",
+      });
+    }, 2000);
+    return () => { if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current); };
+  }, [checkedSteps, activeNote, user, saved]);
 
   // Extract learning concepts from code comments
   const learningConcepts = (() => {
