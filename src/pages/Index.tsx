@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Zap, BookOpen, Trophy, Package, ArrowRight, Cpu, Star, Clock, Lightbulb, Code, Rocket } from "lucide-react";
 import Layout from "@/components/Layout";
+import InteractiveArduinoBoard from "@/components/InteractiveArduinoBoard";
 
 const featuredProjects = [
   { emoji: "💡", title: "LED Blink Tutorial", desc: "The classic 'Hello World' of Arduino — make an LED blink!", difficulty: "beginner", time: "15 mins", xp: 50, id: 1 },
@@ -105,6 +106,18 @@ export default function Index() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* Interactive Arduino Board */}
+        <section className="px-8 py-14" style={{ background: "hsl(232, 48%, 6%)" }}>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-8">
+              <p className="text-xs font-semibold mb-2" style={{ color: "hsl(var(--primary))" }}>Interactive</p>
+              <h2 className="text-xl font-bold" style={{ color: "hsl(var(--foreground))" }}>Explore the Arduino UNO</h2>
+              <p className="text-sm mt-2" style={{ color: "hsl(var(--foreground-muted))" }}>Hover over pins and components to learn what they do</p>
+            </div>
+            <InteractiveArduinoBoard />
           </div>
         </section>
 
