@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn } from "lucide-react";
+import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
@@ -40,6 +40,8 @@ export default function DashboardPage() {
   const [toast, setToast] = useState("");
   const { user, loading: authLoading } = useAuth();
   const { projects, loading: projectsLoading, deleteProject } = useUserProjects();
+  const [navigatingId, setNavigatingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   // Redirect to onboarding if not completed
   useEffect(() => {
@@ -48,7 +50,9 @@ export default function DashboardPage() {
     }
   }, [user, navigate]);
 
-  const openProject = (p: typeof projects[0]) => {
+  const openProject = async (p: typeof projects[0]) => {
+    setNavigatingId(p.project_id);
+    await new Promise(r => setTimeout(r, 500));
     localStorage.setItem(
       "activeGeneratedProject",
       JSON.stringify({
@@ -65,6 +69,14 @@ export default function DashboardPage() {
       })
     );
     navigate(`/project/${p.project_id}`);
+  };
+
+  const handleDelete = async (projectId: number) => {
+    setDeletingId(projectId);
+    await new Promise(r => setTimeout(r, 400));
+    await deleteProject(projectId);
+    setDeletingId(null);
+    showToast("Project removed");
   };
 
   // Redirect to auth if not logged in
@@ -158,7 +170,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex gap-2 justify-between">
               {days.map((d, i) => {
-                const active = i < 3;
+                const active = false;
                 return (
                   <div key={i} className="flex flex-col items-center gap-1.5">
                     <div
@@ -283,17 +295,19 @@ export default function DashboardPage() {
                       <div className="flex gap-2 flex-shrink-0">
                         <button
                           onClick={() => openProject(p)}
-                          className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105"
+                          disabled={navigatingId === p.project_id}
+                          className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-1.5"
                           style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
                         >
-                          Continue
+                          {navigatingId === p.project_id ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : "Continue"}
                         </button>
                         <button
-                          onClick={() => { deleteProject(p.project_id); showToast("Project removed"); }}
-                          className="p-1.5 rounded-lg transition-all hover:scale-110"
+                          onClick={() => handleDelete(p.project_id)}
+                          disabled={deletingId === p.project_id}
+                          className="p-1.5 rounded-lg transition-all hover:scale-110 disabled:opacity-70 disabled:cursor-not-allowed"
                           style={{ color: "hsl(var(--destructive))", background: "hsl(var(--destructive) / 0.08)", border: "1px solid hsl(var(--destructive) / 0.2)" }}
                         >
-                          <Trash2 size={14} />
+                          {deletingId === p.project_id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                         </button>
                       </div>
                     </div>
@@ -357,10 +371,11 @@ export default function DashboardPage() {
                       </div>
                       <button
                         onClick={() => openProject(p)}
-                        className="px-4 py-1.5 rounded-full text-xs font-bold border transition-all hover:scale-105"
+                        disabled={navigatingId === p.project_id}
+                        className="px-4 py-1.5 rounded-full text-xs font-bold border transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-1.5"
                         style={{ borderColor: "hsl(var(--primary) / 0.4)", color: "hsl(var(--primary))" }}
                       >
-                        View Code
+                        {navigatingId === p.project_id ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : "View Code"}
                       </button>
                     </div>
                   </div>
@@ -396,10 +411,11 @@ export default function DashboardPage() {
                       </div>
                       <button
                         onClick={() => openProject(p)}
-                        className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105"
+                        disabled={navigatingId === p.project_id}
+                        className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-1.5"
                         style={{ background: "linear-gradient(135deg, hsl(var(--purple)), hsl(var(--pink)))", color: "hsl(var(--foreground))" }}
                       >
-                        Start Project
+                        {navigatingId === p.project_id ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : "Start Project"}
                       </button>
                     </div>
                   </div>
