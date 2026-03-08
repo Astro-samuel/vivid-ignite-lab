@@ -295,17 +295,19 @@ export default function DashboardPage() {
                       <div className="flex gap-2 flex-shrink-0">
                         <button
                           onClick={() => openProject(p)}
-                          className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105"
+                          disabled={navigatingId === p.project_id}
+                          className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-1.5"
                           style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
                         >
-                          Continue
+                          {navigatingId === p.project_id ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : "Continue"}
                         </button>
                         <button
-                          onClick={() => { deleteProject(p.project_id); showToast("Project removed"); }}
-                          className="p-1.5 rounded-lg transition-all hover:scale-110"
+                          onClick={() => handleDelete(p.project_id)}
+                          disabled={deletingId === p.project_id}
+                          className="p-1.5 rounded-lg transition-all hover:scale-110 disabled:opacity-70 disabled:cursor-not-allowed"
                           style={{ color: "hsl(var(--destructive))", background: "hsl(var(--destructive) / 0.08)", border: "1px solid hsl(var(--destructive) / 0.2)" }}
                         >
-                          <Trash2 size={14} />
+                          {deletingId === p.project_id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                         </button>
                       </div>
                     </div>
