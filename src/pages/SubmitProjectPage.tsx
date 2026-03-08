@@ -159,27 +159,15 @@ export default function SubmitProjectPage() {
           </div>
 
           {/* Author */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: "#E0E7FF" }}>Your Name *</label>
-              <input
-                value={form.authorName}
-                onChange={(e) => update("authorName", e.target.value)}
-                placeholder="John Doe"
-                className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none"
-                style={{ background: "hsl(229, 45%, 16%)", border: "1px solid hsl(229, 42%, 28%)", color: "#FFFFFF" }}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold mb-1.5" style={{ color: "#E0E7FF" }}>Email (optional)</label>
-              <input
-                value={form.authorEmail}
-                onChange={(e) => update("authorEmail", e.target.value)}
-                placeholder="john@example.com"
-                className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none"
-                style={{ background: "hsl(229, 45%, 16%)", border: "1px solid hsl(229, 42%, 28%)", color: "#FFFFFF" }}
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-semibold mb-1.5" style={{ color: "#E0E7FF" }}>Your Name *</label>
+            <input
+              value={form.authorName}
+              onChange={(e) => update("authorName", e.target.value)}
+              placeholder="John Doe"
+              className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none"
+              style={{ background: "hsl(229, 45%, 16%)", border: "1px solid hsl(229, 42%, 28%)", color: "#FFFFFF" }}
+            />
           </div>
 
           <button
