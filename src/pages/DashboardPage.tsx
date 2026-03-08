@@ -176,7 +176,7 @@ export default function DashboardPage() {
         </StaggerContainer>
 
         {/* Two columns: Streak + Daily Challenges */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-6">
           {/* Streak */}
           <div
             className="rounded-2xl p-5 border"
@@ -258,6 +258,9 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* "What Can I Make?" Widget */}
+        <WhatCanIMakeWidget navigate={navigate} userId={user?.id} />
 
         {/* Project Tabs */}
         <div className="flex gap-2 mb-5">
