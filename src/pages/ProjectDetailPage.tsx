@@ -840,14 +840,13 @@ void loop() {
     difficulty: "intermediate", time: "40 mins", xp: 95,
     components: ["Arduino Uno", "OLED Display (0.96\")", "Temperature Sensor (DHT11)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Gather components: 1x Arduino Uno, 1x 0.96\" OLED display (SSD1306, I2C), 1x DHT11 temperature/humidity sensor, breadboard, jumper wires",
-      "Connect the OLED display via I2C: SDA → Arduino pin A4, SCL → Arduino pin A5, VCC → 3.3V or 5V (check your module), GND → GND",
-      "Connect the DHT11 sensor: VCC → 5V, GND → GND, DATA → digital pin 2. Some DHT11 modules have a built-in pull-up resistor; if yours doesn't, add a 10kΩ resistor between DATA and VCC",
-      "In the Arduino IDE Library Manager, install: 'Adafruit SSD1306', 'Adafruit GFX Library', and 'DHT sensor library'. These are required for display and sensor functions",
-      "Upload the code. The OLED shows a dashboard with '== Dashboard ==' header, temperature in °C, and humidity in %. Data updates every 2 seconds",
-      "The display uses 128×64 pixels. setTextSize(1) = 6×8px characters (21 chars per line). setTextSize(2) = 12×16px (10 chars per line). setCursor(x,y) positions text in pixels",
-      "🧪 Experiment: Add a mini graph by plotting temperature history as pixels on the bottom half of the display. Try adding a boot animation or status icons",
-      "⚠️ Troubleshooting: If the OLED is blank, try address 0x3C instead of 0x27. Run an I2C scanner sketch to find the correct address. Make sure SDA/SCL aren't swapped",
+      "Gather: Arduino Uno, 0.96\" SSD1306 OLED (I2C), DHT11 sensor, breadboard, wires",
+      "Connect OLED: SDA→A4, SCL→A5, VCC→3.3V/5V, GND→GND",
+      "Wire DHT11: VCC→5V, GND→GND, DATA→pin 2",
+      "Install Adafruit SSD1306, GFX, and DHT libraries",
+      "Upload code — dashboard shows temp and humidity",
+      "🧪 Add a mini graph plotting temperature history",
+      "⚠️ Blank screen? Try I2C address 0x3C; check SDA/SCL",
     ],
     basicCode: `/*
   Learning Goals:
