@@ -16,7 +16,6 @@ export type Database = {
     Tables: {
       community_projects: {
         Row: {
-          author_email: string | null
           author_name: string
           components: string[]
           created_at: string
@@ -28,7 +27,6 @@ export type Database = {
           title: string
         }
         Insert: {
-          author_email?: string | null
           author_name: string
           components?: string[]
           created_at?: string
@@ -40,7 +38,6 @@ export type Database = {
           title: string
         }
         Update: {
-          author_email?: string | null
           author_name?: string
           components?: string[]
           created_at?: string
