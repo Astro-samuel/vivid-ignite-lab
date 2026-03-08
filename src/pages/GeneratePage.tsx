@@ -273,7 +273,7 @@ export default function GeneratePage() {
                 <Zap size={14} style={{ color: "#00F5FF" }} />
               </div>
               <span className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>Your Components</span>
-            </div>
+              <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF" }}>{components.length}</span>
             <div className="flex flex-wrap gap-1.5 mb-3 max-h-32 overflow-y-auto">
               {components.map((c) => (
                 <div
