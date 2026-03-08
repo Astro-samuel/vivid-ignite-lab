@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 const languages = [
@@ -63,7 +62,6 @@ export function useTranslation() {
   const [selectedLang, setSelectedLang] = useState(getSavedLang);
   const [translating, setTranslating] = useState(false);
   const originalTextsRef = useRef<Map<Text, string>>(new Map());
-  const location = useLocation();
   const observerRef = useRef<MutationObserver | null>(null);
   const pendingNodesRef = useRef<Text[]>([]);
   const batchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -142,8 +140,6 @@ export function useTranslation() {
     if (!root) return;
 
     const textNodes = getTextNodes(root);
-    // Mark all as needing translation
-    translatedNodes.delete = translatedNodes.delete; // no-op, just for clarity
     await translateNodes(textNodes, langCode, langLabel);
   }, [translateNodes]);
 
