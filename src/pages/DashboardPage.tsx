@@ -40,6 +40,8 @@ export default function DashboardPage() {
   const [toast, setToast] = useState("");
   const { user, loading: authLoading } = useAuth();
   const { projects, loading: projectsLoading, deleteProject } = useUserProjects();
+  const [navigatingId, setNavigatingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   // Redirect to onboarding if not completed
   useEffect(() => {
@@ -48,7 +50,9 @@ export default function DashboardPage() {
     }
   }, [user, navigate]);
 
-  const openProject = (p: typeof projects[0]) => {
+  const openProject = async (p: typeof projects[0]) => {
+    setNavigatingId(p.project_id);
+    await new Promise(r => setTimeout(r, 500));
     localStorage.setItem(
       "activeGeneratedProject",
       JSON.stringify({
@@ -65,6 +69,14 @@ export default function DashboardPage() {
       })
     );
     navigate(`/project/${p.project_id}`);
+  };
+
+  const handleDelete = async (projectId: number) => {
+    setDeletingId(projectId);
+    await new Promise(r => setTimeout(r, 400));
+    await deleteProject(projectId);
+    setDeletingId(null);
+    showToast("Project removed");
   };
 
   // Redirect to auth if not logged in
