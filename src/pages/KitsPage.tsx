@@ -3,6 +3,22 @@ import { Package, Zap, CheckCircle } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 
+// Map kit component names to canonical ComponentsPage names
+const componentNameMap: Record<string, string> = {
+  "BMP180 Pressure": "BMP180 (Pressure)",
+  "DHT22": "Temperature Sensor (DHT22)",
+  "HC-SR04": "Ultrasonic Sensor (HC-SR04)",
+  "Servo Motor": "Servo Motor (SG90)",
+  "L298N Motor Driver": "Motor Driver (L298N)",
+  "OLED Display": "OLED Display (0.96\")",
+  "Chassis Kit": "Breadboard", // closest match
+};
+
+function normalizeKitComponent(raw: string): string {
+  const base = raw.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").trim();
+  return componentNameMap[base] || base;
+}
+
 const kits = [
   {
     id: 1,
