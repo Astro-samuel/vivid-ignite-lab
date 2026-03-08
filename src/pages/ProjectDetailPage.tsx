@@ -1029,7 +1029,55 @@ export default function ProjectDetailPage() {
   const { id } = useParams();
   const projectId = parseInt(id || "1");
 
-  // Check if this project came from the Generate page
+  const buildFallbackProject = (source: any) => ({
+    id: source.id,
+    emoji: source.emoji || "🔧",
+    title: source.title,
+    desc: source.description || source.desc || "A custom Arduino project.",
+    difficulty: source.difficulty || "beginner",
+    time: source.time || "30 mins",
+    xp: source.xp || 75,
+    components: source.components || ["Arduino Uno"],
+    instructions: [
+      "Review the project components and gather your materials",
+      "Wire up the circuit following the pin assignments in the code",
+      "Read through the starter code and understand each section",
+      "Fill in the TODO sections and test your implementation",
+    ],
+    basicCode: `/*
+  🎯 Project: ${source.title}
+
+  Goal: ${source.description || source.desc || "Complete this project"}
+
+  📦 Components: ${(source.components || ["Arduino Uno"]).join(", ")}
+
+  🧩 Write your implementation below!
+*/
+
+void setup() {
+  Serial.begin(9600);
+  // TODO: Initialize your pins and components
+  Serial.println("${source.title} Starting...");
+}
+
+void loop() {
+  // TODO: Add your main project logic here
+
+  delay(100);
+}`,
+    optimizedCode: `// Optimized version coming soon!
+// Complete the basic version first.
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  delay(100);
+}`,
+  });
+
+  // Check if this project has active local data (Generate/Catalog/Think Bigger/Dashboard)
   const generatedProject = (() => {
     try {
       const stored = localStorage.getItem("activeGeneratedProject");
@@ -1041,67 +1089,31 @@ export default function ProjectDetailPage() {
     return null;
   })();
 
-  // First try exact ID match in catalog, then title match from generated data,
-  // then build a fallback from the generated project data
+  // Fallback lookup from saved dashboard projects by ID
+  const savedProjectById = (() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("savedProjects") || "[]");
+      return saved.find((p: any) => p.id === projectId) || null;
+    } catch {
+      return null;
+    }
+  })();
+
   const project = (() => {
-    // If we have generated project data, try to find a matching catalog entry by title
     if (generatedProject) {
       const byTitle = allProjects.find(
         (p) => p.title.toLowerCase() === generatedProject.title?.toLowerCase()
       );
       if (byTitle) return byTitle;
-
-      // Build a fallback project detail from the generated data
-      return {
-        id: generatedProject.id,
-        emoji: generatedProject.emoji || "🔧",
-        title: generatedProject.title,
-        desc: generatedProject.description || "A custom AI-generated Arduino project.",
-        difficulty: generatedProject.difficulty || "beginner",
-        time: generatedProject.time || "30 mins",
-        xp: generatedProject.xp || 75,
-        components: generatedProject.components || ["Arduino Uno"],
-        instructions: [
-          "Review the project components and gather your materials",
-          "Wire up the circuit following the pin assignments in the code",
-          "Read through the starter code and understand each section",
-          "Fill in the TODO sections and test your implementation",
-        ],
-        basicCode: `/*
-  🎯 Project: ${generatedProject.title}
-
-  Goal: ${generatedProject.description || "Complete this project"}
-
-  📦 Components: ${(generatedProject.components || ["Arduino Uno"]).join(", ")}
-
-  🧩 Write your implementation below!
-*/
-
-void setup() {
-  Serial.begin(9600);
-  // TODO: Initialize your pins and components
-  Serial.println("${generatedProject.title} Starting...");
-}
-
-void loop() {
-  // TODO: Add your main project logic here
-
-  delay(100);
-}`,
-        optimizedCode: `// Optimized version coming soon!
-// Complete the basic version first.
-
-void setup() {
-  Serial.begin(9600);
-}
-
-void loop() {
-  delay(100);
-}`,
-      };
+      return buildFallbackProject(generatedProject);
     }
 
-    return allProjects.find((p) => p.id === projectId) || allProjects[0];
+    const exactCatalogMatch = allProjects.find((p) => p.id === projectId);
+    if (exactCatalogMatch) return exactCatalogMatch;
+
+    if (savedProjectById) return buildFallbackProject(savedProjectById);
+
+    return allProjects[0];
   })();
 
   const [activeTab, setActiveTab] = useState<ActiveTab>("instructions");
