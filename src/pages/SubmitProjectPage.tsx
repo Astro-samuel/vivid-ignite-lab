@@ -33,7 +33,6 @@ export default function SubmitProjectPage() {
       components: form.components.split(",").map((c) => c.trim()).filter(Boolean),
       estimated_time: `${form.estimatedTime} mins`,
       author_name: form.authorName.trim(),
-      author_email: form.authorEmail.trim() || null,
     } as any);
 
     setLoading(false);
