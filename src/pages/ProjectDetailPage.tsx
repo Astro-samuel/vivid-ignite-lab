@@ -1126,7 +1126,48 @@ void loop() {
     setExpandedComponents(prev => ({ ...prev, [name]: !prev[name] }));
   };
 
-  const handleShare = () => {
+  // Editable code state
+  const starterTemplate = `/*
+  Project: ${project.title}
+  
+  🎯 Goal: ${project.desc}
+  
+  📦 Components needed:
+${project.components.map(c => `     - ${c}`).join("\n")}
+  
+  🧩 Hints:
+${project.instructions.map((inst, i) => `     Step ${i + 1}: ${inst}`).join("\n")}
+  
+  💡 Your task: Write the code below!
+     Use the AI Mentor (bottom-right) if you get stuck.
+     Click "Reveal Solution" only after trying on your own.
+*/
+
+void setup() {
+  // TODO: Initialize your pins and Serial
+  // Hint: Use pinMode() for outputs and Serial.begin() for debugging
+  
+}
+
+void loop() {
+  // TODO: Write your main logic here
+  // Hint: Think about what should happen repeatedly
+  
+}`;
+
+  const [userCode, setUserCode] = useState(starterTemplate);
+  const [runStep, setRunStep] = useState<"idle" | "compiling" | "simulating" | "success" | "error">("idle");
+  const [errors, setErrors] = useState<string[]>([]);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  const [debugMessages, setDebugMessages] = useState<Array<{ role: "ai" | "user"; content: string }>>([]);
+  const [debugInput, setDebugInput] = useState("");
+  const [aiTyping, setAiTyping] = useState(false);
+  const debugBottomRef = useRef<HTMLDivElement>(null);
+
+  const currentCode = showSolution
+    ? (codeMode === "basic" ? project.basicCode : project.optimizedCode)
+    : userCode;
+
     navigator.clipboard.writeText(window.location.href);
     setShareToast(true);
     setTimeout(() => setShareToast(false), 2000);
