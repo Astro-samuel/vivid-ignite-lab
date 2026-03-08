@@ -55,9 +55,17 @@ export default function AuthPage() {
       if (error) setError(error.message);
       else setConfirmMsg("Check your email to confirm your account!");
     } else {
-      const { error } = await signIn(email, password);
+      const { error, data } = await signIn(email, password);
       if (error) setError(error.message);
-      else navigate("/dashboard");
+      else {
+        // Check if onboarding is completed
+        const userId = data?.user?.id;
+        if (userId && !localStorage.getItem(`onboarding_${userId}`)) {
+          navigate("/onboarding");
+        } else {
+          navigate("/dashboard");
+        }
+      }
     }
     setLoading(false);
   };
