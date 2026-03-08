@@ -1120,7 +1120,12 @@ void loop() {
   const [simExpanded, setSimExpanded] = useState(false);
   const [codeMode, setCodeMode] = useState<CodeMode>("basic");
   const [showSolution, setShowSolution] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(() => {
+    try {
+      const savedProjects = JSON.parse(localStorage.getItem("savedProjects") || "[]");
+      return savedProjects.some((p: any) => p.id === projectId);
+    } catch { return false; }
+  });
   const [completed, setCompleted] = useState(false);
   const [copyToast, setCopyToast] = useState(false);
   const [checkedSteps, setCheckedSteps] = useState<boolean[]>(new Array(project.instructions.length).fill(false));
