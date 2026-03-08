@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Search, Clock, Star } from "lucide-react";
+import { Search, Clock, X } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 
-const projects = [
+const MAX_PROJECTS = 5;
+
+const allProjects = [
   { id: 1, emoji: "💡", title: "LED Blink Tutorial", desc: "The classic 'Hello World' of Arduino - make an LED blink!", difficulty: "beginner", time: "15 mins", xp: 50, tags: ["LED", "GPIO"] },
   { id: 2, emoji: "🌡️", title: "Temperature Monitor", desc: "Read temperature data and display it on your computer.", difficulty: "beginner", time: "30 mins", xp: 75, tags: ["DHT22", "Serial"] },
   { id: 3, emoji: "🤖", title: "Servo Motor Control", desc: "Control servo motors for precise movements.", difficulty: "intermediate", time: "45 mins", xp: 100, tags: ["Servo", "PWM"] },
@@ -32,8 +34,20 @@ export default function CatalogPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [diffFilter, setDiffFilter] = useState<string>("all");
+  const [removedIds, setRemovedIds] = useState<number[]>(() => {
+    const saved = localStorage.getItem("removedCatalogProjects");
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  const filtered = projects.filter((p) => {
+  const handleRemove = (id: number) => {
+    const updated = [...removedIds, id];
+    setRemovedIds(updated);
+    localStorage.setItem("removedCatalogProjects", JSON.stringify(updated));
+  };
+
+  const visibleProjects = allProjects.filter((p) => !removedIds.includes(p.id)).slice(0, MAX_PROJECTS);
+
+  const filtered = visibleProjects.filter((p) => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
     const matchDiff = diffFilter === "all" || p.difficulty === diffFilter;
     return matchSearch && matchDiff;
@@ -47,7 +61,7 @@ export default function CatalogPage() {
           <h1 className="text-3xl font-bold mb-2" style={{ color: "#FFFFFF" }}>
             Project <span className="gradient-text-teal">Catalog</span>
           </h1>
-          <p style={{ color: "hsl(226, 35%, 72%)" }}>{projects.length} projects available to build</p>
+          <p style={{ color: "hsl(226, 35%, 72%)" }}>{visibleProjects.length} of {MAX_PROJECTS} projects shown</p>
         </div>
 
         {/* Filters */}
@@ -92,9 +106,17 @@ export default function CatalogPage() {
           {filtered.map((p, i) => (
             <div
               key={p.id}
-              className="card-neon p-5 cursor-pointer group"
+              className="card-neon p-5 cursor-pointer group relative"
               style={{ animationDelay: `${i * 50}ms` }}
             >
+              <button
+                onClick={(e) => { e.stopPropagation(); handleRemove(p.id); }}
+                className="absolute top-3 right-3 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
+                style={{ background: "rgba(255,80,80,0.15)", color: "#FF5050", border: "1px solid rgba(255,80,80,0.3)" }}
+                title="Remove project"
+              >
+                <X size={14} />
+              </button>
               <div className="text-3xl mb-3 animate-float" style={{ animationDelay: `${i * 0.3}s` }}>
                 {p.emoji}
               </div>
