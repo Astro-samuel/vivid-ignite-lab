@@ -373,7 +373,7 @@ export default function IDEPage() {
 
           {/* Wokwi Simulator Panel */}
           <div
-            className="w-80 flex-shrink-0 border-l flex flex-col"
+            className="w-72 flex-shrink-0 border-l flex flex-col"
             style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}
           >
             <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
