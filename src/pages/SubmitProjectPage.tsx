@@ -18,7 +18,6 @@ export default function SubmitProjectPage() {
     components: "",
     estimatedTime: "30",
     authorName: "",
-    authorEmail: "",
   });
 
   const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
