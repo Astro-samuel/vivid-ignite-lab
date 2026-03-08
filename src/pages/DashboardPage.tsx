@@ -16,7 +16,7 @@ const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 
 const dailyChallenges = [
   { icon: "🎯", title: "Complete a Project", desc: "Finish any project from the catalog", xp: 50, done: false },
-  { icon: "🔧", title: "Add 3 Components", desc: "Add components to your inventory", xp: 25, done: false },
+  { icon: "🔧", title: "Add 3 Components", desc: "Add components to your inventory", xp: 25, done: true },
   { icon: "✨", title: "Generate AI Project", desc: "Use AI to generate a custom project", xp: 35, done: false },
 ];
 
@@ -158,7 +158,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex gap-2 justify-between">
               {days.map((d, i) => {
-                const active = false;
+                const active = i < 3;
                 return (
                   <div key={i} className="flex flex-col items-center gap-1.5">
                     <div
