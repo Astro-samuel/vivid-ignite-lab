@@ -380,7 +380,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <button
-                        onClick={() => navigate(`/project/${p.id}`)}
+                        onClick={() => openProject(p)}
                         className="px-4 py-1.5 rounded-full text-xs font-bold border transition-all hover:scale-105"
                         style={{ borderColor: "rgba(0,245,255,0.4)", color: "#00F5FF" }}
                       >
