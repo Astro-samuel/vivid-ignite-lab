@@ -54,6 +54,11 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
 }
 
 export default function DashboardPage() {
+  const [activeTab, setActiveTab] = useState<Tab>("inProgress");
+  const navigate = useNavigate();
+  const [toast, setToast] = useState("");
+  const [allProjects, setAllProjects] = useState<SavedProject[]>([]);
+
   const openProject = (project: SavedProject) => {
     localStorage.setItem(
       "activeGeneratedProject",
@@ -62,19 +67,16 @@ export default function DashboardPage() {
         emoji: project.emoji,
         title: project.title,
         description: project.description,
+        desc: (project as any).desc,
         difficulty: project.difficulty,
         time: project.time,
         xp: project.xp,
-        components: [],
+        components: (project as any).components || [],
         source: "dashboard",
       })
     );
     navigate(`/project/${project.id}`);
   };
-  const [activeTab, setActiveTab] = useState<Tab>("inProgress");
-  const navigate = useNavigate();
-  const [toast, setToast] = useState("");
-  const [allProjects, setAllProjects] = useState<SavedProject[]>([]);
 
   useEffect(() => {
     setAllProjects(loadSavedProjects());
