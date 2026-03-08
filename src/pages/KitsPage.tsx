@@ -73,6 +73,7 @@ function saveInventory(items: string[], userId?: string) {
 
 export default function KitsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedKits, setSelectedKits] = useState<Set<number>>(new Set());
   const [toast, setToast] = useState("");
 
@@ -83,7 +84,7 @@ export default function KitsPage() {
       const normalized = normalizeKitComponent(c);
       if (!inventory.includes(normalized)) inventory.push(normalized);
     });
-    saveInventory(inventory);
+    saveInventory(inventory, user?.id);
     setToast(`✓ ${kit.name} added to inventory! (${inventory.length} components)`);
     setTimeout(() => { setToast(""); navigate("/components"); }, 3000);
   };

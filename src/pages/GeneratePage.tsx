@@ -54,11 +54,12 @@ const projectPool: Project[] = [
   { id: 308, emoji: "🤖", title: "Gesture-Controlled Robot", difficulty: "advanced", time: "110 mins", xp: 240, description: "Control a robot using hand gestures detected by an accelerometer on a glove.", components: ["MPU6050", "Motor Driver L298N", "DC Motors", "Arduino Uno"] },
 ];
 
-function getInventoryComponents(): string[] {
+function getInventoryComponents(userId?: string): string[] {
   try {
-    const inv = JSON.parse(localStorage.getItem("userInventory") || "[]");
-    return inv.length > 0 ? inv : ["Arduino Uno", "Breadboard", "Jumper Wires", "LED (Red)", "Resistor (220Ω)", "Push Button", "Buzzer"];
-  } catch { return ["Arduino Uno"]; }
+    const key = userId ? `inventory_${userId}` : "userInventory";
+    const inv = JSON.parse(localStorage.getItem(key) || "[]");
+    return inv;
+  } catch { return []; }
 }
 
 function DifficultyBadge({ difficulty }: { difficulty: string }) {

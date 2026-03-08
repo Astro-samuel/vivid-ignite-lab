@@ -124,7 +124,8 @@ export default function ComponentsPage() {
 
   const handleSave = () => {
     const inventory = Object.keys(quantities);
-    localStorage.setItem("userInventory", JSON.stringify(inventory));
+    const key = user ? `inventory_${user.id}` : "userInventory";
+    localStorage.setItem(key, JSON.stringify(inventory));
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
