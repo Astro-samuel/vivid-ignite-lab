@@ -53,6 +53,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    // Clear all app data so new sign-ins start fresh
+    const keysToRemove = [
+      "userInventory",
+      "activeGeneratedProject",
+      "savedProjects",
+      "removedCatalogProjects",
+    ];
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
   };
 
   return (
