@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Minus, Plus, Save, Zap, Lightbulb, Package } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
+import FadeInView from "@/components/motion/FadeInView";
 
 type Category = "Microcontroller" | "Sensor" | "Actuator" | "Display" | "Communication" | "Module" | "Power" | "Passive" | "Other";
 
