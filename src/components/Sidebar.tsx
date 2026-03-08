@@ -76,9 +76,7 @@ export default function Sidebar() {
                 className="flex-shrink-0"
                 style={{ color: isActive ? "#00F5FF" : "inherit" }}
               />
-              {!collapsed && (
-                <span className="text-sm font-medium truncate">{label}</span>
-              )}
+              <span className="text-sm font-medium truncate">{label}</span>
             </Link>
           );
         })}
