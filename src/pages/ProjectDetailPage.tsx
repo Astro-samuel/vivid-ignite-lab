@@ -12,9 +12,16 @@ const allProjects = [
     difficulty: "beginner", time: "15 mins", xp: 50,
     components: ["Arduino Uno", "LED (Red)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect the LED's anode (long leg) to a 220Ω resistor, then to pin 13",
-      "Connect the LED's cathode (short leg) to GND",
-      "Upload the code and watch it blink!",
+      "Gather your components: 1x Arduino Uno, 1x red LED, 1x 220Ω resistor (Red-Red-Brown bands), 1x breadboard, and 2x jumper wires",
+      "Place the LED on the breadboard — identify the anode (longer leg) and cathode (shorter leg). The anode goes into one row, cathode into an adjacent row",
+      "Connect one end of the 220Ω resistor to the same row as the LED's anode. Connect the other end to a new row — this limits current to ~15mA, protecting the LED",
+      "Use a jumper wire to connect the resistor's free row to Arduino digital pin 13. This is the signal wire that will turn the LED on/off",
+      "Use another jumper wire to connect the LED's cathode row to the Arduino GND pin. This completes the circuit",
+      "Connect the Arduino to your computer via USB cable. Open the Arduino IDE and select 'Arduino Uno' under Tools → Board",
+      "Copy the code from the Code tab, paste it into the Arduino IDE, and click the Upload button (→ arrow icon)",
+      "Once uploaded, the LED should blink on and off every second. Open Serial Monitor (Tools → Serial Monitor) at 9600 baud to see status messages",
+      "🧪 Experiment: Try changing the delay values (e.g., delay(500) for faster blinking, or delay(2000) for slower). What happens with delay(50)?",
+      "⚠️ Troubleshooting: If the LED doesn't light up, check polarity (swap legs), verify the resistor is connected properly, and ensure pin 13 is selected in code",
     ],
     basicCode: `/*
   Learning Goals:
