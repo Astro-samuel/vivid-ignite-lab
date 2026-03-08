@@ -25,7 +25,7 @@ const queryClient = new QueryClient();
 function AnimatedRoutes() {
   const location = useLocation();
   return (
-    <PageTransition key={location.pathname}>
+    <PageTransition>
       <Routes location={location}>
         <Route path="/" element={<Index />} />
         <Route path="/dashboard" element={<DashboardPage />} />
@@ -41,7 +41,6 @@ function AnimatedRoutes() {
         <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="/submit-project" element={<SubmitProjectPage />} />
         <Route path="/resources" element={<ResourcesPage />} />
-        <Route path="*" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>

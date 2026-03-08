@@ -2,6 +2,9 @@ import { useState, useRef } from "react";
 import { User, Camera, Edit3, Save, Star, Zap, Trophy, CheckCircle, Flame, ChevronRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
+import FadeInView from "@/components/motion/FadeInView";
+import MotionCard from "@/components/motion/MotionCard";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface UserProfile {
   name: string;
@@ -83,10 +86,10 @@ export default function ProfilePage() {
     <Layout>
       <div className="px-8 py-10 max-w-3xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
+        <FadeInView className="flex items-center gap-3 mb-8">
           <User size={22} style={{ color: "#00F5FF" }} />
           <h1 className="text-2xl font-bold" style={{ color: "#FFFFFF" }}>My Profile</h1>
-        </div>
+        </FadeInView>
 
         {/* Profile Card */}
         <div
@@ -300,11 +303,14 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {savedToast && (
-        <div className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up z-50" style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}>
-          <CheckCircle size={16} /> ✓ Profile Saved!
-        </div>
-      )}
+      <AnimatePresence>
+        {savedToast && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold z-50" style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}>
+            <CheckCircle size={16} /> ✓ Profile Saved!
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Layout>
   );
 }

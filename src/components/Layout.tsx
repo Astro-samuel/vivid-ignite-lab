@@ -3,6 +3,7 @@ import Sidebar from "./Sidebar";
 import AIMentor from "./AIMentor";
 import { Globe, ChevronDown, Loader2, Menu, X } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface LayoutProps {
   children: ReactNode;
@@ -46,9 +47,12 @@ export default function Layout({ children }: LayoutProps) {
 
           <div className="flex-1" />
 
-          {/* Language Switcher */}
+          {/* Language Switcher — floating button with scale-in */}
           <div className="relative" data-no-translate>
-            <button
+            <motion.button
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
               onClick={() => setLangOpen(!langOpen)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
               style={{
@@ -65,36 +69,43 @@ export default function Layout({ children }: LayoutProps) {
               <Globe size={12} style={{ color: "#00F5FF" }} />
               <span>{selectedLang.label}</span>
               <ChevronDown size={11} style={{ color: "#A0AED9" }} />
-            </button>
+            </motion.button>
 
-            {langOpen && (
-              <div
-                className="absolute right-0 top-full mt-1 w-44 rounded-xl border py-1 z-50 shadow-xl max-h-64 overflow-y-auto"
-                style={{
-                  background: "hsl(229, 45%, 14%)",
-                  borderColor: "rgba(0,245,255,0.2)",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-                }}
-              >
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => handleSelectLang(lang)}
-                    disabled={translating}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-left transition-all hover:bg-white/5 disabled:opacity-50"
-                    style={{
-                      color: lang.code === selectedLang.code ? "#00F5FF" : "#E0E7FF",
-                    }}
-                  >
-                    <span>{lang.flag}</span>
-                    <span>{lang.label}</span>
-                    {lang.code === selectedLang.code && (
-                      <span className="ml-auto text-xs" style={{ color: "#00F5FF" }}>✓</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Language panel — slides in from right */}
+            <AnimatePresence>
+              {langOpen && (
+                <motion.div
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 100 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="absolute right-0 top-full mt-1 w-44 rounded-xl border py-1 z-50 shadow-xl max-h-64 overflow-y-auto"
+                  style={{
+                    background: "hsl(229, 45%, 14%)",
+                    borderColor: "rgba(0,245,255,0.2)",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+                  }}
+                >
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleSelectLang(lang)}
+                      disabled={translating}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-left transition-all hover:bg-white/5 disabled:opacity-50"
+                      style={{
+                        color: lang.code === selectedLang.code ? "#00F5FF" : "#E0E7FF",
+                      }}
+                    >
+                      <span>{lang.flag}</span>
+                      <span>{lang.label}</span>
+                      {lang.code === selectedLang.code && (
+                        <span className="ml-auto text-xs" style={{ color: "#00F5FF" }}>✓</span>
+                      )}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </header>
 

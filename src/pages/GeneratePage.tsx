@@ -3,6 +3,7 @@ import { Zap, RefreshCw, Save, CheckSquare, Square, ChevronDown, ChevronUp, Cloc
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import FadeInView from "@/components/motion/FadeInView";
 
 interface Project {
   id: number;

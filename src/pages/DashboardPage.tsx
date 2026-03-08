@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
+import FadeInView from "@/components/motion/FadeInView";
+import MotionCard from "@/components/motion/MotionCard";
+import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
+import { motion } from "framer-motion";
 
 type Tab = "inProgress" | "completed" | "saved";
 
@@ -80,25 +84,26 @@ export default function DashboardPage() {
     <Layout>
       <div className="px-6 py-8 max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
+        <FadeInView className="mb-6">
           <div className="flex items-center gap-2 mb-1">
             <Target size={14} style={{ color: "#00F5FF" }} />
             <span className="text-xs font-semibold" style={{ color: "#00F5FF" }}>Your Workspace</span>
           </div>
           <h1 className="text-3xl font-bold mb-1" style={{ color: "#FFFFFF" }}>Dashboard</h1>
           <p className="text-sm" style={{ color: "#A0AED9" }}>Track your projects and see your progress</p>
-        </div>
+        </FadeInView>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <StaggerContainer className="grid grid-cols-4 gap-4 mb-6">
           {[
             { label: "In Progress", value: inProgressProjects.length, icon: Play, color: "#00F5FF", bg: "rgba(0,245,255,0.08)", border: "rgba(0,245,255,0.2)" },
             { label: "Completed", value: completedProjects.length, icon: CheckCircle, color: "#00FF88", bg: "rgba(0,255,136,0.08)", border: "rgba(0,255,136,0.2)" },
             { label: "Saved", value: savedProjects.length, icon: Bookmark, color: "#B744FF", bg: "rgba(183,68,255,0.08)", border: "rgba(183,68,255,0.2)" },
             { label: "Total XP", value: totalXP, icon: Star, color: "#FFD700", bg: "rgba(255,215,0,0.08)", border: "rgba(255,215,0,0.2)" },
           ].map(({ label, value, icon: Icon, color, bg, border }) => (
-            <div
+            <motion.div
               key={label}
+              variants={staggerItem}
               className="rounded-2xl p-5 flex items-center gap-4 border"
               style={{ background: bg, borderColor: border }}
             >
@@ -109,9 +114,9 @@ export default function DashboardPage() {
                 <p className="text-2xl font-bold font-orbitron" style={{ color }}>{value}</p>
                 <p className="text-xs" style={{ color: "#A0AED9" }}>{label}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </StaggerContainer>
 
         {/* Two columns: Streak + Daily Challenges */}
         <div className="grid grid-cols-2 gap-4 mb-6">
