@@ -24,7 +24,33 @@ export default function AuthPage() {
     setLoading(true);
 
     if (mode === "signup") {
-      const { error } = await signUp(email, password, username);
+      if (!username.trim()) {
+        setError("Username is required");
+        setLoading(false);
+        return;
+      }
+      if (username.trim().length < 3) {
+        setError("Username must be at least 3 characters");
+        setLoading(false);
+        return;
+      }
+
+      // Check username availability
+      const { data: available, error: checkErr } = await supabase.rpc("check_username_available", {
+        desired_username: username.trim(),
+      });
+      if (checkErr) {
+        setError("Could not verify username. Try again.");
+        setLoading(false);
+        return;
+      }
+      if (!available) {
+        setError("Username is already taken");
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await signUp(email, password, username.trim());
       if (error) setError(error.message);
       else setConfirmMsg("Check your email to confirm your account!");
     } else {
