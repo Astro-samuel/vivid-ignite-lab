@@ -32,8 +32,6 @@ function getInventoryComponents(): string[] {
   } catch { return ["Arduino Uno"]; }
 }
 
-const defaultComponents = getInventoryComponents();
-
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
   const styles =
     difficulty === "beginner"
