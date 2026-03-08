@@ -980,11 +980,43 @@ export default function ProjectDetailPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("instructions");
   const [simExpanded, setSimExpanded] = useState(false);
   const [codeMode, setCodeMode] = useState<CodeMode>("basic");
+  const [showSolution, setShowSolution] = useState(false);
   const [saved, setSaved] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [copyToast, setCopyToast] = useState(false);
 
-  const currentCode = codeMode === "basic" ? project.basicCode : project.optimizedCode;
+  // Build a starter template with hints instead of full code
+  const starterTemplate = `/*
+  Project: ${project.title}
+  
+  🎯 Goal: ${project.desc}
+  
+  📦 Components needed:
+${project.components.map(c => `     - ${c}`).join("\n")}
+  
+  🧩 Hints:
+${project.instructions.map((inst, i) => `     Step ${i + 1}: ${inst}`).join("\n")}
+  
+  💡 Your task: Write the code below!
+     Use the AI Mentor (bottom-right) if you get stuck.
+     Click "Reveal Solution" only after trying on your own.
+*/
+
+void setup() {
+  // TODO: Initialize your pins and Serial
+  // Hint: Use pinMode() for outputs and Serial.begin() for debugging
+  
+}
+
+void loop() {
+  // TODO: Write your main logic here
+  // Hint: Think about what should happen repeatedly
+  
+}`;
+
+  const currentCode = showSolution
+    ? (codeMode === "basic" ? project.basicCode : project.optimizedCode)
+    : starterTemplate;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentCode);
