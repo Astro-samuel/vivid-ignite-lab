@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Zap, RefreshCw, Save, CheckSquare, Square, ChevronDown, ChevronUp, Clock, Star, Loader2, X, Plus } from "lucide-react";
+import { Zap, RefreshCw, Save, CheckSquare, Square, ChevronDown, ChevronUp, Clock, Star, Loader2, X, Plus, Brain } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FadeInView from "@/components/motion/FadeInView";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
+import { toast as sonnerToast } from "sonner";
 
 interface Project {
   id: number;
