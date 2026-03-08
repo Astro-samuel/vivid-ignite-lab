@@ -54,6 +54,23 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
 }
 
 export default function DashboardPage() {
+  const openProject = (project: SavedProject) => {
+    localStorage.setItem(
+      "activeGeneratedProject",
+      JSON.stringify({
+        id: project.id,
+        emoji: project.emoji,
+        title: project.title,
+        description: project.description,
+        difficulty: project.difficulty,
+        time: project.time,
+        xp: project.xp,
+        components: [],
+        source: "dashboard",
+      })
+    );
+    navigate(`/project/${project.id}`);
+  };
   const [activeTab, setActiveTab] = useState<Tab>("inProgress");
   const navigate = useNavigate();
   const [toast, setToast] = useState("");
