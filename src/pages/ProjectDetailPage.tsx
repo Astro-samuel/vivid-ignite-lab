@@ -329,15 +329,14 @@ void loop() {
     difficulty: "intermediate", time: "60 mins", xp: 130,
     components: ["Arduino Uno", "HC-05 Bluetooth", "LED (Red)", "LED (Green)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Gather components: 1x Arduino Uno, 1x HC-05 Bluetooth module, 2x LEDs (red & green), 2x 220Ω resistors, 1x breadboard, jumper wires",
-      "⚠️ Important: Disconnect the Arduino from USB before wiring the HC-05. The module uses 3.3V logic on RX — use a voltage divider (1kΩ + 2kΩ) between Arduino TX and HC-05 RX to avoid damage",
-      "Connect HC-05: VCC → 5V, GND → GND, TX → Arduino pin 0 (RX), RX → Arduino pin 1 (TX) through the voltage divider",
-      "Connect the red LED through a 220Ω resistor to pin 12, and the green LED through a 220Ω resistor to pin 13. Both cathodes to GND",
-      "⚠️ You must disconnect HC-05 TX/RX wires before uploading code (they share the same serial lines as USB). Upload first, then reconnect HC-05",
-      "On your phone, enable Bluetooth and pair with 'HC-05' (default PIN: 1234 or 0000). Download a Bluetooth terminal app (e.g., 'Serial Bluetooth Terminal' on Android)",
-      "Open the Bluetooth terminal, connect to HC-05, and send commands: '1' = LED1 ON, '2' = LED1 OFF, '3' = LED2 ON, '4' = LED2 OFF",
-      "🧪 Experiment: Modify the code to accept text commands like 'RED_ON' instead of single characters. Add a 'STATUS' command that reports which LEDs are currently on",
-      "⚠️ Troubleshooting: If HC-05 LED blinks fast, it's not paired. If slow blink, it's paired. If no response, check baud rate matches (9600 default)",
+      "Gather: Arduino Uno, HC-05 Bluetooth, 2× LEDs, 2× 220Ω resistors, breadboard, wires",
+      "Wire HC-05: VCC→5V, GND→GND, TX→pin 0, RX→pin 1 (use voltage divider!)",
+      "Connect LEDs through resistors to pins 12 and 13",
+      "Disconnect HC-05 TX/RX before uploading code",
+      "Pair phone with 'HC-05' (PIN: 1234), use a Bluetooth terminal app",
+      "Send '1'/'2'/'3'/'4' to toggle LEDs on/off",
+      "🧪 Try text commands like 'RED_ON' instead of numbers",
+      "⚠️ No response? Check baud rate (9600) and HC-05 LED blink pattern",
     ],
     basicCode: `/*
   Learning Goals:
