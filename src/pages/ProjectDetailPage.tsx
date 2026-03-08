@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 import { ArrowLeft, Clock, Zap, CheckCircle, Settings, Code, Play, Copy, Download, Sparkles, Save, Loader2, XCircle, AlertTriangle, Brain, Eye, RefreshCw } from "lucide-react";
+import ExplainCode from "@/components/ExplainCode";
+import InteractiveSchematic from "@/components/InteractiveSchematic";
 import Layout from "@/components/Layout";
 import { useNavigate, useParams } from "react-router-dom";
 
