@@ -341,13 +341,39 @@ export default function IDEPage() {
               <span>Arduino Uno</span>
               <span className="ml-auto text-xs" style={{ color: "#00FF88" }}>✎ Editable</span>
             </div>
-            <div className="relative flex-1">
+            <div className="relative flex-1 flex overflow-hidden">
+              {/* Line Numbers */}
+              <div
+                className="flex-shrink-0 select-none text-right pr-3 pt-4 pb-4 overflow-hidden"
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: "13px",
+                  lineHeight: "1.7",
+                  color: "hsl(228, 25%, 35%)",
+                  background: "hsl(229, 48%, 7%)",
+                  borderRight: "1px solid hsl(232, 38%, 18%)",
+                  width: "48px",
+                  minWidth: "48px",
+                }}
+                ref={(el) => {
+                  if (el && codeRef.current) {
+                    const sync = () => { el.scrollTop = codeRef.current!.scrollTop; };
+                    codeRef.current.addEventListener("scroll", sync);
+                  }
+                }}
+              >
+                {code.split("\n").map((_, i) => (
+                  <div key={i} className="px-1" style={{ height: "calc(13px * 1.7)" }}>
+                    {i + 1}
+                  </div>
+                ))}
+              </div>
               <textarea
                 ref={codeRef}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 className="code-editor w-full h-full p-4 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-[hsl(182,100%,50%)]"
-                style={{ fontFamily: "'JetBrains Mono', monospace", lineHeight: "1.7", fontSize: "13px", caretColor: "#00F5FF" }}
+                style={{ fontFamily: "'JetBrains Mono', monospace", lineHeight: "1.7", fontSize: "13px", caretColor: "#00F5FF", border: "none", borderRadius: 0 }}
                 spellCheck={false}
               />
             </div>

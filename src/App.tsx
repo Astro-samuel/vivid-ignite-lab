@@ -18,6 +18,7 @@ import KitsPage from "./pages/KitsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import SubmitProjectPage from "./pages/SubmitProjectPage";
+import ResourcesPage from "./pages/ResourcesPage";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,8 @@ function AnimatedRoutes() {
         <Route path="/project/:id" element={<ProjectDetailPage />} />
         <Route path="/feedback" element={<FeedbackPage />} />
         <Route path="/submit-project" element={<SubmitProjectPage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="*" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>
