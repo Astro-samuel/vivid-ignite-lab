@@ -26,9 +26,10 @@ export default function Sidebar() {
     <aside
       className="flex flex-col h-screen sticky top-0 transition-all duration-300 border-r relative flex-shrink-0"
       style={{
-        width: collapsed ? "60px" : "200px",
+        width: collapsed ? "0px" : "200px",
+        overflow: collapsed ? "hidden" : undefined,
         background: "hsl(232, 48%, 6%)",
-        borderColor: "hsl(232, 40%, 16%)",
+        borderColor: collapsed ? "transparent" : "hsl(232, 40%, 16%)",
       }}
     >
       {/* Logo */}
@@ -43,12 +44,10 @@ export default function Sidebar() {
         >
           <Cpu size={16} style={{ color: "#0A0E27" }} />
         </div>
-        {!collapsed && (
-          <div className="min-w-0">
-            <p className="font-bold text-sm truncate" style={{ color: "#FFFFFF" }}>Arduino AI</p>
-            <p className="text-xs truncate" style={{ color: "hsl(226, 35%, 55%)" }}>Project Generator</p>
-          </div>
-        )}
+        <div className="min-w-0">
+          <p className="font-bold text-sm truncate" style={{ color: "#FFFFFF" }}>Arduino AI</p>
+          <p className="text-xs truncate" style={{ color: "hsl(226, 35%, 55%)" }}>Project Generator</p>
+        </div>
       </div>
 
       {/* Nav Items */}
