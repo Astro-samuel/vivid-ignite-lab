@@ -21,6 +21,7 @@ import FeedbackPage from "./pages/FeedbackPage";
 import SubmitProjectPage from "./pages/SubmitProjectPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import AuthPage from "./pages/AuthPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -31,19 +32,19 @@ function AnimatedRoutes() {
       <Routes location={location}>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<AuthPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/catalog" element={<CatalogPage />} />
-        <Route path="/components" element={<ComponentsPage />} />
-        <Route path="/kits" element={<KitsPage />} />
-        <Route path="/generate" element={<GeneratePage />} />
-        <Route path="/think-bigger" element={<ThinkBiggerPage />} />
-        <Route path="/achievements" element={<AchievementsPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/ide" element={<IDEPage />} />
-        <Route path="/project/:id" element={<ProjectDetailPage />} />
-        <Route path="/feedback" element={<FeedbackPage />} />
-        <Route path="/submit-project" element={<SubmitProjectPage />} />
-        <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/components" element={<ProtectedRoute><ComponentsPage /></ProtectedRoute>} />
+        <Route path="/kits" element={<ProtectedRoute><KitsPage /></ProtectedRoute>} />
+        <Route path="/generate" element={<ProtectedRoute><GeneratePage /></ProtectedRoute>} />
+        <Route path="/think-bigger" element={<ProtectedRoute><ThinkBiggerPage /></ProtectedRoute>} />
+        <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/ide" element={<ProtectedRoute><IDEPage /></ProtectedRoute>} />
+        <Route path="/project/:id" element={<ProtectedRoute><ProjectDetailPage /></ProtectedRoute>} />
+        <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
+        <Route path="/submit-project" element={<ProtectedRoute><SubmitProjectPage /></ProtectedRoute>} />
+        <Route path="/resources" element={<ProtectedRoute><ResourcesPage /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>
