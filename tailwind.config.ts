@@ -90,8 +90,8 @@ export default {
           to: { height: "0" },
         },
         "neon-pulse": {
-          "0%, 100%": { boxShadow: "0 0 10px rgba(0, 245, 255, 0.4)" },
-          "50%": { boxShadow: "0 0 25px rgba(0, 245, 255, 0.8), 0 0 50px rgba(0, 245, 255, 0.3)" },
+          "0%, 100%": { boxShadow: "0 0 8px rgba(80, 180, 190, 0.2)" },
+          "50%": { boxShadow: "0 0 16px rgba(80, 180, 190, 0.35), 0 0 32px rgba(80, 180, 190, 0.15)" },
         },
         "float": {
           "0%, 100%": { transform: "translateY(0px)" },
