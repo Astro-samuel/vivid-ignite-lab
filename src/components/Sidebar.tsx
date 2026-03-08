@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, LayoutDashboard, BookOpen, Cpu, Package, Zap, Lightbulb,
-  Trophy, User, LogOut, Star, MessageSquareHeart
+  Trophy, User, LogOut, Star, MessageSquareHeart, PlusCircle
 } from "lucide-react";
 
 const navItems = [
