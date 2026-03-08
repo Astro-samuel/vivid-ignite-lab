@@ -137,6 +137,9 @@ export default function AuthPage() {
                 <input
                   type="text"
                   placeholder="Username"
+                  required
+                  minLength={3}
+                  maxLength={30}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2"
