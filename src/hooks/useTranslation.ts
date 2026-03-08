@@ -1,4 +1,5 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 const languages = [
@@ -40,10 +41,33 @@ function getTextNodes(root: Node): Text[] {
   return nodes;
 }
 
+function getSavedLang() {
+  try {
+    const saved = localStorage.getItem("app-language");
+    if (saved) {
+      const found = languages.find((l) => l.code === saved);
+      if (found) return found;
+    }
+  } catch {}
+  return languages[0];
+}
+
 export function useTranslation() {
-  const [selectedLang, setSelectedLang] = useState(languages[0]);
+  const [selectedLang, setSelectedLang] = useState(getSavedLang);
   const [translating, setTranslating] = useState(false);
   const originalTextsRef = useRef<Map<Text, string>>(new Map());
+  const location = useLocation();
+
+  // Re-translate on route change if a non-English language is selected
+  useEffect(() => {
+    if (selectedLang.code !== "en") {
+      originalTextsRef.current.clear();
+      const timer = setTimeout(() => {
+        translatePage(selectedLang.code, selectedLang.label);
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname]);
 
   const translatePage = useCallback(async (langCode: string, langLabel: string) => {
     const mainEl = document.querySelector("main");
@@ -125,6 +149,7 @@ export function useTranslation() {
   const selectLanguage = useCallback(
     async (lang: typeof languages[0]) => {
       setSelectedLang(lang);
+      localStorage.setItem("app-language", lang.code);
       if (lang.code === "en") {
         restoreOriginal();
       } else {
