@@ -1734,17 +1734,9 @@ void loop() {
 
                 {/* Code area - editable or read-only */}
                 {showSolution ? (
-                  <pre className="p-5 overflow-x-auto text-sm leading-relaxed" style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace", color: "#E0E7FF", background: "hsl(232, 48%, 8%)", maxHeight: "500px" }}>
-                    <code>{currentCode}</code>
-                  </pre>
+                  <CodeEditor code={currentCode} readOnly maxHeight="500px" minHeight="300px" />
                 ) : (
-                  <textarea
-                    value={userCode}
-                    onChange={(e) => setUserCode(e.target.value)}
-                    className="w-full p-5 text-sm leading-relaxed resize-none focus:outline-none"
-                    style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace", color: "#E0E7FF", background: "hsl(232, 48%, 8%)", minHeight: "400px", maxHeight: "500px", caretColor: "#00F5FF", border: "none" }}
-                    spellCheck={false}
-                  />
+                  <CodeEditor code={userCode} onChange={setUserCode} maxHeight="500px" minHeight="400px" />
                 )}
 
                 {/* Error panel */}
