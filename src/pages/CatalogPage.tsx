@@ -2,6 +2,10 @@ import { useState, useMemo } from "react";
 import { Search, Clock, X } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
+import FadeInView from "@/components/motion/FadeInView";
+import MotionCard from "@/components/motion/MotionCard";
+import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
+import { motion } from "framer-motion";
 
 const PROJECTS_PER_LEVEL = 5;
 
@@ -106,17 +110,17 @@ export default function CatalogPage() {
     <Layout>
       <div className="px-8 py-10 max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <FadeInView className="mb-8">
           <h1 className="text-3xl font-bold mb-2" style={{ color: "hsl(var(--foreground))" }}>
             Project <span className="gradient-text-teal">Catalog</span>
           </h1>
           <p style={{ color: "hsl(var(--muted-foreground))" }}>
             {filtered.length} projects shown • Refreshes every few hours
           </p>
-        </div>
+        </FadeInView>
 
         {/* Filters */}
-        <div className="flex gap-3 mb-8 flex-wrap">
+        <FadeInView delay={0.1} className="flex gap-3 mb-8 flex-wrap">
           <div className="relative flex-1 min-w-48">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "hsl(var(--muted-foreground))" }} />
             <input
@@ -148,7 +152,7 @@ export default function CatalogPage() {
               </button>
             ))}
           </div>
-        </div>
+        </FadeInView>
 
         {/* Grouped by level */}
         {levels
@@ -158,67 +162,67 @@ export default function CatalogPage() {
             if (levelProjects.length === 0) return null;
             return (
               <div key={lvl} className="mb-10">
-                <h2 className="text-lg font-bold mb-4" style={{ color: "hsl(var(--foreground))" }}>
-                  {levelLabels[lvl]}
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                <FadeInView>
+                  <h2 className="text-lg font-bold mb-4" style={{ color: "hsl(var(--foreground))" }}>
+                    {levelLabels[lvl]}
+                  </h2>
+                </FadeInView>
+                <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                   {levelProjects.map((p, i) => (
-                    <div
-                      key={p.id}
-                      className="card-neon p-4 cursor-pointer group relative"
-                      style={{ animationDelay: `${i * 50}ms` }}
-                    >
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleRemove(p.id); }}
-                        className="absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
-                        style={{ background: "rgba(255,80,80,0.15)", color: "#FF5050", border: "1px solid rgba(255,80,80,0.3)" }}
-                        title="Remove project"
+                    <motion.div key={p.id} variants={staggerItem}>
+                      <MotionCard
+                        className="card-neon p-4 cursor-pointer group relative"
                       >
-                        <X size={12} />
-                      </button>
-                      <div className="text-2xl mb-2 animate-float" style={{ animationDelay: `${i * 0.3}s` }}>
-                        {p.emoji}
-                      </div>
-                      <h3 className="font-bold text-sm mb-1" style={{ color: "hsl(var(--foreground))" }}>{p.title}</h3>
-                      <p className="text-xs mb-3 line-clamp-2" style={{ color: "hsl(var(--muted-foreground))" }}>{p.desc}</p>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleRemove(p.id); }}
+                          className="absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
+                          style={{ background: "rgba(255,80,80,0.15)", color: "#FF5050", border: "1px solid rgba(255,80,80,0.3)" }}
+                          title="Remove project"
+                        >
+                          <X size={12} />
+                        </button>
+                        <div className="text-2xl mb-2">{p.emoji}</div>
+                        <h3 className="font-bold text-sm mb-1" style={{ color: "hsl(var(--foreground))" }}>{p.title}</h3>
+                        <p className="text-xs mb-3 line-clamp-2" style={{ color: "hsl(var(--muted-foreground))" }}>{p.desc}</p>
 
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {p.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-xs px-1.5 py-0.5 rounded"
-                            style={{ background: "rgba(183,68,255,0.1)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.2)" }}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {p.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="text-xs px-1.5 py-0.5 rounded"
+                              style={{ background: "rgba(183,68,255,0.1)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.2)" }}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
 
-                      <div className="flex items-center justify-between text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
-                        <span className="flex items-center gap-1"><Clock size={10} /> {p.time}</span>
-                        <span className="font-bold" style={{ color: "#FFD700" }}>+{p.xp} XP</span>
-                      </div>
+                        <div className="flex items-center justify-between text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
+                          <span className="flex items-center gap-1"><Clock size={10} /> {p.time}</span>
+                          <span className="font-bold" style={{ color: "#FFD700" }}>+{p.xp} XP</span>
+                        </div>
 
-                      <button
-                        onClick={() => navigate(`/project/${p.id}`)}
-                        className="w-full py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-[1.02]"
-                        style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 12px rgba(0,245,255,0.25)" }}
-                      >
-                        View Project
-                      </button>
-                    </div>
+                        <button
+                          onClick={() => navigate(`/project/${p.id}`)}
+                          className="w-full py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-[1.02]"
+                          style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 12px rgba(0,245,255,0.25)" }}
+                        >
+                          View Project
+                        </button>
+                      </MotionCard>
+                    </motion.div>
                   ))}
-                </div>
+                </StaggerContainer>
               </div>
             );
           })}
 
         {filtered.length === 0 && (
-          <div className="text-center py-20">
+          <FadeInView className="text-center py-20">
             <div className="text-5xl mb-4">🔍</div>
             <p className="font-semibold mb-1" style={{ color: "hsl(var(--foreground))" }}>No projects found</p>
             <p style={{ color: "hsl(var(--muted-foreground))" }}>Try different search terms or filters</p>
-          </div>
+          </FadeInView>
         )}
       </div>
     </Layout>

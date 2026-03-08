@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 import { Zap, BookOpen, Trophy, Package, ArrowRight, Cpu, Star, Clock, Lightbulb, Code, Rocket } from "lucide-react";
 import Layout from "@/components/Layout";
+import FadeInView from "@/components/motion/FadeInView";
+import MotionCard from "@/components/motion/MotionCard";
+import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
+import { motion } from "framer-motion";
 
 const featuredProjects = [
   { emoji: "💡", title: "LED Blink Tutorial", desc: "The classic 'Hello World' of Arduino — make an LED blink!", difficulty: "beginner", time: "15 mins", xp: 50, id: 1 },
@@ -47,107 +51,121 @@ export default function Index() {
           />
 
           <div className="relative max-w-3xl mx-auto text-center">
-            <div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border text-sm font-medium"
-              style={{ background: "rgba(183,68,255,0.08)", borderColor: "rgba(183,68,255,0.25)", color: "#B744FF" }}
-            >
-              <Zap size={14} /> AI-Powered Arduino Learning Platform
-            </div>
-
-            <h1 className="font-black mb-6 leading-tight" style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)" }}>
-              <span style={{ color: "#FFFFFF" }}>Build Amazing</span>
-              <br />
-              <span
-                style={{
-                  background: "linear-gradient(135deg, #00F5FF, #B744FF)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
+            <FadeInView>
+              <div
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border text-sm font-medium"
+                style={{ background: "rgba(183,68,255,0.08)", borderColor: "rgba(183,68,255,0.25)", color: "#B744FF" }}
               >
-                Arduino Projects
-              </span>
-            </h1>
+                <Zap size={14} /> AI-Powered Arduino Learning Platform
+              </div>
+            </FadeInView>
 
-            <p className="text-base mb-10 max-w-xl mx-auto leading-relaxed" style={{ color: "#A0AED9" }}>
-              Tell us what components you have, and our AI will generate custom Arduino projects
-              tailored to your skill level. Learn, build, and level up!
-            </p>
+            <FadeInView delay={0.1}>
+              <h1 className="font-black mb-6 leading-tight" style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)" }}>
+                <span style={{ color: "#FFFFFF" }}>Build Amazing</span>
+                <br />
+                <span
+                  style={{
+                    background: "linear-gradient(135deg, #00F5FF, #B744FF)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  Arduino Projects
+                </span>
+              </h1>
+            </FadeInView>
 
-            <div className="flex gap-4 justify-center flex-wrap">
-              <Link to="/components">
-                <button
-                  className="px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
-                  style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,245,255,0.3)" }}
-                >
-                  <Cpu size={16} /> Add My Components
-                </button>
-              </Link>
-              <Link to="/catalog">
-                <button
-                  className="px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 border transition-all hover:scale-105 hover:bg-white/5"
-                  style={{ borderColor: "rgba(183,68,255,0.4)", color: "#B744FF" }}
-                >
-                  <BookOpen size={16} /> Browse Projects
-                </button>
-              </Link>
-            </div>
+            <FadeInView delay={0.2}>
+              <p className="text-base mb-10 max-w-xl mx-auto leading-relaxed" style={{ color: "#A0AED9" }}>
+                Tell us what components you have, and our AI will generate custom Arduino projects
+                tailored to your skill level. Learn, build, and level up!
+              </p>
+            </FadeInView>
+
+            <FadeInView delay={0.3}>
+              <div className="flex gap-4 justify-center flex-wrap">
+                <Link to="/components">
+                  <button
+                    className="px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
+                    style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,245,255,0.3)" }}
+                  >
+                    <Cpu size={16} /> Add My Components
+                  </button>
+                </Link>
+                <Link to="/catalog">
+                  <button
+                    className="px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 border transition-all hover:scale-105 hover:bg-white/5"
+                    style={{ borderColor: "rgba(183,68,255,0.4)", color: "#B744FF" }}
+                  >
+                    <BookOpen size={16} /> Browse Projects
+                  </button>
+                </Link>
+              </div>
+            </FadeInView>
 
             {/* Stats */}
-            <div className="flex gap-12 justify-center mt-16">
-              {[
-                { value: "50+", label: "Projects", color: "#00F5FF" },
-                { value: "100+", label: "Components", color: "#B744FF" },
-                { value: "AI", label: "Powered", color: "#FFD700" },
-              ].map(({ value, label, color }) => (
-                <div key={label} className="text-center">
-                  <p className="font-black text-3xl" style={{ color }}>{value}</p>
-                  <p className="text-xs mt-1" style={{ color: "#A0AED9" }}>{label}</p>
-                </div>
-              ))}
-            </div>
+            <FadeInView delay={0.4}>
+              <div className="flex gap-12 justify-center mt-16">
+                {[
+                  { value: "50+", label: "Projects", color: "#00F5FF" },
+                  { value: "100+", label: "Components", color: "#B744FF" },
+                  { value: "AI", label: "Powered", color: "#FFD700" },
+                ].map(({ value, label, color }) => (
+                  <div key={label} className="text-center">
+                    <p className="font-black text-3xl" style={{ color }}>{value}</p>
+                    <p className="text-xs mt-1" style={{ color: "#A0AED9" }}>{label}</p>
+                  </div>
+                ))}
+              </div>
+            </FadeInView>
           </div>
         </section>
 
         {/* Quick Actions */}
         <section className="px-8 py-14">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-xl font-bold mb-1" style={{ color: "#FFFFFF" }}>Quick Actions</h2>
-            <p className="mb-8 text-sm" style={{ color: "#A0AED9" }}>Jump into action with these shortcuts</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <FadeInView>
+              <h2 className="text-xl font-bold mb-1" style={{ color: "#FFFFFF" }}>Quick Actions</h2>
+              <p className="mb-8 text-sm" style={{ color: "#A0AED9" }}>Jump into action with these shortcuts</p>
+            </FadeInView>
+            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {quickActions.map(({ icon: Icon, title, desc, path, color, bg, border }) => (
-                <Link key={path} to={path}>
-                  <div
-                    className="rounded-xl p-5 h-full cursor-pointer group border transition-all hover:-translate-y-1"
-                    style={{ background: bg, borderColor: border }}
-                  >
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
-                      style={{ background: `${color}15`, border: `1px solid ${color}33` }}
+                <motion.div key={path} variants={staggerItem}>
+                  <Link to={path}>
+                    <MotionCard
+                      className="rounded-xl p-5 h-full cursor-pointer group border"
+                      style={{ background: bg, borderColor: border }}
                     >
-                      <Icon size={18} style={{ color }} />
-                    </div>
-                    <h3 className="font-bold text-sm mb-1.5" style={{ color: "#FFFFFF" }}>{title}</h3>
-                    <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>{desc}</p>
-                    <span className="text-xs font-semibold flex items-center gap-1 transition-all group-hover:gap-2" style={{ color }}>
-                      Get Started <ArrowRight size={12} />
-                    </span>
-                  </div>
-                </Link>
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+                        style={{ background: `${color}15`, border: `1px solid ${color}33` }}
+                      >
+                        <Icon size={18} style={{ color }} />
+                      </div>
+                      <h3 className="font-bold text-sm mb-1.5" style={{ color: "#FFFFFF" }}>{title}</h3>
+                      <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>{desc}</p>
+                      <span className="text-xs font-semibold flex items-center gap-1 transition-all group-hover:gap-2" style={{ color }}>
+                        Get Started <ArrowRight size={12} />
+                      </span>
+                    </MotionCard>
+                  </Link>
+                </motion.div>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         </section>
 
         {/* How It Works */}
         <section className="px-8 py-14" style={{ background: "hsl(232, 48%, 6%)" }}>
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-10">
+            <FadeInView className="text-center mb-10">
               <p className="text-xs font-semibold mb-2" style={{ color: "#B744FF" }}>How It Works</p>
               <h2 className="text-xl font-bold" style={{ color: "#FFFFFF" }}>From Components to Complete Projects</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            </FadeInView>
+            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {howItWorks.map(({ step, icon: Icon, title, desc, color }) => (
-                <div key={step} className="text-center">
+                <motion.div key={step} variants={staggerItem} className="text-center">
                   <div
                     className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
                     style={{ background: `${color}12`, border: `1px solid ${color}30` }}
@@ -162,60 +180,64 @@ export default function Index() {
                   </div>
                   <h3 className="font-bold text-sm mb-1" style={{ color: "#FFFFFF" }}>{title}</h3>
                   <p className="text-xs" style={{ color: "#A0AED9" }}>{desc}</p>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         </section>
 
         {/* Featured Projects */}
         <section className="px-8 py-14">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <p className="text-xs font-semibold mb-1" style={{ color: "#FFD700" }}>Featured</p>
-                <h2 className="text-xl font-bold" style={{ color: "#FFFFFF" }}>Popular Projects to Get Started</h2>
-              </div>
-              <Link to="/catalog">
-                <button className="px-4 py-2 rounded-lg text-xs font-semibold border transition-all hover:scale-105" style={{ borderColor: "rgba(0,245,255,0.3)", color: "#00F5FF" }}>
-                  View All
-                </button>
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {featuredProjects.map((p) => (
-                <Link key={p.id} to={`/project/${p.id}`}>
-                  <div
-                    className="rounded-xl border p-5 cursor-pointer group transition-all hover:-translate-y-1"
-                    style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 24%)" }}
-                  >
-                    <div className="text-3xl mb-3">{p.emoji}</div>
-                    <h3 className="font-bold text-sm mb-1.5" style={{ color: "#FFFFFF" }}>{p.title}</h3>
-                    <p className="text-xs mb-3 line-clamp-2" style={{ color: "#A0AED9" }}>{p.desc}</p>
-                    <div className="flex items-center gap-2 mb-3">
-                      <DifficultyBadge difficulty={p.difficulty} />
-                    </div>
-                    <div className="flex items-center justify-between text-xs mb-3" style={{ color: "#A0AED9" }}>
-                      <span className="flex items-center gap-1"><Clock size={11} /> {p.time}</span>
-                      <span className="font-bold" style={{ color: "#FFD700" }}>+{p.xp} XP</span>
-                    </div>
-                    <div
-                      className="w-full py-2 rounded-lg text-xs font-bold text-center transition-all group-hover:scale-[1.02]"
-                      style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27" }}
-                    >
-                      Start Project
-                    </div>
-                  </div>
+            <FadeInView>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <p className="text-xs font-semibold mb-1" style={{ color: "#FFD700" }}>Featured</p>
+                  <h2 className="text-xl font-bold" style={{ color: "#FFFFFF" }}>Popular Projects to Get Started</h2>
+                </div>
+                <Link to="/catalog">
+                  <button className="px-4 py-2 rounded-lg text-xs font-semibold border transition-all hover:scale-105" style={{ borderColor: "rgba(0,245,255,0.3)", color: "#00F5FF" }}>
+                    View All
+                  </button>
                 </Link>
+              </div>
+            </FadeInView>
+
+            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {featuredProjects.map((p) => (
+                <motion.div key={p.id} variants={staggerItem}>
+                  <Link to={`/project/${p.id}`}>
+                    <MotionCard
+                      className="rounded-xl border p-5 cursor-pointer group"
+                      style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 24%)" }}
+                    >
+                      <div className="text-3xl mb-3">{p.emoji}</div>
+                      <h3 className="font-bold text-sm mb-1.5" style={{ color: "#FFFFFF" }}>{p.title}</h3>
+                      <p className="text-xs mb-3 line-clamp-2" style={{ color: "#A0AED9" }}>{p.desc}</p>
+                      <div className="flex items-center gap-2 mb-3">
+                        <DifficultyBadge difficulty={p.difficulty} />
+                      </div>
+                      <div className="flex items-center justify-between text-xs mb-3" style={{ color: "#A0AED9" }}>
+                        <span className="flex items-center gap-1"><Clock size={11} /> {p.time}</span>
+                        <span className="font-bold" style={{ color: "#FFD700" }}>+{p.xp} XP</span>
+                      </div>
+                      <div
+                        className="w-full py-2 rounded-lg text-xs font-bold text-center transition-all group-hover:scale-[1.02]"
+                        style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27" }}
+                      >
+                        Start Project
+                      </div>
+                    </MotionCard>
+                  </Link>
+                </motion.div>
               ))}
-            </div>
+            </StaggerContainer>
           </div>
         </section>
 
         {/* CTA Section */}
         <section className="px-8 py-16" style={{ background: "hsl(232, 48%, 6%)" }}>
-          <div className="max-w-2xl mx-auto text-center">
+          <FadeInView className="max-w-2xl mx-auto text-center">
             <h2 className="text-2xl font-bold mb-3" style={{ color: "#FFFFFF" }}>Ready to Start Building?</h2>
             <p className="text-sm mb-8" style={{ color: "#A0AED9" }}>
               Add your components and let AI create the perfect project for you.
@@ -228,7 +250,7 @@ export default function Index() {
                 <Zap size={16} /> Generate Your First Project
               </button>
             </Link>
-          </div>
+          </FadeInView>
         </section>
       </div>
     </Layout>
