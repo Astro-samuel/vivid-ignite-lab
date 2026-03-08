@@ -1168,6 +1168,7 @@ void loop() {
     ? (codeMode === "basic" ? project.basicCode : project.optimizedCode)
     : userCode;
 
+  const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     setShareToast(true);
     setTimeout(() => setShareToast(false), 2000);
