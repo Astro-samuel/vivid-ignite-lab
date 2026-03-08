@@ -475,10 +475,11 @@ export default function GeneratePage() {
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
+              disabled={savingAll}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.3)" }}
             >
-              <Save size={14} /> {selected.size > 0 ? `Save Selected (${selected.size})` : "Save All"}
+              {savingAll ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Save size={14} /> {selected.size > 0 ? `Save Selected (${selected.size})` : "Save All"}</>}
             </button>
           </div>
         )}
