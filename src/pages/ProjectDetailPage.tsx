@@ -1368,6 +1368,12 @@ void loop() {
               ))}
             </div>
           </div>
+
+          {/* Interactive Schematic */}
+          <div className="mt-6">
+            <InteractiveSchematic components={project.components} title={project.title} />
+          </div>
+        </div>
         )}
 
         {activeTab === "code" && (
