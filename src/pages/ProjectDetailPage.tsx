@@ -1119,7 +1119,7 @@ void loop() {
   })();
 
   const { user } = useAuth();
-  const { saveProject, isProjectSaved, updateProgress, projects: userDbProjects } = useUserProjects();
+  const { saveProject, isProjectSaved, updateProgress, deleteProject, projects: userDbProjects } = useUserProjects();
 
   // Load saved progress from DB
   const dbProject = userDbProjects.find(p => p.project_id === projectId);
@@ -1462,12 +1462,17 @@ void loop() {
                   </div>
                 ) : (
                   saved ? (
-                    <div
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold"
-                      style={{ background: "rgba(0,255,136,0.1)", color: "#00FF88", border: "1px solid rgba(0,255,136,0.3)" }}
+                    <button
+                      onClick={async () => {
+                        await deleteProject(projectId);
+                        setSaved(false);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105 group"
+                      style={{ background: "hsl(var(--success) / 0.1)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}
+                      title="Click to unsave"
                     >
-                      <CheckCircle size={14} /> Saved
-                    </div>
+                      <CheckCircle size={14} /> <span className="group-hover:hidden">Saved</span><span className="hidden group-hover:inline" style={{ color: "hsl(var(--destructive))" }}>Unsave</span>
+                    </button>
                   ) : (
                     <button
                       onClick={handleSaveToProfile}
