@@ -1236,11 +1236,19 @@ void loop() {
       <div className="px-8 py-8 max-w-4xl mx-auto">
         {/* Back link */}
         <button
-          onClick={() => navigate("/catalog")}
+          onClick={() => {
+            if (generatedProject?.source === "think-bigger") {
+              navigate("/think-bigger");
+            } else if (generatedProject) {
+              navigate("/generate");
+            } else {
+              navigate("/catalog");
+            }
+          }}
           className="flex items-center gap-2 text-sm font-medium mb-6 transition-all hover:gap-3"
           style={{ color: "#00F5FF" }}
         >
-          <ArrowLeft size={16} /> Back to Catalog
+          <ArrowLeft size={16} /> {generatedProject?.source === "think-bigger" ? "Back to Think Bigger" : generatedProject ? "Back to Generate" : "Back to Catalog"}
         </button>
 
         {/* Project Header */}
