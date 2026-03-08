@@ -965,12 +965,8 @@ void loop() {
   },
 ];
 
-// Wokwi project IDs mapping
-const wokwiProjects: Record<number, string> = {
-  1: "https://wokwi.com/projects/new/arduino-uno",
-  2: "https://wokwi.com/projects/new/arduino-uno",
-  3: "https://wokwi.com/projects/new/arduino-uno",
-};
+// Wokwi project IDs mapping — every project gets a simulator
+const getWokwiUrl = (_id: number) => "https://wokwi.com/projects/new/arduino-uno";
 
 type ActiveTab = "instructions" | "code" | "simulate";
 type CodeMode = "basic" | "optimized";
@@ -981,7 +977,8 @@ export default function ProjectDetailPage() {
   const projectId = parseInt(id || "1");
   const project = allProjects.find((p) => p.id === projectId) || allProjects[0];
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>("code");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("instructions");
+  const [simExpanded, setSimExpanded] = useState(false);
   const [codeMode, setCodeMode] = useState<CodeMode>("basic");
   const [saved, setSaved] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -1245,13 +1242,23 @@ export default function ProjectDetailPage() {
 
         {activeTab === "simulate" && (
           <div
-            className="rounded-2xl border overflow-hidden"
+            className={`rounded-2xl border overflow-hidden transition-all duration-300 ${simExpanded ? "fixed inset-4 z-50" : ""}`}
             style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
           >
-            <div className="relative" style={{ paddingTop: "56.25%" }}>
+            <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
+              <span className="text-sm font-semibold" style={{ color: "#00F5FF" }}>Wokwi Simulator</span>
+              <button
+                onClick={() => setSimExpanded(!simExpanded)}
+                className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
+                style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
+              >
+                {simExpanded ? "Minimize" : "Expand"}
+              </button>
+            </div>
+            <div className="relative" style={{ paddingTop: simExpanded ? "0" : "56.25%", height: simExpanded ? "calc(100% - 44px)" : undefined }}>
               <iframe
-                src={wokwiProjects[projectId] || "https://wokwi.com/projects/new/arduino-uno"}
-                className="absolute inset-0 w-full h-full"
+                src={getWokwiUrl(projectId)}
+                className={simExpanded ? "w-full h-full" : "absolute inset-0 w-full h-full"}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
                 style={{ border: "none" }}
                 title="Wokwi Simulator"
@@ -1259,6 +1266,7 @@ export default function ProjectDetailPage() {
             </div>
           </div>
         )}
+        {simExpanded && <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setSimExpanded(false)} />}
       </div>
 
       {/* Toasts */}
