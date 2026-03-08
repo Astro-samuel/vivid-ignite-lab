@@ -243,14 +243,13 @@ void loop() {
     difficulty: "beginner", time: "30 mins", xp: 80,
     components: ["Arduino Uno", "RGB LED", "Potentiometer", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Gather components: 1x Arduino Uno, 1x common-cathode RGB LED, 3x 220Ω resistors, 3x 10kΩ potentiometers, 1x breadboard, jumper wires",
-      "Place the RGB LED on the breadboard. Identify the longest pin — that's the common cathode (GND). The other three pins control Red, Green, and Blue (order varies by manufacturer — check the datasheet)",
-      "Connect the common cathode (longest pin) to Arduino GND. Connect each color pin through its own 220Ω resistor to Arduino PWM pins: Red → pin 9, Green → pin 10, Blue → pin 11",
-      "Place three potentiometers on the breadboard. For each: left pin → GND, right pin → 5V, middle pin → A0 (red pot), A1 (green pot), A2 (blue pot)",
-      "Upload the code. Each potentiometer now controls one color channel (0-255 via analogWrite PWM). Turn them to mix any color!",
-      "Open Serial Monitor to see live R, G, B values. Try making: pure red (255,0,0), white (255,255,255), purple (255,0,255), orange (255,165,0)",
-      "🧪 Experiment: Try adding a rainbow fade by removing the pots and cycling through hue values in code. Can you make the LED smoothly transition through all colors?",
-      "⚠️ Troubleshooting: If colors look wrong, you may have a common-anode LED (use 255-value for analogWrite). Verify each resistor is in the correct color channel",
+      "Gather: Arduino Uno, common-cathode RGB LED, 3× 220Ω resistors, 3× potentiometers, breadboard, wires",
+      "Connect RGB LED cathode (longest pin) to GND",
+      "Wire each color through a 220Ω resistor: R→pin 9, G→pin 10, B→pin 11",
+      "Wire 3 pots: middles to A0, A1, A2 — outers to 5V/GND",
+      "Upload code — each pot controls one color channel (0-255)",
+      "🧪 Try making purple (255,0,255) or orange (255,165,0)",
+      "⚠️ Wrong colors? You may have a common-anode LED — invert values",
     ],
     basicCode: `/*
   Learning Goals:
