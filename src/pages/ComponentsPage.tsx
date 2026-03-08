@@ -4,8 +4,6 @@ import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import FadeInView from "@/components/motion/FadeInView";
 
 type Category = "Microcontroller" | "Sensor" | "Actuator" | "Display" | "Communication" | "Module" | "Power" | "Passive" | "Other";
 
