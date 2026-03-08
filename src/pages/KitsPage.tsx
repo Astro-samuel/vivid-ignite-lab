@@ -138,7 +138,7 @@ export default function KitsPage() {
     setTimeout(() => {
       setToast("");
       navigate("/components");
-    }, 2000);
+    }, 3000);
   };
 
   return (

@@ -9,16 +9,18 @@ export default function PageTransition({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (location.key !== prevKey.current) {
-      // Fade out
+      // Fade out slowly
       setVisible(false);
       const timer = setTimeout(() => {
         prevKey.current = location.key;
         setContent(children);
-        // Small delay to let new content mount before fading in
+        // Let new content mount, then fade in
         requestAnimationFrame(() => {
-          setVisible(true);
+          requestAnimationFrame(() => {
+            setVisible(true);
+          });
         });
-      }, 150);
+      }, 350); // longer exit duration
       return () => clearTimeout(timer);
     } else {
       setContent(children);
@@ -29,8 +31,8 @@ export default function PageTransition({ children }: { children: ReactNode }) {
     <div
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(6px)",
-        transition: "opacity 200ms ease-out, transform 200ms ease-out",
+        transform: visible ? "translateY(0)" : "translateY(12px)",
+        transition: "opacity 400ms ease-in-out, transform 400ms ease-in-out",
         minHeight: "100vh",
       }}
     >
