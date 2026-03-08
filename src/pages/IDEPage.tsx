@@ -189,7 +189,7 @@ export default function IDEPage() {
       <div className="flex flex-col" style={{ height: "calc(100vh - 48px)" }}>
         {/* Top Bar */}
         <div
-          className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0"
+          className="flex items-center justify-between px-6 py-2.5 border-b flex-shrink-0"
           style={{ background: "hsl(232, 48%, 6%)", borderColor: "hsl(232, 40%, 16%)" }}
         >
           <div>
@@ -199,22 +199,22 @@ export default function IDEPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button onClick={loadErrorCode} className="btn-neon-outline-teal px-3 py-1.5 text-xs flex items-center gap-1.5">
-              <Bug size={12} /> Load Error Code
+          <div className="flex items-center gap-2">
+            <button onClick={loadErrorCode} className="btn-neon-outline-teal px-2.5 py-1.5 text-xs flex items-center gap-1.5">
+              <Bug size={11} /> Load Errors
             </button>
-            <button onClick={resetCode} className="px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105" style={{ background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
-              <RefreshCw size={12} /> Reset
+            <button onClick={resetCode} className="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105" style={{ background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
+              <RefreshCw size={11} /> Reset
             </button>
             <button
               onClick={runAndCheck}
               disabled={runStep === "compiling" || runStep === "simulating" || runStep === "safety"}
-              className="btn-neon-green px-5 py-2 text-sm font-bold flex items-center gap-2 disabled:opacity-60"
+              className="btn-neon-green px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 disabled:opacity-60"
             >
-              {runStep === "compiling" && <><Loader2 size={14} className="animate-spin" /> Compiling...</>}
-              {runStep === "simulating" && <><Loader2 size={14} className="animate-spin" /> Simulating...</>}
-              {runStep === "safety" && <><Loader2 size={14} className="animate-spin" /> Safety Check...</>}
-              {(runStep === "idle" || runStep === "success" || runStep === "error") && <><Play size={14} /> ▶ Run &amp; Check</>}
+              {runStep === "compiling" && <><Loader2 size={12} className="animate-spin" /> Compiling...</>}
+              {runStep === "simulating" && <><Loader2 size={12} className="animate-spin" /> Simulating...</>}
+              {runStep === "safety" && <><Loader2 size={12} className="animate-spin" /> Safety Check...</>}
+              {(runStep === "idle" || runStep === "success" || runStep === "error") && <><Play size={12} /> Run &amp; Check</>}
             </button>
           </div>
         </div>
