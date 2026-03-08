@@ -353,7 +353,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                           <DifficultyBadge difficulty={p.difficulty} />
-                          <span className="text-xs" style={{ color: "#A0AED9" }}>Completed {p.completedOn}</span>
+                          <span className="text-xs" style={{ color: "#A0AED9" }}>Completed</span>
                           <span className="text-xs font-bold" style={{ color: "#00FF88" }}>+{p.xp} XP</span>
                         </div>
                       </div>
