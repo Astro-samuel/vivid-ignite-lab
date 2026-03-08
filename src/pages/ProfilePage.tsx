@@ -1,10 +1,13 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { User, Camera, Edit3, Save, Star, Zap, Trophy, CheckCircle, Flame, ChevronRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
 import MotionCard from "@/components/motion/MotionCard";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserProjects } from "@/hooks/useUserProjects";
 
 interface UserProfile {
   name: string;
@@ -18,15 +21,15 @@ interface UserProfile {
   avatar: string | null;
 }
 
-const initialProfile: UserProfile = {
-  name: "Alex Maker",
-  username: "alex_maker",
-  bio: "Passionate about Arduino and electronics. Building the future one circuit at a time! ⚡",
-  level: 7,
-  xp: 245,
-  maxXP: 500,
-  streak: 3,
-  projectsCompleted: 5,
+const emptyProfile: UserProfile = {
+  name: "",
+  username: "",
+  bio: "",
+  level: 1,
+  xp: 0,
+  maxXP: 200,
+  streak: 0,
+  projectsCompleted: 0,
   avatar: null,
 };
 
