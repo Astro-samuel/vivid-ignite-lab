@@ -277,7 +277,7 @@ export default function DashboardPage() {
                     <div className="flex items-start justify-between gap-3 mb-1">
                       <div>
                         <h3 className="font-bold" style={{ color: "#FFFFFF" }}>{p.title}</h3>
-                        <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "#A0AED9" }}>{p.desc}</p>
+                        <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "#A0AED9" }}>{p.description || ""}</p>
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         <button
