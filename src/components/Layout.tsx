@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react";
 import Sidebar from "./Sidebar";
 import AIMentor from "./AIMentor";
-import { Globe, ChevronDown, Loader2 } from "lucide-react";
+import { Globe, ChevronDown, Loader2, Menu, X } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface LayoutProps {
@@ -10,6 +10,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [langOpen, setLangOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { languages, selectedLang, translating, selectLanguage } = useTranslation();
 
   const handleSelectLang = async (lang: typeof languages[0]) => {
@@ -19,17 +20,32 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "hsl(232, 45%, 8%)" }}>
-      <Sidebar />
+      <Sidebar collapsed={sidebarCollapsed} />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
         <header
-          className="flex items-center justify-end gap-2 px-4 py-2 border-b flex-shrink-0"
+          className="flex items-center gap-2 px-4 py-2 border-b flex-shrink-0"
           style={{
             background: "hsl(232, 48%, 6%)",
             borderColor: "hsl(232, 40%, 16%)",
             minHeight: "48px",
           }}
         >
+          {/* Hamburger toggle */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 hover:scale-105"
+            style={{
+              color: "#00F5FF",
+              background: "rgba(0,245,255,0.06)",
+              border: "1px solid rgba(0,245,255,0.15)",
+            }}
+          >
+            {sidebarCollapsed ? <Menu size={16} /> : <X size={16} />}
+          </button>
+
+          <div className="flex-1" />
+
           {/* Language Switcher */}
           <div className="relative" data-no-translate>
             <button
@@ -92,7 +108,6 @@ export default function Layout({ children }: LayoutProps) {
         </main>
       </div>
 
-      {/* AI Mentor - floating bottom right */}
       <AIMentor />
     </div>
   );
