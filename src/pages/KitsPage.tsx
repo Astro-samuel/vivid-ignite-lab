@@ -3,6 +3,22 @@ import { Package, Zap, CheckCircle } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 
+// Map kit component names to canonical ComponentsPage names
+const componentNameMap: Record<string, string> = {
+  "BMP180 Pressure": "BMP180 (Pressure)",
+  "DHT22": "Temperature Sensor (DHT22)",
+  "HC-SR04": "Ultrasonic Sensor (HC-SR04)",
+  "Servo Motor": "Servo Motor (SG90)",
+  "L298N Motor Driver": "Motor Driver (L298N)",
+  "OLED Display": "OLED Display (0.96\")",
+  "Chassis Kit": "Breadboard", // closest match
+};
+
+function normalizeKitComponent(raw: string): string {
+  const base = raw.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").trim();
+  return componentNameMap[base] || base;
+}
+
 const kits = [
   {
     id: 1,
@@ -105,20 +121,20 @@ export default function KitsPage() {
   const [toast, setToast] = useState("");
 
   const handleHaveKit = (kit: typeof kits[0]) => {
-    if (selectedKits.has(kit.id)) return;
-    setSelectedKits((prev) => new Set([...prev, kit.id]));
+    // Clear previous kit selection and inventory
+    setSelectedKits(new Set([kit.id]));
 
-    // Add kit components to localStorage inventory
-    const inventory = getInventory();
+    // Build fresh inventory from only this kit's components (normalized)
+    const inventory: string[] = [];
     kit.components.forEach((c) => {
-      const base = c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "");
-      if (!inventory.includes(base)) {
-        inventory.push(base);
+      const normalized = normalizeKitComponent(c);
+      if (!inventory.includes(normalized)) {
+        inventory.push(normalized);
       }
     });
     saveInventory(inventory);
 
-    setToast(`✓ ${kit.name} added to inventory!`);
+    setToast(`✓ ${kit.name} added to inventory! (${inventory.length} components)`);
     setTimeout(() => {
       setToast("");
       navigate("/components");
