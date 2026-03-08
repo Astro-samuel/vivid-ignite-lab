@@ -484,10 +484,15 @@ void loop() {
     difficulty: "intermediate", time: "55 mins", xp: 115,
     components: ["Arduino Uno", "Soil Moisture Sensor", "Relay Module", "Water Pump", "LED (Green)", "LED (Red)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect soil moisture sensor analog output to A0",
-      "Connect relay signal pin to digital pin 7",
-      "Connect water pump through the relay",
-      "LEDs on pins 12 (green = moist) and 13 (red = dry)",
+      "Gather components: 1x Arduino Uno, 1x soil moisture sensor (capacitive preferred), 1x 5V relay module, 1x small water pump, 2x LEDs (red & green), 2x 220Ω resistors, breadboard, jumper wires, and a water container",
+      "Connect the soil moisture sensor: VCC → 5V, GND → GND, Analog Output (AO) → Arduino pin A0. Insert the probe forks into the soil of your plant",
+      "Connect the relay module: VCC → 5V, GND → GND, IN (signal) → Arduino digital pin 7. The relay acts as an electrically-controlled switch for the pump",
+      "Wire the water pump through the relay: Connect pump positive wire to the relay's NO (Normally Open) terminal, relay COM to your power supply positive, and pump negative to power supply negative",
+      "Connect green LED through 220Ω resistor to pin 12 (indicates moist soil). Connect red LED through 220Ω resistor to pin 13 (indicates dry soil). Both cathodes to GND",
+      "Upload the code. The sensor reads moisture level (0-1023): lower values = wetter soil. The threshold (500) triggers watering — adjust based on your soil type",
+      "Test by inserting the sensor probe into dry vs. wet soil. The Serial Monitor shows real-time readings. When dry (>500), the relay clicks on and the pump runs",
+      "🧪 Experiment: Add a cooldown timer to prevent over-watering. Try logging moisture data over time. Add an OLED display to show moisture percentage",
+      "⚠️ Safety: Never submerge the electronics part of the moisture sensor. Use a separate power supply for the pump if it draws more than 500mA. Capacitive sensors last longer than resistive ones",
     ],
     basicCode: `/*
   Learning Goals:
