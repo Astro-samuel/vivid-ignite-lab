@@ -149,15 +149,15 @@ function ProjectCard({
             </div>
             <button
               onClick={onStart}
-              className="px-5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
+              disabled={isStarting}
+              className="px-5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{
                 background: "linear-gradient(135deg, #00F5FF, #0099FF)",
                 color: "#0A0E27",
                 boxShadow: "0 0 15px rgba(0,245,255,0.3)",
               }}
             >
-              <Zap size={14} />
-              Start This Project
+              {isStarting ? <><Loader2 size={14} className="animate-spin" /> Starting...</> : <><Zap size={14} /> Start This Project</>}
             </button>
           </div>
         )}
