@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn, Loader2 } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn, Loader2, Zap } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
@@ -10,6 +10,26 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
 
 type Tab = "inProgress" | "completed" | "saved";
+
+// Quick project pool for "What Can I Make?" widget
+const quickProjects = [
+  { id: 104, emoji: "🚦", title: "Traffic Light Controller", difficulty: "beginner", time: "20 mins", xp: 55, components: ["LED", "Arduino Uno", "220Ω Resistor", "Breadboard"] },
+  { id: 105, emoji: "🎹", title: "Button Piano", difficulty: "beginner", time: "25 mins", xp: 65, components: ["Push Button", "Buzzer", "Arduino Uno", "Breadboard"] },
+  { id: 107, emoji: "🎲", title: "Electronic Dice", difficulty: "beginner", time: "25 mins", xp: 60, components: ["LED", "Push Button", "Arduino Uno", "220Ω Resistor"] },
+  { id: 109, emoji: "🌈", title: "Rainbow LED Fader", difficulty: "beginner", time: "25 mins", xp: 65, components: ["RGB LED", "Arduino Uno", "220Ω Resistor", "Breadboard"] },
+  { id: 101, emoji: "💡", title: "Smart LED Mood Lamp", difficulty: "beginner", time: "30 mins", xp: 75, components: ["LED", "Photoresistor", "Arduino Uno", "220Ω Resistor"] },
+  { id: 209, emoji: "🔔", title: "Motion Detection Alarm", difficulty: "intermediate", time: "40 mins", xp: 95, components: ["PIR Sensor", "Buzzer", "LED", "Arduino Uno"] },
+  { id: 207, emoji: "🎯", title: "Laser Tripwire Alarm", difficulty: "intermediate", time: "45 mins", xp: 100, components: ["Laser Module", "Photoresistor", "Buzzer", "Arduino Uno"] },
+  { id: 305, emoji: "🚁", title: "Ultrasonic Radar Scanner", difficulty: "advanced", time: "90 mins", xp: 200, components: ["HC-SR04", "Servo Motor", "Arduino Uno", "Breadboard"] },
+  { id: 303, emoji: "🏠", title: "Smart Home Controller", difficulty: "advanced", time: "100 mins", xp: 220, components: ["ESP8266", "Relay Module", "LED", "Arduino Uno"] },
+];
+
+function getInventoryComponents(userId?: string): string[] {
+  try {
+    const key = userId ? `inventory_${userId}` : "userInventory";
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  } catch { return []; }
+}
 
 const days = ["M", "T", "W", "T", "F", "S", "S"];
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
@@ -31,6 +51,100 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
     <span className="text-xs px-2 py-0.5 rounded-full font-semibold capitalize" style={styles}>
       {difficulty}
     </span>
+  );
+}
+
+function WhatCanIMakeWidget({ navigate, userId }: { navigate: (path: string) => void; userId?: string }) {
+  const inventory = useMemo(() => getInventoryComponents(userId), [userId]);
+  const inventoryNorm = inventory.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
+
+  const buildable = quickProjects.filter(p =>
+    p.components.every(req =>
+      inventoryNorm.some(owned => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
+    )
+  );
+
+  if (inventory.length === 0) {
+    return (
+      <div className="rounded-2xl border p-5 mb-6" style={{ background: "hsl(var(--primary) / 0.04)", borderColor: "hsl(var(--primary) / 0.15)" }}>
+        <div className="flex items-center gap-2 mb-2">
+          <Zap size={16} style={{ color: "hsl(var(--primary))" }} />
+          <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>What Can I Make?</span>
+        </div>
+        <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
+          Add components to your inventory to see projects you can build right now!
+        </p>
+        <button
+          onClick={() => navigate("/components")}
+          className="px-4 py-2 rounded-xl text-xs font-bold transition-all hover:scale-[1.02]"
+          style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
+        >
+          Set Up Inventory
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border p-5 mb-6" style={{ background: "hsl(var(--primary) / 0.04)", borderColor: "hsl(var(--primary) / 0.15)" }}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Zap size={16} style={{ color: "hsl(var(--primary))" }} />
+          <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>
+            What Can I Make? 
+          </span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}>
+            {buildable.length} project{buildable.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+        <button
+          onClick={() => navigate("/generate")}
+          className="text-xs font-semibold transition-all hover:opacity-80"
+          style={{ color: "hsl(var(--primary))" }}
+        >
+          See all →
+        </button>
+      </div>
+
+      {buildable.length === 0 ? (
+        <div>
+          <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
+            No fully buildable projects found with your current inventory. Try adding more components!
+          </p>
+          <button
+            onClick={() => navigate("/components")}
+            className="px-4 py-2 rounded-xl text-xs font-bold transition-all hover:scale-[1.02]"
+            style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
+          >
+            Update Inventory
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-3">
+          {buildable.slice(0, 3).map(p => (
+            <button
+              key={p.id}
+              onClick={() => {
+                localStorage.setItem("activeGeneratedProject", JSON.stringify({
+                  id: p.id, emoji: p.emoji, title: p.title, difficulty: p.difficulty,
+                  time: p.time, xp: p.xp, components: p.components, source: "dashboard",
+                }));
+                navigate(`/project/${p.id}`);
+              }}
+              className="rounded-xl p-3 text-left transition-all hover:scale-[1.02] border"
+              style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
+            >
+              <div className="text-xl mb-1">{p.emoji}</div>
+              <p className="text-xs font-bold truncate" style={{ color: "hsl(var(--foreground))" }}>{p.title}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{p.time}</span>
+                <span className="text-xs font-bold" style={{ color: "hsl(var(--secondary))" }}>+{p.xp}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -156,7 +270,7 @@ export default function DashboardPage() {
         </StaggerContainer>
 
         {/* Two columns: Streak + Daily Challenges */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-4 mb-6">
           {/* Streak */}
           <div
             className="rounded-2xl p-5 border"
@@ -238,6 +352,9 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* "What Can I Make?" Widget */}
+        <WhatCanIMakeWidget navigate={navigate} userId={user?.id} />
 
         {/* Project Tabs */}
         <div className="flex gap-2 mb-5">
