@@ -666,10 +666,16 @@ void loop() {
     difficulty: "advanced", time: "120 mins", xp: 250,
     components: ["Arduino Uno", "Ultrasonic Sensor (HC-SR04)", "Motor Driver (L298N)", "DC Motor", "Battery Holder", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Assemble the chassis with DC motors",
-      "Connect L298N motor driver inputs to pins 5-8",
-      "Mount HC-SR04 on the front, trig pin 9, echo pin 10",
-      "Power motors from battery pack through L298N",
+      "Gather components: 1x Arduino Uno, 1x HC-SR04 ultrasonic sensor, 1x L298N motor driver, 2x DC gear motors, 1x robot chassis with wheels, 1x 4×AA battery holder, breadboard, jumper wires",
+      "Assemble the chassis: mount the two DC motors on the chassis plate using the included brackets. Attach wheels to the motor shafts and add a caster wheel at the front for balance",
+      "Wire the L298N motor driver: connect IN1→pin 5, IN2→pin 6 (Motor A), IN3→pin 7, IN4→pin 8 (Motor B). Connect ENA and ENB jumpers or to PWM pins for speed control",
+      "Connect L298N power: Battery pack positive → L298N 12V input, Battery negative → L298N GND. Also connect L298N GND to Arduino GND (common ground is critical!). If the 5V jumper is in place, L298N provides 5V to Arduino",
+      "Connect motors to L298N: Motor A wires → OUT1/OUT2 terminals, Motor B wires → OUT3/OUT4 terminals. If a motor spins backwards, swap its two wires",
+      "Mount the HC-SR04 on the front of the chassis, facing forward. Connect: VCC → 5V, GND → GND, Trig → pin 9, Echo → pin 10",
+      "Upload the code. The robot measures distance: >20cm = drive forward, <20cm = stop and turn right for 500ms. The getDistance() function uses pulseIn() to calculate centimeters",
+      "Place the robot on the floor and power it on. It should drive forward and turn when it detects walls or objects within 20cm",
+      "🧪 Experiment: Add a servo with the ultrasonic sensor to scan left/right before deciding which way to turn. Try adding speed control with analogWrite() on ENA/ENB pins",
+      "⚠️ Safety: Always test with the car lifted off the ground first. Use fresh batteries — low voltage causes erratic behavior. Keep wires away from wheels",
     ],
     basicCode: `/*
   Learning Goals:
