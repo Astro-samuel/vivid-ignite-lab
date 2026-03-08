@@ -1120,7 +1120,12 @@ void loop() {
   const [simExpanded, setSimExpanded] = useState(false);
   const [codeMode, setCodeMode] = useState<CodeMode>("basic");
   const [showSolution, setShowSolution] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(() => {
+    try {
+      const savedProjects = JSON.parse(localStorage.getItem("savedProjects") || "[]");
+      return savedProjects.some((p: any) => p.id === projectId);
+    } catch { return false; }
+  });
   const [completed, setCompleted] = useState(false);
   const [copyToast, setCopyToast] = useState(false);
   const [checkedSteps, setCheckedSteps] = useState<boolean[]>(new Array(project.instructions.length).fill(false));
@@ -1355,7 +1360,6 @@ void loop() {
       localStorage.setItem("savedProjects", JSON.stringify(savedProjects));
     }
     setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
   };
 
   const diffBadgeStyle =
@@ -1423,13 +1427,22 @@ void loop() {
                     <CheckCircle size={16} /> Completed
                   </div>
                 ) : (
-                  <button
-                    onClick={handleSaveToProfile}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
-                    style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
-                  >
-                    <Save size={14} /> Save Project
-                  </button>
+                  saved ? (
+                    <div
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold"
+                      style={{ background: "rgba(0,255,136,0.1)", color: "#00FF88", border: "1px solid rgba(0,255,136,0.3)" }}
+                    >
+                      <CheckCircle size={14} /> Saved
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleSaveToProfile}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
+                      style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                    >
+                      <Save size={14} /> Save Project
+                    </button>
+                  )
                 )}
               </div>
             </div>
