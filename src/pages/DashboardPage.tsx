@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
+import FadeInView from "@/components/motion/FadeInView";
+import MotionCard from "@/components/motion/MotionCard";
+import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
+import { motion } from "framer-motion";
 
 type Tab = "inProgress" | "completed" | "saved";
 
