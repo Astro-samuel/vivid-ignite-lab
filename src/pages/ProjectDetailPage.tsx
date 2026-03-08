@@ -1373,11 +1373,16 @@ void loop() {
     URL.revokeObjectURL(url);
   };
 
+  const [saving, setSaving] = useState(false);
+  const [unsaving, setUnsaving] = useState(false);
+
   const handleSaveToProfile = async () => {
     if (!user) {
       navigate("/auth");
       return;
     }
+    setSaving(true);
+    await new Promise(r => setTimeout(r, 600));
     const result = await saveProject({
       project_id: project.id,
       emoji: project.emoji,
@@ -1389,6 +1394,7 @@ void loop() {
       components: project.components,
       source: generatedProject?.source || "catalog",
     });
+    setSaving(false);
     if (result.error) {
       alert(result.error);
     } else {
