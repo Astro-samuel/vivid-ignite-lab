@@ -187,7 +187,36 @@ export default function GeneratePage() {
   };
 
   const handleSave = () => {
-    showToast(`✓ ${selected.size > 0 ? selected.size + " projects" : "All projects"} saved!`);
+    const projectsToSave = selected.size > 0 
+      ? projects.filter(p => selected.has(p.id))
+      : projects.filter(Boolean);
+    
+    try {
+      const existing = JSON.parse(localStorage.getItem("savedProjects") || "[]");
+      const merged = [...existing];
+      projectsToSave.forEach(p => {
+        if (!merged.find((e: Project) => e.id === p.id)) {
+          merged.push({ ...p, savedAt: Date.now(), status: "saved" });
+        }
+      });
+      // Enforce 5 project limit
+      const limited = merged.slice(-5);
+      localStorage.setItem("savedProjects", JSON.stringify(limited));
+      showToast(`✓ ${projectsToSave.length} project${projectsToSave.length !== 1 ? "s" : ""} saved to dashboard!`);
+    } catch {
+      showToast("Error saving projects");
+    }
+  };
+
+  const handleStartProject = (project: Project) => {
+    try {
+      const existing = JSON.parse(localStorage.getItem("savedProjects") || "[]");
+      if (!existing.find((e: Project) => e.id === project.id)) {
+        const merged = [...existing, { ...project, savedAt: Date.now(), status: "inProgress" }].slice(-5);
+        localStorage.setItem("savedProjects", JSON.stringify(merged));
+      }
+    } catch {}
+    navigate(`/project/${project.id}`);
   };
 
   return (
