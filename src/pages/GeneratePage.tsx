@@ -146,7 +146,7 @@ export default function GeneratePage() {
   const [toast, setToast] = useState("");
   const [difficulty, setDifficulty] = useState("Any Difficulty");
   const [category, setCategory] = useState("Any Category");
-  const [components, setComponents] = useState<string[]>(defaultComponents);
+  const [components, setComponents] = useState<string[]>(getInventoryComponents);
   const [newComponent, setNewComponent] = useState("");
 
   const showToast = (msg: string) => {
