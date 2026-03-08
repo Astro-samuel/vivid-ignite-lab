@@ -111,16 +111,18 @@ export default function FeedbackPage() {
     <Layout>
       <div className="max-w-2xl mx-auto px-6 py-10">
         {/* Header */}
-        <div className="flex items-center gap-2 mb-1">
-          <MessageSquareHeart size={16} style={{ color: "#B744FF" }} />
-          <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#B744FF" }}>
-            Share Your Thoughts
-          </span>
-        </div>
-        <h1 className="text-3xl font-bold mb-2" style={{ color: "#FFFFFF" }}>Feedback</h1>
-        <p className="text-sm mb-8" style={{ color: "hsl(226, 35%, 65%)" }}>
-          Help us improve Arduino AI — we read every submission!
-        </p>
+        <FadeInView>
+          <div className="flex items-center gap-2 mb-1">
+            <MessageSquareHeart size={16} style={{ color: "#B744FF" }} />
+            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#B744FF" }}>
+              Share Your Thoughts
+            </span>
+          </div>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: "#FFFFFF" }}>Feedback</h1>
+          <p className="text-sm mb-8" style={{ color: "hsl(226, 35%, 65%)" }}>
+            Help us improve Arduino AI — we read every submission!
+          </p>
+        </FadeInView>
 
         <div className="space-y-6">
           {/* Name & Email */}

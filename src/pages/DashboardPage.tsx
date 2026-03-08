@@ -114,9 +114,9 @@ export default function DashboardPage() {
                 <p className="text-2xl font-bold font-orbitron" style={{ color }}>{value}</p>
                 <p className="text-xs" style={{ color: "#A0AED9" }}>{label}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </StaggerContainer>
 
         {/* Two columns: Streak + Daily Challenges */}
         <div className="grid grid-cols-2 gap-4 mb-6">

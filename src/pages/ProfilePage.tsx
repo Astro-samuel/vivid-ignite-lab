@@ -303,11 +303,14 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {savedToast && (
-        <div className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up z-50" style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}>
-          <CheckCircle size={16} /> ✓ Profile Saved!
-        </div>
-      )}
+      <AnimatePresence>
+        {savedToast && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold z-50" style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}>
+            <CheckCircle size={16} /> ✓ Profile Saved!
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Layout>
   );
 }

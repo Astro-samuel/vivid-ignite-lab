@@ -78,14 +78,14 @@ export default function SubmitProjectPage() {
           <ArrowLeft size={16} /> Back to Catalog
         </button>
 
-        <div className="mb-8">
+        <FadeInView className="mb-8">
           <h1 className="text-3xl font-bold mb-2" style={{ color: "#FFFFFF" }}>
             Submit a <span style={{ color: "#00FF88" }}>Project</span>
           </h1>
           <p className="text-sm" style={{ color: "#A0AED9" }}>
             Share your Arduino project with the community! It will be reviewed before appearing in the catalog.
           </p>
-        </div>
+        </FadeInView>
 
         <div className="space-y-5">
           {/* Title */}
