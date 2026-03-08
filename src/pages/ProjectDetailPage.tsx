@@ -938,9 +938,13 @@ void loop() {
     difficulty: "beginner", time: "35 mins", xp: 85,
     components: ["Arduino Uno", "LED Matrix 8x8", "Push Button", "Potentiometer", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect joystick X to A0, Y to A1, button to pin 2",
-      "Connect LED matrix via MAX7219",
-      "Use joystick to move a dot and avoid obstacles",
+      "Gather components: 1x Arduino Uno, 1x joystick module (or 2x potentiometers + 1 button), 1x 8×8 LED matrix with MAX7219 driver, breadboard, jumper wires",
+      "Connect the joystick module: VRx (X-axis) → A0, VRy (Y-axis) → A1, SW (button) → digital pin 2, VCC → 5V, GND → GND. The joystick outputs ~512 at center, 0-1023 at extremes",
+      "Connect the MAX7219 LED matrix: DIN → pin 11, CS → pin 10, CLK → pin 13, VCC → 5V, GND → GND. Install the 'LedControl' library from Library Manager",
+      "Upload the code. The player starts at position (4,4) on an invisible 8×8 grid. Move the joystick to change position — values <300 = left/up, >700 = right/down",
+      "Open Serial Monitor to see player coordinates and score. The score increases each game loop cycle — survive as long as possible!",
+      "🧪 Experiment: Add obstacles that move across the grid. Implement collision detection — if the player hits an obstacle, trigger game over. Add a high score that persists using EEPROM.write()",
+      "⚠️ Troubleshooting: If the joystick drifts, calibrate the center value (read A0/A1 at rest and adjust the 300/700 thresholds). If the matrix shows garbage, check DIN/CLK/CS pin assignments",
     ],
     basicCode: `/*
   Learning Goals:
