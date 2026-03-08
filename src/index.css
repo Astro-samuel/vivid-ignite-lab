@@ -353,7 +353,7 @@
 }
 
 .shimmer-text {
-  background: linear-gradient(90deg, #00F5FF 0%, #B744FF 25%, #FFD700 50%, #B744FF 75%, #00F5FF 100%);
+  background: linear-gradient(90deg, hsl(182, 45%, 50%) 0%, hsl(284, 35%, 55%) 25%, hsl(45, 40%, 55%) 50%, hsl(284, 35%, 55%) 75%, hsl(182, 45%, 50%) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
