@@ -1450,6 +1450,7 @@ void loop() {
                     <button onClick={handleRevealSolution} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={showSolution ? { background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" } : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" }}>
                       {showSolution ? "Hide Solution" : "🔓 Reveal Solution"}
                     </button>
+                    <ExplainCode code={currentCode} />
                     <button onClick={handleCopy} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105" style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}>
                       <Copy size={12} /> Copy
                     </button>
