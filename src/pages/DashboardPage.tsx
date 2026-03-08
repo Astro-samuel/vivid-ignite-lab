@@ -101,8 +101,9 @@ export default function DashboardPage() {
             { label: "Saved", value: savedProjects.length, icon: Bookmark, color: "#B744FF", bg: "rgba(183,68,255,0.08)", border: "rgba(183,68,255,0.2)" },
             { label: "Total XP", value: totalXP, icon: Star, color: "#FFD700", bg: "rgba(255,215,0,0.08)", border: "rgba(255,215,0,0.2)" },
           ].map(({ label, value, icon: Icon, color, bg, border }) => (
-            <div
+            <motion.div
               key={label}
+              variants={staggerItem}
               className="rounded-2xl p-5 flex items-center gap-4 border"
               style={{ background: bg, borderColor: border }}
             >
