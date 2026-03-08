@@ -109,6 +109,18 @@ export default function Index() {
           </div>
         </section>
 
+        {/* Interactive Arduino Board */}
+        <section className="px-8 py-14" style={{ background: "hsl(232, 48%, 6%)" }}>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-8">
+              <p className="text-xs font-semibold mb-2" style={{ color: "hsl(var(--primary))" }}>Interactive</p>
+              <h2 className="text-xl font-bold" style={{ color: "hsl(var(--foreground))" }}>Explore the Arduino UNO</h2>
+              <p className="text-sm mt-2" style={{ color: "hsl(var(--foreground-muted))" }}>Hover over pins and components to learn what they do</p>
+            </div>
+            <InteractiveArduinoBoard />
+          </div>
+        </section>
+
         {/* Quick Actions */}
         <section className="px-8 py-14">
           <div className="max-w-5xl mx-auto">
