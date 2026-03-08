@@ -502,23 +502,41 @@ export default function GeneratePage() {
           </div>
         </div>
 
-        {/* Generate Button */}
-        <button
-          onClick={generateProjects}
-          disabled={generating}
-          className="w-full py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 mb-6 transition-all hover:scale-[1.01] disabled:opacity-70"
-          style={{
-            background: generating ? "rgba(183,68,255,0.3)" : "linear-gradient(135deg, #B744FF, #FF1493, #FF4500)",
-            color: "#FFFFFF",
-            boxShadow: generating ? "none" : "0 0 30px rgba(183,68,255,0.4)",
-          }}
-        >
-          {generating ? (
-            <><Loader2 size={18} className="animate-spin" /> Generating Projects...</>
-          ) : (
-            <><Zap size={18} /> ✦ Generate Project</>
-          )}
-        </button>
+        {/* Generate Buttons */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <button
+            onClick={generateProjects}
+            disabled={generating || aiRecommending}
+            className="py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70"
+            style={{
+              background: generating ? "rgba(183,68,255,0.3)" : "linear-gradient(135deg, #B744FF, #FF1493, #FF4500)",
+              color: "#FFFFFF",
+              boxShadow: generating ? "none" : "0 0 30px rgba(183,68,255,0.4)",
+            }}
+          >
+            {generating ? (
+              <><Loader2 size={18} className="animate-spin" /> Generating...</>
+            ) : (
+              <><Zap size={18} /> ✦ Generate Project</>
+            )}
+          </button>
+          <button
+            onClick={generateAIRecommendations}
+            disabled={generating || aiRecommending}
+            className="py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70"
+            style={{
+              background: aiRecommending ? "rgba(0,245,255,0.15)" : "linear-gradient(135deg, #00F5FF, #0099FF, #00FF88)",
+              color: aiRecommending ? "#00F5FF" : "#0A0E27",
+              boxShadow: aiRecommending ? "none" : "0 0 30px rgba(0,245,255,0.3)",
+            }}
+          >
+            {aiRecommending ? (
+              <><Loader2 size={18} className="animate-spin" /> AI Thinking...</>
+            ) : (
+              <><Brain size={18} /> 🤖 AI Recommend for My Level</>
+            )}
+          </button>
+        </div>
 
         {/* Action buttons when projects exist */}
         {projects.length > 0 && (
