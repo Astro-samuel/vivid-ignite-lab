@@ -109,7 +109,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
           </Link>
           {user ? (
             <button
-              onClick={async () => { await signOut(); navigate("/"); }}
+              onClick={async () => { await signOut(); navigate("/auth"); }}
               className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg w-full transition-all duration-150 hover:bg-white/5 whitespace-nowrap"
               style={{ color: "hsl(226, 35%, 65%)" }}
             >
