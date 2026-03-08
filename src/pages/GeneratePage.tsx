@@ -245,21 +245,14 @@ export default function GeneratePage() {
     const fresh = pool.filter((p) => !previouslyShown.has(p.id));
     const candidates = fresh.length >= 5 ? fresh : pool; // reset if pool exhausted
 
-    // Score by component match
-    const scored = candidates.map((p) => {
-      const matchCount = p.components.filter((req) =>
+    // Only include projects where ALL required components are in the user's inventory
+    const buildable = candidates.filter((p) =>
+      p.components.length > 0 && p.components.every((req) =>
         ownedNorm.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
-      ).length;
-      return { ...p, matchScore: p.components.length > 0 ? matchCount / p.components.length : 0 };
-    });
+      )
+    );
 
-    // Prioritize full matches, then partial (≥30%), then any
-    const fullMatch = scored.filter((p) => p.matchScore === 1);
-    const partialMatch = scored.filter((p) => p.matchScore >= 0.3 && p.matchScore < 1);
-    const rest = scored.filter((p) => p.matchScore < 0.3);
-
-    const ranked = [...fullMatch.sort(() => Math.random() - 0.5), ...partialMatch.sort(() => Math.random() - 0.5), ...rest.sort(() => Math.random() - 0.5)];
-    const selected5 = ranked.slice(0, 5);
+    const selected5 = buildable.sort(() => Math.random() - 0.5).slice(0, 5);
 
     if (selected5.length === 0) {
       setGenerating(false);
