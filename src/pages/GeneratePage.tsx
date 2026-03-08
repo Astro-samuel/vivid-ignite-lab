@@ -4,6 +4,8 @@ import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import FadeInView from "@/components/motion/FadeInView";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserProjects } from "@/hooks/useUserProjects";
 
 interface Project {
   id: number;
