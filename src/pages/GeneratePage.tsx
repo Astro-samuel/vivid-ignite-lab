@@ -287,37 +287,44 @@ export default function GeneratePage() {
     setSelected((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!user) { navigate("/auth"); return; }
     const projectsToSave = selected.size > 0 
       ? projects.filter(p => selected.has(p.id))
       : projects.filter(Boolean);
     
-    try {
-      const existing = JSON.parse(localStorage.getItem("savedProjects") || "[]");
-      const merged = [...existing];
-      projectsToSave.forEach(p => {
-        if (!merged.find((e: Project) => e.id === p.id)) {
-          merged.push({ ...p, savedAt: Date.now(), status: "saved" });
-        }
+    let savedCount = 0;
+    for (const p of projectsToSave) {
+      const result = await saveProject({
+        project_id: p.id,
+        emoji: p.emoji,
+        title: p.title,
+        description: p.description,
+        difficulty: p.difficulty,
+        time: p.time,
+        xp: p.xp,
+        components: p.components,
+        source: "generate",
       });
-      // Enforce 5 project limit
-      const limited = merged.slice(-5);
-      localStorage.setItem("savedProjects", JSON.stringify(limited));
-      showToast(`✓ ${projectsToSave.length} project${projectsToSave.length !== 1 ? "s" : ""} saved to dashboard!`);
-    } catch {
-      showToast("Error saving projects");
+      if (!result.error) savedCount++;
     }
+    showToast(`✓ ${savedCount} project${savedCount !== 1 ? "s" : ""} saved to dashboard!`);
   };
 
-  const handleStartProject = (project: Project) => {
-    try {
-      const existing = JSON.parse(localStorage.getItem("savedProjects") || "[]");
-      if (!existing.find((e: Project) => e.id === project.id)) {
-        const merged = [...existing, { ...project, savedAt: Date.now(), status: "inProgress" }].slice(-5);
-        localStorage.setItem("savedProjects", JSON.stringify(merged));
-      }
-    } catch {}
-    // Store the full project data so ProjectDetailPage can use it
+  const handleStartProject = async (project: Project) => {
+    if (user) {
+      await saveProject({
+        project_id: project.id,
+        emoji: project.emoji,
+        title: project.title,
+        description: project.description,
+        difficulty: project.difficulty,
+        time: project.time,
+        xp: project.xp,
+        components: project.components,
+        source: "generate",
+      });
+    }
     localStorage.setItem("activeGeneratedProject", JSON.stringify(project));
     navigate(`/project/${project.id}`);
   };
