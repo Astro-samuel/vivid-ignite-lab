@@ -169,9 +169,31 @@ export default function GeneratePage() {
     setSelected(new Set());
     setShowAll(false);
 
+    // Normalize component names for matching (lowercase, strip quantities)
+    const ownedNorm = components.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
+
     let pool = [...projectPool].sort(() => Math.random() - 0.5);
     if (difficulty !== "Any Difficulty") pool = pool.filter((p) => p.difficulty === difficulty.toLowerCase());
-    const shuffled = pool.slice(0, 5);
+
+    // Filter to projects where ALL required components are in user's inventory
+    const matching = pool.filter((p) =>
+      p.components.every((req) => ownedNorm.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned)))
+    );
+
+    // Fall back to partial matches (≥50% components owned) if no full matches
+    const fallback = matching.length > 0 ? matching : pool
+      .map((p) => ({ ...p, matchScore: p.components.filter((req) => ownedNorm.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))).length / p.components.length }))
+      .filter((p) => p.matchScore >= 0.5)
+      .sort((a, b) => b.matchScore - a.matchScore);
+
+    const shuffled = (matching.length > 0 ? matching : fallback).slice(0, 5);
+
+    if (shuffled.length === 0) {
+      setGenerating(false);
+      setLoadingStates([]);
+      showToast("No projects match your components. Try adding more to your inventory!");
+      return;
+    }
 
     shuffled.forEach((project, i) => {
       setTimeout(() => {
