@@ -34,8 +34,20 @@ export default function CatalogPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [diffFilter, setDiffFilter] = useState<string>("all");
+  const [removedIds, setRemovedIds] = useState<number[]>(() => {
+    const saved = localStorage.getItem("removedCatalogProjects");
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  const filtered = projects.filter((p) => {
+  const handleRemove = (id: number) => {
+    const updated = [...removedIds, id];
+    setRemovedIds(updated);
+    localStorage.setItem("removedCatalogProjects", JSON.stringify(updated));
+  };
+
+  const visibleProjects = allProjects.filter((p) => !removedIds.includes(p.id)).slice(0, MAX_PROJECTS);
+
+  const filtered = visibleProjects.filter((p) => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
     const matchDiff = diffFilter === "all" || p.difficulty === diffFilter;
     return matchSearch && matchDiff;
@@ -49,7 +61,7 @@ export default function CatalogPage() {
           <h1 className="text-3xl font-bold mb-2" style={{ color: "#FFFFFF" }}>
             Project <span className="gradient-text-teal">Catalog</span>
           </h1>
-          <p style={{ color: "hsl(226, 35%, 72%)" }}>{projects.length} projects available to build</p>
+          <p style={{ color: "hsl(226, 35%, 72%)" }}>{visibleProjects.length} of {MAX_PROJECTS} projects shown</p>
         </div>
 
         {/* Filters */}
