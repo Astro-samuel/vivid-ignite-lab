@@ -167,6 +167,8 @@ function ProjectCard({
 
 export default function GeneratePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { saveProject } = useUserProjects();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingStates, setLoadingStates] = useState<boolean[]>([]);
   const [generating, setGenerating] = useState(false);
