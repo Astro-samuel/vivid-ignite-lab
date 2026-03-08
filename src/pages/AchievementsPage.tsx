@@ -55,7 +55,7 @@ export default function AchievementsPage() {
           {[
             { icon: Trophy, label: "Unlocked", value: `${unlockedCount}/${achievements.length}`, color: "#FFD700" },
             { icon: Zap, label: "XP Earned", value: `${totalXP}`, color: "#00F5FF" },
-            { icon: Star, label: "Current Streak", value: "3 days 🔥", color: "#FF4500" },
+            { icon: Star, label: "Current Streak", value: "0 days", color: "#FF4500" },
           ].map(({ icon: Icon, label, value, color }) => (
             <motion.div key={label} variants={staggerItem} className="stat-card text-center">
               <Icon size={20} style={{ color }} className="mx-auto mb-2" />
