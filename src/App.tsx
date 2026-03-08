@@ -21,6 +21,8 @@ import FeedbackPage from "./pages/FeedbackPage";
 import SubmitProjectPage from "./pages/SubmitProjectPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import AuthPage from "./pages/AuthPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ function AnimatedRoutes() {
       <Routes location={location}>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/catalog" element={<CatalogPage />} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/components" element={<ProtectedRoute><ComponentsPage /></ProtectedRoute>} />
