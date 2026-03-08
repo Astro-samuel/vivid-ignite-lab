@@ -164,14 +164,13 @@ void loop() {
     difficulty: "intermediate", time: "45 mins", xp: 100,
     components: ["Arduino Uno", "Servo Motor (SG90)", "Potentiometer", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Gather components: 1x Arduino Uno, 1x SG90 micro servo, 1x 10kΩ potentiometer, 1x breadboard, jumper wires",
-      "Identify the servo wires: Red = VCC (power), Brown/Black = GND, Orange/Yellow = Signal (PWM). Connect Red to Arduino 5V and Brown to GND",
-      "Connect the servo's orange signal wire to Arduino digital pin 9 — this must be a PWM-capable pin (marked with ~ on the board)",
-      "Place the potentiometer on the breadboard. Connect the left outer pin to GND, the right outer pin to 5V, and the middle (wiper) pin to Arduino analog pin A0",
-      "Upload the code from the Code tab. The potentiometer's position (0-1023) is mapped to servo angle (0-180°)",
-      "Slowly turn the potentiometer knob — the servo should follow! Open Serial Monitor to see the raw pot value and mapped angle in real-time",
-      "🧪 Experiment: Try changing the map() range to limit servo travel (e.g., 45° to 135°). What happens if you use map(potValue, 0, 1023, 180, 0) — reversed direction!",
-      "⚠️ Troubleshooting: If the servo jitters, add a 100μF capacitor between 5V and GND near the servo. If using multiple servos, use an external 5V power supply — USB can't provide enough current",
+      "Gather: Arduino Uno, SG90 servo, 10kΩ potentiometer, breadboard, wires",
+      "Connect servo: Red→5V, Brown→GND, Orange→pin 9 (PWM)",
+      "Wire potentiometer: outer pins to 5V/GND, middle to A0",
+      "Upload code — pot value maps to servo angle (0-180°)",
+      "Turn the knob and watch the servo follow",
+      "🧪 Try limiting the range with map(val, 0, 1023, 45, 135)",
+      "⚠️ Jittery servo? Add a 100μF capacitor near servo power pins",
     ],
     basicCode: `/*
   Learning Goals:
