@@ -1295,92 +1295,202 @@ void loop() {
         )}
 
         {activeTab === "code" && (
-          <div
-            className="rounded-2xl border overflow-hidden"
-            style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
-          >
-            {/* Code toolbar */}
-            <div
-              className="flex items-center justify-between px-5 py-3 border-b"
-              style={{ borderColor: "hsl(229, 42%, 22%)" }}
-            >
-              <div className="flex items-center gap-2">
-                {showSolution ? (
-                  <>
-                    <button
-                      onClick={() => setCodeMode("basic")}
-                      className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
-                      style={
-                        codeMode === "basic"
-                          ? { background: "transparent", color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }
-                          : { background: "transparent", color: "hsl(226, 35%, 50%)" }
-                      }
-                    >
-                      <Code size={13} /> Basic
-                    </button>
-                    <button
-                      onClick={() => setCodeMode("optimized")}
-                      className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
-                      style={
-                        codeMode === "optimized"
-                          ? { background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27" }
-                          : { background: "transparent", color: "hsl(226, 35%, 50%)" }
-                      }
-                    >
-                      <Sparkles size={13} /> Optimized
-                    </button>
-                  </>
-                ) : (
-                  <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: "#FFD700" }}>
-                    <Sparkles size={14} /> Starter Template — Try it yourself first!
+          <div className="space-y-4">
+            {/* Run workflow indicator */}
+            {runStep !== "idle" && (
+              <div className="rounded-xl px-5 py-3 flex items-center gap-6 border" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
+                {(["compiling", "simulating"] as const).map((step, i) => {
+                  const labels = ["Compiling", "Simulating"];
+                  const stepOrder = ["compiling", "simulating"];
+                  const stepIdx = stepOrder.indexOf(runStep);
+                  const thisIdx = stepOrder.indexOf(step);
+                  const isDone = runStep === "success" || stepIdx > thisIdx;
+                  const isActive = step === runStep;
+                  return (
+                    <div key={step} className="flex items-center gap-2">
+                      {isDone ? <CheckCircle size={16} style={{ color: "#00FF88" }} /> : isActive ? <Loader2 size={16} className="animate-spin" style={{ color: "#00F5FF" }} /> : <div className="w-4 h-4 rounded-full" style={{ background: "hsl(228, 25%, 30%)" }} />}
+                      <span className="text-sm font-medium" style={{ color: isDone ? "#00FF88" : isActive ? "#00F5FF" : "hsl(228, 25%, 50%)" }}>{labels[i]}</span>
+                    </div>
+                  );
+                })}
+                {runStep === "success" && (
+                  <span className="font-bold text-sm animate-fade-in-up flex items-center gap-2" style={{ color: "#00FF88" }}>
+                    <CheckCircle size={16} /> ✓ Compilation Successful! +{project.xp} XP
                   </span>
                 )}
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowSolution(!showSolution)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105"
-                  style={
-                    showSolution
-                      ? { background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }
-                      : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" }
-                  }
-                >
-                  {showSolution ? "Hide Solution" : "🔓 Reveal Solution"}
-                </button>
-                {showSolution && (
-                  <>
+                {runStep === "error" && (
+                  <div className="flex items-center gap-2">
+                    <XCircle size={16} style={{ color: "#FF4500" }} />
+                    <span className="font-bold text-sm" style={{ color: "#FF4500" }}>{errors.length} Error{errors.length !== 1 ? "s" : ""}</span>
                     <button
-                      onClick={handleCopy}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
-                      style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
+                      onClick={() => {
+                        setShowDebugPanel(true);
+                        if (debugMessages.length === 0) {
+                          setDebugMessages([{ role: "ai", content: `🔍 I see ${errors.length} error(s) in your code. Let me help!\n\nFirst issue: "${errors[0]}"\n\nHint: Check for typos and missing syntax. Can you spot it?` }]);
+                        }
+                      }}
+                      className="ml-2 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1"
+                      style={{ background: "rgba(183,68,255,0.2)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.4)" }}
                     >
-                      <Copy size={12} /> Copy
+                      <Brain size={12} /> Debug with AI
                     </button>
-                    <button
-                      onClick={handleDownload}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
-                      style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
-                    >
-                      <Download size={12} /> .ino
-                    </button>
-                  </>
+                  </div>
                 )}
               </div>
-            </div>
+            )}
 
-            {/* Code display */}
-            <pre
-              className="p-5 overflow-x-auto text-sm leading-relaxed"
-              style={{
-                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-                color: "#E0E7FF",
-                background: "hsl(232, 48%, 8%)",
-                maxHeight: "500px",
-              }}
-            >
-              <code>{currentCode}</code>
-            </pre>
+            <div className="flex gap-4">
+              {/* Main code editor */}
+              <div className="flex-1 rounded-2xl border overflow-hidden" style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}>
+                {/* Code toolbar */}
+                <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
+                  <div className="flex items-center gap-2">
+                    {showSolution ? (
+                      <>
+                        <button onClick={() => setCodeMode("basic")} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all" style={codeMode === "basic" ? { background: "transparent", color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" } : { background: "transparent", color: "hsl(226, 35%, 50%)" }}>
+                          <Code size={13} /> Basic
+                        </button>
+                        <button onClick={() => setCodeMode("optimized")} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all" style={codeMode === "optimized" ? { background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27" } : { background: "transparent", color: "hsl(226, 35%, 50%)" }}>
+                          <Sparkles size={13} /> Optimized
+                        </button>
+                      </>
+                    ) : (
+                      <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: "#FFD700" }}>
+                        <Sparkles size={14} /> Starter Template — Try it yourself first!
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {!showSolution && (
+                      <button onClick={() => { setUserCode(starterTemplate); setRunStep("idle"); setErrors([]); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
+                        <RefreshCw size={12} /> Reset
+                      </button>
+                    )}
+                    <button onClick={handleRevealSolution} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={showSolution ? { background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" } : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" }}>
+                      {showSolution ? "Hide Solution" : "🔓 Reveal Solution"}
+                    </button>
+                    <button onClick={handleCopy} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105" style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}>
+                      <Copy size={12} /> Copy
+                    </button>
+                    <button onClick={handleDownload} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105" style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}>
+                      <Download size={12} /> .ino
+                    </button>
+                  </div>
+                </div>
+
+                {/* File tab */}
+                <div className="flex items-center gap-2 px-4 py-1.5 border-b text-xs" style={{ borderColor: "hsl(229, 42%, 22%)", background: "hsl(232, 48%, 6%)", color: "hsl(228, 25%, 60%)" }}>
+                  <span style={{ color: "#00F5FF" }}>sketch.ino</span>
+                  <span>•</span>
+                  <span>Arduino Uno</span>
+                  {!showSolution && <span className="ml-auto" style={{ color: "#00FF88" }}>✎ Editable</span>}
+                </div>
+
+                {/* Code area - editable or read-only */}
+                {showSolution ? (
+                  <pre className="p-5 overflow-x-auto text-sm leading-relaxed" style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace", color: "#E0E7FF", background: "hsl(232, 48%, 8%)", maxHeight: "500px" }}>
+                    <code>{currentCode}</code>
+                  </pre>
+                ) : (
+                  <textarea
+                    value={userCode}
+                    onChange={(e) => setUserCode(e.target.value)}
+                    className="w-full p-5 text-sm leading-relaxed resize-none focus:outline-none"
+                    style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace", color: "#E0E7FF", background: "hsl(232, 48%, 8%)", minHeight: "400px", maxHeight: "500px", caretColor: "#00F5FF", border: "none" }}
+                    spellCheck={false}
+                  />
+                )}
+
+                {/* Error panel */}
+                {errors.length > 0 && (
+                  <div className="border-t p-4 animate-fade-in" style={{ background: "rgba(255,69,0,0.08)", borderColor: "rgba(255,69,0,0.3)" }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle size={14} style={{ color: "#FF4500" }} />
+                      <span className="font-bold text-sm" style={{ color: "#FF4500" }}>Errors</span>
+                    </div>
+                    {errors.map((err, i) => (
+                      <div key={i} className="flex items-start gap-2 text-xs font-mono p-2 rounded-lg mb-1" style={{ background: "rgba(255,69,0,0.1)", color: "#FF6B35" }}>
+                        <XCircle size={12} className="flex-shrink-0 mt-0.5" /> {err}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Run & action bar */}
+                <div className="flex items-center gap-3 px-5 py-3 border-t" style={{ borderColor: "hsl(229, 42%, 22%)", background: "hsl(232, 42%, 11%)" }}>
+                  <button
+                    onClick={runAndCheck}
+                    disabled={runStep === "compiling" || runStep === "simulating"}
+                    className="px-5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 disabled:opacity-60"
+                    style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 15px rgba(0,255,136,0.3)" }}
+                  >
+                    {runStep === "compiling" || runStep === "simulating" ? <><Loader2 size={14} className="animate-spin" /> Running...</> : <><Play size={14} /> ▶ Run & Check</>}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowDebugPanel(true);
+                      if (debugMessages.length === 0) {
+                        setDebugMessages([{ role: "ai", content: `👋 Hi! I can see your code for "${project.title}". I can:\n\n• **Debug errors** after you run\n• **Review your code** for improvements\n• **Give hints** on the TODO sections\n\nWhat would you like help with?` }]);
+                      }
+                    }}
+                    className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
+                    style={{ background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" }}
+                  >
+                    <Brain size={14} /> AI Debug
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowDebugPanel(true);
+                      setDebugMessages((prev) => [...prev, { role: "user", content: "Review my code and suggest improvements" }]);
+                      setAiTyping(true);
+                      setTimeout(() => {
+                        setAiTyping(false);
+                        setDebugMessages((prev) => [...prev, { role: "ai", content: getAIDebugResponse("review improve suggestion") }]);
+                      }, 1000);
+                    }}
+                    className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
+                    style={{ color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                  >
+                    <Eye size={14} /> AI Review
+                  </button>
+                </div>
+              </div>
+
+              {/* AI Debug Side Panel */}
+              {showDebugPanel && (
+                <div className="w-72 rounded-2xl border flex flex-col overflow-hidden animate-fade-in flex-shrink-0" style={{ background: "hsl(232, 42%, 11%)", borderColor: "rgba(183,68,255,0.3)", maxHeight: "620px" }}>
+                  <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "rgba(183,68,255,0.2)", background: "linear-gradient(135deg, rgba(183,68,255,0.15), rgba(255,20,147,0.05))" }}>
+                    <div className="flex items-center gap-2">
+                      <Brain size={14} style={{ color: "#B744FF" }} />
+                      <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Assistant</span>
+                    </div>
+                    <button onClick={() => setShowDebugPanel(false)} className="text-xs px-2 py-0.5 rounded" style={{ color: "#A0AED9" }}>✕</button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ minHeight: 0 }}>
+                    {debugMessages.map((msg, i) => (
+                      <div key={i} className={`p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${msg.role === "user" ? "ml-4" : ""}`} style={{ background: msg.role === "ai" ? "rgba(183,68,255,0.1)" : "rgba(0,245,255,0.1)", border: `1px solid ${msg.role === "ai" ? "rgba(183,68,255,0.25)" : "rgba(0,245,255,0.25)"}`, color: msg.role === "ai" ? "#E0E7FF" : "#00F5FF" }}>
+                        {msg.role === "ai" && <span className="text-xs font-bold block mb-1" style={{ color: "#B744FF" }}>🧠 AI</span>}
+                        {msg.content}
+                      </div>
+                    ))}
+                    {aiTyping && (
+                      <div className="p-2.5 rounded-xl flex items-center gap-1" style={{ background: "rgba(183,68,255,0.1)", border: "1px solid rgba(183,68,255,0.25)" }}>
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF" }} />
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF", animationDelay: "0.15s" }} />
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF", animationDelay: "0.3s" }} />
+                      </div>
+                    )}
+                    <div ref={debugBottomRef} />
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2.5 border-t" style={{ borderColor: "rgba(183,68,255,0.2)", background: "hsl(229, 48%, 10%)" }}>
+                    <input value={debugInput} onChange={(e) => setDebugInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendDebugMessage()} placeholder="Ask about your code..." className="flex-1 bg-transparent text-xs focus:outline-none" style={{ color: "#FFFFFF" }} />
+                    <button onClick={sendDebugMessage} disabled={!debugInput.trim()} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110 disabled:opacity-40" style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}>
+                      <Sparkles size={10} color="#fff" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
