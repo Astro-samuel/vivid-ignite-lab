@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Zap, BookOpen, Trophy, Package, ArrowRight, Cpu, Star, Clock, Lightbulb, Code, Rocket } from "lucide-react";
 import Layout from "@/components/Layout";
+import InteractiveArduinoBoard from "@/components/InteractiveArduinoBoard";
 
 const featuredProjects = [
   { emoji: "💡", title: "LED Blink Tutorial", desc: "The classic 'Hello World' of Arduino — make an LED blink!", difficulty: "beginner", time: "15 mins", xp: 50, id: 1 },
