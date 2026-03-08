@@ -246,6 +246,8 @@ export default function GeneratePage() {
         localStorage.setItem("savedProjects", JSON.stringify(merged));
       }
     } catch {}
+    // Store the full project data so ProjectDetailPage can use it
+    localStorage.setItem("activeGeneratedProject", JSON.stringify(project));
     navigate(`/project/${project.id}`);
   };
 
