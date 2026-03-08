@@ -1503,6 +1503,12 @@ void loop() {
           </div>
         </div>
 
+        {/* Required Libraries */}
+        <RequiredLibraries basicCode={project.basicCode} optimizedCode={project.optimizedCode} />
+
+        {/* Arduino Setup Guide for Beginners */}
+        <ArduinoSetupGuide />
+
         {/* Social / Like / Share bar */}
         <div className="flex items-center gap-3 mb-6">
           <button
