@@ -1849,6 +1849,7 @@ void loop() {
         >
           <Share2 size={16} /> Link copied to clipboard!
         </div>
+      )}
     </Layout>
   );
 }
