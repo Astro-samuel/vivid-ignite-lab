@@ -1360,7 +1360,6 @@ void loop() {
       localStorage.setItem("savedProjects", JSON.stringify(savedProjects));
     }
     setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
   };
 
   const diffBadgeStyle =
