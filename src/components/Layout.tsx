@@ -1,109 +1,20 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useState } from "react";
 import Sidebar from "./Sidebar";
 import AIMentor from "./AIMentor";
-import { Globe, ChevronDown } from "lucide-react";
+import { Globe, ChevronDown, Loader2 } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-const languages = [
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "es", label: "Español", flag: "🇪🇸" },
-  { code: "fr", label: "Français", flag: "🇫🇷" },
-  { code: "de", label: "Deutsch", flag: "🇩🇪" },
-  { code: "pt", label: "Português", flag: "🇧🇷" },
-  { code: "ja", label: "日本語", flag: "🇯🇵" },
-  { code: "ar", label: "العربية", flag: "🇸🇦" },
-  { code: "zh-CN", label: "中文", flag: "🇨🇳" },
-  { code: "ko", label: "한국어", flag: "🇰🇷" },
-  { code: "hi", label: "हिन्दी", flag: "🇮🇳" },
-];
-
-// Inject Google Translate script once
-let gtScriptLoaded = false;
-function loadGoogleTranslate() {
-  if (gtScriptLoaded) return;
-  gtScriptLoaded = true;
-
-  // Define the callback Google Translate expects
-  (window as any).googleTranslateElementInit = () => {
-    new (window as any).google.translate.TranslateElement(
-      {
-        pageLanguage: "en",
-        autoDisplay: false,
-        layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
-      },
-      "google_translate_element"
-    );
-  };
-
-  const script = document.createElement("script");
-  script.src =
-    "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-  script.async = true;
-  document.body.appendChild(script);
-}
-
-function triggerGoogleTranslate(langCode: string) {
-  // Google Translate stores language in a cookie and uses a hidden select
-  const frame = document.querySelector<HTMLIFrameElement>(".goog-te-menu-frame");
-  if (frame) {
-    const doc = frame.contentDocument || frame.contentWindow?.document;
-    if (doc) {
-      const items = doc.querySelectorAll<HTMLAnchorElement>(".goog-te-menu2-item a");
-      items.forEach((item) => {
-        // Match by lang code in the anchor's text or value
-        if (item.getAttribute("href")?.includes(`#${langCode}`)) {
-          item.click();
-          return;
-        }
-      });
-    }
-  }
-
-  // Fallback: set cookie directly and reload translate frame
-  document.cookie = `googtrans=/en/${langCode}; path=/`;
-  document.cookie = `googtrans=/en/${langCode}; path=/; domain=${window.location.hostname}`;
-
-  // Try triggering via the select element Google injects
-  const selectEl = document.querySelector<HTMLSelectElement>(".goog-te-combo");
-  if (selectEl) {
-    selectEl.value = langCode;
-    selectEl.dispatchEvent(new Event("change"));
-  }
-}
-
 export default function Layout({ children }: LayoutProps) {
   const [langOpen, setLangOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState(languages[0]);
+  const { languages, selectedLang, translating, selectLanguage } = useTranslation();
 
-  useEffect(() => {
-    loadGoogleTranslate();
-  }, []);
-
-  const handleSelectLang = (lang: typeof languages[0]) => {
-    setSelectedLang(lang);
+  const handleSelectLang = async (lang: typeof languages[0]) => {
     setLangOpen(false);
-
-    if (lang.code === "en") {
-      // Reset to English — remove translation
-      document.cookie = "googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
-      document.cookie = `googtrans=; path=/; domain=${window.location.hostname}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
-      const selectEl = document.querySelector<HTMLSelectElement>(".goog-te-combo");
-      if (selectEl) {
-        selectEl.value = "en";
-        selectEl.dispatchEvent(new Event("change"));
-      }
-      // Fallback: reload to clear translation
-      setTimeout(() => {
-        if (document.querySelector(".goog-te-banner-frame")) {
-          window.location.reload();
-        }
-      }, 300);
-    } else {
-      triggerGoogleTranslate(lang.code);
-    }
+    await selectLanguage(lang);
   };
 
   return (
@@ -119,11 +30,8 @@ export default function Layout({ children }: LayoutProps) {
             minHeight: "48px",
           }}
         >
-          {/* Hidden Google Translate element */}
-          <div id="google_translate_element" style={{ display: "none" }} />
-
           {/* Language Switcher */}
-          <div className="relative">
+          <div className="relative" data-no-translate>
             <button
               onClick={() => setLangOpen(!langOpen)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
@@ -133,7 +41,11 @@ export default function Layout({ children }: LayoutProps) {
                 color: "#E0E7FF",
               }}
             >
-              <span>{selectedLang.flag}</span>
+              {translating ? (
+                <Loader2 size={12} className="animate-spin" style={{ color: "#00F5FF" }} />
+              ) : (
+                <span>{selectedLang.flag}</span>
+              )}
               <Globe size={12} style={{ color: "#00F5FF" }} />
               <span>{selectedLang.label}</span>
               <ChevronDown size={11} style={{ color: "#A0AED9" }} />
@@ -152,7 +64,8 @@ export default function Layout({ children }: LayoutProps) {
                   <button
                     key={lang.code}
                     onClick={() => handleSelectLang(lang)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-left transition-all hover:bg-white/5"
+                    disabled={translating}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-left transition-all hover:bg-white/5 disabled:opacity-50"
                     style={{
                       color: lang.code === selectedLang.code ? "#00F5FF" : "#E0E7FF",
                     }}
@@ -181,18 +94,6 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* AI Mentor - floating bottom right */}
       <AIMentor />
-
-      {/* Hide Google Translate UI artifacts */}
-      <style>{`
-        .goog-te-banner-frame, .goog-te-balloon-frame,
-        #goog-gt-tt, .goog-te-ftab-frame,
-        .VIpgJd-ZVi9od-aZ2wEe-wOHMyf, .VIpgJd-ZVi9od-aZ2wEe-OiiCO {
-          display: none !important;
-        }
-        body { top: 0 !important; }
-        .skiptranslate { display: none !important; }
-        .goog-te-gadget { display: none !important; }
-      `}</style>
     </div>
   );
 }
