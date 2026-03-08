@@ -1470,22 +1470,28 @@ void loop() {
                   saved ? (
                     <button
                       onClick={async () => {
+                        setUnsaving(true);
+                        await new Promise(r => setTimeout(r, 600));
                         await deleteProject(projectId);
+                        setUnsaving(false);
                         setSaved(false);
                       }}
+                      disabled={unsaving}
                       className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105 group"
-                      style={{ background: "hsl(var(--success) / 0.1)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}
+                      style={{ background: "hsl(var(--success) / 0.1)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)", opacity: unsaving ? 0.7 : 1 }}
                       title="Click to unsave"
                     >
-                      <CheckCircle size={14} /> <span className="group-hover:hidden">Saved</span><span className="hidden group-hover:inline" style={{ color: "hsl(var(--destructive))" }}>Unsave</span>
+                      {unsaving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />} 
+                      {unsaving ? "Removing..." : <><span className="group-hover:hidden">Saved</span><span className="hidden group-hover:inline" style={{ color: "hsl(var(--destructive))" }}>Unsave</span></>}
                     </button>
                   ) : (
                     <button
                       onClick={handleSaveToProfile}
+                      disabled={saving}
                       className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
-                      style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                      style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)", opacity: saving ? 0.7 : 1 }}
                     >
-                      <Save size={14} /> Save Project
+                      {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} {saving ? "Saving..." : "Save Project"}
                     </button>
                   )
                 )}
