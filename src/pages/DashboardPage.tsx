@@ -54,7 +54,100 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
   );
 }
 
-export default function DashboardPage() {
+function WhatCanIMakeWidget({ navigate, userId }: { navigate: (path: string) => void; userId?: string }) {
+  const inventory = useMemo(() => getInventoryComponents(userId), [userId]);
+  const inventoryNorm = inventory.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
+
+  const buildable = quickProjects.filter(p =>
+    p.components.every(req =>
+      inventoryNorm.some(owned => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
+    )
+  );
+
+  if (inventory.length === 0) {
+    return (
+      <div className="rounded-2xl border p-5 mb-6" style={{ background: "hsl(var(--primary) / 0.04)", borderColor: "hsl(var(--primary) / 0.15)" }}>
+        <div className="flex items-center gap-2 mb-2">
+          <Zap size={16} style={{ color: "hsl(var(--primary))" }} />
+          <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>What Can I Make?</span>
+        </div>
+        <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
+          Add components to your inventory to see projects you can build right now!
+        </p>
+        <button
+          onClick={() => navigate("/components")}
+          className="px-4 py-2 rounded-xl text-xs font-bold transition-all hover:scale-[1.02]"
+          style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
+        >
+          Set Up Inventory
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border p-5 mb-6" style={{ background: "hsl(var(--primary) / 0.04)", borderColor: "hsl(var(--primary) / 0.15)" }}>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Zap size={16} style={{ color: "hsl(var(--primary))" }} />
+          <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>
+            What Can I Make? 
+          </span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}>
+            {buildable.length} project{buildable.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+        <button
+          onClick={() => navigate("/generate")}
+          className="text-xs font-semibold transition-all hover:opacity-80"
+          style={{ color: "hsl(var(--primary))" }}
+        >
+          See all →
+        </button>
+      </div>
+
+      {buildable.length === 0 ? (
+        <div>
+          <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
+            No fully buildable projects found with your current inventory. Try adding more components!
+          </p>
+          <button
+            onClick={() => navigate("/components")}
+            className="px-4 py-2 rounded-xl text-xs font-bold transition-all hover:scale-[1.02]"
+            style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
+          >
+            Update Inventory
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-3">
+          {buildable.slice(0, 3).map(p => (
+            <button
+              key={p.id}
+              onClick={() => {
+                localStorage.setItem("activeGeneratedProject", JSON.stringify({
+                  id: p.id, emoji: p.emoji, title: p.title, difficulty: p.difficulty,
+                  time: p.time, xp: p.xp, components: p.components, source: "dashboard",
+                }));
+                navigate(`/project/${p.id}`);
+              }}
+              className="rounded-xl p-3 text-left transition-all hover:scale-[1.02] border"
+              style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
+            >
+              <div className="text-xl mb-1">{p.emoji}</div>
+              <p className="text-xs font-bold truncate" style={{ color: "hsl(var(--foreground))" }}>{p.title}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{p.time}</span>
+                <span className="text-xs font-bold" style={{ color: "hsl(var(--secondary))" }}>+{p.xp}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
   const [activeTab, setActiveTab] = useState<Tab>("inProgress");
   const navigate = useNavigate();
   const [toast, setToast] = useState("");
