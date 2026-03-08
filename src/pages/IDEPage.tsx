@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, Bug, RefreshCw, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
+import CodeEditor from "@/components/CodeEditor";
 
 type RunStep = "idle" | "compiling" | "simulating" | "safety" | "success" | "error";
 
