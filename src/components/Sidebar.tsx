@@ -97,20 +97,18 @@ export default function Sidebar() {
         </div>
 
         {/* Pro Tip */}
-        {!collapsed && (
-          <div
-            className="mx-2 my-2 p-3 rounded-xl"
-            style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.15)" }}
-          >
-            <div className="flex items-center gap-1.5 mb-1">
-              <Star size={11} style={{ color: "#FFD700" }} />
-              <span className="text-xs font-bold" style={{ color: "#FFD700" }}>Pro Tip</span>
-            </div>
-            <p className="text-xs" style={{ color: "hsl(226, 35%, 65%)" }}>
-              Add all your components to get the best project recommendations!
-            </p>
+        <div
+          className="mx-2 my-2 p-3 rounded-xl"
+          style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.15)" }}
+        >
+          <div className="flex items-center gap-1.5 mb-1">
+            <Star size={11} style={{ color: "#FFD700" }} />
+            <span className="text-xs font-bold" style={{ color: "#FFD700" }}>Pro Tip</span>
           </div>
-        )}
+          <p className="text-xs" style={{ color: "hsl(226, 35%, 65%)" }}>
+            Add all your components to get the best project recommendations!
+          </p>
+        </div>
       </div>
 
       {/* Collapse toggle - hamburger menu */}
