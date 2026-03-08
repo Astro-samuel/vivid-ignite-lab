@@ -149,6 +149,7 @@ export function useTranslation() {
   const selectLanguage = useCallback(
     async (lang: typeof languages[0]) => {
       setSelectedLang(lang);
+      localStorage.setItem("app-language", lang.code);
       if (lang.code === "en") {
         restoreOriginal();
       } else {
