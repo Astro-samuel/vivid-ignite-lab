@@ -3,6 +3,7 @@ import { Send, CheckCircle, ArrowLeft } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import FadeInView from "@/components/motion/FadeInView";
 
 const difficultyOptions = ["beginner", "intermediate", "advanced"];
 
