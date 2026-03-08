@@ -117,6 +117,8 @@ export default function CatalogPage() {
               >
                 <X size={14} />
               </button>
+              <div className="text-3xl mb-3 animate-float" style={{ animationDelay: `${i * 0.3}s` }}>
+                {p.emoji}
               </div>
               <h3 className="font-bold mb-2" style={{ color: "#FFFFFF" }}>{p.title}</h3>
               <p className="text-sm mb-4 line-clamp-2" style={{ color: "hsl(226, 35%, 72%)" }}>{p.desc}</p>
