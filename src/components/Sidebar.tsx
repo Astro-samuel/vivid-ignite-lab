@@ -1,8 +1,9 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, LayoutDashboard, BookOpen, Cpu, Package, Zap, Lightbulb,
-  Trophy, User, LogOut, Star, MessageSquareHeart, PlusCircle
+  Trophy, User, LogOut, LogIn, Star, MessageSquareHeart, PlusCircle
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -25,6 +26,7 @@ interface SidebarProps {
 export default function Sidebar({ collapsed }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   return (
     <aside
@@ -105,13 +107,25 @@ export default function Sidebar({ collapsed }: SidebarProps) {
             <User size={16} className="flex-shrink-0" style={{ color: location.pathname === "/profile" ? "#00F5FF" : "inherit" }} />
             <span className="text-sm font-medium">Profile</span>
           </Link>
-          <button
-            className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg w-full transition-all duration-150 hover:bg-white/5 whitespace-nowrap"
-            style={{ color: "hsl(226, 35%, 65%)" }}
-          >
-            <LogOut size={16} className="flex-shrink-0" style={{ color: "#FF4500" }} />
-            <span className="text-sm font-medium">Sign Out</span>
-          </button>
+          {user ? (
+            <button
+              onClick={async () => { await signOut(); navigate("/"); }}
+              className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg w-full transition-all duration-150 hover:bg-white/5 whitespace-nowrap"
+              style={{ color: "hsl(226, 35%, 65%)" }}
+            >
+              <LogOut size={16} className="flex-shrink-0" style={{ color: "#FF4500" }} />
+              <span className="text-sm font-medium">Sign Out</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate("/auth")}
+              className="flex items-center gap-3 px-2.5 py-2.5 rounded-lg w-full transition-all duration-150 hover:bg-white/5 whitespace-nowrap"
+              style={{ color: "hsl(var(--primary))" }}
+            >
+              <LogIn size={16} className="flex-shrink-0" />
+              <span className="text-sm font-medium">Sign In</span>
+            </button>
+          )}
         </div>
 
         <div
