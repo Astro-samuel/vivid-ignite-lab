@@ -203,7 +203,20 @@ export default function CatalogPage() {
                         </div>
 
                         <button
-                          onClick={() => navigate(`/project/${p.id}`)}
+                          onClick={() => {
+                            localStorage.setItem("activeGeneratedProject", JSON.stringify({
+                              id: p.id,
+                              emoji: p.emoji,
+                              title: p.title,
+                              description: p.desc,
+                              difficulty: p.difficulty,
+                              time: p.time,
+                              xp: p.xp,
+                              components: p.tags,
+                              source: "catalog",
+                            }));
+                            navigate(`/project/${p.id}`);
+                          }}
                           className="w-full py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-[1.02]"
                           style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 12px rgba(0,245,255,0.25)" }}
                         >
