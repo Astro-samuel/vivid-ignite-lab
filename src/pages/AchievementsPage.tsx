@@ -13,17 +13,17 @@ interface Achievement {
 }
 
 const achievements: Achievement[] = [
-  { id: 1, emoji: "⚡", title: "First Spark", desc: "Complete your first Arduino project", xp: 50, unlocked: true, color: "#00F5FF" },
-  { id: 2, emoji: "🔥", title: "On Fire", desc: "Complete 3 projects in a row", xp: 100, unlocked: true, color: "#FF4500" },
-  { id: 3, emoji: "🌈", title: "Color Wizard", desc: "Master LED and RGB projects", xp: 75, unlocked: true, color: "#B744FF" },
+  { id: 1, emoji: "⚡", title: "First Spark", desc: "Complete your first Arduino project", xp: 50, unlocked: false, color: "#00F5FF", progress: 0, total: 1 },
+  { id: 2, emoji: "🔥", title: "On Fire", desc: "Complete 3 projects in a row", xp: 100, unlocked: false, color: "#FF4500", progress: 0, total: 3 },
+  { id: 3, emoji: "🌈", title: "Color Wizard", desc: "Master LED and RGB projects", xp: 75, unlocked: false, color: "#B744FF", progress: 0, total: 3 },
   { id: 4, emoji: "🤖", title: "Robotics Pioneer", desc: "Build your first autonomous robot", xp: 200, unlocked: false, color: "#00F5FF", progress: 0, total: 1 },
-  { id: 5, emoji: "🏆", title: "Champion Builder", desc: "Complete 10 projects", xp: 500, unlocked: false, color: "#FFD700", progress: 3, total: 10 },
-  { id: 6, emoji: "🧠", title: "AI Collaborator", desc: "Use AI debug assist 5 times", xp: 150, unlocked: false, color: "#B744FF", progress: 2, total: 5 },
-  { id: 7, emoji: "🌟", title: "Star Maker", desc: "Earn 1000+ XP total", xp: 300, unlocked: false, color: "#FFD700", progress: 245, total: 1000 },
-  { id: 8, emoji: "⚙️", title: "Component Master", desc: "Add 20+ components to your inventory", xp: 125, unlocked: false, color: "#00FF88", progress: 8, total: 20 },
+  { id: 5, emoji: "🏆", title: "Champion Builder", desc: "Complete 10 projects", xp: 500, unlocked: false, color: "#FFD700", progress: 0, total: 10 },
+  { id: 6, emoji: "🧠", title: "AI Collaborator", desc: "Use AI debug assist 5 times", xp: 150, unlocked: false, color: "#B744FF", progress: 0, total: 5 },
+  { id: 7, emoji: "🌟", title: "Star Maker", desc: "Earn 1000+ XP total", xp: 300, unlocked: false, color: "#FFD700", progress: 0, total: 1000 },
+  { id: 8, emoji: "⚙️", title: "Component Master", desc: "Add 20+ components to your inventory", xp: 125, unlocked: false, color: "#00FF88", progress: 0, total: 20 },
 ];
 
-const streakDays = [true, true, true, false, false, false, false];
+const streakDays = [false, false, false, false, false, false, false];
 
 export default function AchievementsPage() {
   const navigate = useNavigate();
