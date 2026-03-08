@@ -412,13 +412,12 @@ void processCommand(String cmd) {
     difficulty: "beginner", time: "25 mins", xp: 70,
     components: ["Arduino Uno", "Buzzer", "Push Button", "Resistor (10kΩ)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Gather components: 1x Arduino Uno, 1x piezo buzzer, 1x push button, 1x 10kΩ resistor, 1x breadboard, jumper wires",
-      "Place the piezo buzzer on the breadboard. Connect the positive leg (marked + or longer) to Arduino digital pin 8. Connect the negative leg to GND",
-      "Place the push button on the breadboard, straddling the center gap. Connect one side to Arduino digital pin 2 and through a 10kΩ pull-down resistor to GND. Connect the other side to 5V",
-      "Upload the code from the Code tab. The melody array contains frequencies for notes C4 through C5: {262, 294, 330, 349, 392, 440, 494, 523} Hz",
-      "Press and hold the button — you'll hear a C major scale! Each note plays for 200ms with a 50ms gap between notes",
-      "🧪 Experiment: Try changing frequencies to play different melodies. 440 Hz = A4 (concert pitch). Try the Super Mario theme: {660, 660, 0, 660, 0, 520, 660, 0, 784}",
-      "⚠️ Troubleshooting: If no sound, verify buzzer polarity. If the button doesn't trigger, check the pull-down resistor is connected to GND (not floating). Use Serial.println(digitalRead(buttonPin)) to debug",
+      "Gather: Arduino Uno, piezo buzzer, push button, 10kΩ resistor, breadboard, wires",
+      "Connect buzzer: positive→pin 8, negative→GND",
+      "Wire button between pin 2 (with pull-down resistor) and 5V",
+      "Upload code — press button to play a C major scale",
+      "🧪 Try the Mario theme: {660, 660, 0, 660, 0, 520, 660, 0, 784}",
+      "⚠️ No sound? Check buzzer polarity and button wiring",
     ],
     basicCode: `/*
   Learning Goals:
