@@ -394,7 +394,7 @@ export default function GeneratePage() {
               return loadingStates[i] ? (
                 <ProjectCard key={`loading-${i}`} project={{ id: -i, emoji: "⏳", title: "", difficulty: "beginner", time: "", xp: 0, description: "", components: [] }} index={i} isLoading={true} isSelected={false} onSelect={() => {}} onStart={() => {}} />
               ) : projects[i] ? (
-                <ProjectCard key={`proj-${projects[i].id}`} project={projects[i]} index={i} isLoading={false} isSelected={selected.has(projects[i].id)} onSelect={() => toggleSelect(projects[i].id)} onStart={() => navigate("/ide")} />
+                <ProjectCard key={`proj-${projects[i].id}`} project={projects[i]} index={i} isLoading={false} isSelected={selected.has(projects[i].id)} onSelect={() => toggleSelect(projects[i].id)} onStart={() => handleStartProject(projects[i])} />
               ) : null;
             })}
 
