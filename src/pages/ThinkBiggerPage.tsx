@@ -126,7 +126,20 @@ export default function ThinkBiggerPage() {
                       </div>
 
                       <button
-                        onClick={() => navigate("/ide")}
+                        onClick={() => {
+                          localStorage.setItem("activeGeneratedProject", JSON.stringify({
+                            id: 100 + idea.id,
+                            emoji: idea.emoji,
+                            title: idea.title,
+                            description: idea.desc,
+                            difficulty: idea.level.toLowerCase() === "expert" ? "advanced" : idea.level.toLowerCase(),
+                            time: "120+ mins",
+                            xp: 500,
+                            components: idea.tags,
+                            source: "think-bigger",
+                          }));
+                          navigate(`/project/${100 + idea.id}`);
+                        }}
                         className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 group-hover:gap-3"
                         style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 12px rgba(0,245,255,0.3)" }}
                       >
