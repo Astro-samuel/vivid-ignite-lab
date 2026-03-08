@@ -273,7 +273,136 @@ export default function ComponentsPage() {
               🤖 Smart Component Recognition
               <Sparkles size={12} />
             </button>
+            <button
+              onClick={() => { setShowVisualSearch(!showVisualSearch); setShowPastePanel(false); }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
+              style={{
+                background: "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(0,153,255,0.15))",
+                color: "#00F5FF",
+                border: "1px solid rgba(0,245,255,0.3)",
+              }}
+            >
+              <Camera size={15} />
+              📸 Visual Search
+              <Eye size={12} />
+            </button>
           </div>
+
+          {/* Visual Search Panel */}
+          <AnimatePresence>
+            {showVisualSearch && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden mb-4"
+              >
+                <div
+                  className="rounded-2xl border p-5"
+                  style={{ background: "rgba(0,245,255,0.04)", borderColor: "rgba(0,245,255,0.2)" }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Camera size={16} style={{ color: "#00F5FF" }} />
+                      <span className="font-bold text-sm" style={{ color: "#00F5FF" }}>Visual Component Search</span>
+                    </div>
+                    <button onClick={() => setShowVisualSearch(false)} style={{ color: "#A0AED9" }}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
+                    Upload a photo of an electronic component you can't identify — AI will recognize it and add it to your inventory.
+                  </p>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+
+                  {!previewImage ? (
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full py-8 rounded-xl border-2 border-dashed flex flex-col items-center gap-2 transition-all hover:scale-[1.01]"
+                      style={{ borderColor: "rgba(0,245,255,0.3)", color: "#00F5FF" }}
+                    >
+                      <Camera size={28} />
+                      <span className="text-sm font-semibold">Take Photo or Upload Image</span>
+                      <span className="text-xs" style={{ color: "#A0AED9" }}>Supports JPG, PNG, WEBP</span>
+                    </button>
+                  ) : (
+                    <div>
+                      <div className="rounded-xl overflow-hidden mb-3 relative">
+                        <img src={previewImage} alt="Component" className="w-full max-h-48 object-contain rounded-xl" style={{ background: "hsl(229, 42%, 10%)" }} />
+                        <button
+                          onClick={() => { setPreviewImage(null); setVisualResults([]); }}
+                          className="absolute top-2 right-2 p-1.5 rounded-lg"
+                          style={{ background: "rgba(0,0,0,0.6)", color: "#FFF" }}
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+
+                      {visualSearching && (
+                        <div className="flex items-center gap-2 py-3 justify-center">
+                          <Loader2 size={16} className="animate-spin" style={{ color: "#00F5FF" }} />
+                          <span className="text-sm" style={{ color: "#00F5FF" }}>Analyzing image...</span>
+                        </div>
+                      )}
+
+                      {visualResults.length > 0 && (
+                        <div className="mt-3 p-4 rounded-xl" style={{ background: "rgba(0,255,136,0.06)", border: "1px solid rgba(0,255,136,0.2)" }}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Sparkles size={14} style={{ color: "#00FF88" }} />
+                            <span className="text-sm font-bold" style={{ color: "#00FF88" }}>
+                              Identified {visualResults.length} component{visualResults.length !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                          <div className="space-y-1.5 mb-3">
+                            {visualResults.map(item => (
+                              <div key={item.name} className="flex items-center justify-between px-3 py-2 rounded-lg"
+                                style={{ background: "rgba(0,255,136,0.08)", border: "1px solid rgba(0,255,136,0.15)" }}>
+                                <span className="text-xs font-medium" style={{ color: "#E0E7FF" }}>
+                                  {ownedNames.includes(item.name) ? "✓ " : "+ "}{item.name}
+                                </span>
+                                <span className="text-xs px-2 py-0.5 rounded-full" style={{
+                                  background: item.confidence === "high" ? "rgba(0,255,136,0.15)" : item.confidence === "medium" ? "rgba(255,165,0,0.15)" : "rgba(255,80,80,0.15)",
+                                  color: item.confidence === "high" ? "#00FF88" : item.confidence === "medium" ? "#FFA500" : "#FF5050",
+                                  border: `1px solid ${item.confidence === "high" ? "rgba(0,255,136,0.3)" : item.confidence === "medium" ? "rgba(255,165,0,0.3)" : "rgba(255,80,80,0.3)"}`
+                                }}>
+                                  {item.confidence}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          <button
+                            onClick={addVisualResultsToInventory}
+                            className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                            style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27" }}
+                          >
+                            <Plus size={14} /> Add to Inventory
+                          </button>
+                        </div>
+                      )}
+
+                      {!visualSearching && visualResults.length === 0 && (
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                          style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                        >
+                          <Camera size={14} /> Try Another Photo
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <AnimatePresence>
             {showPastePanel && (
