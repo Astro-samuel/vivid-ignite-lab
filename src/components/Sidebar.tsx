@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, LayoutDashboard, BookOpen, Cpu, Package, Zap, Lightbulb,
-  Trophy, User, ChevronLeft, ChevronRight, LogOut, Star
+  Trophy, User, LogOut, Star, Menu, X
 } from "lucide-react";
 
 const navItems = [
@@ -116,17 +116,17 @@ export default function Sidebar() {
         )}
       </div>
 
-      {/* Collapse toggle */}
+      {/* Collapse toggle - hamburger menu */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-16 w-6 h-6 rounded-full border flex items-center justify-center transition-all duration-200 hover:scale-110 z-10"
+        className="absolute -right-4 top-4 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-110 z-10"
         style={{
           background: "hsl(232, 42%, 13%)",
-          borderColor: "rgba(0,245,255,0.4)",
+          border: "1px solid hsl(232, 40%, 22%)",
           color: "#00F5FF",
         }}
       >
-        {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+        {collapsed ? <Menu size={16} /> : <X size={16} />}
       </button>
     </aside>
   );
