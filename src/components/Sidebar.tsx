@@ -92,7 +92,7 @@ export default function Sidebar() {
             title={collapsed ? "Sign Out" : undefined}
           >
             <LogOut size={16} className="flex-shrink-0" style={{ color: "#FF4500" }} />
-            {!collapsed && <span className="text-sm font-medium">Sign Out</span>}
+            <span className="text-sm font-medium">Sign Out</span>
           </button>
         </div>
 
