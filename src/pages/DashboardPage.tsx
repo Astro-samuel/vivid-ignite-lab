@@ -94,7 +94,7 @@ export default function DashboardPage() {
         </FadeInView>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <StaggerContainer className="grid grid-cols-4 gap-4 mb-6">
           {[
             { label: "In Progress", value: inProgressProjects.length, icon: Play, color: "#00F5FF", bg: "rgba(0,245,255,0.08)", border: "rgba(0,245,255,0.2)" },
             { label: "Completed", value: completedProjects.length, icon: CheckCircle, color: "#00FF88", bg: "rgba(0,255,136,0.08)", border: "rgba(0,255,136,0.2)" },
