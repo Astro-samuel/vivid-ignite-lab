@@ -83,6 +83,108 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          level: number
+          projects_completed: number
+          streak_days: number
+          total_xp: number
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          level?: number
+          projects_completed?: number
+          streak_days?: number
+          total_xp?: number
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          level?: number
+          projects_completed?: number
+          streak_days?: number
+          total_xp?: number
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      user_projects: {
+        Row: {
+          checked_steps: boolean[] | null
+          components: string[] | null
+          current_code: string | null
+          description: string | null
+          difficulty: string | null
+          emoji: string | null
+          id: string
+          notes: Json | null
+          progress: number | null
+          project_id: number
+          saved_at: string
+          source: string | null
+          status: string
+          time: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          xp: number | null
+        }
+        Insert: {
+          checked_steps?: boolean[] | null
+          components?: string[] | null
+          current_code?: string | null
+          description?: string | null
+          difficulty?: string | null
+          emoji?: string | null
+          id?: string
+          notes?: Json | null
+          progress?: number | null
+          project_id: number
+          saved_at?: string
+          source?: string | null
+          status?: string
+          time?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          xp?: number | null
+        }
+        Update: {
+          checked_steps?: boolean[] | null
+          components?: string[] | null
+          current_code?: string | null
+          description?: string | null
+          difficulty?: string | null
+          emoji?: string | null
+          id?: string
+          notes?: Json | null
+          progress?: number | null
+          project_id?: number
+          saved_at?: string
+          source?: string | null
+          status?: string
+          time?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          xp?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
