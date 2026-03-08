@@ -178,7 +178,7 @@ export default function AIMentor() {
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.4 }}
+        transition={{ type: "spring", stiffness: 400, damping: 22, delay: 0.2 }}
         onClick={() => setOpen((o) => !o)}
         className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center z-50 shadow-2xl"
         whileHover={{ scale: 1.1 }}
