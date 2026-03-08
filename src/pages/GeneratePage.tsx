@@ -183,6 +183,7 @@ export default function GeneratePage() {
   const [newComponent, setNewComponent] = useState("");
   const [previouslyShown, setPreviouslyShown] = useState<Set<number>>(new Set());
   const [communityProjects, setCommunityProjects] = useState<Project[]>([]);
+  const [aiRecommending, setAiRecommending] = useState(false);
 
   // Fetch approved community projects on mount
   useEffect(() => {
