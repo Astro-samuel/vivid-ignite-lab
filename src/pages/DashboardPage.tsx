@@ -53,6 +53,15 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>("inProgress");
   const navigate = useNavigate();
   const [toast, setToast] = useState("");
+  const [allProjects, setAllProjects] = useState<SavedProject[]>([]);
+
+  useEffect(() => {
+    setAllProjects(loadSavedProjects());
+  }, []);
+
+  const inProgressProjects = allProjects.filter(p => p.status === "inProgress");
+  const completedProjects = allProjects.filter(p => p.status === "completed");
+  const savedProjects = allProjects.filter(p => p.status === "saved");
 
   const showToast = (msg: string) => {
     setToast(msg);
