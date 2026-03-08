@@ -1,9 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowLeft, Clock, Zap, CheckCircle, Settings, Code, Play, Copy, Download, Sparkles, Save, Loader2, XCircle, AlertTriangle, Brain, Eye, RefreshCw, ChevronDown, ChevronUp, BookOpen, Lightbulb, Award, Info, ExternalLink, CheckSquare, Square, Star, MessageCircle, ThumbsUp, Share2 } from "lucide-react";
 import ExplainCode from "@/components/ExplainCode";
 import CodeEditor from "@/components/CodeEditor";
 import RequiredLibraries from "@/components/RequiredLibraries";
 import ArduinoSetupGuide from "@/components/ArduinoSetupGuide";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserProjects } from "@/hooks/useUserProjects";
 
 import Layout from "@/components/Layout";
 import { useNavigate, useParams } from "react-router-dom";
