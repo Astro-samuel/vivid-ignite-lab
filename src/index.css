@@ -281,22 +281,22 @@
 
 @layer utilities {
   .bg-gradient-teal {
-    background: linear-gradient(135deg, #00F5FF, #00D4FF, #0099FF);
+    background: linear-gradient(135deg, hsl(182, 45%, 45%), hsl(197, 40%, 40%), hsl(210, 40%, 45%));
   }
   .bg-gradient-gold {
-    background: linear-gradient(135deg, #FFE135, #FFD700, #FFA500);
+    background: linear-gradient(135deg, hsl(48, 35%, 55%), hsl(45, 40%, 50%), hsl(35, 40%, 48%));
   }
   .bg-gradient-green {
-    background: linear-gradient(135deg, #00FF88, #00E676, #00C853);
+    background: linear-gradient(135deg, hsl(150, 40%, 45%), hsl(143, 38%, 42%), hsl(144, 38%, 38%));
   }
   .bg-gradient-hero {
-    background: linear-gradient(135deg, rgba(0,245,255,0.1) 0%, rgba(183,68,255,0.1) 50%, rgba(255,215,0,0.05) 100%);
+    background: linear-gradient(135deg, rgba(80, 180, 190, 0.08) 0%, rgba(150, 90, 200, 0.08) 50%, rgba(190, 170, 80, 0.04) 100%);
   }
   .border-neon-teal {
-    border-color: rgba(0, 245, 255, 0.4);
+    border-color: rgba(80, 180, 190, 0.3);
   }
   .border-neon-gold {
-    border-color: rgba(255, 215, 0, 0.4);
+    border-color: rgba(190, 170, 80, 0.3);
   }
   .animate-pulse-slow {
     animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
