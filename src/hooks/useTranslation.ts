@@ -62,7 +62,6 @@ export function useTranslation() {
   const [selectedLang, setSelectedLang] = useState(getSavedLang);
   const [translating, setTranslating] = useState(false);
   const originalTextsRef = useRef<Map<Text, string>>(new Map());
-  const location = useLocation();
   const observerRef = useRef<MutationObserver | null>(null);
   const pendingNodesRef = useRef<Text[]>([]);
   const batchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
