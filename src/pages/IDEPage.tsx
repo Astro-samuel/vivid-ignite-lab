@@ -177,7 +177,7 @@ export default function IDEPage() {
   };
 
   const resetCode = () => {
-    setCode(sampleCode);
+    setCode(starterCode);
     setRunStep("idle");
     setErrors([]);
     setXpAwarded(false);
