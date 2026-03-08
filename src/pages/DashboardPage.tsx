@@ -281,7 +281,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         <button
-                          onClick={() => navigate("/ide")}
+                          onClick={() => navigate(`/project/${p.id}`)}
                           className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105"
                           style={{
                             background: "linear-gradient(135deg, #00F5FF, #0099FF)",
