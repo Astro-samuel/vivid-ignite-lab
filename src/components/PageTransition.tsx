@@ -1,33 +1,40 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 
 export default function PageTransition({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const [displayChildren, setDisplayChildren] = useState(children);
-  const [stage, setStage] = useState<"enter" | "exit">("enter");
+  const [visible, setVisible] = useState(true);
+  const prevKey = useRef(location.key);
+  const [content, setContent] = useState(children);
 
   useEffect(() => {
-    // On route change: fade out, swap content, fade in
-    if (children !== displayChildren) {
-      setStage("exit");
+    if (location.key !== prevKey.current) {
+      // Fade out
+      setVisible(false);
       const timer = setTimeout(() => {
-        setDisplayChildren(children);
-        setStage("enter");
-      }, 150); // exit duration
+        prevKey.current = location.key;
+        setContent(children);
+        // Small delay to let new content mount before fading in
+        requestAnimationFrame(() => {
+          setVisible(true);
+        });
+      }, 150);
       return () => clearTimeout(timer);
+    } else {
+      setContent(children);
     }
-  }, [children, displayChildren]);
+  }, [location.key, children]);
 
   return (
     <div
-      className="min-h-screen"
       style={{
-        opacity: stage === "enter" ? 1 : 0,
-        transform: stage === "enter" ? "translateY(0)" : "translateY(6px)",
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(6px)",
         transition: "opacity 200ms ease-out, transform 200ms ease-out",
+        minHeight: "100vh",
       }}
     >
-      {displayChildren}
+      {content}
     </div>
   );
 }
