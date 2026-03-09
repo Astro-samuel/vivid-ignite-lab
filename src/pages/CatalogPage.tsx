@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
+import { useUserProjects } from "@/hooks/useUserProjects";
 
 const PROJECTS_PER_LEVEL = 5;
 
