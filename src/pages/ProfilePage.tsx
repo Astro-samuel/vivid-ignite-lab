@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { User, Camera, Edit3, Save, Star, Zap, Trophy, CheckCircle, Flame, ChevronRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProjects } from "@/hooks/useUserProjects";
+import { calculateSkillProgress } from "@/lib/skillMapping";
 
 interface UserProfile {
   name: string;
@@ -32,14 +33,6 @@ const emptyProfile: UserProfile = {
   projectsCompleted: 0,
   avatar: null,
 };
-
-const skillProgress = [
-  { name: "Electronics Basics", level: "Beginner", percent: 0, color: "#00F5FF" },
-  { name: "Programming", level: "Beginner", percent: 0, color: "#00FF88" },
-  { name: "Sensors & Actuators", level: "Beginner", percent: 0, color: "#FFD700" },
-  { name: "IoT & Connectivity", level: "Beginner", percent: 0, color: "#B744FF" },
-  { name: "Robotics", level: "Beginner", percent: 0, color: "#FF1493" },
-];
 
 const recentActivity: { icon: string; text: string; time: string; color: string }[] = [];
 
@@ -109,6 +102,13 @@ export default function ProfilePage() {
     setSavedToast(true);
     setTimeout(() => setSavedToast(false), 3000);
   };
+
+  // Calculate skill progress from completed projects
+  const completedProjectIds = useMemo(() =>
+    projects.filter(p => p.status === "completed").map(p => p.project_id),
+    [projects]
+  );
+  const skillProgress = useMemo(() => calculateSkillProgress(completedProjectIds), [completedProjectIds]);
 
   const xpPercent = (profile.xp / profile.maxXP) * 100;
 
