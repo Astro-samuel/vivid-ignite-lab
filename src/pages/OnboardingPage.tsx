@@ -238,7 +238,7 @@ export default function OnboardingPage() {
                 </button>
 
                 <button
-                  onClick={() => setStep(1)}
+                  onClick={() => setStep(2)}
                   className="w-full py-2 text-xs font-medium hover:underline"
                   style={{ color: "hsl(var(--muted-foreground))" }}
                 >
