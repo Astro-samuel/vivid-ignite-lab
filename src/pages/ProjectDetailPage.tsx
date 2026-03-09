@@ -1,5 +1,13 @@
-import { useState } from "react";
-import { ArrowLeft, Clock, Zap, CheckCircle, Settings, Code, Play, Copy, Download, Sparkles, Save } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { toast as sonnerToast } from "sonner";
+import { ArrowLeft, Clock, Zap, CheckCircle, Settings, Code, Play, Copy, Download, Sparkles, Save, Loader2, XCircle, AlertTriangle, Brain, Eye, RefreshCw, ChevronDown, ChevronUp, BookOpen, Lightbulb, Award, Info, ExternalLink, CheckSquare, Square, Star, MessageCircle, ThumbsUp, Share2 } from "lucide-react";
+import ExplainCode from "@/components/ExplainCode";
+import CodeEditor from "@/components/CodeEditor";
+import RequiredLibraries from "@/components/RequiredLibraries";
+import ArduinoSetupGuide from "@/components/ArduinoSetupGuide";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserProjects } from "@/hooks/useUserProjects";
+
 import Layout from "@/components/Layout";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -10,9 +18,14 @@ const allProjects = [
     difficulty: "beginner", time: "15 mins", xp: 50,
     components: ["Arduino Uno", "LED (Red)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect the LED's anode (long leg) to a 220Ω resistor, then to pin 13",
-      "Connect the LED's cathode (short leg) to GND",
-      "Upload the code and watch it blink!",
+      "Gather: Arduino Uno, red LED, 220Ω resistor, breadboard, jumper wires",
+      "Place LED on breadboard — long leg (anode) and short leg (cathode)",
+      "Connect resistor from anode row to pin 13",
+      "Connect cathode row to GND",
+      "Upload the code via Arduino IDE",
+      "LED should blink every second — check Serial Monitor",
+      "🧪 Try changing delay values for faster/slower blinking",
+      "⚠️ No light? Check LED polarity and resistor wiring",
     ],
     basicCode: `/*
   Learning Goals:
@@ -74,10 +87,14 @@ void loop() {
     difficulty: "beginner", time: "30 mins", xp: 75,
     components: ["Arduino Uno", "Temperature Sensor (DHT22)", "Resistor (10kΩ)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect DHT22 VCC to 5V, GND to GND",
-      "Connect data pin to digital pin 2 with a 10kΩ pull-up resistor",
-      "Install the DHT library from Library Manager",
+      "Gather: Arduino Uno, DHT22 sensor, 10kΩ resistor, breadboard, wires",
+      "Wire DHT22: Pin 1→5V, Pin 2→digital pin 2, Pin 4→GND",
+      "Add 10kΩ pull-up resistor between DATA and VCC",
+      "Install 'DHT sensor library' from Library Manager",
       "Upload code and open Serial Monitor at 9600 baud",
+      "You should see temperature and humidity every 2 seconds",
+      "🧪 Breathe on the sensor to see humidity spike",
+      "⚠️ Seeing 'nan'? Check pull-up resistor and pin 2 connection",
     ],
     basicCode: `/*
   Learning Goals:
@@ -153,9 +170,13 @@ void loop() {
     difficulty: "intermediate", time: "45 mins", xp: 100,
     components: ["Arduino Uno", "Servo Motor (SG90)", "Potentiometer", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect servo red wire to 5V, brown to GND, orange to pin 9",
-      "Connect potentiometer: outer pins to 5V and GND, middle to A0",
-      "Upload code and turn the potentiometer to control the servo",
+      "Gather: Arduino Uno, SG90 servo, 10kΩ potentiometer, breadboard, wires",
+      "Connect servo: Red→5V, Brown→GND, Orange→pin 9 (PWM)",
+      "Wire potentiometer: outer pins to 5V/GND, middle to A0",
+      "Upload code — pot value maps to servo angle (0-180°)",
+      "Turn the knob and watch the servo follow",
+      "🧪 Try limiting the range with map(val, 0, 1023, 45, 135)",
+      "⚠️ Jittery servo? Add a 100μF capacitor near servo power pins",
     ],
     basicCode: `/*
   Learning Goals:
@@ -228,9 +249,13 @@ void loop() {
     difficulty: "beginner", time: "30 mins", xp: 80,
     components: ["Arduino Uno", "RGB LED", "Potentiometer", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect RGB LED pins through 220Ω resistors to pins 9, 10, 11",
-      "Connect three potentiometers to A0, A1, A2",
-      "Each pot controls one color channel (R, G, B)",
+      "Gather: Arduino Uno, common-cathode RGB LED, 3× 220Ω resistors, 3× potentiometers, breadboard, wires",
+      "Connect RGB LED cathode (longest pin) to GND",
+      "Wire each color through a 220Ω resistor: R→pin 9, G→pin 10, B→pin 11",
+      "Wire 3 pots: middles to A0, A1, A2 — outers to 5V/GND",
+      "Upload code — each pot controls one color channel (0-255)",
+      "🧪 Try making purple (255,0,255) or orange (255,165,0)",
+      "⚠️ Wrong colors? You may have a common-anode LED — invert values",
     ],
     basicCode: `/*
   Learning Goals:
@@ -310,10 +335,14 @@ void loop() {
     difficulty: "intermediate", time: "60 mins", xp: 130,
     components: ["Arduino Uno", "HC-05 Bluetooth", "LED (Red)", "LED (Green)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect HC-05 TX to Arduino RX (pin 0), RX to TX (pin 1)",
-      "Power HC-05 with 5V and GND",
-      "Connect LEDs to pins 12 and 13 through resistors",
-      "Pair with phone and use a Bluetooth terminal app",
+      "Gather: Arduino Uno, HC-05 Bluetooth, 2× LEDs, 2× 220Ω resistors, breadboard, wires",
+      "Wire HC-05: VCC→5V, GND→GND, TX→pin 0, RX→pin 1 (use voltage divider!)",
+      "Connect LEDs through resistors to pins 12 and 13",
+      "Disconnect HC-05 TX/RX before uploading code",
+      "Pair phone with 'HC-05' (PIN: 1234), use a Bluetooth terminal app",
+      "Send '1'/'2'/'3'/'4' to toggle LEDs on/off",
+      "🧪 Try text commands like 'RED_ON' instead of numbers",
+      "⚠️ No response? Check baud rate (9600) and HC-05 LED blink pattern",
     ],
     basicCode: `/*
   Learning Goals:
@@ -389,9 +418,12 @@ void processCommand(String cmd) {
     difficulty: "beginner", time: "25 mins", xp: 70,
     components: ["Arduino Uno", "Buzzer", "Push Button", "Resistor (10kΩ)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect buzzer positive to pin 8, negative to GND",
-      "Connect push button to pin 2 with a pull-down resistor",
-      "Press button to play melody",
+      "Gather: Arduino Uno, piezo buzzer, push button, 10kΩ resistor, breadboard, wires",
+      "Connect buzzer: positive→pin 8, negative→GND",
+      "Wire button between pin 2 (with pull-down resistor) and 5V",
+      "Upload code — press button to play a C major scale",
+      "🧪 Try the Mario theme: {660, 660, 0, 660, 0, 520, 660, 0, 784}",
+      "⚠️ No sound? Check buzzer polarity and button wiring",
     ],
     basicCode: `/*
   Learning Goals:
@@ -451,10 +483,14 @@ void loop() {
     difficulty: "intermediate", time: "55 mins", xp: 115,
     components: ["Arduino Uno", "Soil Moisture Sensor", "Relay Module", "Water Pump", "LED (Green)", "LED (Red)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect soil moisture sensor analog output to A0",
-      "Connect relay signal pin to digital pin 7",
-      "Connect water pump through the relay",
-      "LEDs on pins 12 (green = moist) and 13 (red = dry)",
+      "Gather: Arduino Uno, soil moisture sensor, relay module, water pump, 2× LEDs, resistors, breadboard",
+      "Connect moisture sensor: VCC→5V, GND→GND, AO→A0",
+      "Wire relay: VCC→5V, GND→GND, IN→pin 7",
+      "Connect pump through relay NO terminal to power supply",
+      "Wire green LED→pin 12, red LED→pin 13 (with resistors)",
+      "Upload code — threshold (500) triggers watering",
+      "🧪 Add a cooldown timer to prevent over-watering",
+      "⚠️ Use separate power for pump if >500mA draw",
     ],
     basicCode: `/*
   Learning Goals:
@@ -528,9 +564,14 @@ void loop() {
     difficulty: "intermediate", time: "70 mins", xp: 140,
     components: ["Arduino Uno", "16x2 LCD", "Push Button", "Buzzer", "LED (Green)", "LED (Red)", "Resistor (220Ω)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect LCD using I2C (SDA to A4, SCL to A5)",
-      "Connect buttons for code input on pins 2-5",
-      "Connect buzzer to pin 8, LEDs to pins 12, 13",
+      "Gather: Arduino Uno, I2C LCD, 4× push buttons, buzzer, 2× LEDs, resistors, breadboard",
+      "Connect LCD via I2C: SDA→A4, SCL→A5, VCC→5V, GND→GND",
+      "Wire 4 buttons to pins 2-5 (using INPUT_PULLUP, no resistors needed)",
+      "Connect buzzer→pin 8, green LED→pin 12, red LED→pin 13",
+      "Install 'LiquidCrystal_I2C' library, upload code",
+      "Enter password '1234' using buttons — LCD shows result",
+      "🧪 Add lockout after 3 failed attempts",
+      "⚠️ LCD blank? Try I2C address 0x3C instead of 0x27",
     ],
     basicCode: `/*
   Learning Goals:
@@ -622,10 +663,14 @@ void loop() {
     difficulty: "advanced", time: "120 mins", xp: 250,
     components: ["Arduino Uno", "Ultrasonic Sensor (HC-SR04)", "Motor Driver (L298N)", "DC Motor", "Battery Holder", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Assemble the chassis with DC motors",
-      "Connect L298N motor driver inputs to pins 5-8",
-      "Mount HC-SR04 on the front, trig pin 9, echo pin 10",
-      "Power motors from battery pack through L298N",
+      "Gather: Arduino Uno, HC-SR04 sensor, L298N driver, 2× DC motors, chassis, battery pack, wires",
+      "Mount motors and wheels on chassis, add front caster wheel",
+      "Wire L298N: IN1/IN2→pins 5/6, IN3/IN4→pins 7/8",
+      "Power L298N from battery pack; connect GND to Arduino GND",
+      "Mount HC-SR04 on front: Trig→pin 9, Echo→pin 10",
+      "Upload code — robot drives forward, turns when <20cm from obstacle",
+      "🧪 Add a servo to scan left/right before turning",
+      "⚠️ Test with car lifted first; keep wires clear of wheels",
     ],
     basicCode: `/*
   Learning Goals:
@@ -722,10 +767,13 @@ void loop() {
     difficulty: "advanced", time: "90 mins", xp: 200,
     components: ["Arduino Uno", "Servo Motor (SG90)", "Photoresistor (LDR)", "Resistor (10kΩ)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Mount two LDRs on either side of a divider",
-      "Connect LDRs to A0 and A1 with voltage dividers",
-      "Connect servo to pin 9",
-      "Servo moves toward the brighter LDR",
+      "Gather: Arduino Uno, SG90 servo, 2× LDRs, 2× 10kΩ resistors, breadboard, wires",
+      "Build sensor mount with vertical divider between two LDRs",
+      "Wire LDR voltage dividers: Left→A0, Right→A1",
+      "Connect servo: signal→pin 9, Red→5V, Brown→GND",
+      "Upload code — servo tracks toward brighter LDR",
+      "🧪 Add a second servo for dual-axis tracking",
+      "⚠️ Jittery? Increase deadband threshold or add averaging",
     ],
     basicCode: `/*
   Learning Goals:
@@ -798,9 +846,13 @@ void loop() {
     difficulty: "intermediate", time: "40 mins", xp: 95,
     components: ["Arduino Uno", "OLED Display (0.96\")", "Temperature Sensor (DHT11)", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect OLED via I2C: SDA to A4, SCL to A5",
-      "Connect DHT11 data pin to pin 2",
-      "Install Adafruit SSD1306 and DHT libraries",
+      "Gather: Arduino Uno, 0.96\" SSD1306 OLED (I2C), DHT11 sensor, breadboard, wires",
+      "Connect OLED: SDA→A4, SCL→A5, VCC→3.3V/5V, GND→GND",
+      "Wire DHT11: VCC→5V, GND→GND, DATA→pin 2",
+      "Install Adafruit SSD1306, GFX, and DHT libraries",
+      "Upload code — dashboard shows temp and humidity",
+      "🧪 Add a mini graph plotting temperature history",
+      "⚠️ Blank screen? Try I2C address 0x3C; check SDA/SCL",
     ],
     basicCode: `/*
   Learning Goals:
@@ -879,9 +931,13 @@ void loop() {
     difficulty: "beginner", time: "35 mins", xp: 85,
     components: ["Arduino Uno", "LED Matrix 8x8", "Push Button", "Potentiometer", "Breadboard", "Jumper Wires"],
     instructions: [
-      "Connect joystick X to A0, Y to A1, button to pin 2",
-      "Connect LED matrix via MAX7219",
-      "Use joystick to move a dot and avoid obstacles",
+      "Gather: Arduino Uno, joystick module (or 2 pots + button), 8×8 LED matrix, breadboard, wires",
+      "Wire joystick: VRx→A0, VRy→A1, SW→pin 2, VCC→5V, GND→GND",
+      "Connect MAX7219 matrix: DIN→pin 11, CS→pin 10, CLK→pin 13",
+      "Upload code — move joystick to control player position",
+      "Score increases each cycle — survive as long as possible!",
+      "🧪 Add obstacles and collision detection for game over",
+      "⚠️ Drifting? Calibrate center values and adjust thresholds",
     ],
     basicCode: `/*
   Learning Goals:
@@ -965,12 +1021,8 @@ void loop() {
   },
 ];
 
-// Wokwi project IDs mapping
-const wokwiProjects: Record<number, string> = {
-  1: "https://wokwi.com/projects/new/arduino-uno",
-  2: "https://wokwi.com/projects/new/arduino-uno",
-  3: "https://wokwi.com/projects/new/arduino-uno",
-};
+// Wokwi project IDs mapping — every project gets a simulator
+const getWokwiUrl = (_id: number) => "https://wokwi.com/projects/new/arduino-uno";
 
 type ActiveTab = "instructions" | "code" | "simulate";
 type CodeMode = "basic" | "optimized";
@@ -979,15 +1031,411 @@ export default function ProjectDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const projectId = parseInt(id || "1");
-  const project = allProjects.find((p) => p.id === projectId) || allProjects[0];
 
-  const [activeTab, setActiveTab] = useState<ActiveTab>("code");
+  const buildFallbackProject = (source: any) => ({
+    id: source.id,
+    emoji: source.emoji || "🔧",
+    title: source.title,
+    desc: source.description || source.desc || "A custom Arduino project.",
+    difficulty: source.difficulty || "beginner",
+    time: source.time || "30 mins",
+    xp: source.xp || 75,
+    components: source.components || ["Arduino Uno"],
+    instructions: [
+      "Review the project components and gather your materials",
+      "Wire up the circuit following the pin assignments in the code",
+      "Read through the starter code and understand each section",
+      "Fill in the TODO sections and test your implementation",
+    ],
+    basicCode: `/*
+  🎯 Project: ${source.title}
+
+  Goal: ${source.description || source.desc || "Complete this project"}
+
+  📦 Components: ${(source.components || ["Arduino Uno"]).join(", ")}
+
+  🧩 Write your implementation below!
+*/
+
+void setup() {
+  Serial.begin(9600);
+  // TODO: Initialize your pins and components
+  Serial.println("${source.title} Starting...");
+}
+
+void loop() {
+  // TODO: Add your main project logic here
+
+  delay(100);
+}`,
+    optimizedCode: `// Optimized version coming soon!
+// Complete the basic version first.
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  delay(100);
+}`,
+  });
+
+  // Check if this project has active local data (Generate/Catalog/Think Bigger/Dashboard)
+  const generatedProject = (() => {
+    try {
+      const stored = localStorage.getItem("activeGeneratedProject");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.id === projectId) {
+          // Cache for future visits
+          try { localStorage.setItem(`projectCache_${projectId}`, stored); } catch {}
+          return parsed;
+        }
+      }
+    } catch {}
+    return null;
+  })();
+
+  // Fallback: check project cache
+  const cachedProject = (() => {
+    try {
+      const cached = localStorage.getItem(`projectCache_${projectId}`);
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return null;
+  })();
+
+  // Fallback lookup from saved dashboard projects by ID
+  const savedProjectById = (() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("savedProjects") || "[]");
+      return saved.find((p: any) => p.id === projectId) || null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const project = (() => {
+    if (generatedProject) {
+      const byTitle = allProjects.find(
+        (p) => p.title.toLowerCase() === generatedProject.title?.toLowerCase()
+      );
+      if (byTitle) return byTitle;
+      return buildFallbackProject(generatedProject);
+    }
+
+    const exactCatalogMatch = allProjects.find((p) => p.id === projectId);
+    if (exactCatalogMatch) return exactCatalogMatch;
+
+    if (savedProjectById) return buildFallbackProject(savedProjectById);
+
+    // Try cached project data
+    if (cachedProject) return buildFallbackProject(cachedProject);
+
+    return allProjects[0];
+  })();
+
+  const { user } = useAuth();
+  const { saveProject, isProjectSaved, updateProgress, completeProject, deleteProject, projects: userDbProjects } = useUserProjects();
+
+  // Load saved progress from DB
+  const dbProject = userDbProjects.find(p => p.project_id === projectId);
+
+  const [activeTab, setActiveTab] = useState<ActiveTab>("instructions");
+  const [simExpanded, setSimExpanded] = useState(false);
   const [codeMode, setCodeMode] = useState<CodeMode>("basic");
+  const [showSolution, setShowSolution] = useState(false);
   const [saved, setSaved] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [copyToast, setCopyToast] = useState(false);
+  const [checkedSteps, setCheckedSteps] = useState<boolean[]>(new Array(project.instructions.length).fill(false));
+  const [expandedComponents, setExpandedComponents] = useState<Record<string, boolean>>({});
+  const [activeNote, setActiveNote] = useState<Record<number, string>>({});
+  const [showConceptDetails, setShowConceptDetails] = useState<string | null>(null);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 80) + 20);
+  const [shareToast, setShareToast] = useState(false);
+  const [showCompletionCelebration, setShowCompletionCelebration] = useState(false);
+  const [simulatorPassed, setSimulatorPassed] = useState(false);
+  const [codePassed, setCodePassed] = useState(false);
+  const [completionAwarded, setCompletionAwarded] = useState(false);
 
-  const currentCode = codeMode === "basic" ? project.basicCode : project.optimizedCode;
+  // Sync saved state and checked steps from DB
+  useEffect(() => {
+    setSaved(isProjectSaved(projectId));
+    if (dbProject) {
+      if (dbProject.checked_steps?.length > 0) setCheckedSteps(dbProject.checked_steps);
+      if (dbProject.notes && Object.keys(dbProject.notes).length > 0) {
+        const parsed: Record<number, string> = {};
+        Object.entries(dbProject.notes).forEach(([k, v]) => { parsed[Number(k)] = v; });
+        setActiveNote(parsed);
+      }
+      if (dbProject.status === "completed") {
+        setCompleted(true);
+        setCompletionAwarded(true);
+      }
+    }
+  }, [dbProject, isProjectSaved, projectId]);
+
+  // AUTO-COMPLETION CHECK: All steps done + code compiled + simulator passed
+  const allStepsCompleted = checkedSteps.length > 0 && checkedSteps.every(Boolean);
+  
+  useEffect(() => {
+    if (allStepsCompleted && codePassed && simulatorPassed && !completionAwarded && saved && user) {
+      // All conditions met — trigger auto-completion
+      setCompletionAwarded(true);
+      setCompleted(true);
+      setShowCompletionCelebration(true);
+
+      // Award XP and update DB
+      completeProject(projectId, project.xp || 0);
+
+      // Hide celebration after 5s
+      setTimeout(() => setShowCompletionCelebration(false), 5000);
+    }
+  }, [allStepsCompleted, codePassed, simulatorPassed, completionAwarded, saved, user, projectId, project.xp, completeProject]);
+
+  // Auto-save progress to DB when steps change
+  const autoSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!user || !saved) return;
+    if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
+    autoSaveTimeout.current = setTimeout(() => {
+      const completedCount = checkedSteps.filter(Boolean).length;
+      const allStepsDone = checkedSteps.length > 0 && checkedSteps.every(Boolean);
+      // Progress milestones: steps=25%, code=50%, simulator=100%
+      let progress = 0;
+      if (allStepsDone && codePassed && simulatorPassed) progress = 100;
+      else if (allStepsDone && codePassed) progress = 50;
+      else if (allStepsDone) progress = 25;
+      else if (project.instructions.length > 0) progress = Math.min(Math.round((completedCount / project.instructions.length) * 24), 24);
+      // Don't overwrite completed status via auto-save
+      if (!completionAwarded) {
+        updateProgress(projectId, {
+          checked_steps: checkedSteps,
+          notes: activeNote as any,
+          progress,
+          status: "inProgress",
+        });
+      }
+    }, 2000);
+    return () => { if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current); };
+  }, [checkedSteps, activeNote, user, saved, completionAwarded, codePassed, simulatorPassed, project.instructions.length, projectId, updateProgress]);
+
+  // Extract learning concepts from code comments
+  const learningConcepts = (() => {
+    const code = project.basicCode;
+    const goalMatch = code.match(/Learning Goals:\n([\s\S]*?)\*\//);
+    if (goalMatch) {
+      return goalMatch[1]
+        .split("\n")
+        .map(l => l.replace(/^\s*\d+\.\s*/, "").trim())
+        .filter(l => l.length > 0);
+    }
+    return ["Digital I/O", "Serial Communication", "Timing Functions"];
+  })();
+
+  // Component info database
+  const componentInfo: Record<string, { description: string; pins: string; tipIcon: string; buyLink?: string }> = {
+    "Arduino Uno": { description: "ATmega328P microcontroller board with 14 digital I/O pins and 6 analog inputs.", pins: "Digital: 0-13 | Analog: A0-A5 | PWM: 3,5,6,9,10,11", tipIcon: "🎛️" },
+    "LED (Red)": { description: "Light-emitting diode. Forward voltage ~2V, max current 20mA.", pins: "Anode (+) → Resistor → Pin | Cathode (−) → GND", tipIcon: "💡" },
+    "Resistor (220Ω)": { description: "Current-limiting resistor to protect LEDs. Color bands: Red-Red-Brown.", pins: "In series with LED anode", tipIcon: "⚡" },
+    "Resistor (10kΩ)": { description: "Pull-up/pull-down resistor. Color bands: Brown-Black-Orange.", pins: "Used in voltage dividers or pull-up circuits", tipIcon: "⚡" },
+    "Breadboard": { description: "Solderless prototyping board. Rails (+/−) run horizontally, rows vertically.", pins: "Power rails on sides, component rows in center", tipIcon: "🔲" },
+    "Jumper Wires": { description: "Male-to-male wires for breadboard connections. Use color coding!", pins: "Red=5V, Black=GND, Others=signals", tipIcon: "🔌" },
+    "Temperature Sensor (DHT22)": { description: "Digital temp & humidity sensor. Range: -40°C to 80°C, ±0.5°C accuracy.", pins: "VCC → 5V | DATA → Digital Pin | GND → GND", tipIcon: "🌡️" },
+    "Temperature Sensor (DHT11)": { description: "Basic digital temp sensor. Range: 0-50°C, ±2°C accuracy.", pins: "VCC → 5V | DATA → Digital Pin | GND → GND", tipIcon: "🌡️" },
+    "Servo Motor (SG90)": { description: "Micro servo with 180° rotation. Torque: 1.8kg·cm at 4.8V.", pins: "Red → 5V | Brown → GND | Orange → PWM Pin", tipIcon: "⚙️" },
+    "Potentiometer": { description: "Variable resistor (10kΩ typical). Turn the knob to change resistance.", pins: "Outer pins → 5V & GND | Middle → Analog Pin", tipIcon: "🎚️" },
+    "RGB LED": { description: "Common cathode LED with 3 color channels. Mix R+G+B for any color.", pins: "Longest pin (cathode) → GND | R,G,B → PWM pins via 220Ω", tipIcon: "🌈" },
+    "HC-05 Bluetooth": { description: "Bluetooth SPP module. Default baud: 9600. Pair code: 1234.", pins: "TX → Arduino RX | RX → Arduino TX | VCC → 5V | GND → GND", tipIcon: "📡" },
+    "Buzzer": { description: "Piezoelectric buzzer. Use tone() to generate frequencies 31Hz-65kHz.", pins: "+ → Digital Pin | − → GND", tipIcon: "🔊" },
+    "Push Button": { description: "Momentary tactile switch. Normally open, closes when pressed.", pins: "One side → Digital Pin + Pull-down | Other → 5V or GND", tipIcon: "🔘" },
+    "Soil Moisture Sensor": { description: "Analog sensor. Low value = wet soil, high value = dry soil.", pins: "VCC → 5V | GND → GND | AO → Analog Pin", tipIcon: "🌱" },
+    "Relay Module": { description: "Electrically controlled switch for high-power devices (up to 10A/250V AC).", pins: "IN → Digital Pin | VCC → 5V | GND → GND", tipIcon: "🔌" },
+    "Water Pump": { description: "Small submersible DC water pump. 3-6V, ~130mA.", pins: "Connected through relay module", tipIcon: "💧" },
+    "16x2 LCD": { description: "Character LCD with I2C adapter. 16 columns × 2 rows display.", pins: "SDA → A4 | SCL → A5 | VCC → 5V | GND → GND", tipIcon: "📺" },
+    "Ultrasonic Sensor (HC-SR04)": { description: "Distance sensor using sound waves. Range: 2cm-400cm.", pins: "Trig → Digital Pin | Echo → Digital Pin | VCC → 5V | GND → GND", tipIcon: "📏" },
+    "Motor Driver (L298N)": { description: "Dual H-bridge motor driver. Controls 2 DC motors or 1 stepper.", pins: "IN1-IN4 → Digital Pins | ENA/ENB → PWM | VCC → 12V | GND → GND", tipIcon: "🏎️" },
+    "DC Motor": { description: "Simple DC motor. Speed controlled by PWM, direction by H-bridge.", pins: "Connected through L298N motor driver", tipIcon: "⚡" },
+    "Photoresistor (LDR)": { description: "Light-dependent resistor. Resistance decreases with more light.", pins: "One leg → 5V | Other → Analog Pin + 10kΩ to GND", tipIcon: "☀️" },
+    "OLED Display (0.96\")": { description: "128×64 pixel I2C OLED. SSD1306 driver. No backlight needed.", pins: "SDA → A4 | SCL → A5 | VCC → 3.3/5V | GND → GND", tipIcon: "📊" },
+    "LED Matrix 8x8": { description: "64 LEDs in an 8×8 grid controlled via MAX7219 driver.", pins: "DIN → Digital Pin | CS → Digital Pin | CLK → Digital Pin", tipIcon: "🎮" },
+    "Battery Holder": { description: "Holds AA batteries for portable power. 4xAA = 6V.", pins: "+ → VIN or Motor Driver | − → GND", tipIcon: "🔋" },
+  };
+
+  const stepProgress = checkedSteps.filter(Boolean).length;
+  const totalSteps = project.instructions.length;
+  // Progress milestones: steps=25%, code=50%, simulator=100%
+  const progressPercent = (() => {
+    if (allStepsCompleted && codePassed && simulatorPassed) return 100;
+    if (allStepsCompleted && codePassed) return 50;
+    if (allStepsCompleted) return 25;
+    // Before all steps done, scale 0-24%
+    return totalSteps > 0 ? Math.min(Math.round((stepProgress / totalSteps) * 24), 24) : 0;
+  })();
+
+  const toggleStep = (index: number) => {
+    setCheckedSteps(prev => {
+      const next = [...prev];
+      next[index] = !next[index];
+      return next;
+    });
+  };
+
+  const toggleComponentExpand = (name: string) => {
+    setExpandedComponents(prev => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  // Editable code state
+  const starterTemplate = `/*
+  Project: ${project.title}
+  
+  🎯 Goal: ${project.desc}
+  
+  📦 Components needed:
+${project.components.map(c => `     - ${c}`).join("\n")}
+  
+  🧩 Hints:
+${project.instructions.map((inst, i) => `     Step ${i + 1}: ${inst}`).join("\n")}
+  
+  💡 Your task: Write the code below!
+     Use the AI Mentor (bottom-right) if you get stuck.
+     Click "Reveal Solution" only after trying on your own.
+*/
+
+void setup() {
+  // TODO: Initialize your pins and Serial
+  // Hint: Use pinMode() for outputs and Serial.begin() for debugging
+  
+}
+
+void loop() {
+  // TODO: Write your main logic here
+  // Hint: Think about what should happen repeatedly
+  
+}`;
+
+  const [userCode, setUserCode] = useState(starterTemplate);
+  const [runStep, setRunStep] = useState<"idle" | "compiling" | "simulating" | "success" | "error">("idle");
+  const [errors, setErrors] = useState<string[]>([]);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  const [debugMessages, setDebugMessages] = useState<Array<{ role: "ai" | "user"; content: string }>>([]);
+  const [debugInput, setDebugInput] = useState("");
+  const [aiTyping, setAiTyping] = useState(false);
+  const debugBottomRef = useRef<HTMLDivElement>(null);
+
+  const currentCode = showSolution
+    ? (codeMode === "basic" ? project.basicCode : project.optimizedCode)
+    : userCode;
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setShareToast(true);
+    setTimeout(() => setShareToast(false), 2000);
+  };
+
+  const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  const runAndCheck = async () => {
+    setErrors([]);
+    setRunStep("compiling");
+    await delay(1200);
+
+    const code = showSolution ? currentCode : userCode;
+    const foundErrors: string[] = [];
+
+    // Check for common Arduino errors
+    if (code.includes("pinMod(")) foundErrors.push("Error: 'pinMod' is not defined. Did you mean 'pinMode'?");
+    if (/delay\(\d+;/.test(code)) foundErrors.push("Syntax error: missing closing parenthesis ')' in delay()");
+    if (code.includes("void setup()") && !code.includes("pinMode") && !code.includes("Serial.begin") && !code.includes("// TODO")) {
+      foundErrors.push("Warning: setup() is empty. Initialize your pins with pinMode() and Serial with Serial.begin().");
+    }
+    if (code.includes("// TODO: Initialize") || code.includes("// TODO: Write your main")) {
+      foundErrors.push("Incomplete: You still have TODO sections. Fill in your code before running!");
+    }
+    if (!code.includes("void setup()")) foundErrors.push("Error: Missing setup() function.");
+    if (!code.includes("void loop()")) foundErrors.push("Error: Missing loop() function.");
+
+    if (foundErrors.length > 0) {
+      setErrors(foundErrors);
+      setRunStep("error");
+      setCodePassed(false);
+      setSimulatorPassed(false);
+      return;
+    }
+
+    // Code compiled successfully
+    setCodePassed(true);
+
+    setRunStep("simulating");
+    await delay(1500);
+
+    // Safety checks (no critical warnings)
+    const safetyWarnings: string[] = [];
+    if (code.includes("analogWrite") && code.includes("delay(1)")) {
+      safetyWarnings.push("Warning: Very short delay with analog output may cause instability.");
+    }
+    if (safetyWarnings.length > 0) {
+      setErrors(safetyWarnings);
+      setRunStep("error");
+      setSimulatorPassed(false);
+      return;
+    }
+
+    // Simulator passed
+    setSimulatorPassed(true);
+    setRunStep("success");
+
+    // Note: completion is now handled by the auto-completion effect
+    // which checks allSteps + codePassed + simulatorPassed
+  };
+
+  const getAIDebugResponse = (input: string): string => {
+    const lower = input.toLowerCase();
+    const code = showSolution ? currentCode : userCode;
+
+    if (lower.includes("review") || lower.includes("improve") || lower.includes("suggestion") || lower.includes("look at")) {
+      if (code.includes("delay(") && !code.includes("millis(")) {
+        return "📝 I see you're using `delay()` which blocks execution. Consider using `millis()` for non-blocking timing — this lets your Arduino do other things while waiting. Want me to explain how?";
+      }
+      if (!code.includes("Serial.begin")) {
+        return "📝 I'd suggest adding `Serial.begin(9600)` in setup() and some `Serial.print()` calls in loop(). It's the easiest way to debug and see what your values are!";
+      }
+      return "📝 Your code structure looks solid! A few suggestions:\n• Add comments explaining key logic\n• Consider edge cases (what if sensor returns 0?)\n• Use `constrain()` to keep values in safe ranges";
+    }
+    if (lower.includes("error") || lower.includes("fix") || lower.includes("wrong") || lower.includes("help")) {
+      if (errors.length > 0) {
+        return `🔍 I see ${errors.length} issue(s). Let's tackle the first one:\n\n"${errors[0]}"\n\nHint: Check for typos in function names and make sure every statement ends with a semicolon. Can you spot the issue?`;
+      }
+      return "🔍 Try clicking 'Run & Check' first so I can see what errors come up. Then I can help you debug step by step!";
+    }
+    if (lower.includes("todo") || lower.includes("start") || lower.includes("begin") || lower.includes("how")) {
+      return `🧩 Great question! For "${project.title}", start with setup():\n\n1. Use \`pinMode(pin, OUTPUT)\` for each output device\n2. Use \`Serial.begin(9600)\` so you can debug\n\nThen in loop(), think about what needs to happen repeatedly. What sensor are you reading?`;
+    }
+    return "🤔 I'm here to help! Try asking me to:\n• **Review your code** for improvements\n• **Debug errors** after running\n• **Explain a concept** like PWM, analogRead, etc.\n• Help you **get started** with the TODO sections";
+  };
+
+  const sendDebugMessage = () => {
+    if (!debugInput.trim()) return;
+    const msg = debugInput.trim();
+    setDebugInput("");
+    setDebugMessages((prev) => [...prev, { role: "user", content: msg }]);
+    setAiTyping(true);
+    setTimeout(() => {
+      setAiTyping(false);
+      setDebugMessages((prev) => [...prev, { role: "ai", content: getAIDebugResponse(msg) }]);
+      setTimeout(() => debugBottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }, 800 + Math.random() * 500);
+  };
+
+  const handleRevealSolution = () => {
+    if (!showSolution) {
+      setShowSolution(true);
+    } else {
+      setShowSolution(false);
+    }
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentCode);
@@ -1005,29 +1453,36 @@ export default function ProjectDetailPage() {
     URL.revokeObjectURL(url);
   };
 
-  const handleSaveToProfile = () => {
-    // Save to dashboard (localStorage for now)
-    const savedProjects = JSON.parse(localStorage.getItem("savedProjects") || "[]");
-    if (savedProjects.length >= 5) {
-      alert("You can only save up to 5 projects. Please remove one first.");
+  const [saving, setSaving] = useState(false);
+  const [unsaving, setUnsaving] = useState(false);
+
+  const handleSaveToProfile = async () => {
+    if (!user) {
+      navigate("/auth");
       return;
     }
-    const exists = savedProjects.find((p: any) => p.id === project.id);
-    if (!exists) {
-      savedProjects.push({
-        id: project.id,
-        emoji: project.emoji,
-        title: project.title,
-        difficulty: project.difficulty,
-        time: project.time,
-        xp: project.xp,
-        desc: project.desc,
-        savedAt: new Date().toISOString(),
+    setSaving(true);
+    await new Promise(r => setTimeout(r, 600));
+    const result = await saveProject({
+      project_id: project.id,
+      emoji: project.emoji,
+      title: project.title,
+      description: project.desc,
+      difficulty: project.difficulty,
+      time: project.time,
+      xp: project.xp,
+      components: project.components,
+      source: generatedProject?.source || "catalog",
+    });
+    setSaving(false);
+    if (result.error) {
+      sonnerToast.error("🚫 Project limit reached", {
+        description: "You can only have up to 5 projects in your dashboard. Complete or remove a project to start a new one.",
+        duration: 5000,
       });
-      localStorage.setItem("savedProjects", JSON.stringify(savedProjects));
+    } else {
+      setSaved(true);
     }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
   };
 
   const diffBadgeStyle =
@@ -1037,16 +1492,70 @@ export default function ProjectDetailPage() {
       ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
       : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
 
+  // Completion status checklist
+  const completionChecks = [
+    { label: "All steps completed", done: allStepsCompleted },
+    { label: "Code compiles successfully", done: codePassed },
+    { label: "Simulator runs without errors", done: simulatorPassed },
+    { label: "No critical warnings", done: codePassed && simulatorPassed },
+  ];
+
   return (
     <Layout>
+      {/* Completion Celebration Overlay */}
+      {showCompletionCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "hsl(var(--background) / 0.85)", backdropFilter: "blur(8px)" }}>
+          <div className="text-center animate-fade-in space-y-4">
+            <div className="text-7xl animate-bounce">🎉</div>
+            <h2 className="text-3xl font-bold" style={{ color: "hsl(var(--foreground))" }}>
+              Project Complete!
+            </h2>
+            <div className="flex items-center justify-center gap-2 text-xl font-bold" style={{ color: "hsl(var(--secondary))" }}>
+              <Zap size={24} /> +{project.xp} XP Earned!
+            </div>
+            <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
+              This project has been moved to your Completed Projects
+            </p>
+            <div className="flex gap-3 justify-center mt-4">
+              <button
+                onClick={() => { setShowCompletionCelebration(false); navigate("/dashboard"); }}
+                className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
+                style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
+              >
+                View Dashboard
+              </button>
+              <button
+                onClick={() => setShowCompletionCelebration(false)}
+                className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+                style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }}
+              >
+                Stay Here
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="px-8 py-8 max-w-4xl mx-auto">
         {/* Back link */}
         <button
-          onClick={() => navigate("/catalog")}
+          onClick={() => {
+            if (generatedProject?.source === "think-bigger") {
+            navigate("/think-bigger");
+            } else if (generatedProject?.source === "dashboard") {
+              navigate("/dashboard");
+            } else if (generatedProject?.source === "catalog") {
+              navigate("/catalog");
+            } else if (generatedProject) {
+              navigate("/generate");
+            } else {
+              navigate("/catalog");
+            }
+          }}
           className="flex items-center gap-2 text-sm font-medium mb-6 transition-all hover:gap-3"
           style={{ color: "#00F5FF" }}
         >
-          <ArrowLeft size={16} /> Back to Catalog
+          <ArrowLeft size={16} /> {generatedProject?.source === "think-bigger" ? "Back to Think Bigger" : generatedProject?.source === "dashboard" ? "Back to Dashboard" : generatedProject?.source === "catalog" ? "Back to Catalog" : generatedProject ? "Back to Generate" : "Back to Catalog"}
         </button>
 
         {/* Project Header */}
@@ -1083,20 +1592,74 @@ export default function ProjectDetailPage() {
                     <CheckCircle size={16} /> Completed
                   </div>
                 ) : (
-                  <button
-                    onClick={handleSaveToProfile}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
-                    style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
-                  >
-                    <Save size={14} /> Save Project
-                  </button>
+                  saved ? (
+                    <button
+                      onClick={async () => {
+                        setUnsaving(true);
+                        await new Promise(r => setTimeout(r, 600));
+                        await deleteProject(projectId);
+                        setUnsaving(false);
+                        setSaved(false);
+                      }}
+                      disabled={unsaving}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105 group"
+                      style={{ background: "hsl(var(--success) / 0.1)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)", opacity: unsaving ? 0.7 : 1 }}
+                      title="Click to unsave"
+                    >
+                      {unsaving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />} 
+                      {unsaving ? "Removing..." : <><span className="group-hover:hidden">Saved</span><span className="hidden group-hover:inline" style={{ color: "hsl(var(--destructive))" }}>Unsave</span></>}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSaveToProfile}
+                      disabled={saving}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
+                      style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)", opacity: saving ? 0.7 : 1 }}
+                    >
+                      {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} {saving ? "Saving..." : "Save Project"}
+                    </button>
+                  )
                 )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Components Required */}
+        {/* Learning Concepts */}
+        <div
+          className="rounded-2xl p-5 border mb-6"
+          style={{ background: "linear-gradient(135deg, hsl(229, 45%, 14%), hsl(260, 40%, 16%))", borderColor: "hsl(260, 42%, 28%)" }}
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Lightbulb size={16} style={{ color: "#FFD700" }} />
+            <span className="font-bold text-sm" style={{ color: "#FFD700" }}>What You'll Learn</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {learningConcepts.map((concept) => (
+              <button
+                key={concept}
+                onClick={() => setShowConceptDetails(showConceptDetails === concept ? null : concept)}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 cursor-pointer"
+                style={{
+                  background: showConceptDetails === concept ? "rgba(255,215,0,0.2)" : "hsl(260, 35%, 20%)",
+                  color: showConceptDetails === concept ? "#FFD700" : "#E0E7FF",
+                  border: `1px solid ${showConceptDetails === concept ? "rgba(255,215,0,0.4)" : "hsl(260, 35%, 30%)"}`,
+                }}
+              >
+                <BookOpen size={12} className="inline mr-1.5" />
+                {concept}
+              </button>
+            ))}
+          </div>
+          {showConceptDetails && (
+            <div className="mt-3 p-3 rounded-xl text-xs leading-relaxed animate-fade-in" style={{ background: "rgba(255,215,0,0.08)", border: "1px solid rgba(255,215,0,0.2)", color: "#E0E7FF" }}>
+              <strong style={{ color: "#FFD700" }}>{showConceptDetails}</strong>
+              <p className="mt-1">This concept is covered in the code. Look for related functions and experiment with different values to deepen your understanding.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Components Required - Interactive */}
         <div
           className="rounded-2xl p-5 border mb-6"
           style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
@@ -1104,18 +1667,73 @@ export default function ProjectDetailPage() {
           <div className="flex items-center gap-2 mb-4">
             <Settings size={16} style={{ color: "#00F5FF" }} />
             <span className="font-bold text-sm" style={{ color: "#00F5FF" }}>Components Required</span>
+            <span className="text-xs px-2 py-0.5 rounded-full ml-auto" style={{ background: "rgba(0,245,255,0.1)", color: "#00F5FF" }}>
+              {project.components.length} parts
+            </span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {project.components.map((c) => (
-              <span
-                key={c}
-                className="px-3 py-1.5 rounded-lg text-sm font-medium"
-                style={{ background: "hsl(229, 42%, 20%)", color: "#E0E7FF", border: "1px solid hsl(229, 42%, 30%)" }}
-              >
-                {c}
-              </span>
-            ))}
+          <div className="space-y-2">
+            {project.components.map((c) => {
+              const info = componentInfo[c];
+              const isExpanded = expandedComponents[c];
+              return (
+                <div key={c}>
+                  <button
+                    onClick={() => toggleComponentExpand(c)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-[1.01]"
+                    style={{
+                      background: isExpanded ? "hsl(229, 42%, 22%)" : "hsl(229, 42%, 18%)",
+                      color: "#E0E7FF",
+                      border: `1px solid ${isExpanded ? "rgba(0,245,255,0.3)" : "hsl(229, 42%, 28%)"}`,
+                    }}
+                  >
+                    <span className="text-lg">{info?.tipIcon || "🔧"}</span>
+                    <span className="flex-1 text-left">{c}</span>
+                    {info && (
+                      <Info size={14} style={{ color: isExpanded ? "#00F5FF" : "#A0AED9" }} />
+                    )}
+                    {info && (isExpanded ? <ChevronUp size={14} style={{ color: "#A0AED9" }} /> : <ChevronDown size={14} style={{ color: "#A0AED9" }} />)}
+                  </button>
+                  {isExpanded && info && (
+                    <div className="ml-4 mt-1 mb-2 p-3 rounded-xl text-xs space-y-2 animate-fade-in" style={{ background: "hsl(229, 42%, 15%)", border: "1px solid hsl(229, 42%, 25%)" }}>
+                      <p style={{ color: "#E0E7FF" }}>{info.description}</p>
+                      <div className="flex items-start gap-2">
+                        <span className="font-bold flex-shrink-0" style={{ color: "#00F5FF" }}>Pins:</span>
+                        <span style={{ color: "#A0AED9" }}>{info.pins}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
+        </div>
+
+        {/* Required Libraries */}
+        <RequiredLibraries basicCode={project.basicCode} optimizedCode={project.optimizedCode} />
+
+        {/* Arduino Setup Guide for Beginners */}
+        <ArduinoSetupGuide />
+
+        {/* Social / Like / Share bar */}
+        <div className="flex items-center gap-3 mb-6">
+          <button
+            onClick={() => { setLiked(!liked); setLikeCount(prev => liked ? prev - 1 : prev + 1); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
+            style={{
+              background: liked ? "rgba(255,69,0,0.15)" : "hsl(229, 42%, 18%)",
+              color: liked ? "#FF4500" : "#A0AED9",
+              border: `1px solid ${liked ? "rgba(255,69,0,0.3)" : "hsl(229, 42%, 28%)"}`,
+            }}
+          >
+            <ThumbsUp size={14} fill={liked ? "currentColor" : "none"} /> {likeCount}
+          </button>
+          <button
+            onClick={handleShare}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
+            style={{ background: "hsl(229, 42%, 18%)", color: "#A0AED9", border: "1px solid hsl(229, 42%, 28%)" }}
+          >
+            <Share2 size={14} /> Share
+          </button>
         </div>
 
         {/* Tabs: Instructions | Code | Simulate */}
@@ -1159,99 +1777,305 @@ export default function ProjectDetailPage() {
             className="rounded-2xl p-6 border"
             style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
           >
-            <h3 className="font-bold mb-4" style={{ color: "#FFFFFF" }}>Step-by-Step Instructions</h3>
-            <div className="space-y-3">
+            {/* Progress bar */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold" style={{ color: "#FFFFFF" }}>Step-by-Step Instructions</h3>
+              <div className="flex items-center gap-3">
+                <div className="w-32 h-2 rounded-full overflow-hidden" style={{ background: "hsl(229, 42%, 22%)" }}>
+                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progressPercent}%`, background: progressPercent === 100 ? "linear-gradient(90deg, #00FF88, #00C853)" : "linear-gradient(90deg, #00F5FF, #0099FF)" }} />
+                </div>
+                <span className="text-xs font-bold" style={{ color: progressPercent === 100 ? "#00FF88" : "#00F5FF" }}>
+                  {stepProgress}/{totalSteps}
+                </span>
+              </div>
+            </div>
+
+            {/* Completion Checklist */}
+            {(allStepsCompleted || codePassed || simulatorPassed) && (
+              <div className="mb-4 p-4 rounded-xl space-y-2" style={{ background: completed ? "rgba(0,255,136,0.06)" : "hsl(var(--muted) / 0.5)", border: `1px solid ${completed ? "rgba(0,255,136,0.3)" : "hsl(var(--border))"}` }}>
+                <p className="text-xs font-bold mb-2" style={{ color: completed ? "#00FF88" : "hsl(var(--foreground))" }}>
+                  {completed ? "🎉 Project Complete!" : "📋 Completion Requirements"}
+                </p>
+                {completionChecks.map((check, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    {check.done
+                      ? <CheckCircle size={14} style={{ color: "#00FF88" }} />
+                      : <div className="w-3.5 h-3.5 rounded-full border" style={{ borderColor: "hsl(var(--muted-foreground))" }} />
+                    }
+                    <span className="text-xs" style={{ color: check.done ? "#00FF88" : "hsl(var(--muted-foreground))" }}>{check.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-2">
               {project.instructions.map((inst, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
-                    style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                <div
+                  key={i}
+                  className="flex items-start gap-3 p-3 rounded-xl transition-all cursor-pointer group"
+                  style={{
+                    background: checkedSteps[i] ? "rgba(0,255,136,0.06)" : "transparent",
+                    border: `1px solid ${checkedSteps[i] ? "rgba(0,255,136,0.2)" : "transparent"}`,
+                  }}
+                  onClick={() => toggleStep(i)}
+                >
+                  <div className="flex-shrink-0 mt-0.5 transition-all group-hover:scale-110">
+                    {checkedSteps[i] ? (
+                      <CheckSquare size={20} style={{ color: "#00FF88" }} />
+                    ) : (
+                      <Square size={20} style={{ color: "#A0AED9" }} />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-sm transition-all ${checkedSteps[i] ? "line-through opacity-60" : ""}`} style={{ color: "#E0E7FF" }}>{inst}</p>
+                    {/* Step note input */}
+                    <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <input
+                        value={activeNote[i] || ""}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          setActiveNote(prev => ({ ...prev, [i]: e.target.value }));
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Add a note..."
+                        className="w-full bg-transparent text-xs focus:outline-none px-2 py-1 rounded-lg"
+                        style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 25%)" }}
+                      />
+                    </div>
+                    {activeNote[i] && (
+                      <p className="mt-1 text-xs italic flex items-center gap-1" style={{ color: "#A0AED9" }}>
+                        <MessageCircle size={10} /> {activeNote[i]}
+                      </p>
+                    )}
+                  </div>
+                  <span
+                    className="text-xs font-bold flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
+                    style={{
+                      background: checkedSteps[i] ? "rgba(0,255,136,0.15)" : "rgba(0,245,255,0.15)",
+                      color: checkedSteps[i] ? "#00FF88" : "#00F5FF",
+                    }}
                   >
                     {i + 1}
-                  </div>
-                  <p className="text-sm pt-1" style={{ color: "#E0E7FF" }}>{inst}</p>
+                  </span>
                 </div>
               ))}
             </div>
+
           </div>
         )}
 
         {activeTab === "code" && (
-          <div
-            className="rounded-2xl border overflow-hidden"
-            style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
-          >
-            {/* Code toolbar */}
-            <div
-              className="flex items-center justify-between px-5 py-3 border-b"
-              style={{ borderColor: "hsl(229, 42%, 22%)" }}
-            >
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCodeMode("basic")}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
-                  style={
-                    codeMode === "basic"
-                      ? { background: "transparent", color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }
-                      : { background: "transparent", color: "hsl(226, 35%, 50%)" }
-                  }
-                >
-                  <Code size={13} /> Basic
-                </button>
-                <button
-                  onClick={() => setCodeMode("optimized")}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all"
-                  style={
-                    codeMode === "optimized"
-                      ? { background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27" }
-                      : { background: "transparent", color: "hsl(226, 35%, 50%)" }
-                  }
-                >
-                  <Sparkles size={13} /> Optimized
-                </button>
+          <div className="space-y-4">
+            {/* Run workflow indicator */}
+            {runStep !== "idle" && (
+              <div className="rounded-xl px-5 py-3 flex items-center gap-6 border" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
+                {(["compiling", "simulating"] as const).map((step, i) => {
+                  const labels = ["Compiling", "Simulating"];
+                  const stepOrder = ["compiling", "simulating"];
+                  const stepIdx = stepOrder.indexOf(runStep);
+                  const thisIdx = stepOrder.indexOf(step);
+                  const isDone = runStep === "success" || stepIdx > thisIdx;
+                  const isActive = step === runStep;
+                  return (
+                    <div key={step} className="flex items-center gap-2">
+                      {isDone ? <CheckCircle size={16} style={{ color: "#00FF88" }} /> : isActive ? <Loader2 size={16} className="animate-spin" style={{ color: "#00F5FF" }} /> : <div className="w-4 h-4 rounded-full" style={{ background: "hsl(228, 25%, 30%)" }} />}
+                      <span className="text-sm font-medium" style={{ color: isDone ? "#00FF88" : isActive ? "#00F5FF" : "hsl(228, 25%, 50%)" }}>{labels[i]}</span>
+                    </div>
+                  );
+                })}
+                {runStep === "success" && (
+                  <span className="font-bold text-sm animate-fade-in-up flex items-center gap-2" style={{ color: "#00FF88" }}>
+                    <CheckCircle size={16} /> ✓ Compilation Successful! +{project.xp} XP
+                  </span>
+                )}
+                {runStep === "error" && (
+                  <div className="flex items-center gap-2">
+                    <XCircle size={16} style={{ color: "#FF4500" }} />
+                    <span className="font-bold text-sm" style={{ color: "#FF4500" }}>{errors.length} Error{errors.length !== 1 ? "s" : ""}</span>
+                    <button
+                      onClick={() => {
+                        setShowDebugPanel(true);
+                        if (debugMessages.length === 0) {
+                          setDebugMessages([{ role: "ai", content: `🔍 I see ${errors.length} error(s) in your code. Let me help!\n\nFirst issue: "${errors[0]}"\n\nHint: Check for typos and missing syntax. Can you spot it?` }]);
+                        }
+                      }}
+                      className="ml-2 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1"
+                      style={{ background: "rgba(183,68,255,0.2)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.4)" }}
+                    >
+                      <Brain size={12} /> Debug with AI
+                    </button>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
-                  style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
-                >
-                  <Copy size={12} /> Copy
-                </button>
-                <button
-                  onClick={handleDownload}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
-                  style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
-                >
-                  <Download size={12} /> Download .ino
-                </button>
-              </div>
-            </div>
+            )}
 
-            {/* Code display */}
-            <pre
-              className="p-5 overflow-x-auto text-sm leading-relaxed"
-              style={{
-                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-                color: "#E0E7FF",
-                background: "hsl(232, 48%, 8%)",
-                maxHeight: "500px",
-              }}
-            >
-              <code>{currentCode}</code>
-            </pre>
+            <div className="flex gap-4">
+              {/* Main code editor */}
+              <div className="flex-1 rounded-2xl border overflow-hidden" style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}>
+                {/* Code toolbar */}
+                <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
+                  <div className="flex items-center gap-2">
+                    {showSolution ? (
+                      <>
+                        <button onClick={() => setCodeMode("basic")} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all" style={codeMode === "basic" ? { background: "transparent", color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" } : { background: "transparent", color: "hsl(226, 35%, 50%)" }}>
+                          <Code size={13} /> Basic
+                        </button>
+                        <button onClick={() => setCodeMode("optimized")} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all" style={codeMode === "optimized" ? { background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27" } : { background: "transparent", color: "hsl(226, 35%, 50%)" }}>
+                          <Sparkles size={13} /> Optimized
+                        </button>
+                      </>
+                    ) : (
+                      <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: "#FFD700" }}>
+                        <Sparkles size={14} /> Starter Template — Try it yourself first!
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {!showSolution && (
+                      <button onClick={() => { setUserCode(starterTemplate); setRunStep("idle"); setErrors([]); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
+                        <RefreshCw size={12} /> Reset
+                      </button>
+                    )}
+                    <button onClick={handleRevealSolution} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={showSolution ? { background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" } : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" }}>
+                      {showSolution ? "Hide Solution" : "🔓 Reveal Solution"}
+                    </button>
+                    <ExplainCode code={currentCode} />
+                    <button onClick={handleCopy} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105" style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}>
+                      <Copy size={12} /> Copy
+                    </button>
+                    <button onClick={handleDownload} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105" style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}>
+                      <Download size={12} /> .ino
+                    </button>
+                  </div>
+                </div>
+
+                {/* File tab */}
+                <div className="flex items-center gap-2 px-4 py-1.5 border-b text-xs" style={{ borderColor: "hsl(229, 42%, 22%)", background: "hsl(232, 48%, 6%)", color: "hsl(228, 25%, 60%)" }}>
+                  <span style={{ color: "#00F5FF" }}>sketch.ino</span>
+                  <span>•</span>
+                  <span>Arduino Uno</span>
+                  {!showSolution && <span className="ml-auto" style={{ color: "#00FF88" }}>✎ Editable</span>}
+                </div>
+
+                {/* Code area - editable or read-only */}
+                {showSolution ? (
+                  <CodeEditor code={currentCode} readOnly maxHeight="500px" minHeight="300px" />
+                ) : (
+                  <CodeEditor code={userCode} onChange={setUserCode} maxHeight="500px" minHeight="400px" />
+                )}
+
+                {/* Error panel */}
+                {errors.length > 0 && (
+                  <div className="border-t p-4 animate-fade-in" style={{ background: "rgba(255,69,0,0.08)", borderColor: "rgba(255,69,0,0.3)" }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle size={14} style={{ color: "#FF4500" }} />
+                      <span className="font-bold text-sm" style={{ color: "#FF4500" }}>Errors</span>
+                    </div>
+                    {errors.map((err, i) => (
+                      <div key={i} className="flex items-start gap-2 text-xs font-mono p-2 rounded-lg mb-1" style={{ background: "rgba(255,69,0,0.1)", color: "#FF6B35" }}>
+                        <XCircle size={12} className="flex-shrink-0 mt-0.5" /> {err}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Run & action bar */}
+                <div className="flex items-center gap-3 px-5 py-3 border-t" style={{ borderColor: "hsl(229, 42%, 22%)", background: "hsl(232, 42%, 11%)" }}>
+                  <button
+                    onClick={runAndCheck}
+                    disabled={runStep === "compiling" || runStep === "simulating"}
+                    className="px-5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 disabled:opacity-60"
+                    style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 15px rgba(0,255,136,0.3)" }}
+                  >
+                    {runStep === "compiling" || runStep === "simulating" ? <><Loader2 size={14} className="animate-spin" /> Running...</> : <><Play size={14} /> ▶ Run & Check</>}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowDebugPanel(true);
+                      if (debugMessages.length === 0) {
+                        setDebugMessages([{ role: "ai", content: `👋 Hi! I can see your code for "${project.title}". I can:\n\n• **Debug errors** after you run\n• **Review your code** for improvements\n• **Give hints** on the TODO sections\n\nWhat would you like help with?` }]);
+                      }
+                    }}
+                    className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
+                    style={{ background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" }}
+                  >
+                    <Brain size={14} /> AI Debug
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowDebugPanel(true);
+                      setDebugMessages((prev) => [...prev, { role: "user", content: "Review my code and suggest improvements" }]);
+                      setAiTyping(true);
+                      setTimeout(() => {
+                        setAiTyping(false);
+                        setDebugMessages((prev) => [...prev, { role: "ai", content: getAIDebugResponse("review improve suggestion") }]);
+                      }, 1000);
+                    }}
+                    className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
+                    style={{ color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                  >
+                    <Eye size={14} /> AI Review
+                  </button>
+                </div>
+              </div>
+
+              {/* AI Debug Side Panel */}
+              {showDebugPanel && (
+                <div className="w-72 rounded-2xl border flex flex-col overflow-hidden animate-fade-in flex-shrink-0" style={{ background: "hsl(232, 42%, 11%)", borderColor: "rgba(183,68,255,0.3)", maxHeight: "620px" }}>
+                  <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "rgba(183,68,255,0.2)", background: "linear-gradient(135deg, rgba(183,68,255,0.15), rgba(255,20,147,0.05))" }}>
+                    <div className="flex items-center gap-2">
+                      <Brain size={14} style={{ color: "#B744FF" }} />
+                      <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Assistant</span>
+                    </div>
+                    <button onClick={() => setShowDebugPanel(false)} className="text-xs px-2 py-0.5 rounded" style={{ color: "#A0AED9" }}>✕</button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ minHeight: 0 }}>
+                    {debugMessages.map((msg, i) => (
+                      <div key={i} className={`p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${msg.role === "user" ? "ml-4" : ""}`} style={{ background: msg.role === "ai" ? "rgba(183,68,255,0.1)" : "rgba(0,245,255,0.1)", border: `1px solid ${msg.role === "ai" ? "rgba(183,68,255,0.25)" : "rgba(0,245,255,0.25)"}`, color: msg.role === "ai" ? "#E0E7FF" : "#00F5FF" }}>
+                        {msg.role === "ai" && <span className="text-xs font-bold block mb-1" style={{ color: "#B744FF" }}>🧠 AI</span>}
+                        {msg.content}
+                      </div>
+                    ))}
+                    {aiTyping && (
+                      <div className="p-2.5 rounded-xl flex items-center gap-1" style={{ background: "rgba(183,68,255,0.1)", border: "1px solid rgba(183,68,255,0.25)" }}>
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF" }} />
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF", animationDelay: "0.15s" }} />
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF", animationDelay: "0.3s" }} />
+                      </div>
+                    )}
+                    <div ref={debugBottomRef} />
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2.5 border-t" style={{ borderColor: "rgba(183,68,255,0.2)", background: "hsl(229, 48%, 10%)" }}>
+                    <input value={debugInput} onChange={(e) => setDebugInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendDebugMessage()} placeholder="Ask about your code..." className="flex-1 bg-transparent text-xs focus:outline-none" style={{ color: "#FFFFFF" }} />
+                    <button onClick={sendDebugMessage} disabled={!debugInput.trim()} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110 disabled:opacity-40" style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}>
+                      <Sparkles size={10} color="#fff" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {activeTab === "simulate" && (
           <div
-            className="rounded-2xl border overflow-hidden"
+            className={`rounded-2xl border overflow-hidden transition-all duration-300 ${simExpanded ? "fixed inset-4 z-50" : ""}`}
             style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
           >
-            <div className="relative" style={{ paddingTop: "56.25%" }}>
+            <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
+              <span className="text-sm font-semibold" style={{ color: "#00F5FF" }}>Wokwi Simulator</span>
+              <button
+                onClick={() => setSimExpanded(!simExpanded)}
+                className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
+                style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
+              >
+                {simExpanded ? "Minimize" : "Expand"}
+              </button>
+            </div>
+            <div className="relative" style={{ paddingTop: simExpanded ? "0" : "56.25%", height: simExpanded ? "calc(100% - 44px)" : undefined }}>
               <iframe
-                src={wokwiProjects[projectId] || "https://wokwi.com/projects/new/arduino-uno"}
-                className="absolute inset-0 w-full h-full"
+                src={getWokwiUrl(projectId)}
+                className={simExpanded ? "w-full h-full" : "absolute inset-0 w-full h-full"}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
                 style={{ border: "none" }}
                 title="Wokwi Simulator"
@@ -1259,23 +2083,24 @@ export default function ProjectDetailPage() {
             </div>
           </div>
         )}
+        {simExpanded && <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setSimExpanded(false)} />}
       </div>
 
       {/* Toasts */}
-      {saved && (
-        <div
-          className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in z-50"
-          style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}
-        >
-          <CheckCircle size={16} /> ✓ Project Saved to Dashboard!
-        </div>
-      )}
       {copyToast && (
         <div
           className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in z-50"
           style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,245,255,0.4)" }}
         >
           <Copy size={16} /> Code copied to clipboard!
+        </div>
+      )}
+      {shareToast && (
+        <div
+          className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in z-50"
+          style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)", color: "#FFFFFF", boxShadow: "0 0 20px rgba(183,68,255,0.4)" }}
+        >
+          <Share2 size={16} /> Link copied to clipboard!
         </div>
       )}
     </Layout>

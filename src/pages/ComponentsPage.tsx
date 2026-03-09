@@ -1,7 +1,11 @@
-import { useState } from "react";
-import { Minus, Plus, Save, Zap, Lightbulb, Package } from "lucide-react";
+import { useState, useRef } from "react";
+import { Minus, Plus, Save, Zap, Lightbulb, Package, Loader2, Brain, Heart, X, Sparkles, ShoppingCart, Camera, Eye } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
+import FadeInView from "@/components/motion/FadeInView";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { AnimatePresence, motion } from "framer-motion";
 
 type Category = "Microcontroller" | "Sensor" | "Actuator" | "Display" | "Communication" | "Module" | "Power" | "Passive" | "Other";
 
@@ -11,13 +15,11 @@ interface ComponentItem {
 }
 
 const allComponents: ComponentItem[] = [
-  // Microcontrollers
   { name: "Arduino Uno", category: "Microcontroller" },
   { name: "Arduino Nano", category: "Microcontroller" },
   { name: "Arduino Mega", category: "Microcontroller" },
   { name: "ESP32", category: "Microcontroller" },
   { name: "ESP8266", category: "Microcontroller" },
-  // Sensors
   { name: "Temperature Sensor (DHT11)", category: "Sensor" },
   { name: "Temperature Sensor (DHT22)", category: "Sensor" },
   { name: "Ultrasonic Sensor (HC-SR04)", category: "Sensor" },
@@ -28,25 +30,21 @@ const allComponents: ComponentItem[] = [
   { name: "Sound Sensor", category: "Sensor" },
   { name: "Rain Sensor", category: "Sensor" },
   { name: "BMP180 (Pressure)", category: "Sensor" },
-  // Actuators
   { name: "Servo Motor (SG90)", category: "Actuator" },
   { name: "DC Motor", category: "Actuator" },
   { name: "Stepper Motor", category: "Actuator" },
   { name: "Buzzer", category: "Actuator" },
   { name: "Relay Module", category: "Actuator" },
   { name: "Water Pump", category: "Actuator" },
-  // Displays
   { name: "16x2 LCD", category: "Display" },
   { name: "OLED Display (0.96\")", category: "Display" },
   { name: "7-Segment Display", category: "Display" },
   { name: "LED Strip (WS2812B)", category: "Display" },
   { name: "LED Matrix 8x8", category: "Display" },
-  // Communication
   { name: "HC-05 Bluetooth", category: "Communication" },
   { name: "NRF24L01 (RF)", category: "Communication" },
   { name: "SIM800L (GSM)", category: "Communication" },
   { name: "LoRa Module", category: "Communication" },
-  // Passive
   { name: "LED (Red)", category: "Passive" },
   { name: "LED (Green)", category: "Passive" },
   { name: "LED (Blue)", category: "Passive" },
@@ -58,17 +56,14 @@ const allComponents: ComponentItem[] = [
   { name: "Push Button", category: "Passive" },
   { name: "Potentiometer", category: "Passive" },
   { name: "Transistor BC547", category: "Passive" },
-  // Module
   { name: "Motor Driver (L298N)", category: "Module" },
   { name: "RFID RC522", category: "Module" },
   { name: "RTC DS3231", category: "Module" },
   { name: "SD Card Module", category: "Module" },
   { name: "I2C Hub", category: "Module" },
-  // Power
   { name: "Battery Holder", category: "Power" },
   { name: "9V Battery", category: "Power" },
   { name: "Voltage Regulator (LM7805)", category: "Power" },
-  // Other
   { name: "Breadboard", category: "Other" },
   { name: "Jumper Wires", category: "Other" },
   { name: "USB Cable", category: "Other" },
@@ -77,22 +72,53 @@ const allComponents: ComponentItem[] = [
 
 const categories: Category[] = ["Microcontroller", "Sensor", "Actuator", "Display", "Communication", "Module", "Power", "Passive", "Other"];
 
+function loadWishlist(userId?: string): string[] {
+  try {
+    const key = userId ? `wishlist_${userId}` : "wishlist";
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  } catch { return []; }
+}
+
+function saveWishlistToStorage(items: string[], userId?: string) {
+  const key = userId ? `wishlist_${userId}` : "wishlist";
+  localStorage.setItem(key, JSON.stringify(items));
+}
+
 export default function ComponentsPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeCategory, setActiveCategory] = useState<Category>("Microcontroller");
-  
-  // Load from localStorage
+
   const loadQuantities = (): Record<string, number> => {
     try {
-      const inv = JSON.parse(localStorage.getItem("userInventory") || "[]") as string[];
+      const key = user ? `inventory_${user.id}` : "userInventory";
+      const inv = JSON.parse(localStorage.getItem(key) || "[]") as string[];
       const q: Record<string, number> = {};
       inv.forEach((name) => { q[name] = 1; });
-      return Object.keys(q).length > 0 ? q : { "Arduino Uno": 1 };
-    } catch { return { "Arduino Uno": 1 }; }
+      return q;
+    } catch { return {}; }
   };
-  
+
   const [quantities, setQuantities] = useState<Record<string, number>>(loadQuantities);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Smart Recognition state
+  const [pasteText, setPasteText] = useState("");
+  const [recognizing, setRecognizing] = useState(false);
+  const [recognized, setRecognized] = useState<string[]>([]);
+  const [showPastePanel, setShowPastePanel] = useState(false);
+
+  // Wishlist state
+  const [wishlist, setWishlist] = useState<string[]>(() => loadWishlist(user?.id));
+  const [showWishlist, setShowWishlist] = useState(false);
+
+  // Visual Search state
+  const [showVisualSearch, setShowVisualSearch] = useState(false);
+  const [visualSearching, setVisualSearching] = useState(false);
+  const [visualResults, setVisualResults] = useState<{name: string; confidence: string}[]>([]);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredComponents = allComponents.filter((c) => c.category === activeCategory);
   const totalSelected = Object.keys(quantities).length;
@@ -116,20 +142,112 @@ export default function ComponentsPage() {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaving(true);
+    await new Promise(r => setTimeout(r, 600));
     const inventory = Object.keys(quantities);
-    localStorage.setItem("userInventory", JSON.stringify(inventory));
+    const key = user ? `inventory_${user.id}` : "userInventory";
+    localStorage.setItem(key, JSON.stringify(inventory));
+    setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
+
+  // Smart Recognition
+  const handleRecognize = async () => {
+    if (!pasteText.trim()) return;
+    setRecognizing(true);
+    setRecognized([]);
+    try {
+      const { data, error } = await supabase.functions.invoke("recognize-components", {
+        body: { text: pasteText.trim() },
+      });
+      if (error) throw error;
+      if (data?.components) {
+        setRecognized(data.components);
+      }
+    } catch (e) {
+      console.error("Recognition error:", e);
+    }
+    setRecognizing(false);
+  };
+
+  const addRecognizedToInventory = () => {
+    setQuantities(prev => {
+      const next = { ...prev };
+      recognized.forEach(name => { if (!next[name]) next[name] = 1; });
+      return next;
+    });
+    setRecognized([]);
+    setPasteText("");
+    setShowPastePanel(false);
+  };
+
+  // Wishlist
+  const toggleWishlist = (name: string) => {
+    setWishlist(prev => {
+      const next = prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name];
+      saveWishlistToStorage(next, user?.id);
+      return next;
+    });
+  };
+
+  const moveWishlistToInventory = (name: string) => {
+    setQuantities(prev => ({ ...prev, [name]: 1 }));
+    setWishlist(prev => {
+      const next = prev.filter(n => n !== name);
+      saveWishlistToStorage(next, user?.id);
+      return next;
+    });
+  };
+
+  // Visual Search
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target?.result as string;
+      setPreviewImage(base64);
+      setVisualSearching(true);
+      setVisualResults([]);
+      try {
+        const { data, error } = await supabase.functions.invoke("visual-search", {
+          body: { image: base64 },
+        });
+        if (error) throw error;
+        if (data?.components) {
+          setVisualResults(data.components);
+        }
+      } catch (e) {
+        console.error("Visual search error:", e);
+      }
+      setVisualSearching(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addVisualResultsToInventory = () => {
+    setQuantities(prev => {
+      const next = { ...prev };
+      visualResults.forEach(item => { if (!next[item.name]) next[item.name] = 1; });
+      return next;
+    });
+    setVisualResults([]);
+    setPreviewImage(null);
+    setShowVisualSearch(false);
+  };
+
+  // "One component away" - components on wishlist that if added would complete a project's requirements
+  const ownedNames = Object.keys(quantities);
 
   return (
     <Layout>
       <div className="flex h-full">
         {/* Main panel */}
         <div className="flex-1 px-8 py-10 overflow-y-auto">
-          {/* Header */}
-          <div className="mb-6">
+          <FadeInView className="mb-6">
             <div className="flex items-center gap-2 mb-1">
               <span style={{ color: "#00F5FF" }}>⚙️</span>
               <span className="text-xs font-semibold" style={{ color: "#00F5FF" }}>Inventory Management</span>
@@ -138,14 +256,256 @@ export default function ComponentsPage() {
             <p className="text-sm" style={{ color: "#A0AED9" }}>
               Add the Arduino components you own. We'll generate projects that match your inventory.
             </p>
+          </FadeInView>
+
+          {/* Smart Recognition Panel */}
+          <div className="mb-4">
+            <button
+              onClick={() => setShowPastePanel(!showPastePanel)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
+              style={{
+                background: "linear-gradient(135deg, rgba(183,68,255,0.15), rgba(255,20,147,0.15))",
+                color: "#B744FF",
+                border: "1px solid rgba(183,68,255,0.3)",
+              }}
+            >
+              <Brain size={15} />
+              🤖 Smart Component Recognition
+              <Sparkles size={12} />
+            </button>
+            <button
+              onClick={() => { setShowVisualSearch(!showVisualSearch); setShowPastePanel(false); }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
+              style={{
+                background: "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(0,153,255,0.15))",
+                color: "#00F5FF",
+                border: "1px solid rgba(0,245,255,0.3)",
+              }}
+            >
+              <Camera size={15} />
+              📸 Visual Search
+              <Eye size={12} />
+            </button>
           </div>
+
+          {/* Visual Search Panel */}
+          <AnimatePresence>
+            {showVisualSearch && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden mb-4"
+              >
+                <div
+                  className="rounded-2xl border p-5"
+                  style={{ background: "rgba(0,245,255,0.04)", borderColor: "rgba(0,245,255,0.2)" }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Camera size={16} style={{ color: "#00F5FF" }} />
+                      <span className="font-bold text-sm" style={{ color: "#00F5FF" }}>Visual Component Search</span>
+                    </div>
+                    <button onClick={() => setShowVisualSearch(false)} style={{ color: "#A0AED9" }}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
+                    Upload a photo of an electronic component you can't identify — AI will recognize it and add it to your inventory.
+                  </p>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+
+                  {!previewImage ? (
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full py-8 rounded-xl border-2 border-dashed flex flex-col items-center gap-2 transition-all hover:scale-[1.01]"
+                      style={{ borderColor: "rgba(0,245,255,0.3)", color: "#00F5FF" }}
+                    >
+                      <Camera size={28} />
+                      <span className="text-sm font-semibold">Take Photo or Upload Image</span>
+                      <span className="text-xs" style={{ color: "#A0AED9" }}>Supports JPG, PNG, WEBP</span>
+                    </button>
+                  ) : (
+                    <div>
+                      <div className="rounded-xl overflow-hidden mb-3 relative">
+                        <img src={previewImage} alt="Component" className="w-full max-h-48 object-contain rounded-xl" style={{ background: "hsl(229, 42%, 10%)" }} />
+                        <button
+                          onClick={() => { setPreviewImage(null); setVisualResults([]); }}
+                          className="absolute top-2 right-2 p-1.5 rounded-lg"
+                          style={{ background: "rgba(0,0,0,0.6)", color: "#FFF" }}
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+
+                      {visualSearching && (
+                        <div className="flex items-center gap-2 py-3 justify-center">
+                          <Loader2 size={16} className="animate-spin" style={{ color: "#00F5FF" }} />
+                          <span className="text-sm" style={{ color: "#00F5FF" }}>Analyzing image...</span>
+                        </div>
+                      )}
+
+                      {visualResults.length > 0 && (
+                        <div className="mt-3 p-4 rounded-xl" style={{ background: "rgba(0,255,136,0.06)", border: "1px solid rgba(0,255,136,0.2)" }}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Sparkles size={14} style={{ color: "#00FF88" }} />
+                            <span className="text-sm font-bold" style={{ color: "#00FF88" }}>
+                              Identified {visualResults.length} component{visualResults.length !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                          <div className="space-y-1.5 mb-3">
+                            {visualResults.map(item => (
+                              <div key={item.name} className="flex items-center justify-between px-3 py-2 rounded-lg"
+                                style={{ background: "rgba(0,255,136,0.08)", border: "1px solid rgba(0,255,136,0.15)" }}>
+                                <span className="text-xs font-medium" style={{ color: "#E0E7FF" }}>
+                                  {ownedNames.includes(item.name) ? "✓ " : "+ "}{item.name}
+                                </span>
+                                <span className="text-xs px-2 py-0.5 rounded-full" style={{
+                                  background: item.confidence === "high" ? "rgba(0,255,136,0.15)" : item.confidence === "medium" ? "rgba(255,165,0,0.15)" : "rgba(255,80,80,0.15)",
+                                  color: item.confidence === "high" ? "#00FF88" : item.confidence === "medium" ? "#FFA500" : "#FF5050",
+                                  border: `1px solid ${item.confidence === "high" ? "rgba(0,255,136,0.3)" : item.confidence === "medium" ? "rgba(255,165,0,0.3)" : "rgba(255,80,80,0.3)"}`
+                                }}>
+                                  {item.confidence}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          <button
+                            onClick={addVisualResultsToInventory}
+                            className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                            style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27" }}
+                          >
+                            <Plus size={14} /> Add to Inventory
+                          </button>
+                        </div>
+                      )}
+
+                      {!visualSearching && visualResults.length === 0 && (
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                          style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                        >
+                          <Camera size={14} /> Try Another Photo
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showPastePanel && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden mb-4"
+              >
+                <div
+                  className="rounded-2xl border p-5"
+                  style={{ background: "rgba(183,68,255,0.06)", borderColor: "rgba(183,68,255,0.25)" }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Brain size={16} style={{ color: "#B744FF" }} />
+                      <span className="font-bold text-sm" style={{ color: "#B744FF" }}>Paste Your Component List</span>
+                    </div>
+                    <button onClick={() => setShowPastePanel(false)} style={{ color: "#A0AED9" }}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
+                    Paste a shopping cart, project guide, or parts list — AI will recognize the components and add them to your inventory.
+                  </p>
+                  <textarea
+                    value={pasteText}
+                    onChange={(e) => setPasteText(e.target.value)}
+                    placeholder={"e.g.\n1x Arduino Uno\n2x DHT11 Temperature Sensor\n5x 220 ohm Resistor\nServo motor SG90\nBreadboard + jumper wires..."}
+                    className="w-full h-28 px-4 py-3 rounded-xl text-sm resize-none focus:outline-none"
+                    style={{
+                      background: "hsl(229, 42%, 12%)",
+                      border: "1px solid rgba(183,68,255,0.2)",
+                      color: "#FFFFFF",
+                    }}
+                  />
+                  <button
+                    onClick={handleRecognize}
+                    disabled={recognizing || !pasteText.trim()}
+                    className="mt-3 w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{
+                      background: "linear-gradient(135deg, #B744FF, #FF1493)",
+                      color: "#FFFFFF",
+                      boxShadow: "0 0 15px rgba(183,68,255,0.3)",
+                    }}
+                  >
+                    {recognizing ? <><Loader2 size={14} className="animate-spin" /> Recognizing...</> : <><Brain size={14} /> Recognize Components</>}
+                  </button>
+
+                  {/* Recognized Results */}
+                  <AnimatePresence>
+                    {recognized.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="mt-4 p-4 rounded-xl"
+                        style={{ background: "rgba(0,255,136,0.06)", border: "1px solid rgba(0,255,136,0.2)" }}
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          <Sparkles size={14} style={{ color: "#00FF88" }} />
+                          <span className="text-sm font-bold" style={{ color: "#00FF88" }}>
+                            Found {recognized.length} component{recognized.length !== 1 ? "s" : ""}!
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          {recognized.map(name => (
+                            <span
+                              key={name}
+                              className="text-xs px-2.5 py-1 rounded-lg font-medium"
+                              style={{
+                                background: ownedNames.includes(name) ? "rgba(255,215,0,0.12)" : "rgba(0,255,136,0.12)",
+                                color: ownedNames.includes(name) ? "#FFD700" : "#00FF88",
+                                border: `1px solid ${ownedNames.includes(name) ? "rgba(255,215,0,0.3)" : "rgba(0,255,136,0.3)"}`,
+                              }}
+                            >
+                              {ownedNames.includes(name) ? "✓ " : "+"} {name}
+                            </span>
+                          ))}
+                        </div>
+                        <button
+                          onClick={addRecognizedToInventory}
+                          className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                          style={{
+                            background: "linear-gradient(135deg, #00FF88, #00C853)",
+                            color: "#0A0E27",
+                          }}
+                        >
+                          <Plus size={14} /> Add All to Inventory
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Component Library card */}
           <div
             className="rounded-2xl border overflow-hidden"
             style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
           >
-            {/* Card header */}
             <div
               className="flex items-center justify-between px-5 py-4 border-b"
               style={{ borderColor: "hsl(229, 42%, 22%)" }}
@@ -163,7 +523,8 @@ export default function ComponentsPage() {
             <div className="px-5 py-3 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
               <button
                 onClick={handleSave}
-                className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                disabled={saving}
+                className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-80 disabled:cursor-not-allowed"
                 style={{
                   background: saved
                     ? "linear-gradient(135deg, #00FF88, #00C853)"
@@ -172,8 +533,7 @@ export default function ComponentsPage() {
                   boxShadow: saved ? "0 0 20px rgba(0,255,136,0.4)" : "0 0 20px rgba(0,245,255,0.3)",
                 }}
               >
-                <Save size={15} />
-                {saved ? "✓ Inventory Saved!" : "Save Inventory"}
+                {saving ? <><Loader2 size={15} className="animate-spin" /> Saving...</> : saved ? <><Save size={15} /> ✓ Inventory Saved!</> : <><Save size={15} /> Save Inventory</>}
               </button>
             </div>
 
@@ -199,6 +559,7 @@ export default function ComponentsPage() {
             <div className="p-5 space-y-2">
               {filteredComponents.map((comp) => {
                 const owned = quantities[comp.name] !== undefined;
+                const wishlisted = wishlist.includes(comp.name);
                 return (
                   <div
                     key={comp.name}
@@ -206,6 +567,8 @@ export default function ComponentsPage() {
                     style={
                       owned
                         ? { background: "rgba(0,245,255,0.06)", border: "1px solid rgba(0,245,255,0.25)" }
+                        : wishlisted
+                        ? { background: "rgba(255,20,147,0.06)", border: "1px solid rgba(255,20,147,0.2)" }
                         : { background: "hsl(229, 42%, 18%)", border: "1px solid transparent" }
                     }
                     onClick={() => !owned && toggleComponent(comp.name)}
@@ -234,27 +597,45 @@ export default function ComponentsPage() {
                       </span>
                     </div>
 
-                    {owned && (
-                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      {/* Wishlist button */}
+                      {!owned && (
                         <button
-                          onClick={() => adjustQty(comp.name, -1)}
+                          onClick={() => toggleWishlist(comp.name)}
                           className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-                          style={{ background: "hsl(229, 42%, 22%)", border: "1px solid hsl(229, 42%, 30%)", color: "#FFFFFF" }}
+                          title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                          style={{
+                            background: wishlisted ? "rgba(255,20,147,0.15)" : "transparent",
+                            border: wishlisted ? "1px solid rgba(255,20,147,0.3)" : "1px solid hsl(229, 42%, 30%)",
+                            color: wishlisted ? "#FF1493" : "hsl(226, 35%, 55%)",
+                          }}
                         >
-                          <Minus size={11} />
+                          <Heart size={11} fill={wishlisted ? "#FF1493" : "none"} />
                         </button>
-                        <span className="text-sm font-bold w-6 text-center" style={{ color: "#FFFFFF" }}>
-                          {quantities[comp.name]}
-                        </span>
-                        <button
-                          onClick={() => adjustQty(comp.name, 1)}
-                          className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-                          style={{ background: "hsl(229, 42%, 22%)", border: "1px solid hsl(229, 42%, 30%)", color: "#FFFFFF" }}
-                        >
-                          <Plus size={11} />
-                        </button>
-                      </div>
-                    )}
+                      )}
+
+                      {owned && (
+                        <>
+                          <button
+                            onClick={() => adjustQty(comp.name, -1)}
+                            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                            style={{ background: "hsl(229, 42%, 22%)", border: "1px solid hsl(229, 42%, 30%)", color: "#FFFFFF" }}
+                          >
+                            <Minus size={11} />
+                          </button>
+                          <span className="text-sm font-bold w-6 text-center" style={{ color: "#FFFFFF" }}>
+                            {quantities[comp.name]}
+                          </span>
+                          <button
+                            onClick={() => adjustQty(comp.name, 1)}
+                            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                            style={{ background: "hsl(229, 42%, 22%)", border: "1px solid hsl(229, 42%, 30%)", color: "#FFFFFF" }}
+                          >
+                            <Plus size={11} />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -264,6 +645,76 @@ export default function ComponentsPage() {
 
         {/* Right sidebar panel */}
         <div className="w-72 flex-shrink-0 px-4 py-10 space-y-4 border-l overflow-y-auto" style={{ borderColor: "hsl(229, 42%, 20%)" }}>
+
+          {/* Wishlist Panel */}
+          <div
+            className="rounded-2xl p-5 border"
+            style={{ background: "rgba(255,20,147,0.05)", borderColor: "rgba(255,20,147,0.2)" }}
+          >
+            <button
+              onClick={() => setShowWishlist(!showWishlist)}
+              className="flex items-center gap-2 w-full mb-2"
+            >
+              <Heart size={16} style={{ color: "#FF1493" }} fill={wishlist.length > 0 ? "#FF1493" : "none"} />
+              <span className="font-bold text-sm" style={{ color: "#FF1493" }}>
+                Wishlist {wishlist.length > 0 && `(${wishlist.length})`}
+              </span>
+              <ShoppingCart size={12} style={{ color: "#FF1493", marginLeft: "auto" }} />
+            </button>
+            <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
+              Components you want but don't have yet. Plan your next purchase!
+            </p>
+
+            <AnimatePresence>
+              {(showWishlist || wishlist.length > 0) && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="space-y-1.5"
+                >
+                  {wishlist.length === 0 ? (
+                    <p className="text-xs italic" style={{ color: "hsl(226, 35%, 45%)" }}>
+                      Click the ♡ icon next to any component to add it here.
+                    </p>
+                  ) : (
+                    <>
+                      {wishlist.map(name => (
+                        <div
+                          key={name}
+                          className="flex items-center justify-between px-3 py-2 rounded-lg"
+                          style={{ background: "rgba(255,20,147,0.08)", border: "1px solid rgba(255,20,147,0.15)" }}
+                        >
+                          <span className="text-xs font-medium truncate" style={{ color: "#E0E7FF" }}>{name}</span>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                              onClick={() => moveWishlistToInventory(name)}
+                              className="p-1 rounded transition-all hover:scale-110"
+                              title="Got it! Move to inventory"
+                              style={{ color: "#00FF88" }}
+                            >
+                              <Plus size={11} />
+                            </button>
+                            <button
+                              onClick={() => toggleWishlist(name)}
+                              className="p-1 rounded transition-all hover:scale-110"
+                              title="Remove from wishlist"
+                              style={{ color: "#FF4500" }}
+                            >
+                              <X size={11} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      <p className="text-xs mt-2 italic" style={{ color: "hsl(226, 35%, 55%)" }}>
+                        💡 Get these components to unlock more projects!
+                      </p>
+                    </>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* Tips */}
           <div
             className="rounded-2xl p-5 border"
@@ -278,6 +729,8 @@ export default function ComponentsPage() {
                 "Add all your components, even basic ones like resistors",
                 "Include the quantity - it affects what projects you can build",
                 "More components = more complex project suggestions",
+                "Use 🤖 Smart Recognition to paste shopping lists",
+                "Add wishlist items to plan future purchases",
               ].map((tip) => (
                 <li key={tip} className="flex items-start gap-2 text-xs" style={{ color: "#A0AED9" }}>
                   <span className="mt-0.5 flex-shrink-0">•</span>

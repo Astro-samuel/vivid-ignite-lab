@@ -1,51 +1,134 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageSquare, X, Send, Bot, Sparkles, ChevronDown, Maximize2, Minimize2, GripVertical } from "lucide-react";
+import { MessageSquare, X, Send, Bot, Sparkles, ChevronDown, Maximize2, Minimize2, GripVertical, Settings } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAIPreferences } from "@/hooks/useAIPreferences";
+import { useAIContext } from "@/hooks/useAIContext";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
-  role: "user" | "ai";
-  text: string;
+  role: "user" | "assistant";
+  content: string;
 }
 
-const greetings = [
-  "Hi! I'm your AI Mentor 🤖 Ask me anything about Arduino, electronics, or your projects!",
-];
+const MENTOR_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-mentor`;
 
-const responses: Record<string, string> = {
-  default: "That's a great question! Can you tell me a bit more about what you're trying to build? Knowing your specific components and goal will help me give you better guidance. 🤔",
-  led: "LEDs are a great starting point! 💡 Here's a question for you: do you know why we need a resistor with an LED? Think about what happens to current without one. The longer leg is the anode (+) and goes through a 220Ω resistor to your Arduino pin.",
-  servo: "Servos are fun! 🤖 Quick question: do you know the difference between a servo and a DC motor? A servo has 3 wires — can you figure out which one carries the signal? Hint: it's usually the orange/yellow one. Try using `myServo.write(angle)` with the Servo library.",
-  sensor: "Sensors are the 'eyes and ears' of your project! 🌡️ What sensor are you working with? Each one communicates differently. Before I help further — have you checked the datasheet? It'll tell you whether it's analog or digital output.",
-  error: "Errors are actually great teachers! 🎓 Let's debug together. Can you tell me: 1) What's the exact error message? 2) What line does it point to? 3) Did it work before you made changes? Let's narrow it down step by step.",
-  beginner: "Welcome to the Arduino world! 🌟 I'd recommend starting with LED blink — it teaches digital output. Then try a button input. Each project builds on the last. What components do you have available?",
-  wifi: "WiFi opens up so many possibilities! 🌐 Are you using ESP32 or ESP8266? The basic flow is: include WiFi.h → call WiFi.begin(ssid, password) → check WiFi.status(). What are you trying to connect to?",
-  motor: "Motors need some extra care — never connect them directly to Arduino! ⚡ You'll need a motor driver like L298N. Think of it as a translator between Arduino's small signals and the motor's big power needs. What type of motor are you using?",
-  wiring: "Good thinking to ask about wiring! 🔧 Always double-check: is power going to the right rails? Are your grounds connected? A common mistake is forgetting the common ground between components. Can you describe your current setup?",
-  code: "Let's look at your code together! 📝 Before I help, try these checks: 1) Does every line end with a semicolon? 2) Are your pin numbers matching the wiring? 3) Did you call pinMode() in setup()? Which part is giving you trouble?",
-};
+async function streamMentor({
+  messages,
+  preferences,
+  contextMeta,
+  onDelta,
+  onDone,
+  onError,
+}: {
+  messages: Message[];
+  preferences?: { tone: string; hintDepth: string; formality: string };
+  contextMeta?: { errors_explained: string[]; questions_asked: string[] };
+  onDelta: (text: string) => void;
+  onDone: () => void;
+  onError: (msg: string) => void;
+}) {
+  try {
+    const resp = await fetch(MENTOR_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ messages, preferences, contextMeta }),
+    });
 
-function getAIResponse(input: string): string {
-  const lower = input.toLowerCase();
-  if (lower.includes("led") || lower.includes("light") || lower.includes("blink")) return responses.led;
-  if (lower.includes("servo")) return responses.servo;
-  if (lower.includes("motor") || lower.includes("drive")) return responses.motor;
-  if (lower.includes("sensor") || lower.includes("temperature") || lower.includes("dht") || lower.includes("ultrasonic")) return responses.sensor;
-  if (lower.includes("error") || lower.includes("not working") || lower.includes("help") || lower.includes("bug") || lower.includes("fix")) return responses.error;
-  if (lower.includes("beginner") || lower.includes("start") || lower.includes("new") || lower.includes("learn")) return responses.beginner;
-  if (lower.includes("wifi") || lower.includes("esp") || lower.includes("internet") || lower.includes("iot")) return responses.wifi;
-  if (lower.includes("wir") || lower.includes("connect") || lower.includes("circuit") || lower.includes("breadboard")) return responses.wiring;
-  if (lower.includes("code") || lower.includes("program") || lower.includes("script") || lower.includes("sketch")) return responses.code;
-  return responses.default;
+    if (!resp.ok) {
+      const data = await resp.json().catch(() => ({}));
+      onError(data.error || "Something went wrong — try again?");
+      return;
+    }
+
+    if (!resp.body) {
+      onError("No response received");
+      return;
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let newlineIdx: number;
+      while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
+        let line = buffer.slice(0, newlineIdx);
+        buffer = buffer.slice(newlineIdx + 1);
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") break;
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) onDelta(content);
+        } catch {
+          buffer = line + "\n" + buffer;
+          break;
+        }
+      }
+    }
+
+    if (buffer.trim()) {
+      for (let raw of buffer.split("\n")) {
+        if (!raw || raw.startsWith(":") || !raw.startsWith("data: ")) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const c = parsed.choices?.[0]?.delta?.content;
+          if (c) onDelta(c);
+        } catch {}
+      }
+    }
+
+    onDone();
+  } catch (err) {
+    onError("Connection failed — check your internet?");
+  }
 }
 
-export default function AIMentor() {
+interface AIMentorProps {
+  projectId?: number;
+}
+
+export default function AIMentor({ projectId }: AIMentorProps) {
+  const navigate = useNavigate();
+  const preferences = useAIPreferences();
+  const { context, saveContext, trackQuestion } = useAIContext(projectId || null);
+
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "ai", text: greetings[0] },
+    { role: "assistant", content: "Hey! 👋 I'm your Arduino mentor. Whether you're wiring your first LED or debugging a sensor project, I'm here to help you figure it out. What are you working on?" },
   ]);
   const [input, setInput] = useState("");
-  const [typing, setTyping] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [contextLoaded, setContextLoaded] = useState(false);
+
+  // Load cached messages when project context loads
+  useEffect(() => {
+    if (contextLoaded || !projectId) return;
+    if (context.messages.length > 0) {
+      setMessages([
+        { role: "assistant", content: "Hey! 👋 I'm your Arduino mentor. I remember our last conversation on this project — let's keep going! What do you need help with?" },
+        ...context.messages,
+      ]);
+    }
+    setContextLoaded(true);
+  }, [context.messages, projectId, contextLoaded]);
 
   // Dragging state
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -81,27 +164,65 @@ export default function AIMentor() {
     };
   }, [isDragging]);
 
-  const send = () => {
-    if (!input.trim()) return;
+  const send = async () => {
+    if (!input.trim() || streaming) return;
     const userMsg = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", text: userMsg }]);
-    setTyping(true);
-    setTimeout(() => {
-      setTyping(false);
-      setMessages((prev) => [...prev, { role: "ai", text: getAIResponse(userMsg) }]);
-    }, 800 + Math.random() * 600);
+
+    trackQuestion(userMsg);
+
+    const newMessages: Message[] = [...messages, { role: "user", content: userMsg }];
+    setMessages(newMessages);
+    setStreaming(true);
+
+    let assistantText = "";
+
+    const updateAssistant = (chunk: string) => {
+      assistantText += chunk;
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant" && prev.length > newMessages.length) {
+          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantText } : m));
+        }
+        return [...prev, { role: "assistant", content: assistantText }];
+      });
+    };
+
+    await streamMentor({
+      messages: newMessages,
+      preferences,
+      contextMeta: {
+        errors_explained: context.errors_explained,
+        questions_asked: context.questions_asked,
+      },
+      onDelta: updateAssistant,
+      onDone: () => {
+        setStreaming(false);
+        // Cache conversation
+        if (projectId) {
+          const allMsgs = [...newMessages.slice(1), { role: "assistant" as const, content: assistantText }];
+          saveContext({ messages: allMsgs });
+        }
+      },
+      onError: (msg) => {
+        setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
+        setStreaming(false);
+      },
+    });
   };
 
   const panelWidth = expanded ? "w-[480px]" : "w-80";
-  const panelHeight = expanded ? "max-h-[680px]" : "max-h-[480px]";
 
   return (
     <>
-      {/* Floating button */}
-      <button
+      <motion.button
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 22, delay: 0.2 }}
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center z-50 transition-all hover:scale-110 shadow-2xl"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center z-50 shadow-2xl"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
         style={{
           background: "linear-gradient(135deg, #B744FF, #FF1493)",
           boxShadow: open
@@ -114,140 +235,158 @@ export default function AIMentor() {
           className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full"
           style={{ background: "#00FF88", border: "2px solid hsl(229, 48%, 8%)" }}
         />
-      </button>
+      </motion.button>
 
-      {/* Chat Panel */}
-      {open && (
-        <div
-          className={`fixed bottom-24 right-6 ${panelWidth} rounded-2xl border z-50 flex flex-col overflow-hidden shadow-2xl animate-fade-in`}
-          style={{
-            background: "hsl(229, 45%, 14%)",
-            borderColor: "rgba(183,68,255,0.4)",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(183,68,255,0.2)",
-            transform: `translate(${position.x}px, ${position.y}px)`,
-            maxHeight: expanded ? "680px" : "480px",
-            transition: isDragging ? "none" : "width 0.3s, max-height 0.3s",
-          }}
-        >
-          {/* Header with drag handle */}
-          <div
-            className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0"
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.97 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className={`fixed bottom-24 right-6 ${panelWidth} rounded-2xl border z-50 flex flex-col overflow-hidden shadow-2xl`}
             style={{
-              background: "linear-gradient(135deg, rgba(183,68,255,0.2), rgba(255,20,147,0.1))",
-              borderColor: "rgba(183,68,255,0.3)",
-              cursor: "default",
+              background: "hsl(229, 45%, 14%)",
+              borderColor: "rgba(183,68,255,0.4)",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(183,68,255,0.2)",
+              transform: `translate(${position.x}px, ${position.y}px)`,
+              maxHeight: expanded ? "680px" : "480px",
+              transition: isDragging ? "none" : "width 0.3s, max-height 0.3s",
             }}
           >
-            <div className="flex items-center gap-2.5">
-              {/* Drag handle */}
-              <div
-                onMouseDown={handleMouseDown}
-                className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-white/10 transition-colors"
-                title="Drag to move"
-              >
-                <GripVertical size={14} style={{ color: "#A0AED9" }} />
-              </div>
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}
-              >
-                <Bot size={16} color="#fff" />
-              </div>
-              <div>
-                <p className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Mentor</p>
-                <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#00FF88" }} />
-                  <p className="text-xs" style={{ color: "#00FF88" }}>Online</p>
+            {/* Header */}
+            <div
+              className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0"
+              style={{
+                background: "linear-gradient(135deg, rgba(183,68,255,0.2), rgba(255,20,147,0.1))",
+                borderColor: "rgba(183,68,255,0.3)",
+              }}
+            >
+              <div className="flex items-center gap-2.5">
+                <div
+                  onMouseDown={handleMouseDown}
+                  className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-white/10 transition-colors"
+                  title="Drag to move"
+                >
+                  <GripVertical size={14} style={{ color: "#A0AED9" }} />
+                </div>
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}
+                >
+                  <Bot size={16} color="#fff" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Mentor</p>
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#00FF88" }} />
+                    <p className="text-xs" style={{ color: "#00FF88" }}>Online</p>
+                  </div>
                 </div>
               </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => navigate("/ai-settings")}
+                  className="p-1 rounded transition-all hover:bg-white/10"
+                  style={{ color: "#A0AED9" }}
+                  title="AI Settings"
+                >
+                  <Settings size={14} />
+                </button>
+                <button
+                  onClick={() => setExpanded(!expanded)}
+                  className="p-1 rounded transition-all hover:bg-white/10"
+                  style={{ color: "#A0AED9" }}
+                >
+                  {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                </button>
+                <button onClick={() => setOpen(false)} className="p-1 rounded transition-all hover:bg-white/10" style={{ color: "#A0AED9" }}>
+                  <X size={14} />
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setExpanded(!expanded)}
-                className="p-1 rounded transition-all hover:bg-white/10"
-                style={{ color: "#A0AED9" }}
-                title={expanded ? "Minimize" : "Expand"}
-              >
-                {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-              </button>
-              <button onClick={() => setOpen(false)} className="p-1 rounded transition-all hover:bg-white/10" style={{ color: "#A0AED9" }}>
-                <X size={14} />
-              </button>
-            </div>
-          </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ minHeight: 0 }}>
-            {messages.map((m, i) => (
-              <div key={i} className={`flex gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                {m.role === "ai" && (
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ minHeight: 0 }}>
+              {messages.map((m, i) => (
+                <div key={i} className={`flex gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                  {m.role === "assistant" && (
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                      style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}
+                    >
+                      <Sparkles size={11} color="#fff" />
+                    </div>
+                  )}
                   <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                    style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}
+                    className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${expanded ? "text-sm" : ""}`}
+                    style={
+                      m.role === "user"
+                        ? {
+                            background: "linear-gradient(135deg, #00F5FF, #0099FF)",
+                            color: "#0A0E27",
+                            borderBottomRightRadius: "4px",
+                          }
+                        : {
+                            background: "rgba(255,255,255,0.06)",
+                            color: "#E0E7FF",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                            borderBottomLeftRadius: "4px",
+                          }
+                    }
                   >
+                    {m.content}
+                  </div>
+                </div>
+              ))}
+              {streaming && messages[messages.length - 1]?.role !== "assistant" && (
+                <div className="flex gap-2 justify-start">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}>
                     <Sparkles size={11} color="#fff" />
                   </div>
-                )}
-                <div
-                  className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${expanded ? "text-sm" : ""}`}
-                  style={
-                    m.role === "user"
-                      ? {
-                          background: "linear-gradient(135deg, #00F5FF, #0099FF)",
-                          color: "#0A0E27",
-                          borderBottomRightRadius: "4px",
-                        }
-                      : {
-                          background: "rgba(255,255,255,0.06)",
-                          color: "#E0E7FF",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          borderBottomLeftRadius: "4px",
-                        }
-                  }
-                >
-                  {m.text}
+                  <div className="px-3 py-2 rounded-2xl text-xs flex items-center gap-1" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF" }} />
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF", animationDelay: "0.15s" }} />
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF", animationDelay: "0.3s" }} />
+                  </div>
                 </div>
-              </div>
-            ))}
-            {typing && (
-              <div className="flex gap-2 justify-start">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}>
-                  <Sparkles size={11} color="#fff" />
-                </div>
-                <div className="px-3 py-2 rounded-2xl text-xs flex items-center gap-1" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF" }} />
-                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF", animationDelay: "0.15s" }} />
-                  <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF", animationDelay: "0.3s" }} />
-                </div>
+              )}
+              <div ref={bottomRef} />
+            </div>
+
+            {/* Context indicator */}
+            {projectId && context.questions_asked.length > 0 && (
+              <div className="px-4 py-1.5 text-xs flex items-center gap-1.5 border-t" style={{ borderColor: "rgba(183,68,255,0.15)", color: "#A0AED9" }}>
+                <Sparkles size={10} /> {context.questions_asked.length} previous questions remembered
               </div>
             )}
-            <div ref={bottomRef} />
-          </div>
 
-          {/* Input */}
-          <div
-            className="flex items-center gap-2 px-3 py-3 border-t flex-shrink-0"
-            style={{ borderColor: "rgba(183,68,255,0.2)", background: "hsl(229, 48%, 10%)" }}
-          >
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && send()}
-              placeholder="Ask your mentor..."
-              className={`flex-1 bg-transparent focus:outline-none ${expanded ? "text-sm" : "text-xs"}`}
-              style={{ color: "#FFFFFF" }}
-            />
-            <button
-              onClick={send}
-              disabled={!input.trim()}
-              className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110 disabled:opacity-40"
-              style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}
+            {/* Input */}
+            <div
+              className="flex items-center gap-2 px-3 py-3 border-t flex-shrink-0"
+              style={{ borderColor: "rgba(183,68,255,0.2)", background: "hsl(229, 48%, 10%)" }}
             >
-              <Send size={12} color="#fff" />
-            </button>
-          </div>
-        </div>
-      )}
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && send()}
+                placeholder="Ask your mentor..."
+                disabled={streaming}
+                className={`flex-1 bg-transparent focus:outline-none disabled:opacity-50 ${expanded ? "text-sm" : "text-xs"}`}
+                style={{ color: "#FFFFFF" }}
+              />
+              <button
+                onClick={send}
+                disabled={!input.trim() || streaming}
+                className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110 disabled:opacity-40"
+                style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}
+              >
+                <Send size={12} color="#fff" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

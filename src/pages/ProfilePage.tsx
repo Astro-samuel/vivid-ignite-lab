@@ -1,7 +1,14 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { User, Camera, Edit3, Save, Star, Zap, Trophy, CheckCircle, Flame, ChevronRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
+import FadeInView from "@/components/motion/FadeInView";
+import MotionCard from "@/components/motion/MotionCard";
+import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserProjects } from "@/hooks/useUserProjects";
+import { calculateSkillProgress } from "@/lib/skillMapping";
 
 interface UserProfile {
   name: string;
@@ -15,40 +22,55 @@ interface UserProfile {
   avatar: string | null;
 }
 
-const initialProfile: UserProfile = {
-  name: "Alex Maker",
-  username: "alex_maker",
-  bio: "Passionate about Arduino and electronics. Building the future one circuit at a time! ⚡",
-  level: 7,
-  xp: 245,
-  maxXP: 500,
-  streak: 3,
-  projectsCompleted: 5,
+const emptyProfile: UserProfile = {
+  name: "",
+  username: "",
+  bio: "",
+  level: 1,
+  xp: 0,
+  maxXP: 200,
+  streak: 0,
+  projectsCompleted: 0,
   avatar: null,
 };
 
-const skillProgress = [
-  { name: "Electronics Basics", level: "Intermediate", percent: 65, color: "#00F5FF" },
-  { name: "Programming", level: "Beginner", percent: 40, color: "#00FF88" },
-  { name: "Sensors & Actuators", level: "Intermediate", percent: 55, color: "#FFD700" },
-  { name: "IoT & Connectivity", level: "Beginner", percent: 20, color: "#B744FF" },
-  { name: "Robotics", level: "Beginner", percent: 15, color: "#FF1493" },
-];
-
-const recentActivity = [
-  { icon: "🏆", text: "Completed RGB LED Mixer", time: "5 days ago", color: "#FFD700" },
-  { icon: "⚡", text: "Generated Eco-Water Monitor", time: "2 days ago", color: "#00F5FF" },
-  { icon: "🔧", text: "Added 5 components to inventory", time: "1 day ago", color: "#00FF88" },
-];
+const recentActivity: { icon: string; text: string; time: string; color: string }[] = [];
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<UserProfile>(initialProfile);
+  const { user } = useAuth();
+  const { projects } = useUserProjects();
+  const [profile, setProfile] = useState<UserProfile>(emptyProfile);
   const [editing, setEditing] = useState(false);
-  const [editData, setEditData] = useState({ name: profile.name, username: profile.username, bio: profile.bio });
+  const [editData, setEditData] = useState({ name: "", username: "", bio: "" });
   const [savedToast, setSavedToast] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Load profile from database — use DB as source of truth for XP/level
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("*").eq("id", user.id).single().then(({ data }) => {
+      if (data) {
+        setProfile({
+          name: data.display_name || "",
+          username: data.username || "",
+          bio: "",
+          level: data.level || 1,
+          xp: data.total_xp || 0,
+          maxXP: (data.level || 1) >= 3 ? 1000 : (data.level || 1) >= 2 ? 500 : 200,
+          streak: data.streak_days || 0,
+          projectsCompleted: data.projects_completed || 0,
+          avatar: data.avatar_url || null,
+        });
+        setEditData({
+          name: data.display_name || "",
+          username: data.username || "",
+          bio: "",
+        });
+      }
+    });
+  }, [user, projects]);
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,12 +85,28 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setProfile((prev) => ({ ...prev, ...editData }));
     setEditing(false);
+
+    // Persist to database
+    if (user) {
+      await supabase.from("profiles").update({
+        display_name: editData.name,
+        username: editData.username,
+      }).eq("id", user.id);
+    }
+
     setSavedToast(true);
     setTimeout(() => setSavedToast(false), 3000);
   };
+
+  // Calculate skill progress from completed projects
+  const completedProjectIds = useMemo(() =>
+    projects.filter(p => p.status === "completed").map(p => p.project_id),
+    [projects]
+  );
+  const skillProgress = useMemo(() => calculateSkillProgress(completedProjectIds), [completedProjectIds]);
 
   const xpPercent = (profile.xp / profile.maxXP) * 100;
 
@@ -76,17 +114,17 @@ export default function ProfilePage() {
     { icon: Trophy, label: "Projects", value: profile.projectsCompleted, color: "#FFD700" },
     { icon: Flame, label: "Day Streak", value: profile.streak, color: "#FF4500" },
     { icon: Star, label: "Level", value: profile.level, color: "#B744FF" },
-    { icon: Zap, label: "Total XP", value: "245", color: "#00F5FF" },
+    { icon: Zap, label: "Total XP", value: profile.xp, color: "#00F5FF" },
   ];
 
   return (
     <Layout>
       <div className="px-8 py-10 max-w-3xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
+        <FadeInView className="flex items-center gap-3 mb-8">
           <User size={22} style={{ color: "#00F5FF" }} />
           <h1 className="text-2xl font-bold" style={{ color: "#FFFFFF" }}>My Profile</h1>
-        </div>
+        </FadeInView>
 
         {/* Profile Card */}
         <div
@@ -300,11 +338,14 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {savedToast && (
-        <div className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up z-50" style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}>
-          <CheckCircle size={16} /> ✓ Profile Saved!
-        </div>
-      )}
+      <AnimatePresence>
+        {savedToast && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold z-50" style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}>
+            <CheckCircle size={16} /> ✓ Profile Saved!
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Layout>
   );
 }

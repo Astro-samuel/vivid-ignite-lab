@@ -1,0 +1,1 @@
+ALTER TABLE public.community_projects DROP COLUMN author_email;

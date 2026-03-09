@@ -1,33 +1,43 @@
 import { useState, useRef, useEffect } from "react";
-import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, Bug, RefreshCw, ChevronRight, BookOpen, Circle } from "lucide-react";
+import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, Bug, RefreshCw, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
+import CodeEditor from "@/components/CodeEditor";
 
 type RunStep = "idle" | "compiling" | "simulating" | "safety" | "success" | "error";
 
-const sampleCode = `// Smart LED Mood Lamp
-// Controls LED brightness based on ambient light
+const starterCode = `/*
+  🎯 Project: Smart LED Mood Lamp
+  
+  Goal: Control LED brightness based on ambient light.
+  
+  📦 Components: LED (pin 9), Photoresistor (A0)
+  
+  🧩 Hints:
+     1. Use pinMode() to set LED_PIN as OUTPUT
+     2. Use analogRead() to get light sensor value (0-1023)
+     3. Use map() to convert sensor range to LED brightness (0-255)
+     4. Use analogWrite() to set LED brightness
+     5. Add Serial.print() to debug your values
+  
+  💡 Try writing it yourself first!
+     Use "Debug with AI" if you get stuck.
+*/
 
 const int LED_PIN = 9;
 const int SENSOR_PIN = A0;
-int brightness = 0;
-int sensorValue = 0;
 
 void setup() {
-  pinMode(LED_PIN, OUTPUT);
-  Serial.begin(9600);
-  Serial.println("Smart LED Lamp Starting...");
+  // TODO: Set LED_PIN as OUTPUT
+  // TODO: Start Serial at 9600 baud
 }
 
 void loop() {
-  sensorValue = analogRead(SENSOR_PIN);
-  // Map sensor value (0-1023) to LED brightness (0-255)
-  brightness = map(sensorValue, 0, 1023, 255, 0);
-  analogWrite(LED_PIN, brightness);
-  
-  Serial.print("Sensor: ");
-  Serial.print(sensorValue);
-  Serial.print(" | Brightness: ");
-  Serial.println(brightness);
+  // TODO: Read the sensor value with analogRead()
+  // TODO: Map sensor value (0-1023) to brightness (0-255)
+  //       Hint: brighter room = dimmer LED, so invert the range
+  // TODO: Write brightness to LED with analogWrite()
+  // TODO: Print values to Serial for debugging
   
   delay(100);
 }`;
@@ -96,7 +106,8 @@ const aiHints = [
 ];
 
 export default function IDEPage() {
-  const [code, setCode] = useState(sampleCode);
+  const navigate = useNavigate();
+  const [code, setCode] = useState(starterCode);
   const [runStep, setRunStep] = useState<RunStep>("idle");
   const [errors, setErrors] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
@@ -105,6 +116,8 @@ export default function IDEPage() {
   const [xpAwarded, setXpAwarded] = useState(false);
   const [autoSaveCountdown, setAutoSaveCountdown] = useState(30);
   const [activeStep, setActiveStep] = useState(3);
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [showSimulator, setShowSimulator] = useState(true);
   const codeRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-save countdown
@@ -174,7 +187,7 @@ export default function IDEPage() {
   };
 
   const resetCode = () => {
-    setCode(sampleCode);
+    setCode(starterCode);
     setRunStep("idle");
     setErrors([]);
     setXpAwarded(false);
@@ -186,32 +199,69 @@ export default function IDEPage() {
       <div className="flex flex-col" style={{ height: "calc(100vh - 48px)" }}>
         {/* Top Bar */}
         <div
-          className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0"
+          className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0"
           style={{ background: "hsl(232, 48%, 6%)", borderColor: "hsl(232, 40%, 16%)" }}
         >
-          <div>
-            <h1 className="font-bold text-sm" style={{ color: "#FFFFFF" }}>Smart LED Mood Lamp</h1>
-            <p className="text-xs" style={{ color: "hsl(228, 25%, 60%)" }}>
-              Step {activeStep} of {projectSteps.length} • Auto-save in {autoSaveCountdown}s
-            </p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-1.5 rounded-lg transition-all hover:scale-105"
+              style={{ background: "rgba(255,255,255,0.06)", color: "hsl(228, 25%, 70%)" }}
+            >
+              <ArrowLeft size={14} />
+            </button>
+            <div>
+              <h1 className="font-bold text-sm" style={{ color: "#FFFFFF" }}>Smart LED Mood Lamp</h1>
+              <p className="text-xs" style={{ color: "hsl(228, 25%, 60%)" }}>
+                Step {activeStep} of {projectSteps.length} • Auto-save in {autoSaveCountdown}s
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button onClick={loadErrorCode} className="btn-neon-outline-teal px-3 py-1.5 text-xs flex items-center gap-1.5">
-              <Bug size={12} /> Load Error Code
+          <div className="flex items-center gap-2">
+            {/* Panel toggles */}
+            <button
+              onClick={() => setShowInstructions(!showInstructions)}
+              className="p-1.5 rounded-lg transition-all hover:scale-105"
+              style={{
+                background: showInstructions ? "rgba(183,68,255,0.15)" : "rgba(255,255,255,0.06)",
+                color: showInstructions ? "#B744FF" : "hsl(228, 25%, 60%)",
+                border: showInstructions ? "1px solid rgba(183,68,255,0.3)" : "1px solid transparent",
+              }}
+              title={showInstructions ? "Hide Instructions" : "Show Instructions"}
+            >
+              {showInstructions ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
             </button>
-            <button onClick={resetCode} className="px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105" style={{ background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
-              <RefreshCw size={12} /> Reset
+            <button
+              onClick={() => setShowSimulator(!showSimulator)}
+              className="p-1.5 rounded-lg transition-all hover:scale-105"
+              style={{
+                background: showSimulator ? "rgba(0,255,136,0.15)" : "rgba(255,255,255,0.06)",
+                color: showSimulator ? "#00FF88" : "hsl(228, 25%, 60%)",
+                border: showSimulator ? "1px solid rgba(0,255,136,0.3)" : "1px solid transparent",
+              }}
+              title={showSimulator ? "Hide Simulator" : "Show Simulator"}
+            >
+              {showSimulator ? <PanelRightClose size={14} /> : <PanelRightOpen size={14} />}
+            </button>
+
+            <div className="w-px h-5 mx-1" style={{ background: "hsl(232, 40%, 20%)" }} />
+
+            <button onClick={loadErrorCode} className="btn-neon-outline-teal px-2.5 py-1.5 text-xs flex items-center gap-1.5">
+              <Bug size={11} /> Load Errors
+            </button>
+            <button onClick={resetCode} className="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105" style={{ background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
+              <RefreshCw size={11} /> Reset
             </button>
             <button
               onClick={runAndCheck}
               disabled={runStep === "compiling" || runStep === "simulating" || runStep === "safety"}
-              className="btn-neon-green px-5 py-2 text-sm font-bold flex items-center gap-2 disabled:opacity-60"
+              className="btn-neon-green px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 disabled:opacity-60"
             >
-              {runStep === "compiling" && <><Loader2 size={14} className="animate-spin" /> Compiling...</>}
-              {runStep === "simulating" && <><Loader2 size={14} className="animate-spin" /> Simulating...</>}
-              {runStep === "safety" && <><Loader2 size={14} className="animate-spin" /> Safety Check...</>}
-              {(runStep === "idle" || runStep === "success" || runStep === "error") && <><Play size={14} /> ▶ Run &amp; Check</>}
+              {runStep === "compiling" && <><Loader2 size={12} className="animate-spin" /> Compiling...</>}
+              {runStep === "simulating" && <><Loader2 size={12} className="animate-spin" /> Simulating...</>}
+              {runStep === "safety" && <><Loader2 size={12} className="animate-spin" /> Safety Check...</>}
+              {(runStep === "idle" || runStep === "success" || runStep === "error") && <><Play size={12} /> Run &amp; Check</>}
             </button>
           </div>
         </div>
@@ -219,7 +269,7 @@ export default function IDEPage() {
         {/* Run workflow indicator */}
         {runStep !== "idle" && (
           <div
-            className="px-6 py-3 border-b flex items-center gap-6 flex-shrink-0"
+            className="px-4 py-2 border-b flex items-center gap-4 flex-shrink-0"
             style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}
           >
             {(["compiling", "simulating", "safety"] as RunStep[]).map((step, i) => {
@@ -267,65 +317,67 @@ export default function IDEPage() {
         {/* Main area */}
         <div className="flex flex-1 overflow-hidden">
           {/* Instructions Panel */}
-          <div
-            className="w-64 flex-shrink-0 border-r flex flex-col overflow-y-auto glass-card animate-fade-in-up"
-            style={{ borderColor: "rgba(255,255,255,0.05)" }}
-          >
-            <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
-              <BookOpen size={15} style={{ color: "#B744FF" }} />
-              <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>Instructions</span>
-            </div>
-            <div className="p-3 space-y-2">
-              {projectSteps.map((step) => (
-                <div
-                  key={step.id}
-                  className="rounded-xl overflow-hidden border cursor-pointer transition-all"
-                  style={{
-                    borderColor: step.id === activeStep
-                      ? "rgba(0,245,255,0.4)"
-                      : step.done
-                        ? "rgba(0,255,136,0.2)"
-                        : "hsl(232, 38%, 20%)",
-                    background: step.id === activeStep
-                      ? "rgba(0,245,255,0.06)"
-                      : "transparent",
-                  }}
-                  onClick={() => setActiveStep(step.id)}
-                >
-                  <div className="flex items-center gap-2.5 px-3 py-2.5">
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
-                      style={
-                        step.done
-                          ? { background: "#00FF88", color: "#0A0E27" }
-                          : step.id === activeStep
-                            ? { background: "#00F5FF", color: "#0A0E27" }
-                            : { background: "hsl(232, 40%, 22%)", color: "hsl(228, 25%, 60%)" }
-                      }
-                    >
-                      {step.done ? "✓" : step.id}
+          {showInstructions && (
+            <div
+              className="w-64 flex-shrink-0 border-r flex flex-col overflow-y-auto glass-card transition-all duration-300 animate-fade-in-up"
+              style={{ borderColor: "rgba(255,255,255,0.05)" }}
+            >
+              <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
+                <BookOpen size={15} style={{ color: "#B744FF" }} />
+                <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>Instructions</span>
+              </div>
+              <div className="p-3 space-y-2">
+                {projectSteps.map((step) => (
+                  <div
+                    key={step.id}
+                    className="rounded-xl overflow-hidden border cursor-pointer transition-all duration-200"
+                    style={{
+                      borderColor: step.id === activeStep
+                        ? "rgba(0,245,255,0.4)"
+                        : step.done
+                          ? "rgba(0,255,136,0.2)"
+                          : "hsl(232, 38%, 20%)",
+                      background: step.id === activeStep
+                        ? "rgba(0,245,255,0.06)"
+                        : "transparent",
+                    }}
+                    onClick={() => setActiveStep(step.id)}
+                  >
+                    <div className="flex items-center gap-2.5 px-3 py-2.5">
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                        style={
+                          step.done
+                            ? { background: "#00FF88", color: "#0A0E27" }
+                            : step.id === activeStep
+                              ? { background: "#00F5FF", color: "#0A0E27" }
+                              : { background: "hsl(232, 40%, 22%)", color: "hsl(228, 25%, 60%)" }
+                        }
+                      >
+                        {step.done ? "✓" : step.id}
+                      </div>
+                      <span className="text-xs font-semibold" style={{ color: step.done ? "#00FF88" : step.id === activeStep ? "#FFFFFF" : "hsl(228, 25%, 60%)" }}>
+                        {step.title}
+                      </span>
                     </div>
-                    <span className="text-xs font-semibold" style={{ color: step.done ? "#00FF88" : step.id === activeStep ? "#FFFFFF" : "hsl(228, 25%, 60%)" }}>
-                      {step.title}
-                    </span>
-                  </div>
 
-                  {step.id === activeStep && (
-                    <div className="px-3 pb-3">
-                      <ul className="space-y-1.5">
-                        {step.instructions.map((inst, i) => (
-                          <li key={i} className="flex items-start gap-2 text-xs" style={{ color: "hsl(228, 30%, 70%)" }}>
-                            <span className="mt-0.5 flex-shrink-0" style={{ color: "#00F5FF" }}>→</span>
-                            <span>{inst}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    {step.id === activeStep && (
+                      <div className="px-3 pb-3 animate-fade-in">
+                        <ul className="space-y-1.5">
+                          {step.instructions.map((inst, i) => (
+                            <li key={i} className="flex items-start gap-2 text-xs" style={{ color: "hsl(228, 30%, 70%)" }}>
+                              <span className="mt-0.5 flex-shrink-0" style={{ color: "#00F5FF" }}>→</span>
+                              <span>{inst}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Code Editor */}
           <div className="flex-1 flex flex-col overflow-hidden">
@@ -336,31 +388,15 @@ export default function IDEPage() {
               <span style={{ color: "#00F5FF" }}>sketch.ino</span>
               <span>•</span>
               <span>Arduino Uno</span>
+              <span className="ml-auto text-xs" style={{ color: "#00FF88" }}>✎ Editable</span>
             </div>
             <div className="relative flex-1 flex overflow-hidden">
-              {/* Line Numbers */}
-              <div
-                className="w-10 flex-shrink-0 flex flex-col items-center pt-4 select-none font-mono text-[11px] border-r"
-                style={{ background: "hsl(232, 48%, 5%)", borderColor: "hsl(232, 40%, 14%)", color: "hsl(228, 20%, 35%)" }}
-              >
-                {code.split("\n").map((_, i) => (
-                  <div key={i} className="leading-[1.7]">{i + 1}</div>
-                ))}
-              </div>
-
-              <textarea
-                ref={codeRef}
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="code-editor w-full h-full p-4 pt-4 text-sm resize-none focus:outline-none bg-transparent border-none"
-                style={{ fontFamily: "'JetBrains Mono', monospace", lineHeight: "1.7", fontSize: "13px" }}
-                spellCheck={false}
-              />
+              <CodeEditor code={code} onChange={setCode} minHeight="100%" maxHeight="100%" />
             </div>
 
             {/* Error panel */}
             {errors.length > 0 && (
-              <div className="border-t p-4 flex-shrink-0" style={{ background: "rgba(255,69,0,0.08)", borderColor: "rgba(255,69,0,0.3)" }}>
+              <div className="border-t p-4 flex-shrink-0 animate-fade-in" style={{ background: "rgba(255,69,0,0.08)", borderColor: "rgba(255,69,0,0.3)" }}>
                 <div className="flex items-center gap-2 mb-3">
                   <AlertTriangle size={16} style={{ color: "#FF4500" }} />
                   <span className="font-bold text-sm" style={{ color: "#FF4500" }}>Compilation Errors</span>
@@ -377,9 +413,31 @@ export default function IDEPage() {
             )}
           </div>
 
+          {/* Wokwi Simulator Panel */}
+          {showSimulator && (
+            <div
+              className="w-72 flex-shrink-0 border-l flex flex-col transition-all duration-300"
+              style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}
+            >
+              <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
+                <Play size={14} style={{ color: "#00FF88" }} />
+                <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>Simulator</span>
+              </div>
+              <div className="flex-1 relative">
+                <iframe
+                  src="https://wokwi.com/projects/new/arduino-uno"
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
+                  style={{ border: "none" }}
+                  title="Wokwi Simulator"
+                />
+              </div>
+            </div>
+          )}
+
           {/* AI Debug Panel */}
           {showDebug && (
-            <div className="w-72 flex flex-col border-l flex-shrink-0 glass-card animate-fade-in-up" style={{ borderColor: "rgba(255,255,255,0.05)", animationDelay: "150ms" }}>
+            <div className="w-72 flex flex-col border-l flex-shrink-0 glass-card animate-slide-in-right" style={{ borderColor: "rgba(255,255,255,0.05)", animationDelay: "150ms" }}>
               <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
                 <Brain size={16} style={{ color: "#B744FF" }} />
                 <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Debug Assistant</span>
