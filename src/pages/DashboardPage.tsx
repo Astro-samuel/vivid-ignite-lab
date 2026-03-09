@@ -157,6 +157,7 @@ export default function DashboardPage() {
   const [toast, setToast] = useState("");
   const { user, loading: authLoading } = useAuth();
   const { projects, loading: projectsLoading, deleteProject } = useUserProjects();
+  const userProjectIds = useMemo(() => new Set(projects.map(p => p.project_id)), [projects]);
   const [navigatingId, setNavigatingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
