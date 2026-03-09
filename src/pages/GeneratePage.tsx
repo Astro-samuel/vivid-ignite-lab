@@ -317,16 +317,18 @@ export default function GeneratePage() {
       if (error) throw error;
 
       if (data?.projects && Array.isArray(data.projects)) {
-        const aiProjects: Project[] = data.projects.map((p: any, i: number) => ({
-          id: 700 + i + Math.floor(Math.random() * 100),
-          emoji: p.emoji || "🤖",
-          title: p.title,
-          description: p.description,
-          difficulty: p.difficulty || "beginner",
-          time: p.time || "30 mins",
-          xp: p.xp || 75,
-          components: p.components || [],
-        }));
+        const aiProjects: Project[] = data.projects
+          .filter((p: any) => !userProjectTitles.has((p.title || "").toLowerCase()))
+          .map((p: any, i: number) => ({
+            id: 700 + i + Math.floor(Math.random() * 100),
+            emoji: p.emoji || "🤖",
+            title: p.title,
+            description: p.description,
+            difficulty: p.difficulty || "beginner",
+            time: p.time || "30 mins",
+            xp: p.xp || 75,
+            components: p.components || [],
+          }));
 
         aiProjects.forEach((project, i) => {
           setTimeout(() => {
