@@ -8,6 +8,7 @@ import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContai
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
+import { supabase } from "@/integrations/supabase/client";
 
 type Tab = "inProgress" | "completed" | "saved";
 
