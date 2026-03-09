@@ -1479,8 +1479,50 @@ void loop() {
       ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
       : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
 
+  // Completion status checklist
+  const completionChecks = [
+    { label: "All steps completed", done: allStepsCompleted },
+    { label: "Code compiles successfully", done: codePassed },
+    { label: "Simulator runs without errors", done: simulatorPassed },
+    { label: "No critical warnings", done: codePassed && simulatorPassed },
+  ];
+
   return (
     <Layout>
+      {/* Completion Celebration Overlay */}
+      {showCompletionCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "hsl(var(--background) / 0.85)", backdropFilter: "blur(8px)" }}>
+          <div className="text-center animate-fade-in space-y-4">
+            <div className="text-7xl animate-bounce">🎉</div>
+            <h2 className="text-3xl font-bold" style={{ color: "hsl(var(--foreground))" }}>
+              Project Complete!
+            </h2>
+            <div className="flex items-center justify-center gap-2 text-xl font-bold" style={{ color: "hsl(var(--secondary))" }}>
+              <Zap size={24} /> +{project.xp} XP Earned!
+            </div>
+            <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
+              This project has been moved to your Completed Projects
+            </p>
+            <div className="flex gap-3 justify-center mt-4">
+              <button
+                onClick={() => { setShowCompletionCelebration(false); navigate("/dashboard"); }}
+                className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
+                style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
+              >
+                View Dashboard
+              </button>
+              <button
+                onClick={() => setShowCompletionCelebration(false)}
+                className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+                style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }}
+              >
+                Stay Here
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="px-8 py-8 max-w-4xl mx-auto">
         {/* Back link */}
         <button
