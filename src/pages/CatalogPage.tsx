@@ -68,7 +68,8 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
 }
 
 function getTimeSeed(): number {
-  return Math.floor(Date.now() / (3 * 60 * 60 * 1000));
+  // Changes once per day (midnight UTC)
+  return Math.floor(Date.now() / (24 * 60 * 60 * 1000));
 }
 
 function getInventoryComponents(userId?: string): string[] {
