@@ -29,6 +29,7 @@ const starterKits = [
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
+  const [fullName, setFullName] = useState("");
   const [experience, setExperience] = useState("");
   const [selectedKit, setSelectedKit] = useState<string | null>(null);
   const [selectedComponents, setSelectedComponents] = useState<string[]>([]);
