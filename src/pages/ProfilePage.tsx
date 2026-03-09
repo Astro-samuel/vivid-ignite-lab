@@ -103,6 +103,13 @@ export default function ProfilePage() {
     setTimeout(() => setSavedToast(false), 3000);
   };
 
+  // Calculate skill progress from completed projects
+  const completedProjectIds = useMemo(() =>
+    projects.filter(p => p.status === "completed").map(p => p.project_id),
+    [projects]
+  );
+  const skillProgress = useMemo(() => calculateSkillProgress(completedProjectIds), [completedProjectIds]);
+
   const xpPercent = (profile.xp / profile.maxXP) * 100;
 
   const stats = [

@@ -419,6 +419,25 @@ export default function CatalogPage() {
                           <h3 className="font-bold text-sm mb-1" style={{ color: "hsl(var(--foreground))" }}>{p.title}</h3>
                           <p className="text-xs mb-3 line-clamp-2" style={{ color: "hsl(var(--muted-foreground))" }}>{p.desc}</p>
 
+                          {/* Skills */}
+                          {PROJECT_SKILLS[p.id] && (
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {PROJECT_SKILLS[p.id].map((skill) => (
+                                <span
+                                  key={skill}
+                                  className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
+                                  style={{
+                                    background: `${SKILL_COLORS[skill]}18`,
+                                    color: SKILL_COLORS[skill],
+                                    border: `1px solid ${SKILL_COLORS[skill]}33`,
+                                  }}
+                                >
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
                           <div className="flex flex-wrap gap-1 mb-3">
                             {p.tags.map((tag) => (
                               <span
