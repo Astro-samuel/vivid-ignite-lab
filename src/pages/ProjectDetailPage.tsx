@@ -1136,7 +1136,7 @@ void loop() {
   })();
 
   const { user } = useAuth();
-  const { saveProject, isProjectSaved, updateProgress, deleteProject, projects: userDbProjects } = useUserProjects();
+  const { saveProject, isProjectSaved, updateProgress, completeProject, deleteProject, projects: userDbProjects } = useUserProjects();
 
   // Load saved progress from DB
   const dbProject = userDbProjects.find(p => p.project_id === projectId);
@@ -1155,6 +1155,10 @@ void loop() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 80) + 20);
   const [shareToast, setShareToast] = useState(false);
+  const [showCompletionCelebration, setShowCompletionCelebration] = useState(false);
+  const [simulatorPassed, setSimulatorPassed] = useState(false);
+  const [codePassed, setCodePassed] = useState(false);
+  const [completionAwarded, setCompletionAwarded] = useState(false);
 
   // Sync saved state and checked steps from DB
   useEffect(() => {
@@ -1166,9 +1170,30 @@ void loop() {
         Object.entries(dbProject.notes).forEach(([k, v]) => { parsed[Number(k)] = v; });
         setActiveNote(parsed);
       }
-      if (dbProject.status === "completed") setCompleted(true);
+      if (dbProject.status === "completed") {
+        setCompleted(true);
+        setCompletionAwarded(true);
+      }
     }
   }, [dbProject, isProjectSaved, projectId]);
+
+  // AUTO-COMPLETION CHECK: All steps done + code compiled + simulator passed
+  const allStepsCompleted = checkedSteps.length > 0 && checkedSteps.every(Boolean);
+  
+  useEffect(() => {
+    if (allStepsCompleted && codePassed && simulatorPassed && !completionAwarded && saved && user) {
+      // All conditions met — trigger auto-completion
+      setCompletionAwarded(true);
+      setCompleted(true);
+      setShowCompletionCelebration(true);
+
+      // Award XP and update DB
+      completeProject(projectId, project.xp || 0);
+
+      // Hide celebration after 5s
+      setTimeout(() => setShowCompletionCelebration(false), 5000);
+    }
+  }, [allStepsCompleted, codePassed, simulatorPassed, completionAwarded, saved, user, projectId, project.xp, completeProject]);
 
   // Auto-save progress to DB when steps change
   const autoSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1178,15 +1203,18 @@ void loop() {
     autoSaveTimeout.current = setTimeout(() => {
       const completedCount = checkedSteps.filter(Boolean).length;
       const progress = project.instructions.length > 0 ? Math.round((completedCount / project.instructions.length) * 100) : 0;
-      updateProgress(projectId, {
-        checked_steps: checkedSteps,
-        notes: activeNote as any,
-        progress,
-        status: progress >= 100 ? "completed" : "inProgress",
-      });
+      // Don't overwrite completed status via auto-save
+      if (!completionAwarded) {
+        updateProgress(projectId, {
+          checked_steps: checkedSteps,
+          notes: activeNote as any,
+          progress,
+          status: "inProgress",
+        });
+      }
     }, 2000);
     return () => { if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current); };
-  }, [checkedSteps, activeNote, user, saved]);
+  }, [checkedSteps, activeNote, user, saved, completionAwarded]);
 
   // Extract learning concepts from code comments
   const learningConcepts = (() => {
@@ -1319,13 +1347,35 @@ void loop() {
     if (foundErrors.length > 0) {
       setErrors(foundErrors);
       setRunStep("error");
+      setCodePassed(false);
+      setSimulatorPassed(false);
       return;
     }
 
+    // Code compiled successfully
+    setCodePassed(true);
+
     setRunStep("simulating");
     await delay(1500);
+
+    // Safety checks (no critical warnings)
+    const safetyWarnings: string[] = [];
+    if (code.includes("analogWrite") && code.includes("delay(1)")) {
+      safetyWarnings.push("Warning: Very short delay with analog output may cause instability.");
+    }
+    if (safetyWarnings.length > 0) {
+      setErrors(safetyWarnings);
+      setRunStep("error");
+      setSimulatorPassed(false);
+      return;
+    }
+
+    // Simulator passed
+    setSimulatorPassed(true);
     setRunStep("success");
-    setCompleted(true);
+
+    // Note: completion is now handled by the auto-completion effect
+    // which checks allSteps + codePassed + simulatorPassed
   };
 
   const getAIDebugResponse = (input: string): string => {
@@ -1429,8 +1479,50 @@ void loop() {
       ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
       : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
 
+  // Completion status checklist
+  const completionChecks = [
+    { label: "All steps completed", done: allStepsCompleted },
+    { label: "Code compiles successfully", done: codePassed },
+    { label: "Simulator runs without errors", done: simulatorPassed },
+    { label: "No critical warnings", done: codePassed && simulatorPassed },
+  ];
+
   return (
     <Layout>
+      {/* Completion Celebration Overlay */}
+      {showCompletionCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "hsl(var(--background) / 0.85)", backdropFilter: "blur(8px)" }}>
+          <div className="text-center animate-fade-in space-y-4">
+            <div className="text-7xl animate-bounce">🎉</div>
+            <h2 className="text-3xl font-bold" style={{ color: "hsl(var(--foreground))" }}>
+              Project Complete!
+            </h2>
+            <div className="flex items-center justify-center gap-2 text-xl font-bold" style={{ color: "hsl(var(--secondary))" }}>
+              <Zap size={24} /> +{project.xp} XP Earned!
+            </div>
+            <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
+              This project has been moved to your Completed Projects
+            </p>
+            <div className="flex gap-3 justify-center mt-4">
+              <button
+                onClick={() => { setShowCompletionCelebration(false); navigate("/dashboard"); }}
+                className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
+                style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
+              >
+                View Dashboard
+              </button>
+              <button
+                onClick={() => setShowCompletionCelebration(false)}
+                className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+                style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }}
+              >
+                Stay Here
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="px-8 py-8 max-w-4xl mx-auto">
         {/* Back link */}
         <button
@@ -1685,10 +1777,21 @@ void loop() {
               </div>
             </div>
 
-            {progressPercent === 100 && (
-              <div className="mb-4 p-3 rounded-xl flex items-center gap-3 animate-fade-in" style={{ background: "rgba(0,255,136,0.1)", border: "1px solid rgba(0,255,136,0.3)" }}>
-                <Award size={20} style={{ color: "#00FF88" }} />
-                <span className="text-sm font-bold" style={{ color: "#00FF88" }}>🎉 All steps completed! Great job wiring up the circuit.</span>
+            {/* Completion Checklist */}
+            {(allStepsCompleted || codePassed || simulatorPassed) && (
+              <div className="mb-4 p-4 rounded-xl space-y-2" style={{ background: completed ? "rgba(0,255,136,0.06)" : "hsl(var(--muted) / 0.5)", border: `1px solid ${completed ? "rgba(0,255,136,0.3)" : "hsl(var(--border))"}` }}>
+                <p className="text-xs font-bold mb-2" style={{ color: completed ? "#00FF88" : "hsl(var(--foreground))" }}>
+                  {completed ? "🎉 Project Complete!" : "📋 Completion Requirements"}
+                </p>
+                {completionChecks.map((check, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    {check.done
+                      ? <CheckCircle size={14} style={{ color: "#00FF88" }} />
+                      : <div className="w-3.5 h-3.5 rounded-full border" style={{ borderColor: "hsl(var(--muted-foreground))" }} />
+                    }
+                    <span className="text-xs" style={{ color: check.done ? "#00FF88" : "hsl(var(--muted-foreground))" }}>{check.label}</span>
+                  </div>
+                ))}
               </div>
             )}
 
