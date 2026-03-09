@@ -170,21 +170,31 @@ export default function CatalogPage() {
     });
   };
 
-  // Pick 5 per level, shuffled by daily seed, excluding active (non-completed) user projects
-  // Completed projects stay visible with a "Completed" badge
+  // Pick 5 per level, shuffled by seed that changes based on user's saved projects
+  // This ensures different projects appear when user adds projects to dashboard
   const visibleProjects = useMemo(() => {
-    const seed = getTimeSeed();
+    // Create a seed that incorporates both time and user's project count
+    // This makes the selection change whenever user saves a new project
+    const timeSeed = getTimeSeed();
+    const userProjectSeed = userProjectIds.size * 7919; // Prime multiplier for variety
+    const combinedSeed = timeSeed + userProjectSeed;
+    
     const levels = ["beginner", "intermediate", "advanced"] as const;
     const result: typeof allProjects = [];
 
     for (const level of levels) {
-      const pool = allProjects.filter((p) => p.difficulty === level && !removedIds.includes(p.id) && !activeProjectIds.has(p.id));
-      const shuffled = seededShuffle(pool, seed + level.length);
+      // Exclude ALL projects already in user's dashboard (both active and completed)
+      const pool = allProjects.filter((p) => 
+        p.difficulty === level && 
+        !removedIds.includes(p.id) && 
+        !userProjectIds.has(p.id)
+      );
+      const shuffled = seededShuffle(pool, combinedSeed + level.length);
       result.push(...shuffled.slice(0, PROJECTS_PER_LEVEL));
     }
 
     return result;
-  }, [removedIds, activeProjectIds]);
+  }, [removedIds, userProjectIds]);
 
   const filtered = visibleProjects.filter((p) => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
