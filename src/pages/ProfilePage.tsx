@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserProjects } from "@/hooks/useUserProjects";
+import { calculateSkillProgress } from "@/lib/skillMapping";
 
 interface UserProfile {
   name: string;
