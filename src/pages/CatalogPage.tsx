@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Search, Clock, X, Filter, Tag } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Search, Clock, X, Filter, Tag, Lock } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
@@ -7,8 +7,17 @@ import MotionCard from "@/components/motion/MotionCard";
 import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast as sonnerToast } from "sonner";
 
 const PROJECTS_PER_LEVEL = 5;
+
+// Level requirements for each difficulty tier
+const LEVEL_REQUIREMENTS: Record<string, { level: number; xp: number }> = {
+  beginner: { level: 1, xp: 0 },
+  intermediate: { level: 2, xp: 200 },
+  advanced: { level: 3, xp: 500 },
+};
 
 const allProjects = [
   // === BEGINNER ===
@@ -97,8 +106,35 @@ export default function CatalogPage() {
     const saved = localStorage.getItem("removedCatalogProjects");
     return saved ? JSON.parse(saved) : [];
   });
+  const [userLevel, setUserLevel] = useState(1);
+  const [userXp, setUserXp] = useState(0);
+
+  // Fetch user profile for level/XP
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("level, total_xp").eq("id", user.id).single()
+      .then(({ data }) => {
+        if (data) {
+          setUserLevel(data.level ?? 1);
+          setUserXp(data.total_xp ?? 0);
+        }
+      });
+  }, [user]);
+
+  const isLocked = (difficulty: string) => {
+    const req = LEVEL_REQUIREMENTS[difficulty];
+    if (!req) return false;
+    return userLevel < req.level;
+  };
 
   const inventory = useMemo(() => getInventoryComponents(user?.id), [user?.id]);
+
+  const getLockMessage = (difficulty: string) => {
+    const req = LEVEL_REQUIREMENTS[difficulty];
+    if (!req) return "";
+    if (userLevel < req.level) return `🔒 Unlock at Level ${req.level} (${req.xp} XP required)`;
+    return "";
+  };
 
   const handleRemove = (id: number) => {
     const updated = [...removedIds, id];
@@ -310,36 +346,62 @@ export default function CatalogPage() {
           .map((lvl) => {
             const levelProjects = filtered.filter((p) => p.difficulty === lvl);
             if (levelProjects.length === 0) return null;
+            const locked = isLocked(lvl);
+            const lockMsg = getLockMessage(lvl);
             return (
               <div key={lvl} className="mb-10">
                 <FadeInView>
-                  <h2 className="text-lg font-bold mb-4" style={{ color: "hsl(var(--foreground))" }}>
-                    {levelLabels[lvl]}
-                  </h2>
+                  <div className="flex items-center gap-3 mb-4">
+                    <h2 className="text-lg font-bold" style={{ color: "hsl(var(--foreground))" }}>
+                      {levelLabels[lvl]}
+                    </h2>
+                    {locked && (
+                      <span className="text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1.5"
+                        style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}>
+                        <Lock size={10} /> {lockMsg}
+                      </span>
+                    )}
+                  </div>
                 </FadeInView>
                 <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                   {levelProjects.map((p) => {
                     const buildable = canBuild(p);
                     return (
                       <motion.div key={p.id} variants={staggerItem}>
-                        <MotionCard className="card-neon p-4 cursor-pointer group relative">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleRemove(p.id); }}
-                            className="absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
-                            style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))", border: "1px solid hsl(var(--destructive) / 0.3)" }}
-                            title="Remove project"
-                          >
-                            <X size={12} />
-                          </button>
+                        <MotionCard className={`card-neon p-4 group relative ${locked ? "cursor-not-allowed" : "cursor-pointer"}`}>
+                          {/* Lock overlay */}
+                          {locked && (
+                            <div className="absolute inset-0 z-10 rounded-2xl flex flex-col items-center justify-center gap-2 backdrop-blur-[2px]"
+                              style={{ background: "hsl(var(--background) / 0.7)" }}>
+                              <Lock size={24} style={{ color: "hsl(var(--muted-foreground))" }} />
+                              <span className="text-xs font-bold text-center px-3" style={{ color: "hsl(var(--muted-foreground))" }}>
+                                Unlock at Level {LEVEL_REQUIREMENTS[p.difficulty]?.level}
+                              </span>
+                              <span className="text-xs" style={{ color: "hsl(var(--muted-foreground) / 0.7)" }}>
+                                Requires {LEVEL_REQUIREMENTS[p.difficulty]?.xp} XP
+                              </span>
+                            </div>
+                          )}
+
+                          {!locked && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleRemove(p.id); }}
+                              className="absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
+                              style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))", border: "1px solid hsl(var(--destructive) / 0.3)" }}
+                              title="Remove project"
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
 
                           {/* Buildable badge */}
-                          {buildable && (
+                          {buildable && !locked && (
                             <div className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}>
                               ✓ Can Build
                             </div>
                           )}
 
-                          <div className={`text-2xl mb-2 ${buildable ? "mt-5" : ""}`}>{p.emoji}</div>
+                          <div className={`text-2xl mb-2 ${buildable && !locked ? "mt-5" : ""}`}>{p.emoji}</div>
                           <h3 className="font-bold text-sm mb-1" style={{ color: "hsl(var(--foreground))" }}>{p.title}</h3>
                           <p className="text-xs mb-3 line-clamp-2" style={{ color: "hsl(var(--muted-foreground))" }}>{p.desc}</p>
 
@@ -364,7 +426,15 @@ export default function CatalogPage() {
                           </div>
 
                           <button
+                            disabled={locked}
                             onClick={() => {
+                              if (locked) {
+                                sonnerToast.error("🔒 Project Locked", {
+                                  description: `Complete more projects to reach Level ${LEVEL_REQUIREMENTS[p.difficulty]?.level} and unlock ${p.difficulty} projects.`,
+                                  duration: 4000,
+                                });
+                                return;
+                              }
                               localStorage.setItem("activeGeneratedProject", JSON.stringify({
                                 id: p.id,
                                 emoji: p.emoji,
@@ -378,10 +448,13 @@ export default function CatalogPage() {
                               }));
                               navigate(`/project/${p.id}`);
                             }}
-                            className="w-full py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-[1.02]"
-                            style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 12px hsl(var(--primary) / 0.25)" }}
+                            className="w-full py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
+                            style={locked
+                              ? { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
+                              : { background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 12px hsl(var(--primary) / 0.25)" }
+                            }
                           >
-                            View Project
+                            {locked ? "Locked" : "View Project"}
                           </button>
                         </MotionCard>
                       </motion.div>
