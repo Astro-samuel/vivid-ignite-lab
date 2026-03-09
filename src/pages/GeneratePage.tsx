@@ -244,9 +244,9 @@ export default function GeneratePage() {
 
     const ownedNorm = components.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
 
-    // Combine static pool + community projects, exclude user's existing projects
+    // Combine static pool + community projects, exclude user's existing projects (by ID and title)
     let pool = [...projectPool, ...communityProjects]
-      .filter((p) => !userProjectIds.has(p.id))
+      .filter((p) => !userProjectIds.has(p.id) && !userProjectTitles.has(p.title.toLowerCase()))
       .sort(() => Math.random() - 0.5);
     if (difficulty !== "Any Difficulty") pool = pool.filter((p) => p.difficulty === difficulty.toLowerCase());
 
