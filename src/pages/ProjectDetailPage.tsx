@@ -1219,7 +1219,7 @@ void loop() {
       }
     }, 2000);
     return () => { if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current); };
-  }, [checkedSteps, activeNote, user, saved, completionAwarded]);
+  }, [checkedSteps, activeNote, user, saved, completionAwarded, codePassed, simulatorPassed, project.instructions.length, projectId, updateProgress]);
 
   // Extract learning concepts from code comments
   const learningConcepts = (() => {
