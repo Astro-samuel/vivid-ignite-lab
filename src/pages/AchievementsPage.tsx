@@ -96,7 +96,19 @@ export default function AchievementsPage() {
       progress: Math.min(inventoryCount, 20), total: 20,
       unlocked: inventoryCount >= 20,
     },
-  ], [completedCount, totalXP, inventoryCount, profile?.level]);
+    {
+      id: 9, emoji: "🔥", title: "Streak Starter", desc: "Maintain a 3-day streak",
+      xp: 75, color: "#FF4500",
+      progress: Math.min(streakDays, 3), total: 3,
+      unlocked: streakDays >= 3,
+    },
+    {
+      id: 10, emoji: "📅", title: "Week Warrior", desc: "Maintain a 7-day streak",
+      xp: 200, color: "#FF4500",
+      progress: Math.min(streakDays, 7), total: 7,
+      unlocked: streakDays >= 7,
+    },
+  ], [completedCount, totalXP, inventoryCount, profile?.level, streakDays]);
 
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
   const achievementXP = achievements.filter((a) => a.unlocked).reduce((sum, a) => sum + a.xp, 0);
