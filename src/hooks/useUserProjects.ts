@@ -55,12 +55,13 @@ export function useUserProjects() {
   }) => {
     if (!user) return { error: "Not authenticated" };
     
-    // Check 5-project limit
+    // Check 5 ACTIVE project limit (exclude completed projects)
     const { count } = await supabase
       .from("user_projects")
       .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id);
-    if ((count ?? 0) >= 5) return { error: "You can only save up to 5 projects." };
+      .eq("user_id", user.id)
+      .neq("status", "completed");
+    if ((count ?? 0) >= 5) return { error: "You can only have up to 5 active projects." };
 
     const { error } = await supabase.from("user_projects").upsert({
       user_id: user.id,
@@ -95,6 +96,42 @@ export function useUserProjects() {
     await fetchProjects();
   }, [user, fetchProjects]);
 
+  // Complete a project: mark as completed and award XP to profile
+  const completeProject = useCallback(async (projectId: number, xpAmount: number) => {
+    if (!user) return;
+
+    // Mark project as completed
+    await supabase.from("user_projects")
+      .update({ status: "completed", progress: 100, updated_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .eq("project_id", projectId);
+
+    // Award XP and increment projects_completed on profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("total_xp, level, projects_completed")
+      .eq("id", user.id)
+      .single();
+
+    if (profile) {
+      const newXp = (profile.total_xp || 0) + xpAmount;
+      const newCompleted = (profile.projects_completed || 0) + 1;
+      // Level up: Level 2 at 200 XP, Level 3 at 500 XP
+      let newLevel = 1;
+      if (newXp >= 500) newLevel = 3;
+      else if (newXp >= 200) newLevel = 2;
+
+      await supabase.from("profiles").update({
+        total_xp: newXp,
+        level: newLevel,
+        projects_completed: newCompleted,
+        updated_at: new Date().toISOString(),
+      }).eq("id", user.id);
+    }
+
+    await fetchProjects();
+  }, [user, fetchProjects]);
+
   const deleteProject = useCallback(async (projectId: number) => {
     if (!user) return;
     await supabase.from("user_projects")
@@ -108,5 +145,5 @@ export function useUserProjects() {
     return projects.some(p => p.project_id === projectId);
   }, [projects]);
 
-  return { projects, loading, saveProject, updateProgress, deleteProject, isProjectSaved, refetch: fetchProjects };
+  return { projects, loading, saveProject, updateProgress, completeProject, deleteProject, isProjectSaved, refetch: fetchProjects };
 }
