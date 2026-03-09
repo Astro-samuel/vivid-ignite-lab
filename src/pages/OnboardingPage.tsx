@@ -88,7 +88,7 @@ export default function OnboardingPage() {
 
           {/* Progress */}
           <div className="flex gap-2 mb-8">
-            {[1, 2].map(s => (
+            {[1, 2, 3].map(s => (
               <div key={s} className="flex-1 h-1.5 rounded-full" style={{ background: s <= step ? "hsl(var(--primary))" : "hsl(var(--muted))" }} />
             ))}
           </div>
