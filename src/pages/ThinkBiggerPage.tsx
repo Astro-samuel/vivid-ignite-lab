@@ -7,12 +7,17 @@ import MotionCard from "@/components/motion/MotionCard";
 import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
 import { motion } from "framer-motion";
 
-const bigIdeas = [
+const allBigIdeas = [
   { id: 1, emoji: "🛸", title: "Autonomous Drone Navigation System", desc: "Build a drone that autonomously maps indoor environments using LIDAR and computer vision, creating real-time 3D maps.", tags: ["LIDAR", "Computer Vision", "IMU", "ESP32"], level: "Expert", impact: "Revolutionary" },
   { id: 2, emoji: "🧬", title: "Biometric Smart Home Hub", desc: "Create a home automation system that recognizes residents by fingerprint and voice, auto-adjusting lighting, temperature, and security.", tags: ["Fingerprint Sensor", "Voice Recognition", "Smart Home", "Raspberry Pi"], level: "Advanced", impact: "Life-Changing" },
   { id: 3, emoji: "🌊", title: "Ocean Pollution Monitor Buoy", desc: "Deploy a self-powered floating sensor that tracks water quality, pH, temperature, and sends data via LoRa to a cloud dashboard.", tags: ["pH Sensor", "LoRa", "Solar Panel", "GPS"], level: "Advanced", impact: "Environmental" },
   { id: 4, emoji: "🧠", title: "Brain-Computer Interface Prototype", desc: "Build a basic EEG headset that reads brainwave patterns and controls a simple game using neural signals.", tags: ["EEG Sensor", "Signal Processing", "BLE", "ML"], level: "Expert", impact: "Future Tech" },
   { id: 5, emoji: "🌿", title: "AI-Powered Vertical Farm", desc: "Design an automated vertical farm that uses machine learning to optimize nutrient levels, lighting schedules, and harvesting.", tags: ["pH Sensor", "Grow Lights", "Camera", "AI"], level: "Advanced", impact: "Sustainable" },
+  { id: 6, emoji: "🚀", title: "CubeSat Ground Station", desc: "Build a ground station to track and communicate with amateur CubeSats using SDR and antenna tracking.", tags: ["SDR", "Antenna", "Stepper Motor", "GPS"], level: "Expert", impact: "Revolutionary" },
+  { id: 7, emoji: "🎸", title: "AI Guitar Effects Pedal", desc: "Create a real-time audio effects processor using DSP and machine learning for custom guitar tones.", tags: ["DAC", "ADC", "DSP", "ESP32"], level: "Advanced", impact: "Life-Changing" },
+  { id: 8, emoji: "🔬", title: "DIY Spectrometer", desc: "Build a spectrometer to analyze the chemical composition of materials using light diffraction.", tags: ["Photodiode", "Stepper Motor", "OLED", "3D Print"], level: "Advanced", impact: "Environmental" },
+  { id: 9, emoji: "🦿", title: "Exoskeleton Assist Glove", desc: "Design a servo-powered glove that amplifies grip strength for rehabilitation or heavy lifting.", tags: ["Servo", "Flex Sensor", "IMU", "3D Print"], level: "Expert", impact: "Future Tech" },
+  { id: 10, emoji: "🌐", title: "Mesh Network Communicator", desc: "Build a decentralized mesh network using LoRa modules for off-grid text communication.", tags: ["LoRa", "OLED", "Battery", "ESP32"], level: "Advanced", impact: "Sustainable" },
 ];
 
 const impactColors: Record<string, string> = {
@@ -22,12 +27,16 @@ const impactColors: Record<string, string> = {
 export default function ThinkBiggerPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [ideas, setIdeas] = useState(bigIdeas);
+  const [ideas, setIdeas] = useState(() => {
+    const shuffled = [...allBigIdeas].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 5);
+  });
 
   const regenerate = async () => {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1500));
-    setIdeas([...bigIdeas].sort(() => Math.random() - 0.5));
+    const shuffled = [...allBigIdeas].sort(() => Math.random() - 0.5);
+    setIdeas(shuffled.slice(0, 5));
     setLoading(false);
   };
 

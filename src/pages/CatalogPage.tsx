@@ -114,12 +114,7 @@ export default function CatalogPage() {
   const [userLevel, setUserLevel] = useState(1);
   const [userXp, setUserXp] = useState(0);
 
-  // Fetch user profile for level/XP and experience from onboarding
-  const userExperience = useMemo(() => {
-    if (!user) return "none";
-    return localStorage.getItem(`experience_${user.id}`) || "none";
-  }, [user]);
-
+  // Fetch user profile for level/XP — purely XP-based locks
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("level, total_xp").eq("id", user.id).single()
@@ -131,18 +126,10 @@ export default function CatalogPage() {
       });
   }, [user]);
 
-  // Experience-based minimum unlock: "some" → intermediate, "experienced" → advanced
-  const effectiveLevel = useMemo(() => {
-    let base = userLevel;
-    if (userExperience === "some" && base < 2) base = 2;
-    if (userExperience === "experienced" && base < 3) base = 3;
-    return base;
-  }, [userLevel, userExperience]);
-
   const isLocked = (difficulty: string) => {
     const req = LEVEL_REQUIREMENTS[difficulty];
     if (!req) return false;
-    return effectiveLevel < req.level;
+    return userLevel < req.level;
   };
 
   const inventory = useMemo(() => getInventoryComponents(user?.id), [user?.id]);
@@ -150,7 +137,7 @@ export default function CatalogPage() {
   const getLockMessage = (difficulty: string) => {
     const req = LEVEL_REQUIREMENTS[difficulty];
     if (!req) return "";
-    if (effectiveLevel < req.level) return `🔒 Unlock at Level ${req.level} (${req.xp} XP required)`;
+    if (userLevel < req.level) return `🔒 Unlock at Level ${req.level} (${req.xp} XP required)`;
     return "";
   };
 
@@ -168,26 +155,32 @@ export default function CatalogPage() {
     });
   };
 
-  // Pick 5 per level, shuffled by seed that changes based on user's saved projects
-  // This ensures different projects appear when user adds projects to dashboard
+  // Pick 5 per level, shuffled by daily seed
+  // Always guarantees exactly 5 per level (fills from full pool if needed)
   const visibleProjects = useMemo(() => {
-    // Create a seed that incorporates both time and user's project count
-    // This makes the selection change whenever user saves a new project
     const timeSeed = getTimeSeed();
-    const userProjectSeed = userProjectIds.size * 7919; // Prime multiplier for variety
-    const combinedSeed = timeSeed + userProjectSeed;
-    
     const levels = ["beginner", "intermediate", "advanced"] as const;
     const result: typeof allProjects = [];
 
     for (const level of levels) {
-      // Exclude ALL projects already in user's dashboard (both active and completed)
-      const pool = allProjects.filter((p) => 
+      // First try excluding user's projects and removed
+      let pool = allProjects.filter((p) => 
         p.difficulty === level && 
         !removedIds.includes(p.id) && 
         !userProjectIds.has(p.id)
       );
-      const shuffled = seededShuffle(pool, combinedSeed + level.length);
+      // If not enough, relax removed filter
+      if (pool.length < PROJECTS_PER_LEVEL) {
+        pool = allProjects.filter((p) => 
+          p.difficulty === level && 
+          !userProjectIds.has(p.id)
+        );
+      }
+      // If still not enough, use all projects of that level
+      if (pool.length < PROJECTS_PER_LEVEL) {
+        pool = allProjects.filter((p) => p.difficulty === level);
+      }
+      const shuffled = seededShuffle(pool, timeSeed + level.length);
       result.push(...shuffled.slice(0, PROJECTS_PER_LEVEL));
     }
 

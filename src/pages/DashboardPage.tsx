@@ -8,20 +8,31 @@ import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContai
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
+import { supabase } from "@/integrations/supabase/client";
 
 type Tab = "inProgress" | "completed" | "saved";
 
-// Quick project pool for "What Can I Make?" widget
+// Full project pool for "What Can I Make?" widget — uses all known projects for smarter matching
 const quickProjects = [
+  // Beginner
   { id: 104, emoji: "🚦", title: "Traffic Light Controller", difficulty: "beginner", time: "20 mins", xp: 55, components: ["LED", "Arduino Uno", "220Ω Resistor", "Breadboard"] },
   { id: 105, emoji: "🎹", title: "Button Piano", difficulty: "beginner", time: "25 mins", xp: 65, components: ["Push Button", "Buzzer", "Arduino Uno", "Breadboard"] },
   { id: 107, emoji: "🎲", title: "Electronic Dice", difficulty: "beginner", time: "25 mins", xp: 60, components: ["LED", "Push Button", "Arduino Uno", "220Ω Resistor"] },
   { id: 109, emoji: "🌈", title: "Rainbow LED Fader", difficulty: "beginner", time: "25 mins", xp: 65, components: ["RGB LED", "Arduino Uno", "220Ω Resistor", "Breadboard"] },
   { id: 101, emoji: "💡", title: "Smart LED Mood Lamp", difficulty: "beginner", time: "30 mins", xp: 75, components: ["LED", "Photoresistor", "Arduino Uno", "220Ω Resistor"] },
+  { id: 106, emoji: "🌙", title: "Automatic Night Light", difficulty: "beginner", time: "20 mins", xp: 55, components: ["LED", "Photoresistor", "Arduino Uno", "10kΩ Resistor"] },
+  { id: 108, emoji: "⏰", title: "Countdown Timer", difficulty: "beginner", time: "30 mins", xp: 70, components: ["7-Segment Display", "Buzzer", "Push Button", "Arduino Uno"] },
+  { id: 110, emoji: "📢", title: "Clap Switch", difficulty: "beginner", time: "30 mins", xp: 70, components: ["Sound Sensor", "LED", "Arduino Uno", "Relay Module"] },
+  // Intermediate
   { id: 209, emoji: "🔔", title: "Motion Detection Alarm", difficulty: "intermediate", time: "40 mins", xp: 95, components: ["PIR Sensor", "Buzzer", "LED", "Arduino Uno"] },
   { id: 207, emoji: "🎯", title: "Laser Tripwire Alarm", difficulty: "intermediate", time: "45 mins", xp: 100, components: ["Laser Module", "Photoresistor", "Buzzer", "Arduino Uno"] },
+  { id: 201, emoji: "🌡️", title: "Weather Station Dashboard", difficulty: "intermediate", time: "60 mins", xp: 150, components: ["DHT22", "BMP180", "OLED Display", "Arduino Uno"] },
+  { id: 205, emoji: "⏱️", title: "Reaction Time Game", difficulty: "intermediate", time: "40 mins", xp: 90, components: ["LED", "Push Button", "LCD 16x2", "Arduino Uno"] },
+  { id: 204, emoji: "📻", title: "IR Remote Decoder", difficulty: "intermediate", time: "35 mins", xp: 85, components: ["IR Receiver", "Arduino Uno", "Breadboard", "Jumper Wires"] },
+  // Advanced
   { id: 305, emoji: "🚁", title: "Ultrasonic Radar Scanner", difficulty: "advanced", time: "90 mins", xp: 200, components: ["HC-SR04", "Servo Motor", "Arduino Uno", "Breadboard"] },
   { id: 303, emoji: "🏠", title: "Smart Home Controller", difficulty: "advanced", time: "100 mins", xp: 220, components: ["ESP8266", "Relay Module", "LED", "Arduino Uno"] },
+  { id: 301, emoji: "🔊", title: "Theremin Synthesizer", difficulty: "advanced", time: "75 mins", xp: 175, components: ["HC-SR04", "Piezo Buzzer", "Arduino Uno", "LED Strip"] },
 ];
 
 function getInventoryComponents(userId?: string): string[] {
@@ -160,6 +171,14 @@ export default function DashboardPage() {
   const userProjectIds = useMemo(() => new Set(projects.map(p => p.project_id)), [projects]);
   const [navigatingId, setNavigatingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [dbXp, setDbXp] = useState(0);
+
+  // Fetch XP from profile (DB source of truth)
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("total_xp").eq("id", user.id).single()
+      .then(({ data }) => { if (data) setDbXp(data.total_xp || 0); });
+  }, [user, projects]);
 
   // Redirect to onboarding if not completed
   useEffect(() => {
@@ -222,7 +241,7 @@ export default function DashboardPage() {
   const inProgressProjects = projects.filter(p => p.status === "inProgress");
   const completedProjects = projects.filter(p => p.status === "completed");
   const savedProjects = projects.filter(p => p.status === "saved");
-  const totalXP = completedProjects.reduce((s, p) => s + (p.xp || 0), 0);
+  const totalXP = dbXp;
 
   const showToast = (msg: string) => {
     setToast(msg);
