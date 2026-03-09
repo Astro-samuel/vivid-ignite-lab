@@ -93,11 +93,42 @@ export default function OnboardingPage() {
             ))}
           </div>
 
-          {/* Step 1: Experience Level */}
+          {/* Step 1: Name */}
           {step === 1 && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
               <h2 className="text-xl font-bold mb-2" style={{ color: "hsl(var(--foreground))" }}>
-                Welcome! What's your Arduino experience?
+                Welcome! What's your name?
+              </h2>
+              <p className="text-sm mb-6" style={{ color: "hsl(var(--muted-foreground))" }}>
+                Tell us what to call you.
+              </p>
+
+              <input
+                type="text"
+                placeholder="Your name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                maxLength={50}
+                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 mb-6"
+                style={{ background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", "--tw-ring-color": "hsl(var(--primary))" } as any}
+              />
+
+              <button
+                onClick={() => setStep(2)}
+                disabled={!fullName.trim()}
+                className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:opacity-40"
+                style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
+              >
+                Continue <ArrowRight size={16} />
+              </button>
+            </motion.div>
+          )}
+
+          {/* Step 2: Experience Level */}
+          {step === 2 && (
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+              <h2 className="text-xl font-bold mb-2" style={{ color: "hsl(var(--foreground))" }}>
+                What's your Arduino experience?
               </h2>
               <p className="text-sm mb-6" style={{ color: "hsl(var(--muted-foreground))" }}>
                 This helps us recommend the right projects for you.
@@ -126,12 +157,20 @@ export default function OnboardingPage() {
               </div>
 
               <button
-                onClick={() => setStep(2)}
+                onClick={() => setStep(3)}
                 disabled={!experience}
                 className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:opacity-40"
                 style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
               >
                 Continue <ArrowRight size={16} />
+              </button>
+
+              <button
+                onClick={() => setStep(1)}
+                className="w-full py-2 mt-2 text-xs font-medium hover:underline"
+                style={{ color: "hsl(var(--muted-foreground))" }}
+              >
+                ← Back
               </button>
             </motion.div>
           )}
