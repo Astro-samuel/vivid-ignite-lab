@@ -19,20 +19,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Update streak on sign-in
+      if (event === "SIGNED_IN" && session?.user) {
+        setTimeout(() => updateStreak(session.user.id), 0);
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Also check streak on page load if already signed in
+      if (session?.user) {
+        setTimeout(() => updateStreak(session.user.id), 0);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const updateStreak = async (userId: string) => {
+    const todayKey = `streak_checked_${userId}`;
+    const today = new Date().toISOString().slice(0, 10);
+
+    // Only check once per day
+    if (localStorage.getItem(todayKey) === today) return;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("streak_days, updated_at")
+      .eq("id", userId)
+      .single();
+
+    if (!profile) return;
+
+    const lastUpdate = profile.updated_at ? new Date(profile.updated_at).toISOString().slice(0, 10) : null;
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+    let newStreak = profile.streak_days || 0;
+
+    if (lastUpdate === today) {
+      // Already updated today, no change
+    } else if (lastUpdate === yesterday) {
+      // Consecutive day — increment streak
+      newStreak += 1;
+    } else {
+      // Streak broken — reset to 1
+      newStreak = 1;
+    }
+
+    await supabase.from("profiles").update({
+      streak_days: newStreak,
+      updated_at: new Date().toISOString(),
+    }).eq("id", userId);
+
+    localStorage.setItem(todayKey, today);
+  };
 
   const signUp = async (email: string, password: string, username?: string) => {
     const { error } = await supabase.auth.signUp({
