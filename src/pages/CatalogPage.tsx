@@ -127,6 +127,8 @@ export default function CatalogPage() {
     return userLevel < req.level;
   };
 
+  const inventory = useMemo(() => getInventoryComponents(user?.id), [user?.id]);
+
   const getLockMessage = (difficulty: string) => {
     const req = LEVEL_REQUIREMENTS[difficulty];
     if (!req) return "";
