@@ -137,7 +137,7 @@ export default function CatalogPage() {
   const getLockMessage = (difficulty: string) => {
     const req = LEVEL_REQUIREMENTS[difficulty];
     if (!req) return "";
-    if (effectiveLevel < req.level) return `🔒 Unlock at Level ${req.level} (${req.xp} XP required)`;
+    if (userLevel < req.level) return `🔒 Unlock at Level ${req.level} (${req.xp} XP required)`;
     return "";
   };
 
