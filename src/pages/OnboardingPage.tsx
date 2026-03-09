@@ -49,10 +49,13 @@ export default function OnboardingPage() {
     if (!user) return;
     setLoading(true);
 
-    // Save experience level to profile
+    // Save name and experience level to profile
     await supabase.from("profiles").update({
-      display_name: experience,
+      display_name: fullName.trim() || null,
     }).eq("id", user.id);
+
+    // Save experience level locally for project recommendations
+    localStorage.setItem(`experience_${user.id}`, experience);
 
     // Save inventory to localStorage (user-scoped)
     if (selectedComponents.length > 0) {
