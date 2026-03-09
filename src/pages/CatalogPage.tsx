@@ -424,7 +424,7 @@ export default function CatalogPage() {
                           )}
 
                           {/* Buildable badge */}
-                          {buildable && !locked && !isCompleted && (
+                          {buildable && !locked && (
                             <div className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}>
                               ✓ Can Build
                             </div>
