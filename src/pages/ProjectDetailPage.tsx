@@ -1136,7 +1136,7 @@ void loop() {
   })();
 
   const { user } = useAuth();
-  const { saveProject, isProjectSaved, updateProgress, deleteProject, projects: userDbProjects } = useUserProjects();
+  const { saveProject, isProjectSaved, updateProgress, completeProject, deleteProject, projects: userDbProjects } = useUserProjects();
 
   // Load saved progress from DB
   const dbProject = userDbProjects.find(p => p.project_id === projectId);
@@ -1155,6 +1155,10 @@ void loop() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 80) + 20);
   const [shareToast, setShareToast] = useState(false);
+  const [showCompletionCelebration, setShowCompletionCelebration] = useState(false);
+  const [simulatorPassed, setSimulatorPassed] = useState(false);
+  const [codePassed, setCodePassed] = useState(false);
+  const [completionAwarded, setCompletionAwarded] = useState(false);
 
   // Sync saved state and checked steps from DB
   useEffect(() => {
@@ -1166,9 +1170,30 @@ void loop() {
         Object.entries(dbProject.notes).forEach(([k, v]) => { parsed[Number(k)] = v; });
         setActiveNote(parsed);
       }
-      if (dbProject.status === "completed") setCompleted(true);
+      if (dbProject.status === "completed") {
+        setCompleted(true);
+        setCompletionAwarded(true);
+      }
     }
   }, [dbProject, isProjectSaved, projectId]);
+
+  // AUTO-COMPLETION CHECK: All steps done + code compiled + simulator passed
+  const allStepsCompleted = checkedSteps.length > 0 && checkedSteps.every(Boolean);
+  
+  useEffect(() => {
+    if (allStepsCompleted && codePassed && simulatorPassed && !completionAwarded && saved && user) {
+      // All conditions met — trigger auto-completion
+      setCompletionAwarded(true);
+      setCompleted(true);
+      setShowCompletionCelebration(true);
+
+      // Award XP and update DB
+      completeProject(projectId, project.xp || 0);
+
+      // Hide celebration after 5s
+      setTimeout(() => setShowCompletionCelebration(false), 5000);
+    }
+  }, [allStepsCompleted, codePassed, simulatorPassed, completionAwarded, saved, user, projectId, project.xp, completeProject]);
 
   // Auto-save progress to DB when steps change
   const autoSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1178,15 +1203,18 @@ void loop() {
     autoSaveTimeout.current = setTimeout(() => {
       const completedCount = checkedSteps.filter(Boolean).length;
       const progress = project.instructions.length > 0 ? Math.round((completedCount / project.instructions.length) * 100) : 0;
-      updateProgress(projectId, {
-        checked_steps: checkedSteps,
-        notes: activeNote as any,
-        progress,
-        status: progress >= 100 ? "completed" : "inProgress",
-      });
+      // Don't overwrite completed status via auto-save
+      if (!completionAwarded) {
+        updateProgress(projectId, {
+          checked_steps: checkedSteps,
+          notes: activeNote as any,
+          progress,
+          status: "inProgress",
+        });
+      }
     }, 2000);
     return () => { if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current); };
-  }, [checkedSteps, activeNote, user, saved]);
+  }, [checkedSteps, activeNote, user, saved, completionAwarded]);
 
   // Extract learning concepts from code comments
   const learningConcepts = (() => {
