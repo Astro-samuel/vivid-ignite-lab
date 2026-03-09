@@ -424,7 +424,7 @@ export default function CatalogPage() {
                           )}
 
                           {/* Buildable badge */}
-                          {buildable && !locked && !isCompleted && (
+                          {buildable && !locked && (
                             <div className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}>
                               ✓ Can Build
                             </div>
@@ -499,12 +499,10 @@ export default function CatalogPage() {
                             className="w-full py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
                             style={locked
                               ? { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
-                              : isCompleted
-                              ? { background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }
                               : { background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 12px hsl(var(--primary) / 0.25)" }
                             }
                           >
-                            {locked ? "Locked" : isCompleted ? "✓ Completed" : "View Project"}
+                            {locked ? "Locked" : "View Project"}
                           </button>
                         </MotionCard>
                       </motion.div>
