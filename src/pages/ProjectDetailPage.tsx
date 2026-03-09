@@ -1202,7 +1202,12 @@ void loop() {
     if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
     autoSaveTimeout.current = setTimeout(() => {
       const completedCount = checkedSteps.filter(Boolean).length;
-      const progress = project.instructions.length > 0 ? Math.round((completedCount / project.instructions.length) * 100) : 0;
+      const allStepsDone = checkedSteps.length > 0 && checkedSteps.every(Boolean);
+      const allReqsMet = allStepsDone && codePassed && simulatorPassed;
+      // Progress only reaches 100% when ALL requirements are met
+      const progress = project.instructions.length > 0 
+        ? (allReqsMet ? 100 : Math.min(Math.round((completedCount / project.instructions.length) * 100), 99))
+        : 0;
       // Don't overwrite completed status via auto-save
       if (!completionAwarded) {
         updateProgress(projectId, {
@@ -1214,7 +1219,7 @@ void loop() {
       }
     }, 2000);
     return () => { if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current); };
-  }, [checkedSteps, activeNote, user, saved, completionAwarded]);
+  }, [checkedSteps, activeNote, user, saved, completionAwarded, codePassed, simulatorPassed, project.instructions.length, projectId, updateProgress]);
 
   // Extract learning concepts from code comments
   const learningConcepts = (() => {
@@ -1260,7 +1265,10 @@ void loop() {
 
   const stepProgress = checkedSteps.filter(Boolean).length;
   const totalSteps = project.instructions.length;
-  const progressPercent = totalSteps > 0 ? (stepProgress / totalSteps) * 100 : 0;
+  // Progress only reaches 100% when ALL requirements are met: steps + code + simulator
+  const allRequirementsMet = allStepsCompleted && codePassed && simulatorPassed;
+  const rawProgressPercent = totalSteps > 0 ? (stepProgress / totalSteps) * 100 : 0;
+  const progressPercent = allRequirementsMet ? 100 : Math.min(rawProgressPercent, 99);
 
   const toggleStep = (index: number) => {
     setCheckedSteps(prev => {
