@@ -91,12 +91,30 @@ export default function ComponentsPage() {
 
   const loadQuantities = (): Record<string, number> => {
     try {
+<<<<<<< HEAD
       const key = user ? `inventory_${user.id}` : "userInventory";
       const inv = JSON.parse(localStorage.getItem(key) || "[]") as string[];
       const q: Record<string, number> = {};
       inv.forEach((name) => { q[name] = 1; });
       return q;
     } catch { return {}; }
+=======
+      const saved = localStorage.getItem("userInventory");
+      if (!saved) return { "Arduino Uno": 1 };
+      const data = JSON.parse(saved);
+      let newQuantities: Record<string, number> = {};
+
+      if (Array.isArray(data)) { // Old format migration
+        data.forEach((name: string) => { newQuantities[name] = 1; });
+      } else if (typeof data === 'object' && data !== null) { // New format
+        newQuantities = data;
+      }
+
+      return Object.keys(newQuantities).length > 0 ? newQuantities : { "Arduino Uno": 1 };
+    } catch {
+      return { "Arduino Uno": 1 };
+    }
+>>>>>>> f1d7728 (Initial commit)
   };
 
   const [quantities, setQuantities] = useState<Record<string, number>>(loadQuantities);
@@ -142,6 +160,7 @@ export default function ComponentsPage() {
     });
   };
 
+<<<<<<< HEAD
   const handleSave = async () => {
     setSaving(true);
     await new Promise(r => setTimeout(r, 600));
@@ -149,6 +168,10 @@ export default function ComponentsPage() {
     const key = user ? `inventory_${user.id}` : "userInventory";
     localStorage.setItem(key, JSON.stringify(inventory));
     setSaving(false);
+=======
+  const handleSave = () => {
+    localStorage.setItem("userInventory", JSON.stringify(quantities));
+>>>>>>> f1d7728 (Initial commit)
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };

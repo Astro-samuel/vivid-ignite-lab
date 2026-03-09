@@ -3,11 +3,16 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+<<<<<<< HEAD
 import { AuthProvider } from "@/contexts/AuthContext";
 import PageTransition from "@/components/PageTransition";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Suspense, lazy } from "react";
 import ProjectSkeleton from "@/components/ProjectSkeleton";
+=======
+import { I18nextProvider } from "react-i18next";
+import i18n from "./locales";
+>>>>>>> f1d7728 (Initial commit)
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import GeneratePage from "./pages/GeneratePage";
@@ -20,6 +25,7 @@ import ThinkBiggerPage from "./pages/ThinkBiggerPage";
 import IDEPage from "./pages/IDEPage";
 import KitsPage from "./pages/KitsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
+<<<<<<< HEAD
 import FeedbackPage from "./pages/FeedbackPage";
 import SubmitProjectPage from "./pages/SubmitProjectPage";
 import ResourcesPage from "./pages/ResourcesPage";
@@ -94,6 +100,74 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+=======
+import PageWrapper from "./components/PageWrapper";
+import { AnimatePresence } from "framer-motion";
+
+const queryClient = new QueryClient();
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route
+          path="/"
+          element={<PageWrapper><Index /></PageWrapper>}
+        />
+        <Route
+          path="/dashboard"
+          element={<PageWrapper><DashboardPage /></PageWrapper>}
+        />
+        <Route
+          path="/catalog"
+          element={<PageWrapper><CatalogPage /></PageWrapper>}
+        />
+        <Route
+          path="/components"
+          element={<PageWrapper><ComponentsPage /></PageWrapper>}
+        />
+        <Route path="/kits" element={<PageWrapper><KitsPage /></PageWrapper>} />
+        <Route
+          path="/generate"
+          element={<PageWrapper><GeneratePage /></PageWrapper>}
+        />
+        <Route
+          path="/think-bigger"
+          element={<PageWrapper><ThinkBiggerPage /></PageWrapper>}
+        />
+        <Route
+          path="/achievements"
+          element={<PageWrapper><AchievementsPage /></PageWrapper>}
+        />
+        <Route
+          path="/profile"
+          element={<PageWrapper><ProfilePage /></PageWrapper>}
+        />
+        <Route path="/ide" element={<PageWrapper><IDEPage /></PageWrapper>} />
+        <Route
+          path="/project/:id"
+          element={<PageWrapper><ProjectDetailPage /></PageWrapper>}
+        />
+        <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
+const App = () => (
+  <I18nextProvider i18n={i18n}>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AnimatedRoutes />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </I18nextProvider>
+>>>>>>> f1d7728 (Initial commit)
 );
 
 export default App;
