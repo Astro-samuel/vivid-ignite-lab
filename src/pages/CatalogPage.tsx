@@ -106,8 +106,33 @@ export default function CatalogPage() {
     const saved = localStorage.getItem("removedCatalogProjects");
     return saved ? JSON.parse(saved) : [];
   });
+  const [userLevel, setUserLevel] = useState(1);
+  const [userXp, setUserXp] = useState(0);
 
-  const inventory = useMemo(() => getInventoryComponents(user?.id), [user?.id]);
+  // Fetch user profile for level/XP
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("level, total_xp").eq("id", user.id).single()
+      .then(({ data }) => {
+        if (data) {
+          setUserLevel(data.level ?? 1);
+          setUserXp(data.total_xp ?? 0);
+        }
+      });
+  }, [user]);
+
+  const isLocked = (difficulty: string) => {
+    const req = LEVEL_REQUIREMENTS[difficulty];
+    if (!req) return false;
+    return userLevel < req.level;
+  };
+
+  const getLockMessage = (difficulty: string) => {
+    const req = LEVEL_REQUIREMENTS[difficulty];
+    if (!req) return "";
+    if (userLevel < req.level) return `🔒 Unlock at Level ${req.level} (${req.xp} XP required)`;
+    return "";
+  };
 
   const handleRemove = (id: number) => {
     const updated = [...removedIds, id];
