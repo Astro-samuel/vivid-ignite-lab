@@ -1260,7 +1260,10 @@ void loop() {
 
   const stepProgress = checkedSteps.filter(Boolean).length;
   const totalSteps = project.instructions.length;
-  const progressPercent = totalSteps > 0 ? (stepProgress / totalSteps) * 100 : 0;
+  // Progress only reaches 100% when ALL requirements are met: steps + code + simulator
+  const allRequirementsMet = allStepsCompleted && codePassed && simulatorPassed;
+  const rawProgressPercent = totalSteps > 0 ? (stepProgress / totalSteps) * 100 : 0;
+  const progressPercent = allRequirementsMet ? 100 : Math.min(rawProgressPercent, 99);
 
   const toggleStep = (index: number) => {
     setCheckedSteps(prev => {
