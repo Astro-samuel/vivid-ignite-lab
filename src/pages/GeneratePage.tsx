@@ -365,10 +365,17 @@ export default function GeneratePage() {
         components: p.components,
         source: "generate",
       });
-      if (!result.error) savedCount++;
+      if (result.error) {
+        sonnerToast.error("🚫 Project limit reached", {
+          description: "You can only have up to 5 projects in your dashboard. Complete or remove a project to start a new one.",
+          duration: 5000,
+        });
+        break;
+      }
+      savedCount++;
     }
     setSavingAll(false);
-    showToast(`✓ ${savedCount} project${savedCount !== 1 ? "s" : ""} saved to dashboard!`);
+    if (savedCount > 0) showToast(`✓ ${savedCount} project${savedCount !== 1 ? "s" : ""} saved to dashboard!`);
   };
 
   const handleStartProject = async (project: Project) => {
