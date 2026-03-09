@@ -1396,7 +1396,10 @@ void loop() {
     });
     setSaving(false);
     if (result.error) {
-      alert(result.error);
+      sonnerToast.error("🚫 Project limit reached", {
+        description: "You can only have up to 5 projects in your dashboard. Complete or remove a project to start a new one.",
+        duration: 5000,
+      });
     } else {
       setSaved(true);
     }
