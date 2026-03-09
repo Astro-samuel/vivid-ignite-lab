@@ -35,8 +35,14 @@ export default function AchievementsPage() {
       .then(({ data }) => { if (data) setProfile(data); });
   }, [user]);
 
-  const completedCount = profile?.projects_completed ?? 0;
-  const totalXP = profile?.total_xp ?? 0;
+  // Use the greater of profile.projects_completed and actual completed projects count
+  const actualCompleted = projects.filter(p => p.status === "completed").length;
+  const completedCount = Math.max(profile?.projects_completed ?? 0, actualCompleted);
+  
+  // Use the greater of profile.total_xp and actual sum of completed project XP
+  const actualXP = projects.filter(p => p.status === "completed").reduce((s, p) => s + (p.xp || 0), 0);
+  const totalXP = Math.max(profile?.total_xp ?? 0, actualXP);
+  
   const streakDays = profile?.streak_days ?? 0;
   const inventoryCount = useMemo(() => getInventoryCount(user?.id), [user?.id]);
 
