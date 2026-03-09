@@ -358,7 +358,7 @@ export default function DashboardPage() {
         </div>
 
         {/* "What Can I Make?" Widget */}
-        <WhatCanIMakeWidget navigate={navigate} userId={user?.id} />
+        <WhatCanIMakeWidget navigate={navigate} userId={user?.id} userProjectIds={userProjectIds} />
 
         {/* Project Tabs */}
         <div className="flex gap-2 mb-5">
