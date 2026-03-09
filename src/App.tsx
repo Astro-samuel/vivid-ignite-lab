@@ -73,6 +73,7 @@ function AnimatedRoutes() {
         <Route path="/feedback" element={<ProtectedRoute><ErrorBoundary><FeedbackPage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="/submit-project" element={<ProtectedRoute><ErrorBoundary><SubmitProjectPage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="/resources" element={<ProtectedRoute><ErrorBoundary><ResourcesPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/ai-settings" element={<ProtectedRoute><ErrorBoundary><AISettingsPage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>

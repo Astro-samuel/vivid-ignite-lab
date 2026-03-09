@@ -17,6 +17,7 @@ const navItems = [
   { icon: MessageSquareHeart, label: "Feedback", path: "/feedback" },
   { icon: PlusCircle, label: "Submit Project", path: "/submit-project" },
   { icon: BookOpen, label: "Resources", path: "/resources" },
+  { icon: Bot, label: "AI Settings", path: "/ai-settings" },
 ];
 
 interface SidebarProps {
