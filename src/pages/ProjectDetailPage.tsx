@@ -1347,13 +1347,35 @@ void loop() {
     if (foundErrors.length > 0) {
       setErrors(foundErrors);
       setRunStep("error");
+      setCodePassed(false);
+      setSimulatorPassed(false);
       return;
     }
 
+    // Code compiled successfully
+    setCodePassed(true);
+
     setRunStep("simulating");
     await delay(1500);
+
+    // Safety checks (no critical warnings)
+    const safetyWarnings: string[] = [];
+    if (code.includes("analogWrite") && code.includes("delay(1)")) {
+      safetyWarnings.push("Warning: Very short delay with analog output may cause instability.");
+    }
+    if (safetyWarnings.length > 0) {
+      setErrors(safetyWarnings);
+      setRunStep("error");
+      setSimulatorPassed(false);
+      return;
+    }
+
+    // Simulator passed
+    setSimulatorPassed(true);
     setRunStep("success");
-    setCompleted(true);
+
+    // Note: completion is now handled by the auto-completion effect
+    // which checks allSteps + codePassed + simulatorPassed
   };
 
   const getAIDebugResponse = (input: string): string => {
