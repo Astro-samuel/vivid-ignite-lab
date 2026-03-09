@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_context_cache: {
+        Row: {
+          errors_explained: string[] | null
+          id: string
+          messages: Json
+          project_id: number
+          questions_asked: string[] | null
+          summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          errors_explained?: string[] | null
+          id?: string
+          messages?: Json
+          project_id: number
+          questions_asked?: string[] | null
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          errors_explained?: string[] | null
+          id?: string
+          messages?: Json
+          project_id?: number
+          questions_asked?: string[] | null
+          summary?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       community_projects: {
         Row: {
           author_name: string
@@ -82,6 +115,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_preferences: Json | null
           avatar_url: string | null
           created_at: string
           display_name: string | null
@@ -94,6 +128,7 @@ export type Database = {
           username: string | null
         }
         Insert: {
+          ai_preferences?: Json | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -106,6 +141,7 @@ export type Database = {
           username?: string | null
         }
         Update: {
+          ai_preferences?: Json | null
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
