@@ -1202,7 +1202,12 @@ void loop() {
     if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
     autoSaveTimeout.current = setTimeout(() => {
       const completedCount = checkedSteps.filter(Boolean).length;
-      const progress = project.instructions.length > 0 ? Math.round((completedCount / project.instructions.length) * 100) : 0;
+      const allStepsDone = checkedSteps.length > 0 && checkedSteps.every(Boolean);
+      const allReqsMet = allStepsDone && codePassed && simulatorPassed;
+      // Progress only reaches 100% when ALL requirements are met
+      const progress = project.instructions.length > 0 
+        ? (allReqsMet ? 100 : Math.min(Math.round((completedCount / project.instructions.length) * 100), 99))
+        : 0;
       // Don't overwrite completed status via auto-save
       if (!completionAwarded) {
         updateProgress(projectId, {
