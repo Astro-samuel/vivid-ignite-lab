@@ -99,7 +99,7 @@ export default function ThinkBiggerPage() {
               </motion.div>
             );
           })}
-        </StaggerContainer>
+        </div>
       </div>
     </Layout>
   );
