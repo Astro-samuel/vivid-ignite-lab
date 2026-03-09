@@ -97,6 +97,8 @@ const costRanges = [
 export default function CatalogPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { projects: userProjects } = useUserProjects();
+  const userProjectIds = useMemo(() => new Set(userProjects.map(p => p.project_id)), [userProjects]);
   const [search, setSearch] = useState("");
   const [diffFilter, setDiffFilter] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
