@@ -28,8 +28,8 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
     difficulty === "beginner"
       ? { background: "rgba(0,255,136,0.15)", color: "#00FF88", border: "1px solid rgba(0,255,136,0.3)" }
       : difficulty === "intermediate"
-      ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
-      : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
+        ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
+        : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
   return <span className="text-xs px-2 py-0.5 rounded-full font-semibold capitalize" style={styles}>{difficulty}</span>;
 }
 
@@ -58,11 +58,8 @@ export default function Index() {
               <span style={{ color: "#FFFFFF" }}>Build Amazing</span>
               <br />
               <span
-                style={{
-                  background: "linear-gradient(135deg, #00F5FF, #B744FF)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
+                className="gradient-text-hero"
+                style={{ fontSize: "1.1em" }}
               >
                 Arduino Projects
               </span>

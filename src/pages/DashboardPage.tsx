@@ -32,7 +32,7 @@ const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 
 const dailyChallenges = [
   { icon: "🎯", title: "Complete a Project", desc: "Finish any project from the catalog", xp: 50, done: false },
-  { icon: "🔧", title: "Add 3 Components", desc: "Add components to your inventory", xp: 25, done: true },
+  { icon: "🔧", title: "Add 3 Components", desc: "Add components to your inventory", xp: 25, done: false },
   { icon: "✨", title: "Generate AI Project", desc: "Use AI to generate a custom project", xp: 35, done: false },
 ];
 
@@ -41,8 +41,8 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
     difficulty === "beginner"
       ? { background: "rgba(0,255,136,0.15)", color: "#00FF88", border: "1px solid rgba(0,255,136,0.3)" }
       : difficulty === "intermediate"
-      ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
-      : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
+        ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
+        : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
   return (
     <span className="text-xs px-2 py-0.5 rounded-full font-semibold capitalize" style={styles}>
       {difficulty}
@@ -231,15 +231,15 @@ export default function DashboardPage() {
                 style={
                   isActive
                     ? {
-                        background: "rgba(0,245,255,0.12)",
-                        color: "#00F5FF",
-                        border: "1px solid rgba(0,245,255,0.3)",
-                      }
+                      background: "rgba(0,245,255,0.12)",
+                      color: "#00F5FF",
+                      border: "1px solid rgba(0,245,255,0.3)",
+                    }
                     : {
-                        background: "transparent",
-                        color: "#A0AED9",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }
+                      background: "transparent",
+                      color: "#A0AED9",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }
                 }
               >
                 <Icon size={13} />
@@ -255,7 +255,7 @@ export default function DashboardPage() {
             {inProgressProjects.map((p) => (
               <div
                 key={p.id}
-                className="rounded-2xl border p-5 transition-all"
+                className="rounded-2xl border p-5 transition-all hover:border-primary/40 animate-fade-in-up"
                 style={{ background: "hsl(229, 45%, 16%)", borderColor: "hsl(229, 42%, 28%)" }}
               >
                 <div className="flex items-start gap-4">

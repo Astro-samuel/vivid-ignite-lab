@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, LayoutDashboard, BookOpen, Cpu, Package, Zap, Lightbulb,
-  Trophy, User, ChevronLeft, ChevronRight, LogOut, Star
+  Trophy, User, ChevronLeft, ChevronRight, LogOut, Star, Code
 } from "lucide-react";
 
 const navItems = [
@@ -14,6 +14,7 @@ const navItems = [
   { icon: Zap, label: "Generate", path: "/generate" },
   { icon: Lightbulb, label: "Think Bigger", path: "/think-bigger" },
   { icon: Trophy, label: "Achievements", path: "/achievements" },
+  { icon: Code, label: "IDE", path: "/ide" },
   { icon: User, label: "Profile", path: "/profile" },
 ];
 
@@ -63,11 +64,11 @@ export default function Sidebar() {
               style={
                 isActive
                   ? {
-                      background: "rgba(0,245,255,0.12)",
-                      color: "#00F5FF",
-                      borderLeft: "3px solid #00F5FF",
-                      paddingLeft: "7px",
-                    }
+                    background: "rgba(0,245,255,0.12)",
+                    color: "#00F5FF",
+                    borderLeft: "3px solid #00F5FF",
+                    paddingLeft: "7px",
+                  }
                   : { color: "hsl(226, 35%, 65%)" }
               }
               title={collapsed ? label : undefined}

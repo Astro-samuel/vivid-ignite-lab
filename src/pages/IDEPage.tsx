@@ -162,7 +162,12 @@ export default function IDEPage() {
   };
 
   const loadErrorCode = () => {
-    setCode(errorCode);
+    // In a real app, this would be project-specific
+    const projectSpecificError = code.includes("const int LED_PIN")
+      ? errorCode
+      : errorCode.replace("pinMod(13", "pinMod(9");
+
+    setCode(projectSpecificError);
     setRunStep("idle");
     setErrors([]);
     setXpAwarded(false);
@@ -279,8 +284,8 @@ export default function IDEPage() {
                     borderColor: step.id === activeStep
                       ? "rgba(0,245,255,0.4)"
                       : step.done
-                      ? "rgba(0,255,136,0.2)"
-                      : "hsl(232, 38%, 20%)",
+                        ? "rgba(0,255,136,0.2)"
+                        : "hsl(232, 38%, 20%)",
                     background: step.id === activeStep
                       ? "rgba(0,245,255,0.06)"
                       : "transparent",
@@ -294,8 +299,8 @@ export default function IDEPage() {
                         step.done
                           ? { background: "#00FF88", color: "#0A0E27" }
                           : step.id === activeStep
-                          ? { background: "#00F5FF", color: "#0A0E27" }
-                          : { background: "hsl(232, 40%, 22%)", color: "hsl(228, 25%, 60%)" }
+                            ? { background: "#00F5FF", color: "#0A0E27" }
+                            : { background: "hsl(232, 40%, 22%)", color: "hsl(228, 25%, 60%)" }
                       }
                     >
                       {step.done ? "✓" : step.id}
@@ -332,12 +337,22 @@ export default function IDEPage() {
               <span>•</span>
               <span>Arduino Uno</span>
             </div>
-            <div className="relative flex-1">
+            <div className="relative flex-1 flex overflow-hidden">
+              {/* Line Numbers */}
+              <div
+                className="w-10 flex-shrink-0 flex flex-col items-center pt-4 select-none font-mono text-[11px] border-r"
+                style={{ background: "hsl(232, 48%, 5%)", borderColor: "hsl(232, 40%, 14%)", color: "hsl(228, 20%, 35%)" }}
+              >
+                {code.split("\n").map((_, i) => (
+                  <div key={i} className="leading-[1.7]">{i + 1}</div>
+                ))}
+              </div>
+
               <textarea
                 ref={codeRef}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="code-editor w-full h-full p-4 text-sm resize-none focus:outline-none"
+                className="code-editor w-full h-full p-4 pt-4 text-sm resize-none focus:outline-none bg-transparent border-none"
                 style={{ fontFamily: "'JetBrains Mono', monospace", lineHeight: "1.7", fontSize: "13px" }}
                 spellCheck={false}
               />

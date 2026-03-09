@@ -82,7 +82,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="fixed inset-0 z-40" onClick={() => setLangOpen(false)} />
         )}
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto page-transition-enter">
           {children}
         </main>
       </div>
