@@ -109,7 +109,12 @@ export default function CatalogPage() {
   const [userLevel, setUserLevel] = useState(1);
   const [userXp, setUserXp] = useState(0);
 
-  // Fetch user profile for level/XP
+  // Fetch user profile for level/XP and experience from onboarding
+  const userExperience = useMemo(() => {
+    if (!user) return "none";
+    return localStorage.getItem(`experience_${user.id}`) || "none";
+  }, [user]);
+
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("level, total_xp").eq("id", user.id).single()
@@ -121,10 +126,18 @@ export default function CatalogPage() {
       });
   }, [user]);
 
+  // Experience-based minimum unlock: "some" → intermediate, "experienced" → advanced
+  const effectiveLevel = useMemo(() => {
+    let base = userLevel;
+    if (userExperience === "some" && base < 2) base = 2;
+    if (userExperience === "experienced" && base < 3) base = 3;
+    return base;
+  }, [userLevel, userExperience]);
+
   const isLocked = (difficulty: string) => {
     const req = LEVEL_REQUIREMENTS[difficulty];
     if (!req) return false;
-    return userLevel < req.level;
+    return effectiveLevel < req.level;
   };
 
   const inventory = useMemo(() => getInventoryComponents(user?.id), [user?.id]);
