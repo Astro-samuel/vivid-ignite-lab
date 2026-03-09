@@ -1777,10 +1777,21 @@ void loop() {
               </div>
             </div>
 
-            {progressPercent === 100 && (
-              <div className="mb-4 p-3 rounded-xl flex items-center gap-3 animate-fade-in" style={{ background: "rgba(0,255,136,0.1)", border: "1px solid rgba(0,255,136,0.3)" }}>
-                <Award size={20} style={{ color: "#00FF88" }} />
-                <span className="text-sm font-bold" style={{ color: "#00FF88" }}>🎉 All steps completed! Great job wiring up the circuit.</span>
+            {/* Completion Checklist */}
+            {(allStepsCompleted || codePassed || simulatorPassed) && (
+              <div className="mb-4 p-4 rounded-xl space-y-2" style={{ background: completed ? "rgba(0,255,136,0.06)" : "hsl(var(--muted) / 0.5)", border: `1px solid ${completed ? "rgba(0,255,136,0.3)" : "hsl(var(--border))"}` }}>
+                <p className="text-xs font-bold mb-2" style={{ color: completed ? "#00FF88" : "hsl(var(--foreground))" }}>
+                  {completed ? "🎉 Project Complete!" : "📋 Completion Requirements"}
+                </p>
+                {completionChecks.map((check, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    {check.done
+                      ? <CheckCircle size={14} style={{ color: "#00FF88" }} />
+                      : <div className="w-3.5 h-3.5 rounded-full border" style={{ borderColor: "hsl(var(--muted-foreground))" }} />
+                    }
+                    <span className="text-xs" style={{ color: check.done ? "#00FF88" : "hsl(var(--muted-foreground))" }}>{check.label}</span>
+                  </div>
+                ))}
               </div>
             )}
 
