@@ -68,7 +68,8 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
 }
 
 function getTimeSeed(): number {
-  return Math.floor(Date.now() / (3 * 60 * 60 * 1000));
+  // Changes once per day (midnight UTC)
+  return Math.floor(Date.now() / (24 * 60 * 60 * 1000));
 }
 
 function getInventoryComponents(userId?: string): string[] {
@@ -100,6 +101,8 @@ export default function CatalogPage() {
   const { user } = useAuth();
   const { projects: userProjects } = useUserProjects();
   const userProjectIds = useMemo(() => new Set(userProjects.map(p => p.project_id)), [userProjects]);
+  const completedProjectIds = useMemo(() => new Set(userProjects.filter(p => p.status === "completed").map(p => p.project_id)), [userProjects]);
+  const activeProjectIds = useMemo(() => new Set(userProjects.filter(p => p.status !== "completed").map(p => p.project_id)), [userProjects]);
   const [search, setSearch] = useState("");
   const [diffFilter, setDiffFilter] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
@@ -167,20 +170,21 @@ export default function CatalogPage() {
     });
   };
 
-  // Pick 5 per level, shuffled by time seed, excluding user's existing projects
+  // Pick 5 per level, shuffled by daily seed, excluding active (non-completed) user projects
+  // Completed projects stay visible with a "Completed" badge
   const visibleProjects = useMemo(() => {
     const seed = getTimeSeed();
     const levels = ["beginner", "intermediate", "advanced"] as const;
     const result: typeof allProjects = [];
 
     for (const level of levels) {
-      const pool = allProjects.filter((p) => p.difficulty === level && !removedIds.includes(p.id) && !userProjectIds.has(p.id));
+      const pool = allProjects.filter((p) => p.difficulty === level && !removedIds.includes(p.id) && !activeProjectIds.has(p.id));
       const shuffled = seededShuffle(pool, seed + level.length);
       result.push(...shuffled.slice(0, PROJECTS_PER_LEVEL));
     }
 
     return result;
-  }, [removedIds, userProjectIds]);
+  }, [removedIds, activeProjectIds]);
 
   const filtered = visibleProjects.filter((p) => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
@@ -211,7 +215,7 @@ export default function CatalogPage() {
             Project <span className="gradient-text-teal">Catalog</span>
           </h1>
           <p style={{ color: "hsl(var(--muted-foreground))" }}>
-            {filtered.length} projects shown • Refreshes every few hours
+            {filtered.length} projects shown • Refreshes daily
           </p>
         </FadeInView>
 
@@ -383,6 +387,7 @@ export default function CatalogPage() {
                 <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                   {levelProjects.map((p) => {
                     const buildable = canBuild(p);
+                    const isCompleted = completedProjectIds.has(p.id);
                     return (
                       <motion.div key={p.id} variants={staggerItem}>
                         <MotionCard className={`card-neon p-4 group relative ${locked ? "cursor-not-allowed" : "cursor-pointer"}`}>
@@ -400,7 +405,7 @@ export default function CatalogPage() {
                             </div>
                           )}
 
-                          {!locked && (
+                          {!locked && !isCompleted && (
                             <button
                               onClick={(e) => { e.stopPropagation(); handleRemove(p.id); }}
                               className="absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
@@ -411,8 +416,15 @@ export default function CatalogPage() {
                             </button>
                           )}
 
+                          {/* Completed badge */}
+                          {isCompleted && (
+                            <div className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}>
+                              ✓ Completed
+                            </div>
+                          )}
+
                           {/* Buildable badge */}
-                          {buildable && !locked && (
+                          {buildable && !locked && !isCompleted && (
                             <div className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}>
                               ✓ Can Build
                             </div>
@@ -487,10 +499,12 @@ export default function CatalogPage() {
                             className="w-full py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
                             style={locked
                               ? { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
+                              : isCompleted
+                              ? { background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }
                               : { background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 12px hsl(var(--primary) / 0.25)" }
                             }
                           >
-                            {locked ? "Locked" : "View Project"}
+                            {locked ? "Locked" : isCompleted ? "✓ Completed" : "View Project"}
                           </button>
                         </MotionCard>
                       </motion.div>
