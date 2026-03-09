@@ -193,16 +193,21 @@ export default function GeneratePage() {
       .select("*")
       .then(({ data }) => {
         if (data) {
-          const mapped: Project[] = data.map((p, i) => ({
-            id: 900 + i,
-            emoji: "🌐",
-            title: p.title,
-            description: p.description,
-            difficulty: (p.difficulty as Project["difficulty"]) || "beginner",
-            time: p.estimated_time || "30 mins",
-            xp: p.difficulty === "advanced" ? 200 : p.difficulty === "intermediate" ? 120 : 75,
-            components: p.components || [],
-          }));
+          // Use a stable unique ID based on the community project's actual UUID hash
+          const mapped: Project[] = data.map((p) => {
+            // Generate a stable numeric ID from the UUID to avoid collisions
+            const hashId = p.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0) + 5000;
+            return {
+              id: hashId,
+              emoji: "🌐",
+              title: p.title,
+              description: p.description,
+              difficulty: (p.difficulty as Project["difficulty"]) || "beginner",
+              time: p.estimated_time || "30 mins",
+              xp: p.difficulty === "advanced" ? 200 : p.difficulty === "intermediate" ? 120 : 75,
+              components: p.components || [],
+            };
+          });
           setCommunityProjects(mapped);
         }
       });
