@@ -4,7 +4,6 @@ import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
 import MotionCard from "@/components/motion/MotionCard";
-import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
 import { motion } from "framer-motion";
 
 const allBigIdeas = [
@@ -59,11 +58,11 @@ export default function ThinkBiggerPage() {
           </button>
         </FadeInView>
 
-        <StaggerContainer className="space-y-5">
+        <div className="space-y-5">
           {ideas.map((idea) => {
             const impactColor = impactColors[idea.impact] || "#00F5FF";
             return (
-              <motion.div key={idea.id} variants={staggerItem}>
+              <motion.div key={idea.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
                 <MotionCard className="card-neon p-6 cursor-pointer group">
                   <div className="flex gap-5">
                     <div className="text-4xl">{idea.emoji}</div>
@@ -99,7 +98,7 @@ export default function ThinkBiggerPage() {
               </motion.div>
             );
           })}
-        </StaggerContainer>
+        </div>
       </div>
     </Layout>
   );

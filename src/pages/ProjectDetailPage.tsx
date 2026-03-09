@@ -1203,11 +1203,12 @@ void loop() {
     autoSaveTimeout.current = setTimeout(() => {
       const completedCount = checkedSteps.filter(Boolean).length;
       const allStepsDone = checkedSteps.length > 0 && checkedSteps.every(Boolean);
-      const allReqsMet = allStepsDone && codePassed && simulatorPassed;
-      // Progress only reaches 100% when ALL requirements are met
-      const progress = project.instructions.length > 0 
-        ? (allReqsMet ? 100 : Math.min(Math.round((completedCount / project.instructions.length) * 100), 99))
-        : 0;
+      // Progress milestones: steps=25%, code=50%, simulator=100%
+      let progress = 0;
+      if (allStepsDone && codePassed && simulatorPassed) progress = 100;
+      else if (allStepsDone && codePassed) progress = 50;
+      else if (allStepsDone) progress = 25;
+      else if (project.instructions.length > 0) progress = Math.min(Math.round((completedCount / project.instructions.length) * 24), 24);
       // Don't overwrite completed status via auto-save
       if (!completionAwarded) {
         updateProgress(projectId, {
@@ -1265,10 +1266,14 @@ void loop() {
 
   const stepProgress = checkedSteps.filter(Boolean).length;
   const totalSteps = project.instructions.length;
-  // Progress only reaches 100% when ALL requirements are met: steps + code + simulator
-  const allRequirementsMet = allStepsCompleted && codePassed && simulatorPassed;
-  const rawProgressPercent = totalSteps > 0 ? (stepProgress / totalSteps) * 100 : 0;
-  const progressPercent = allRequirementsMet ? 100 : Math.min(rawProgressPercent, 99);
+  // Progress milestones: steps=25%, code=50%, simulator=100%
+  const progressPercent = (() => {
+    if (allStepsCompleted && codePassed && simulatorPassed) return 100;
+    if (allStepsCompleted && codePassed) return 50;
+    if (allStepsCompleted) return 25;
+    // Before all steps done, scale 0-24%
+    return totalSteps > 0 ? Math.min(Math.round((stepProgress / totalSteps) * 24), 24) : 0;
+  })();
 
   const toggleStep = (index: number) => {
     setCheckedSteps(prev => {
