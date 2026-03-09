@@ -172,6 +172,7 @@ export default function GeneratePage() {
   const { user } = useAuth();
   const { saveProject, projects: userProjects } = useUserProjects();
   const userProjectIds = new Set(userProjects.map(p => p.project_id));
+  const userProjectTitles = new Set(userProjects.map(p => p.title.toLowerCase()));
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingStates, setLoadingStates] = useState<boolean[]>([]);
   const [generating, setGenerating] = useState(false);
