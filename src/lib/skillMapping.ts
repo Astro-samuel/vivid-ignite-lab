@@ -20,18 +20,19 @@ export const SKILL_COLORS: Record<SkillName, string> = {
 };
 
 // Each project maps to 1-3 skills it develops
+// Covers: Catalog projects (1-23), Generator projects (101-308), Think Bigger (101-110)
 export const PROJECT_SKILLS: Record<number, SkillName[]> = {
-  // Beginner
-  1:  ["Electronics Basics", "Programming"],                    // LED Blink
+  // === CATALOG: Beginner ===
+  1:  ["Electronics Basics", "Programming"],                    // LED Blink Tutorial
   2:  ["Sensors & Actuators", "Programming"],                   // Temperature Monitor
   4:  ["Electronics Basics", "Programming"],                    // RGB LED Mixer
   6:  ["Electronics Basics", "Programming"],                    // Music Synthesizer
   12: ["Programming", "Electronics Basics"],                    // Joystick Game
-  13: ["Electronics Basics"],                                   // Traffic Light
+  13: ["Electronics Basics"],                                   // Traffic Light Simulator
   14: ["Electronics Basics", "Programming"],                    // Piano Keys
   15: ["Electronics Basics", "Sensors & Actuators"],            // Night Light
 
-  // Intermediate
+  // === CATALOG: Intermediate ===
   3:  ["Robotics", "Programming"],                              // Servo Motor Control
   5:  ["IoT & Connectivity", "Programming"],                    // Bluetooth Controller
   7:  ["Sensors & Actuators", "Programming"],                   // Plant Watering Bot
@@ -41,7 +42,7 @@ export const PROJECT_SKILLS: Record<number, SkillName[]> = {
   17: ["Sensors & Actuators", "Programming"],                   // Digital Compass
   18: ["Sensors & Actuators", "Programming"],                   // IR Remote Decoder
 
-  // Advanced
+  // === CATALOG: Advanced ===
   9:  ["Robotics", "Sensors & Actuators", "Programming"],       // Obstacle Avoidance Car
   10: ["Robotics", "Sensors & Actuators"],                      // Solar Tracker
   19: ["IoT & Connectivity", "Programming", "Electronics Basics"], // Smart Home Hub
@@ -49,6 +50,40 @@ export const PROJECT_SKILLS: Record<number, SkillName[]> = {
   21: ["Sensors & Actuators", "IoT & Connectivity", "Programming"], // Weather Station
   22: ["Robotics", "Programming"],                              // Robotic Arm
   23: ["Electronics Basics", "Sensors & Actuators"],            // Battery Monitor
+
+  // === GENERATOR: Beginner ===
+  101: ["Electronics Basics", "Sensors & Actuators"],            // Smart LED Mood Lamp
+  102: ["Sensors & Actuators", "Programming"],                   // Smart Plant Watering
+  103: ["Programming", "Electronics Basics"],                    // Joystick LED Matrix
+  104: ["Electronics Basics"],                                   // Traffic Light Controller
+  105: ["Electronics Basics", "Programming"],                    // Button Piano
+  106: ["Electronics Basics", "Sensors & Actuators"],            // Automatic Night Light
+  107: ["Electronics Basics", "Programming"],                    // Electronic Dice
+  108: ["Electronics Basics", "Programming"],                    // Countdown Timer
+  109: ["Electronics Basics", "Programming"],                    // Rainbow LED Fader
+  110: ["Sensors & Actuators", "Electronics Basics"],            // Clap Switch
+
+  // === GENERATOR: Intermediate ===
+  201: ["Sensors & Actuators", "IoT & Connectivity"],            // Weather Station Dashboard
+  202: ["IoT & Connectivity", "Programming", "Robotics"],        // RFID Door Lock
+  203: ["Robotics", "Sensors & Actuators", "Programming"],       // Line-Following Robot
+  204: ["Sensors & Actuators", "Programming"],                   // IR Remote Decoder
+  205: ["Programming", "Electronics Basics"],                    // Reaction Time Game
+  206: ["Sensors & Actuators", "Programming"],                   // Digital Compass
+  207: ["Sensors & Actuators", "Electronics Basics"],            // Laser Tripwire Alarm
+  208: ["Programming", "IoT & Connectivity"],                    // Data Logger to SD Card
+  209: ["Sensors & Actuators", "Electronics Basics"],            // Motion Detection Alarm
+  210: ["Programming", "Electronics Basics"],                    // Serial LCD Menu System
+
+  // === GENERATOR: Advanced ===
+  301: ["Sensors & Actuators", "Programming"],                   // Theremin Music Synthesizer
+  302: ["IoT & Connectivity", "Sensors & Actuators"],            // Wireless Sensor Network
+  303: ["IoT & Connectivity", "Programming", "Electronics Basics"], // Smart Home Controller
+  304: ["Robotics", "Programming"],                              // Robotic Arm with IK
+  305: ["Sensors & Actuators", "Robotics"],                      // Ultrasonic Radar Scanner
+  306: ["Sensors & Actuators", "Programming"],                   // Audio Spectrum Analyzer
+  307: ["Electronics Basics", "Sensors & Actuators"],            // Power Consumption Monitor
+  308: ["Robotics", "Sensors & Actuators", "Programming"],       // Gesture-Controlled Robot
 };
 
 /**
