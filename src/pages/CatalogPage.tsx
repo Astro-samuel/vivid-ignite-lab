@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Search, Clock, X, Filter, Tag, Lock } from "lucide-react";
+import { PROJECT_SKILLS, SKILL_COLORS } from "@/lib/skillMapping";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
