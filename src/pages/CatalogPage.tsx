@@ -215,7 +215,7 @@ export default function CatalogPage() {
             Project <span className="gradient-text-teal">Catalog</span>
           </h1>
           <p style={{ color: "hsl(var(--muted-foreground))" }}>
-            {filtered.length} projects shown • Refreshes every few hours
+            {filtered.length} projects shown • Refreshes daily
           </p>
         </FadeInView>
 
