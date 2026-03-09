@@ -101,6 +101,8 @@ export default function CatalogPage() {
   const { user } = useAuth();
   const { projects: userProjects } = useUserProjects();
   const userProjectIds = useMemo(() => new Set(userProjects.map(p => p.project_id)), [userProjects]);
+  const completedProjectIds = useMemo(() => new Set(userProjects.filter(p => p.status === "completed").map(p => p.project_id)), [userProjects]);
+  const activeProjectIds = useMemo(() => new Set(userProjects.filter(p => p.status !== "completed").map(p => p.project_id)), [userProjects]);
   const [search, setSearch] = useState("");
   const [diffFilter, setDiffFilter] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
