@@ -10,6 +10,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
 
+const PROJECTS_PER_LEVEL = 5;
+
+// Level requirements for each difficulty tier
+const LEVEL_REQUIREMENTS: Record<string, { level: number; xp: number }> = {
+  beginner: { level: 1, xp: 0 },
+  intermediate: { level: 2, xp: 200 },
+  advanced: { level: 3, xp: 500 },
+};
+
 const allProjects = [
   // === BEGINNER ===
   { id: 1, emoji: "💡", title: "LED Blink Tutorial", desc: "The classic 'Hello World' of Arduino — make an LED blink!", difficulty: "beginner", time: "15 mins", xp: 50, tags: ["LED", "GPIO"], components: ["LED (Red)", "Arduino Uno", "Resistor (220Ω)", "Breadboard"], cost: 5 },
