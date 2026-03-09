@@ -1,23 +1,16 @@
 import { ReactNode, useState } from "react";
 import Sidebar from "./Sidebar";
 import AIMentor from "./AIMentor";
-<<<<<<< HEAD
 import { Globe, ChevronDown, Loader2, Menu, X } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { motion, AnimatePresence } from "framer-motion";
-=======
-import { Globe, ChevronDown } from "lucide-react";
-import { useTranslation } from "react-i18next";
->>>>>>> f1d7728 (Initial commit)
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
-  const { i18n } = useTranslation();
   const [langOpen, setLangOpen] = useState(false);
-<<<<<<< HEAD
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { languages, selectedLang, translating, selectLanguage } = useTranslation();
 
@@ -25,15 +18,6 @@ export default function Layout({ children }: LayoutProps) {
     setLangOpen(false);
     await selectLanguage(lang);
   };
-=======
-
-  const changeLanguage = (code: string) => {
-    i18n.changeLanguage(code);
-    setLangOpen(false);
-  };
-
-  const selectedLang = languages.find((lang) => lang.code === i18n.language) || languages[0];
->>>>>>> f1d7728 (Initial commit)
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "hsl(232, 45%, 8%)" }}>
@@ -87,7 +71,6 @@ export default function Layout({ children }: LayoutProps) {
               <ChevronDown size={11} style={{ color: "#A0AED9" }} />
             </motion.button>
 
-<<<<<<< HEAD
             {/* Language panel — slides in from right */}
             <AnimatePresence>
               {langOpen && (
@@ -123,32 +106,6 @@ export default function Layout({ children }: LayoutProps) {
                 </motion.div>
               )}
             </AnimatePresence>
-=======
-            {langOpen && (
-              <div
-                className="absolute right-0 top-full mt-1 w-40 rounded-xl border py-1 z-50 shadow-xl"
-                style={{
-                  background: "hsl(229, 45%, 14%)",
-                  borderColor: "rgba(0,245,255,0.2)",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-                }}
-              >
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => changeLanguage(lang.code)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-left transition-all hover:bg-white/5"
-                    style={{
-                      color: lang.code === selectedLang.code ? "#00F5FF" : "#E0E7FF",
-                    }}
-                  >
-                    <span>{lang.flag}</span>
-                    <span>{lang.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
->>>>>>> f1d7728 (Initial commit)
           </div>
         </header>
 

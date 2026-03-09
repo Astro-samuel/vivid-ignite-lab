@@ -2,13 +2,9 @@ import { useState } from "react";
 import { Lightbulb, Zap, RefreshCw, Loader2, ArrowRight } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
-<<<<<<< HEAD
 import FadeInView from "@/components/motion/FadeInView";
 import MotionCard from "@/components/motion/MotionCard";
 import { motion } from "framer-motion";
-=======
-import { useTranslation } from "react-i18next";
->>>>>>> f1d7728 (Initial commit)
 
 const allBigIdeas = [
   { id: 1, emoji: "🛸", title: "Autonomous Drone Navigation System", desc: "Build a drone that autonomously maps indoor environments using LIDAR and computer vision, creating real-time 3D maps.", tags: ["LIDAR", "Computer Vision", "IMU", "ESP32"], level: "Expert", impact: "Revolutionary" },
@@ -28,7 +24,6 @@ const impactColors: Record<string, string> = {
 };
 
 export default function ThinkBiggerPage() {
-  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [ideas, setIdeas] = useState(() => {
@@ -44,50 +39,22 @@ export default function ThinkBiggerPage() {
     setLoading(false);
   };
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-  };
-
   return (
     <Layout>
       <div className="px-8 py-10 max-w-4xl mx-auto">
-<<<<<<< HEAD
         <FadeInView className="mb-10 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border text-sm font-medium" style={{ background: "rgba(183,68,255,0.1)", borderColor: "rgba(183,68,255,0.3)", color: "#B744FF" }}>
             <Lightbulb size={14} /> Think Bigger
-=======
-        {/* Language Selector */}
-        <div className="absolute top-4 right-4">
-          <select
-            onChange={(e) => changeLanguage(e.target.value)}
-            className="bg-gray-800 text-white border border-gray-600 rounded-md p-2"
-          >
-            <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="fr">Français</option>
-            <option value="de">Deutsch</option>
-            <option value="pt">Português</option>
-          </select>
-        </div>
-
-        {/* Header */}
-        <div className="mb-10 text-center">
-          <div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border text-sm font-medium"
-            style={{ background: "rgba(183,68,255,0.1)", borderColor: "rgba(183,68,255,0.3)", color: "#B744FF" }}
-          >
-            <Lightbulb size={14} /> {t('think_bigger')}
->>>>>>> f1d7728 (Initial commit)
           </div>
           <h1 className="text-4xl font-bold mb-4" style={{ color: "#FFFFFF" }}>
-            {t('push_the_boundaries')}
+            Push The <span className="shimmer-text">Boundaries</span>
           </h1>
           <p className="text-lg max-w-xl mx-auto" style={{ color: "hsl(226, 35%, 72%)" }}>
-            {t('ambitious_projects')}
+            Ambitious projects that challenge your skills and could actually change the world.
           </p>
           <button onClick={regenerate} disabled={loading} className="mt-6 btn-neon-outline-teal px-6 py-3 text-sm font-bold flex items-center gap-2 mx-auto">
             {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-            {loading ? t('generating') : t('new_ideas')}
+            {loading ? "Generating..." : "New Ideas"}
           </button>
         </FadeInView>
 
@@ -125,17 +92,6 @@ export default function ThinkBiggerPage() {
                           <Zap size={14} /> Start Building <ArrowRight size={14} />
                         </button>
                       </div>
-<<<<<<< HEAD
-=======
-
-                      <button
-                        onClick={() => navigate("/ide")}
-                        className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 group-hover:gap-3"
-                        style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27", boxShadow: "0 0 12px rgba(0,245,255,0.3)" }}
-                      >
-                        <Zap size={14} /> {t('start_building')} <ArrowRight size={14} />
-                      </button>
->>>>>>> f1d7728 (Initial commit)
                     </div>
                   </div>
                 </MotionCard>
