@@ -48,10 +48,10 @@ export default function Index() {
 
           <div className="relative max-w-3xl mx-auto text-center">
             <div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border text-sm font-medium"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border text-sm font-medium animate-float"
               style={{ background: "rgba(183,68,255,0.08)", borderColor: "rgba(183,68,255,0.25)", color: "#B744FF" }}
             >
-              <Zap size={14} /> AI-Powered Arduino Learning Platform
+              <Zap size={14} className="animate-pulse" /> <span className="shimmer-text font-bold">AI-Powered</span> Arduino Learning Platform
             </div>
 
             <h1 className="font-black mb-6 leading-tight" style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)" }}>
@@ -126,7 +126,7 @@ export default function Index() {
                     <h3 className="font-bold text-sm mb-1.5" style={{ color: "#FFFFFF" }}>{title}</h3>
                     <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>{desc}</p>
                     <span className="text-xs font-semibold flex items-center gap-1 transition-all group-hover:gap-2" style={{ color }}>
-                      Get Started <ArrowRight size={12} />
+                      Explore <ArrowRight size={12} />
                     </span>
                   </div>
                 </Link>
@@ -184,8 +184,8 @@ export default function Index() {
               {featuredProjects.map((p) => (
                 <Link key={p.id} to={`/project/${p.id}`}>
                   <div
-                    className="rounded-xl border p-5 cursor-pointer group transition-all hover:-translate-y-1"
-                    style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 24%)" }}
+                    className="glass-card rounded-xl border p-5 cursor-pointer group transition-all"
+                    style={{ borderColor: "rgba(255,255,255,0.05)" }}
                   >
                     <div className="text-3xl mb-3">{p.emoji}</div>
                     <h3 className="font-bold text-sm mb-1.5" style={{ color: "#FFFFFF" }}>{p.title}</h3>

@@ -88,11 +88,11 @@ export default function DashboardPage() {
             { label: "Completed", value: completedProjects.length, icon: CheckCircle, color: "#00FF88", bg: "rgba(0,255,136,0.08)", border: "rgba(0,255,136,0.2)" },
             { label: "Saved", value: savedProjects.length, icon: Bookmark, color: "#B744FF", bg: "rgba(183,68,255,0.08)", border: "rgba(183,68,255,0.2)" },
             { label: "Total XP", value: totalXP, icon: Star, color: "#FFD700", bg: "rgba(255,215,0,0.08)", border: "rgba(255,215,0,0.2)" },
-          ].map(({ label, value, icon: Icon, color, bg, border }) => (
+          ].map(({ label, value, icon: Icon, color, bg, border }, index) => (
             <div
               key={label}
-              className="rounded-2xl p-5 flex items-center gap-4 border"
-              style={{ background: bg, borderColor: border }}
+              className="glass-card rounded-2xl p-5 flex items-center gap-4 border animate-fade-in-up"
+              style={{ borderColor: border, animationDelay: `${index * 50}ms` }}
             >
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}22` }}>
                 <Icon size={18} style={{ color }} />
@@ -255,8 +255,8 @@ export default function DashboardPage() {
             {inProgressProjects.map((p) => (
               <div
                 key={p.id}
-                className="rounded-2xl border p-5 transition-all hover:border-primary/40 animate-fade-in-up"
-                style={{ background: "hsl(229, 45%, 16%)", borderColor: "hsl(229, 42%, 28%)" }}
+                className="glass-card rounded-2xl border p-5 transition-all animate-fade-in-up"
+                style={{ borderColor: "rgba(255,255,255,0.05)" }}
               >
                 <div className="flex items-start gap-4">
                   <div

@@ -23,8 +23,8 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
     difficulty === "beginner"
       ? { background: "rgba(0,255,136,0.15)", color: "#00FF88", border: "1px solid rgba(0,255,136,0.3)" }
       : difficulty === "intermediate"
-      ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
-      : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
+        ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
+        : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
   return <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold capitalize" style={styles}>{difficulty}</span>;
 }
 
@@ -92,8 +92,8 @@ export default function CatalogPage() {
           {filtered.map((p, i) => (
             <div
               key={p.id}
-              className="card-neon p-5 cursor-pointer group"
-              style={{ animationDelay: `${i * 50}ms` }}
+              className="glass-card p-5 cursor-pointer group animate-fade-in-up"
+              style={{ animationDelay: `${i * 80}ms`, borderColor: "rgba(255,255,255,0.05)" }}
             >
               <div className="text-3xl mb-3 animate-float" style={{ animationDelay: `${i * 0.3}s` }}>
                 {p.emoji}

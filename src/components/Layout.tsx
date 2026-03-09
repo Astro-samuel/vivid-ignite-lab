@@ -21,7 +21,12 @@ export default function Layout({ children }: LayoutProps) {
   const [selectedLang, setSelectedLang] = useState(languages[0]);
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "hsl(232, 45%, 8%)" }}>
+    <div className="flex h-screen overflow-hidden relative" style={{ background: "hsl(232, 45%, 8%)" }}>
+      {/* Premium Background Orbs */}
+      <div className="bg-orb w-[400px] h-[400px]" style={{ background: "#00F5FF", top: "-100px", left: "-100px", animationDelay: "0s" }} />
+      <div className="bg-orb w-[500px] h-[500px]" style={{ background: "#B744FF", bottom: "-150px", right: "10%", animationDelay: "-5s" }} />
+      <div className="bg-orb w-[300px] h-[300px]" style={{ background: "#FFD700", top: "20%", right: "-50px", animationDelay: "-10s", opacity: 0.1 }} />
+
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
