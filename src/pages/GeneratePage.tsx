@@ -246,25 +246,35 @@ export default function GeneratePage() {
 
     // Combine static pool + community projects, exclude user's existing projects (by ID and title)
     let pool = [...projectPool, ...communityProjects]
-      .filter((p) => !userProjectIds.has(p.id) && !userProjectTitles.has(p.title.toLowerCase()))
-      .sort(() => Math.random() - 0.5);
+      .filter((p) => !userProjectIds.has(p.id) && !userProjectTitles.has(p.title.toLowerCase()));
     if (difficulty !== "Any Difficulty") pool = pool.filter((p) => p.difficulty === difficulty.toLowerCase());
 
-    // Exclude previously shown projects to ensure variety
+    // Strongly shuffle the pool each time using Fisher-Yates
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+
+    // Split into fresh (never shown) and previously shown
     const fresh = pool.filter((p) => !previouslyShown.has(p.id));
-    const candidates = fresh.length >= 5 ? fresh : pool; // reset if pool exhausted
+    const stale = pool.filter((p) => previouslyShown.has(p.id));
 
-    // Score by component match, prioritize better matches but allow partial
-    const scored = candidates.map((p) => {
+    // Prioritize fresh projects, fill remaining from stale if needed
+    const ownedNormForScore = ownedNorm;
+    const scoreProject = (p: Project) => {
       const matchCount = p.components.filter((req) =>
-        ownedNorm.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
+        ownedNormForScore.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
       ).length;
-      return { ...p, matchScore: p.components.length > 0 ? matchCount / p.components.length : 0 };
-    });
+      return p.components.length > 0 ? matchCount / p.components.length : 0;
+    };
 
-    // Sort by best match first, randomize within same score
-    const sorted = scored.sort((a, b) => b.matchScore - a.matchScore || Math.random() - 0.5);
-    const selected5 = sorted.slice(0, 5);
+    // Score and sort fresh projects by match, then append stale as fallback
+    const scoredFresh = fresh.map(p => ({ ...p, matchScore: scoreProject(p) }))
+      .sort((a, b) => b.matchScore - a.matchScore || Math.random() - 0.5);
+    const scoredStale = stale.map(p => ({ ...p, matchScore: scoreProject(p) }))
+      .sort((a, b) => b.matchScore - a.matchScore || Math.random() - 0.5);
+
+    const selected5 = [...scoredFresh, ...scoredStale].slice(0, 5);
 
     if (selected5.length === 0) {
       setGenerating(false);
@@ -273,12 +283,11 @@ export default function GeneratePage() {
       return;
     }
 
-    // Track shown IDs
+    // Track shown IDs — reset when most of the pool has been shown
     setPreviouslyShown((prev) => {
       const next = new Set(prev);
       selected5.forEach((p) => next.add(p.id));
-      // Reset if we've shown most of the pool
-      if (next.size > pool.length * 0.8) return new Set(selected5.map((p) => p.id));
+      if (next.size > pool.length * 0.7) return new Set(selected5.map((p) => p.id));
       return next;
     });
 
