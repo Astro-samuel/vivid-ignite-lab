@@ -222,7 +222,14 @@ export default function DashboardPage() {
   const inProgressProjects = projects.filter(p => p.status === "inProgress");
   const completedProjects = projects.filter(p => p.status === "completed");
   const savedProjects = projects.filter(p => p.status === "saved");
-  const totalXP = completedProjects.reduce((s, p) => s + (p.xp || 0), 0);
+  // Fetch XP from profile (DB source of truth)
+  const [dbXp, setDbXp] = useState(0);
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("total_xp").eq("id", user.id).single()
+      .then(({ data }) => { if (data) setDbXp(data.total_xp || 0); });
+  }, [user, projects]);
+  const totalXP = dbXp;
 
   const showToast = (msg: string) => {
     setToast(msg);

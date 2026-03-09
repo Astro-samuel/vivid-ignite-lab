@@ -27,12 +27,16 @@ const impactColors: Record<string, string> = {
 export default function ThinkBiggerPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [ideas, setIdeas] = useState(bigIdeas);
+  const [ideas, setIdeas] = useState(() => {
+    const shuffled = [...allBigIdeas].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 5);
+  });
 
   const regenerate = async () => {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 1500));
-    setIdeas([...bigIdeas].sort(() => Math.random() - 0.5));
+    const shuffled = [...allBigIdeas].sort(() => Math.random() - 0.5);
+    setIdeas(shuffled.slice(0, 5));
     setLoading(false);
   };
 

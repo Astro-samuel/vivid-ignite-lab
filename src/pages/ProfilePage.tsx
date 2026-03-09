@@ -47,22 +47,20 @@ export default function ProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Load profile from database
+  // Load profile from database — use DB as source of truth for XP/level
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("*").eq("id", user.id).single().then(({ data }) => {
       if (data) {
-        const completedCount = projects.filter(p => p.status === "completed").length;
-        const totalXp = projects.filter(p => p.status === "completed").reduce((s, p) => s + (p.xp || 0), 0);
         setProfile({
           name: data.display_name || "",
           username: data.username || "",
           bio: "",
           level: data.level || 1,
-          xp: totalXp || data.total_xp || 0,
-          maxXP: (data.level || 1) * 200,
+          xp: data.total_xp || 0,
+          maxXP: (data.level || 1) >= 3 ? 1000 : (data.level || 1) >= 2 ? 500 : 200,
           streak: data.streak_days || 0,
-          projectsCompleted: completedCount || data.projects_completed || 0,
+          projectsCompleted: data.projects_completed || 0,
           avatar: data.avatar_url || null,
         });
         setEditData({
