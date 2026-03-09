@@ -34,14 +34,6 @@ const emptyProfile: UserProfile = {
   avatar: null,
 };
 
-const skillProgress = [
-  { name: "Electronics Basics", level: "Beginner", percent: 0, color: "#00F5FF" },
-  { name: "Programming", level: "Beginner", percent: 0, color: "#00FF88" },
-  { name: "Sensors & Actuators", level: "Beginner", percent: 0, color: "#FFD700" },
-  { name: "IoT & Connectivity", level: "Beginner", percent: 0, color: "#B744FF" },
-  { name: "Robotics", level: "Beginner", percent: 0, color: "#FF1493" },
-];
-
 const recentActivity: { icon: string; text: string; time: string; color: string }[] = [];
 
 export default function ProfilePage() {
