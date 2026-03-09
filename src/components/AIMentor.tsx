@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageSquare, X, Send, Bot, Sparkles, ChevronDown, Maximize2, Minimize2, GripVertical } from "lucide-react";
+import { MessageSquare, X, Send, Bot, Sparkles, ChevronDown, Maximize2, Minimize2, GripVertical, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAIPreferences } from "@/hooks/useAIPreferences";
+import { useAIContext } from "@/hooks/useAIContext";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   role: "user" | "assistant";
@@ -11,11 +14,15 @@ const MENTOR_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-mentor`
 
 async function streamMentor({
   messages,
+  preferences,
+  contextMeta,
   onDelta,
   onDone,
   onError,
 }: {
   messages: Message[];
+  preferences?: { tone: string; hintDepth: string; formality: string };
+  contextMeta?: { errors_explained: string[]; questions_asked: string[] };
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (msg: string) => void;
@@ -27,7 +34,7 @@ async function streamMentor({
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ messages, preferences, contextMeta }),
     });
 
     if (!resp.ok) {
@@ -73,7 +80,6 @@ async function streamMentor({
       }
     }
 
-    // Flush remaining
     if (buffer.trim()) {
       for (let raw of buffer.split("\n")) {
         if (!raw || raw.startsWith(":") || !raw.startsWith("data: ")) continue;
@@ -93,7 +99,15 @@ async function streamMentor({
   }
 }
 
-export default function AIMentor() {
+interface AIMentorProps {
+  projectId?: number;
+}
+
+export default function AIMentor({ projectId }: AIMentorProps) {
+  const navigate = useNavigate();
+  const preferences = useAIPreferences();
+  const { context, saveContext, trackQuestion } = useAIContext(projectId || null);
+
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -102,6 +116,19 @@ export default function AIMentor() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [contextLoaded, setContextLoaded] = useState(false);
+
+  // Load cached messages when project context loads
+  useEffect(() => {
+    if (contextLoaded || !projectId) return;
+    if (context.messages.length > 0) {
+      setMessages([
+        { role: "assistant", content: "Hey! 👋 I'm your Arduino mentor. I remember our last conversation on this project — let's keep going! What do you need help with?" },
+        ...context.messages,
+      ]);
+    }
+    setContextLoaded(true);
+  }, [context.messages, projectId, contextLoaded]);
 
   // Dragging state
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -142,6 +169,8 @@ export default function AIMentor() {
     const userMsg = input.trim();
     setInput("");
 
+    trackQuestion(userMsg);
+
     const newMessages: Message[] = [...messages, { role: "user", content: userMsg }];
     setMessages(newMessages);
     setStreaming(true);
@@ -161,8 +190,20 @@ export default function AIMentor() {
 
     await streamMentor({
       messages: newMessages,
+      preferences,
+      contextMeta: {
+        errors_explained: context.errors_explained,
+        questions_asked: context.questions_asked,
+      },
       onDelta: updateAssistant,
-      onDone: () => setStreaming(false),
+      onDone: () => {
+        setStreaming(false);
+        // Cache conversation
+        if (projectId) {
+          const allMsgs = [...newMessages.slice(1), { role: "assistant" as const, content: assistantText }];
+          saveContext({ messages: allMsgs });
+        }
+      },
       onError: (msg) => {
         setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
         setStreaming(false);
@@ -174,7 +215,6 @@ export default function AIMentor() {
 
   return (
     <>
-      {/* Floating button — scale in on mount */}
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -197,7 +237,6 @@ export default function AIMentor() {
         />
       </motion.button>
 
-      {/* Chat Panel — slides up from bottom */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -246,6 +285,14 @@ export default function AIMentor() {
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                <button
+                  onClick={() => navigate("/ai-settings")}
+                  className="p-1 rounded transition-all hover:bg-white/10"
+                  style={{ color: "#A0AED9" }}
+                  title="AI Settings"
+                >
+                  <Settings size={14} />
+                </button>
                 <button
                   onClick={() => setExpanded(!expanded)}
                   className="p-1 rounded transition-all hover:bg-white/10"
@@ -306,6 +353,13 @@ export default function AIMentor() {
               )}
               <div ref={bottomRef} />
             </div>
+
+            {/* Context indicator */}
+            {projectId && context.questions_asked.length > 0 && (
+              <div className="px-4 py-1.5 text-xs flex items-center gap-1.5 border-t" style={{ borderColor: "rgba(183,68,255,0.15)", color: "#A0AED9" }}>
+                <Sparkles size={10} /> {context.questions_asked.length} previous questions remembered
+              </div>
+            )}
 
             {/* Input */}
             <div
