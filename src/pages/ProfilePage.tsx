@@ -94,9 +94,18 @@ export default function ProfilePage() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setProfile((prev) => ({ ...prev, ...editData }));
     setEditing(false);
+
+    // Persist to database
+    if (user) {
+      await supabase.from("profiles").update({
+        display_name: editData.name,
+        username: editData.username,
+      }).eq("id", user.id);
+    }
+
     setSavedToast(true);
     setTimeout(() => setSavedToast(false), 3000);
   };
