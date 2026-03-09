@@ -116,7 +116,7 @@ export default function ProfilePage() {
     { icon: Trophy, label: "Projects", value: profile.projectsCompleted, color: "#FFD700" },
     { icon: Flame, label: "Day Streak", value: profile.streak, color: "#FF4500" },
     { icon: Star, label: "Level", value: profile.level, color: "#B744FF" },
-    { icon: Zap, label: "Total XP", value: "245", color: "#00F5FF" },
+    { icon: Zap, label: "Total XP", value: profile.xp, color: "#00F5FF" },
   ];
 
   return (
