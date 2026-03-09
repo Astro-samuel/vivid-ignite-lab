@@ -499,10 +499,12 @@ export default function CatalogPage() {
                             className="w-full py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
                             style={locked
                               ? { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
+                              : isCompleted
+                              ? { background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }
                               : { background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 12px hsl(var(--primary) / 0.25)" }
                             }
                           >
-                            {locked ? "Locked" : "View Project"}
+                            {locked ? "Locked" : isCompleted ? "✓ Completed" : "View Project"}
                           </button>
                         </MotionCard>
                       </motion.div>
