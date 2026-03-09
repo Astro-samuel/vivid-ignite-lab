@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, LayoutDashboard, BookOpen, Cpu, Package, Zap, Lightbulb,
-  Trophy, User, LogOut, LogIn, Star, MessageSquareHeart, PlusCircle
+  Trophy, User, LogOut, LogIn, Star, MessageSquareHeart, PlusCircle, Bot
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
