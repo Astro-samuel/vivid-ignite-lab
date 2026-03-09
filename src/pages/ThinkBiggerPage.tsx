@@ -4,7 +4,6 @@ import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
 import MotionCard from "@/components/motion/MotionCard";
-import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
 import { motion } from "framer-motion";
 
 const allBigIdeas = [
