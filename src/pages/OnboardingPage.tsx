@@ -175,8 +175,8 @@ export default function OnboardingPage() {
             </motion.div>
           )}
 
-          {/* Step 2: Component Inventory */}
-          {step === 2 && (
+          {/* Step 3: Component Inventory */}
+          {step === 3 && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
               <h2 className="text-xl font-bold mb-2" style={{ color: "hsl(var(--foreground))" }}>
                 What components do you have?
