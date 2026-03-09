@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import PageTransition from "@/components/PageTransition";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { Suspense, lazy } from "react";
+import ProjectSkeleton from "@/components/ProjectSkeleton";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import GeneratePage from "./pages/GeneratePage";
@@ -28,29 +31,47 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
+// Generic page loading fallback
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(var(--background))" }}>
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: "hsl(var(--muted))", borderTopColor: "hsl(var(--primary))" }} />
+        <span className="text-sm font-medium" style={{ color: "hsl(var(--muted-foreground))" }}>Loading...</span>
+      </div>
+    </div>
+  );
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
   return (
     <PageTransition>
       <Routes location={location}>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
-        <Route path="/catalog" element={<CatalogPage />} />
-        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-        <Route path="/components" element={<ProtectedRoute><ComponentsPage /></ProtectedRoute>} />
-        <Route path="/kits" element={<ProtectedRoute><KitsPage /></ProtectedRoute>} />
-        <Route path="/generate" element={<ProtectedRoute><GeneratePage /></ProtectedRoute>} />
-        <Route path="/think-bigger" element={<ProtectedRoute><ThinkBiggerPage /></ProtectedRoute>} />
-        <Route path="/achievements" element={<ProtectedRoute><AchievementsPage /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/ide" element={<ProtectedRoute><IDEPage /></ProtectedRoute>} />
-        <Route path="/project/:id" element={<ProtectedRoute><ProjectDetailPage /></ProtectedRoute>} />
-        <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
-        <Route path="/submit-project" element={<ProtectedRoute><SubmitProjectPage /></ProtectedRoute>} />
-        <Route path="/resources" element={<ProtectedRoute><ResourcesPage /></ProtectedRoute>} />
+        <Route path="/" element={<ErrorBoundary><Index /></ErrorBoundary>} />
+        <Route path="/auth" element={<ErrorBoundary><AuthPage /></ErrorBoundary>} />
+        <Route path="/forgot-password" element={<ErrorBoundary><ForgotPasswordPage /></ErrorBoundary>} />
+        <Route path="/reset-password" element={<ErrorBoundary><ResetPasswordPage /></ErrorBoundary>} />
+        <Route path="/onboarding" element={<ProtectedRoute><ErrorBoundary><OnboardingPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/catalog" element={<ErrorBoundary fallbackTitle="Catalog couldn't load"><CatalogPage /></ErrorBoundary>} />
+        <Route path="/dashboard" element={<ProtectedRoute><ErrorBoundary fallbackTitle="Dashboard couldn't load"><DashboardPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/components" element={<ProtectedRoute><ErrorBoundary><ComponentsPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/kits" element={<ProtectedRoute><ErrorBoundary><KitsPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/generate" element={<ProtectedRoute><ErrorBoundary fallbackTitle="Generator encountered an error"><GeneratePage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/think-bigger" element={<ProtectedRoute><ErrorBoundary><ThinkBiggerPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/achievements" element={<ProtectedRoute><ErrorBoundary><AchievementsPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><ErrorBoundary><ProfilePage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/ide" element={<ProtectedRoute><ErrorBoundary><IDEPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/project/:id" element={
+          <ProtectedRoute>
+            <ErrorBoundary fallbackTitle="This project couldn't load">
+              <ProjectDetailPage />
+            </ErrorBoundary>
+          </ProtectedRoute>
+        } />
+        <Route path="/feedback" element={<ProtectedRoute><ErrorBoundary><FeedbackPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/submit-project" element={<ProtectedRoute><ErrorBoundary><SubmitProjectPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/resources" element={<ProtectedRoute><ErrorBoundary><ResourcesPage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>
@@ -64,7 +85,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <AnimatedRoutes />
+          <ErrorBoundary fallbackTitle="Application Error">
+            <AnimatedRoutes />
+          </ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
