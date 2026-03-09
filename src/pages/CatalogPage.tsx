@@ -387,6 +387,7 @@ export default function CatalogPage() {
                 <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                   {levelProjects.map((p) => {
                     const buildable = canBuild(p);
+                    const isCompleted = completedProjectIds.has(p.id);
                     return (
                       <motion.div key={p.id} variants={staggerItem}>
                         <MotionCard className={`card-neon p-4 group relative ${locked ? "cursor-not-allowed" : "cursor-pointer"}`}>
@@ -404,7 +405,7 @@ export default function CatalogPage() {
                             </div>
                           )}
 
-                          {!locked && (
+                          {!locked && !isCompleted && (
                             <button
                               onClick={(e) => { e.stopPropagation(); handleRemove(p.id); }}
                               className="absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
@@ -415,8 +416,15 @@ export default function CatalogPage() {
                             </button>
                           )}
 
+                          {/* Completed badge */}
+                          {isCompleted && (
+                            <div className="absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}>
+                              ✓ Completed
+                            </div>
+                          )}
+
                           {/* Buildable badge */}
-                          {buildable && !locked && (
+                          {buildable && !locked && !isCompleted && (
                             <div className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}>
                               ✓ Can Build
                             </div>
