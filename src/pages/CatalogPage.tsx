@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Search, Clock, X, Filter, Tag } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Search, Clock, X, Filter, Tag, Lock } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
@@ -7,8 +7,8 @@ import MotionCard from "@/components/motion/MotionCard";
 import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-
-const PROJECTS_PER_LEVEL = 5;
+import { supabase } from "@/integrations/supabase/client";
+import { toast as sonnerToast } from "sonner";
 
 const allProjects = [
   // === BEGINNER ===
