@@ -172,6 +172,7 @@ export default function GeneratePage() {
   const { user } = useAuth();
   const { saveProject, projects: userProjects } = useUserProjects();
   const userProjectIds = new Set(userProjects.map(p => p.project_id));
+  const userProjectTitles = new Set(userProjects.map(p => p.title.toLowerCase()));
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingStates, setLoadingStates] = useState<boolean[]>([]);
   const [generating, setGenerating] = useState(false);
@@ -243,9 +244,9 @@ export default function GeneratePage() {
 
     const ownedNorm = components.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
 
-    // Combine static pool + community projects, exclude user's existing projects
+    // Combine static pool + community projects, exclude user's existing projects (by ID and title)
     let pool = [...projectPool, ...communityProjects]
-      .filter((p) => !userProjectIds.has(p.id))
+      .filter((p) => !userProjectIds.has(p.id) && !userProjectTitles.has(p.title.toLowerCase()))
       .sort(() => Math.random() - 0.5);
     if (difficulty !== "Any Difficulty") pool = pool.filter((p) => p.difficulty === difficulty.toLowerCase());
 
@@ -316,16 +317,18 @@ export default function GeneratePage() {
       if (error) throw error;
 
       if (data?.projects && Array.isArray(data.projects)) {
-        const aiProjects: Project[] = data.projects.map((p: any, i: number) => ({
-          id: 700 + i + Math.floor(Math.random() * 100),
-          emoji: p.emoji || "🤖",
-          title: p.title,
-          description: p.description,
-          difficulty: p.difficulty || "beginner",
-          time: p.time || "30 mins",
-          xp: p.xp || 75,
-          components: p.components || [],
-        }));
+        const aiProjects: Project[] = data.projects
+          .filter((p: any) => !userProjectTitles.has((p.title || "").toLowerCase()))
+          .map((p: any, i: number) => ({
+            id: 700 + i + Math.floor(Math.random() * 100),
+            emoji: p.emoji || "🤖",
+            title: p.title,
+            description: p.description,
+            difficulty: p.difficulty || "beginner",
+            time: p.time || "30 mins",
+            xp: p.xp || 75,
+            components: p.components || [],
+          }));
 
         aiProjects.forEach((project, i) => {
           setTimeout(() => {

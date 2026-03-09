@@ -35,8 +35,14 @@ export default function AchievementsPage() {
       .then(({ data }) => { if (data) setProfile(data); });
   }, [user]);
 
-  const completedCount = profile?.projects_completed ?? 0;
-  const totalXP = profile?.total_xp ?? 0;
+  // Use the greater of profile.projects_completed and actual completed projects count
+  const actualCompleted = projects.filter(p => p.status === "completed").length;
+  const completedCount = Math.max(profile?.projects_completed ?? 0, actualCompleted);
+  
+  // Use the greater of profile.total_xp and actual sum of completed project XP
+  const actualXP = projects.filter(p => p.status === "completed").reduce((s, p) => s + (p.xp || 0), 0);
+  const totalXP = Math.max(profile?.total_xp ?? 0, actualXP);
+  
   const streakDays = profile?.streak_days ?? 0;
   const inventoryCount = useMemo(() => getInventoryCount(user?.id), [user?.id]);
 
@@ -90,7 +96,19 @@ export default function AchievementsPage() {
       progress: Math.min(inventoryCount, 20), total: 20,
       unlocked: inventoryCount >= 20,
     },
-  ], [completedCount, totalXP, inventoryCount, profile?.level]);
+    {
+      id: 9, emoji: "🔥", title: "Streak Starter", desc: "Maintain a 3-day streak",
+      xp: 75, color: "#FF4500",
+      progress: Math.min(streakDays, 3), total: 3,
+      unlocked: streakDays >= 3,
+    },
+    {
+      id: 10, emoji: "📅", title: "Week Warrior", desc: "Maintain a 7-day streak",
+      xp: 200, color: "#FF4500",
+      progress: Math.min(streakDays, 7), total: 7,
+      unlocked: streakDays >= 7,
+    },
+  ], [completedCount, totalXP, inventoryCount, profile?.level, streakDays]);
 
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
   const achievementXP = achievements.filter((a) => a.unlocked).reduce((sum, a) => sum + a.xp, 0);
