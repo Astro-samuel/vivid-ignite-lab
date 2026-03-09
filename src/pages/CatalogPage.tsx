@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
+import { useUserProjects } from "@/hooks/useUserProjects";
 
 const PROJECTS_PER_LEVEL = 5;
 
@@ -97,6 +98,8 @@ const costRanges = [
 export default function CatalogPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { projects: userProjects } = useUserProjects();
+  const userProjectIds = useMemo(() => new Set(userProjects.map(p => p.project_id)), [userProjects]);
   const [search, setSearch] = useState("");
   const [diffFilter, setDiffFilter] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
@@ -164,20 +167,20 @@ export default function CatalogPage() {
     });
   };
 
-  // Pick 5 per level, shuffled by time seed
+  // Pick 5 per level, shuffled by time seed, excluding user's existing projects
   const visibleProjects = useMemo(() => {
     const seed = getTimeSeed();
     const levels = ["beginner", "intermediate", "advanced"] as const;
     const result: typeof allProjects = [];
 
     for (const level of levels) {
-      const pool = allProjects.filter((p) => p.difficulty === level && !removedIds.includes(p.id));
+      const pool = allProjects.filter((p) => p.difficulty === level && !removedIds.includes(p.id) && !userProjectIds.has(p.id));
       const shuffled = seededShuffle(pool, seed + level.length);
       result.push(...shuffled.slice(0, PROJECTS_PER_LEVEL));
     }
 
     return result;
-  }, [removedIds]);
+  }, [removedIds, userProjectIds]);
 
   const filtered = visibleProjects.filter((p) => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));

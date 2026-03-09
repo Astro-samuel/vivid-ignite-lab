@@ -54,11 +54,14 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
   );
 }
 
-function WhatCanIMakeWidget({ navigate, userId }: { navigate: (path: string) => void; userId?: string }) {
+function WhatCanIMakeWidget({ navigate, userId, userProjectIds }: { navigate: (path: string) => void; userId?: string; userProjectIds: Set<number> }) {
   const inventory = useMemo(() => getInventoryComponents(userId), [userId]);
   const inventoryNorm = inventory.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
 
-  const buildable = quickProjects.filter(p =>
+  // Filter out projects the user already has (in progress, saved, or completed)
+  const availableProjects = quickProjects.filter(p => !userProjectIds.has(p.id));
+
+  const buildable = availableProjects.filter(p =>
     p.components.every(req =>
       inventoryNorm.some(owned => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
     )
@@ -154,6 +157,7 @@ export default function DashboardPage() {
   const [toast, setToast] = useState("");
   const { user, loading: authLoading } = useAuth();
   const { projects, loading: projectsLoading, deleteProject } = useUserProjects();
+  const userProjectIds = useMemo(() => new Set(projects.map(p => p.project_id)), [projects]);
   const [navigatingId, setNavigatingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -354,7 +358,7 @@ export default function DashboardPage() {
         </div>
 
         {/* "What Can I Make?" Widget */}
-        <WhatCanIMakeWidget navigate={navigate} userId={user?.id} />
+        <WhatCanIMakeWidget navigate={navigate} userId={user?.id} userProjectIds={userProjectIds} />
 
         {/* Project Tabs */}
         <div className="flex gap-2 mb-5">
