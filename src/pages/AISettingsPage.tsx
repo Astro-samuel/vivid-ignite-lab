@@ -90,7 +90,7 @@ export default function AISettingsPage() {
     if (!user) return;
     setSaving(true);
     await supabase.from("profiles").update({
-      ai_preferences: prefs as unknown as Record<string, unknown>,
+      ai_preferences: prefs as any,
     }).eq("id", user.id);
     setSaving(false);
     setSaved(true);

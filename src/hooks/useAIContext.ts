@@ -53,15 +53,15 @@ export function useAIContext(projectId: number | null) {
     }
     setContext(newCtx);
 
-    await supabase.from("ai_context_cache").upsert({
+    await supabase.from("ai_context_cache" as any).upsert({
       user_id: user.id,
       project_id: projectId,
-      messages: newCtx.messages as unknown as Record<string, unknown>[],
+      messages: newCtx.messages,
       summary: newCtx.summary,
       errors_explained: newCtx.errors_explained,
       questions_asked: newCtx.questions_asked,
       updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id,project_id" });
+    } as any, { onConflict: "user_id,project_id" });
   }, [user, projectId, context]);
 
   // Track a new question
