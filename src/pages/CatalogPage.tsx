@@ -170,20 +170,21 @@ export default function CatalogPage() {
     });
   };
 
-  // Pick 5 per level, shuffled by time seed, excluding user's existing projects
+  // Pick 5 per level, shuffled by daily seed, excluding active (non-completed) user projects
+  // Completed projects stay visible with a "Completed" badge
   const visibleProjects = useMemo(() => {
     const seed = getTimeSeed();
     const levels = ["beginner", "intermediate", "advanced"] as const;
     const result: typeof allProjects = [];
 
     for (const level of levels) {
-      const pool = allProjects.filter((p) => p.difficulty === level && !removedIds.includes(p.id) && !userProjectIds.has(p.id));
+      const pool = allProjects.filter((p) => p.difficulty === level && !removedIds.includes(p.id) && !activeProjectIds.has(p.id));
       const shuffled = seededShuffle(pool, seed + level.length);
       result.push(...shuffled.slice(0, PROJECTS_PER_LEVEL));
     }
 
     return result;
-  }, [removedIds, userProjectIds]);
+  }, [removedIds, activeProjectIds]);
 
   const filtered = visibleProjects.filter((p) => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
