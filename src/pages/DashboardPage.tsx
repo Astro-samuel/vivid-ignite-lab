@@ -161,6 +161,14 @@ export default function DashboardPage() {
   const userProjectIds = useMemo(() => new Set(projects.map(p => p.project_id)), [projects]);
   const [navigatingId, setNavigatingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [dbXp, setDbXp] = useState(0);
+
+  // Fetch XP from profile (DB source of truth)
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("total_xp").eq("id", user.id).single()
+      .then(({ data }) => { if (data) setDbXp(data.total_xp || 0); });
+  }, [user, projects]);
 
   // Redirect to onboarding if not completed
   useEffect(() => {
