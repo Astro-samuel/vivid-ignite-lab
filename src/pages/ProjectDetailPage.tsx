@@ -1086,8 +1086,21 @@ void loop() {
       const stored = localStorage.getItem("activeGeneratedProject");
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed.id === projectId) return parsed;
+        if (parsed.id === projectId) {
+          // Cache for future visits
+          try { localStorage.setItem(`projectCache_${projectId}`, stored); } catch {}
+          return parsed;
+        }
       }
+    } catch {}
+    return null;
+  })();
+
+  // Fallback: check project cache
+  const cachedProject = (() => {
+    try {
+      const cached = localStorage.getItem(`projectCache_${projectId}`);
+      if (cached) return JSON.parse(cached);
     } catch {}
     return null;
   })();
@@ -1115,6 +1128,9 @@ void loop() {
     if (exactCatalogMatch) return exactCatalogMatch;
 
     if (savedProjectById) return buildFallbackProject(savedProjectById);
+
+    // Try cached project data
+    if (cachedProject) return buildFallbackProject(cachedProject);
 
     return allProjects[0];
   })();
