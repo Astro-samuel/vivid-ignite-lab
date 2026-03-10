@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAIPreferences } from "@/hooks/useAIPreferences";
 import { useAIContext } from "@/hooks/useAIContext";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   role: "user" | "assistant";
