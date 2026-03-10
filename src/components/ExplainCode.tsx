@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BookOpen, Loader2, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const EXPLAIN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/explain-code`;
 
