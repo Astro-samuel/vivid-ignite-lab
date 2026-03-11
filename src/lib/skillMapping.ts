@@ -50,6 +50,13 @@ export const PROJECT_SKILLS: Record<number, SkillName[]> = {
   21: ["Sensors & Actuators", "IoT & Connectivity", "Programming"], // Weather Station
   22: ["Robotics", "Programming"],                              // Robotic Arm
   23: ["Electronics Basics", "Sensors & Actuators"],            // Battery Monitor
+  24: ["Electronics Basics", "Programming"],                    // Electronic Dice
+  25: ["Sensors & Actuators", "Electronics Basics"],            // Clap Switch
+  26: ["Sensors & Actuators", "Electronics Basics"],            // Motion Detection Alarm
+  27: ["Sensors & Actuators", "Electronics Basics"],            // Laser Tripwire
+  28: ["Sensors & Actuators", "Robotics"],                      // Ultrasonic Radar Scanner
+  29: ["Sensors & Actuators", "Programming"],                   // Theremin Synthesizer
+  30: ["IoT & Connectivity", "Sensors & Actuators"],            // GPS Tracker
 
   // === GENERATOR: Beginner ===
   101: ["Electronics Basics", "Sensors & Actuators"],            // Smart LED Mood Lamp
