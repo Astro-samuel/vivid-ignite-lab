@@ -202,6 +202,25 @@ export default function DashboardPage() {
     showToast("Project removed");
   };
 
+  const inProgressProjects = projects.filter(p => p.status === "inProgress");
+  const completedProjects = projects.filter(p => p.status === "completed");
+  const savedProjects = projects.filter(p => p.status === "saved");
+  const totalXP = dbXp;
+
+  const dailyChallenges = useMemo(() => {
+    const hasCompletedToday = completedProjects.some(p => {
+      const updated = new Date(p.updated_at);
+      const today = new Date();
+      return updated.toDateString() === today.toDateString();
+    });
+    const hasInProgress = inProgressProjects.length > 0;
+    return [
+      { icon: "🎯", title: "Complete a Project", desc: "Finish any project from the catalog", xp: 50, done: hasCompletedToday },
+      { icon: "🔧", title: "Work on a Project", desc: "Continue or start any project", xp: 25, done: hasInProgress },
+      { icon: "🔥", title: "Keep Your Streak", desc: `Current streak: ${streakDays} day${streakDays !== 1 ? "s" : ""}`, xp: 35, done: streakDays > 0 },
+    ];
+  }, [completedProjects, inProgressProjects, streakDays]);
+
   if (!authLoading && !user) {
     return (
       <Layout>
@@ -222,28 +241,6 @@ export default function DashboardPage() {
       </Layout>
     );
   }
-
-  const inProgressProjects = projects.filter(p => p.status === "inProgress");
-  const completedProjects = projects.filter(p => p.status === "completed");
-  const savedProjects = projects.filter(p => p.status === "saved");
-  const totalXP = dbXp;
-
-  // Dynamic daily challenges based on actual user data
-  const dailyChallenges = useMemo(() => {
-    const hasCompletedToday = completedProjects.some(p => {
-      const updated = new Date(p.updated_at);
-      const today = new Date();
-      return updated.toDateString() === today.toDateString();
-    });
-    
-    const hasInProgress = inProgressProjects.length > 0;
-    
-    return [
-      { icon: "🎯", title: "Complete a Project", desc: "Finish any project from the catalog", xp: 50, done: hasCompletedToday },
-      { icon: "🔧", title: "Work on a Project", desc: "Continue or start any project", xp: 25, done: hasInProgress },
-      { icon: "🔥", title: "Keep Your Streak", desc: `Current streak: ${streakDays} day${streakDays !== 1 ? "s" : ""}`, xp: 35, done: streakDays > 0 },
-    ];
-  }, [completedProjects, inProgressProjects, streakDays]);
 
   const showToast = (msg: string) => {
     setToast(msg);
