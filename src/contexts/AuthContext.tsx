@@ -24,6 +24,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       setLoading(false);
 
+      // Handle expired/invalid refresh tokens by signing out
+      if (event === "TOKEN_REFRESHED" && !session) {
+        await supabase.auth.signOut();
+        return;
+      }
+
       // Update streak on sign-in
       if (event === "SIGNED_IN" && session?.user) {
         setTimeout(() => updateStreak(session.user.id), 0);
