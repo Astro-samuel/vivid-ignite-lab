@@ -162,14 +162,20 @@ export default function DashboardPage() {
   const [dbXp, setDbXp] = useState(0);
   const [streakDays, setStreakDays] = useState(0);
 
-  // Fetch XP and streak from profile (DB source of truth)
+  // Fetch XP and streak from profile (DB source of truth) + animate streak on change
   useEffect(() => {
     if (!user) return;
     supabase.from("profiles").select("total_xp, streak_days, projects_completed").eq("id", user.id).single()
       .then(({ data }) => {
         if (data) {
+          const prevStreak = streakDays;
           setDbXp(data.total_xp || 0);
           setStreakDays(data.streak_days || 0);
+          // Trigger animation if streak changed (new day login)
+          if (prevStreak !== (data.streak_days || 0) && (data.streak_days || 0) > 0) {
+            setStreakAnimating(true);
+            setTimeout(() => setStreakAnimating(false), 2000);
+          }
         }
       });
   }, [user, projects]);
