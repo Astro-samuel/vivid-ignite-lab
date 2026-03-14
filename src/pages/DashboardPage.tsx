@@ -174,10 +174,20 @@ export default function DashboardPage() {
       });
   }, [user, projects]);
 
+  const [streakAnimating, setStreakAnimating] = useState(false);
+
+  // Check onboarding status from DB, not just localStorage
   useEffect(() => {
-    if (user && !localStorage.getItem(`onboarding_${user.id}`)) {
-      navigate("/onboarding");
-    }
+    if (!user) return;
+    if (localStorage.getItem(`onboarding_${user.id}`)) return; // already done
+    supabase.from("profiles").select("display_name").eq("id", user.id).single()
+      .then(({ data }) => {
+        if (data?.display_name) {
+          localStorage.setItem(`onboarding_${user.id}`, "done");
+        } else {
+          navigate("/onboarding");
+        }
+      });
   }, [user, navigate]);
 
   const openProject = async (p: typeof projects[0]) => {
