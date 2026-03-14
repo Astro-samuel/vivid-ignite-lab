@@ -58,10 +58,20 @@ export default function AuthPage() {
       const { error, data } = await signIn(email, password);
       if (error) setError(error.message);
       else {
-        // Check if onboarding is completed
         const userId = data?.user?.id;
-        if (userId && !localStorage.getItem(`onboarding_${userId}`)) {
-          navigate("/onboarding");
+        if (userId) {
+          // Check profile in DB — if display_name is set, user has already onboarded
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("display_name")
+            .eq("id", userId)
+            .single();
+          if (profile?.display_name) {
+            localStorage.setItem(`onboarding_${userId}`, "done");
+            navigate("/dashboard");
+          } else {
+            navigate("/onboarding");
+          }
         } else {
           navigate("/dashboard");
         }

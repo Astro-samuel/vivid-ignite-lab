@@ -310,20 +310,29 @@ export default function DashboardPage() {
         {/* Two columns: Streak + Daily Challenges */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           {/* Streak — synced from DB */}
-          <div
+          <motion.div
             className="rounded-2xl p-5 border"
-            style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
+            style={{ background: "hsl(var(--card))", borderColor: streakAnimating ? "hsl(var(--success) / 0.5)" : "hsl(var(--border))" }}
+            animate={streakAnimating ? { scale: [1, 1.03, 1], boxShadow: ["0 0 0px transparent", "0 0 20px hsl(var(--success) / 0.3)", "0 0 0px transparent"] } : {}}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Flame size={16} style={{ color: "hsl(var(--destructive))" }} />
+                <motion.div animate={streakAnimating ? { rotate: [0, -15, 15, 0], scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.6 }}>
+                  <Flame size={16} style={{ color: "hsl(var(--destructive))" }} />
+                </motion.div>
                 <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>
                   Weekly Streak
                 </span>
               </div>
-              <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}>
-                {streakDays} day{streakDays !== 1 ? "s" : ""}
-              </span>
+              <motion.span
+                className="text-xs font-bold px-2 py-0.5 rounded-full"
+                style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}
+                animate={streakAnimating ? { scale: [1, 1.2, 1] } : {}}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                {streakDays} day{streakDays !== 1 ? "s" : ""} {streakAnimating ? "🎉" : ""}
+              </motion.span>
             </div>
             <div className="flex gap-2 justify-between">
               {dayLabels.map((d, i) => {
