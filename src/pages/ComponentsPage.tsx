@@ -250,14 +250,24 @@ export default function ComponentsPage() {
         {/* Main panel */}
         <div className="flex-1 px-8 py-10 overflow-y-auto">
           <FadeInView className="mb-6">
-            <div className="flex items-center gap-2 mb-1">
-              <span style={{ color: "#00F5FF" }}>⚙️</span>
-              <span className="text-xs font-semibold" style={{ color: "#00F5FF" }}>Inventory Management</span>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span style={{ color: "hsl(var(--primary))" }}>⚙️</span>
+                  <span className="text-xs font-semibold" style={{ color: "hsl(var(--primary))" }}>Inventory Management</span>
+                </div>
+                <h1 className="text-3xl font-bold mb-1" style={{ color: "hsl(var(--foreground))" }}>My Components</h1>
+                <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
+                  Add the Arduino components you own. We'll generate projects that match your inventory.
+                </p>
+              </div>
+              {/* 3D Component Preview */}
+              <Suspense fallback={<div className="w-24 h-24 rounded-xl" style={{ background: "hsl(var(--muted))" }} />}>
+                <div className="w-24 h-24 rounded-xl overflow-hidden border" style={{ borderColor: "hsl(var(--primary) / 0.2)", background: "hsl(var(--card))" }}>
+                  <Component3DViewer type={activeCategory} />
+                </div>
+              </Suspense>
             </div>
-            <h1 className="text-3xl font-bold mb-1" style={{ color: "#FFFFFF" }}>My Components</h1>
-            <p className="text-sm" style={{ color: "#A0AED9" }}>
-              Add the Arduino components you own. We'll generate projects that match your inventory.
-            </p>
           </FadeInView>
 
           {/* Smart Recognition Panel */}
