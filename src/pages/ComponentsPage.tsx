@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, lazy, Suspense } from "react";
 import { Minus, Plus, Save, Zap, Lightbulb, Package, Loader2, Brain, Heart, X, Sparkles, ShoppingCart, Camera, Eye } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +6,8 @@ import FadeInView from "@/components/motion/FadeInView";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
+
+const Component3DViewer = lazy(() => import("@/components/Component3DViewer"));
 
 type Category = "Microcontroller" | "Sensor" | "Actuator" | "Display" | "Communication" | "Module" | "Power" | "Passive" | "Other";
 
