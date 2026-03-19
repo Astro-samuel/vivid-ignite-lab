@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn, Loader2, Zap } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
@@ -9,8 +9,6 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
 import { supabase } from "@/integrations/supabase/client";
-
-const ProgressRing3D = lazy(() => import("@/components/ProgressRing3D"));
 
 type Tab = "inProgress" | "completed" | "saved";
 
@@ -285,38 +283,29 @@ export default function DashboardPage() {
         </FadeInView>
 
         {/* Stats Row */}
-        {/* 3D Progress Rings + Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <StaggerContainer className="grid grid-cols-4 gap-4 mb-6">
           {[
-            { label: "In Progress", value: inProgressProjects.length, max: 10, icon: Play, color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.08)", border: "hsl(var(--primary) / 0.2)" },
-            { label: "Completed", value: completedProjects.length, max: 10, icon: CheckCircle, color: "hsl(var(--success))", bg: "hsl(var(--success) / 0.08)", border: "hsl(var(--success) / 0.2)" },
-            { label: "Saved", value: savedProjects.length, max: 10, icon: Bookmark, color: "hsl(var(--purple))", bg: "hsl(var(--purple) / 0.08)", border: "hsl(var(--purple) / 0.2)" },
-            { label: "Total XP", value: totalXP, max: 1000, icon: Star, color: "hsl(var(--secondary))", bg: "hsl(var(--secondary) / 0.08)", border: "hsl(var(--secondary) / 0.2)" },
-          ].map(({ label, value, max, icon: Icon, color, bg, border }) => (
+            { label: "In Progress", value: inProgressProjects.length, icon: Play, color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.08)", border: "hsl(var(--primary) / 0.2)" },
+            { label: "Completed", value: completedProjects.length, icon: CheckCircle, color: "hsl(var(--success))", bg: "hsl(var(--success) / 0.08)", border: "hsl(var(--success) / 0.2)" },
+            { label: "Saved", value: savedProjects.length, icon: Bookmark, color: "hsl(var(--purple))", bg: "hsl(var(--purple) / 0.08)", border: "hsl(var(--purple) / 0.2)" },
+            { label: "Total XP", value: totalXP, icon: Star, color: "hsl(var(--secondary))", bg: "hsl(var(--secondary) / 0.08)", border: "hsl(var(--secondary) / 0.2)" },
+          ].map(({ label, value, icon: Icon, color, bg, border }) => (
             <motion.div
               key={label}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="rounded-2xl p-4 flex flex-col items-center gap-2 border"
+              variants={staggerItem}
+              className="rounded-2xl p-5 flex items-center gap-4 border"
               style={{ background: bg, borderColor: border }}
             >
-              <Suspense fallback={
-                <div className="w-[100px] h-[100px] flex items-center justify-center">
-                  <Icon size={24} style={{ color }} />
-                </div>
-              }>
-                <ProgressRing3D
-                  progress={Math.min((value / max) * 100, 100)}
-                  color={color}
-                  value={String(value)}
-                  label={label}
-                  style={{ width: 100, height: 100 }}
-                />
-              </Suspense>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}22` }}>
+                <Icon size={18} style={{ color }} />
+              </div>
+              <div>
+                <p className="text-2xl font-bold font-orbitron" style={{ color }}>{value}</p>
+                <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{label}</p>
+              </div>
             </motion.div>
           ))}
-        </div>
+        </StaggerContainer>
 
         {/* Two columns: Streak + Daily Challenges */}
         <div className="grid grid-cols-2 gap-4 mb-6">

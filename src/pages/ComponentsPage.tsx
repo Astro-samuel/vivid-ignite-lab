@@ -1,4 +1,4 @@
-import { useState, useRef, lazy, Suspense } from "react";
+import { useState, useRef } from "react";
 import { Minus, Plus, Save, Zap, Lightbulb, Package, Loader2, Brain, Heart, X, Sparkles, ShoppingCart, Camera, Eye } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
@@ -6,8 +6,6 @@ import FadeInView from "@/components/motion/FadeInView";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
-
-const Component3DViewer = lazy(() => import("@/components/Component3DViewer"));
 
 type Category = "Microcontroller" | "Sensor" | "Actuator" | "Display" | "Communication" | "Module" | "Power" | "Passive" | "Other";
 
@@ -250,24 +248,14 @@ export default function ComponentsPage() {
         {/* Main panel */}
         <div className="flex-1 px-8 py-10 overflow-y-auto">
           <FadeInView className="mb-6">
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span style={{ color: "hsl(var(--primary))" }}>⚙️</span>
-                  <span className="text-xs font-semibold" style={{ color: "hsl(var(--primary))" }}>Inventory Management</span>
-                </div>
-                <h1 className="text-3xl font-bold mb-1" style={{ color: "hsl(var(--foreground))" }}>My Components</h1>
-                <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
-                  Add the Arduino components you own. We'll generate projects that match your inventory.
-                </p>
-              </div>
-              {/* 3D Component Preview */}
-              <Suspense fallback={<div className="w-24 h-24 rounded-xl" style={{ background: "hsl(var(--muted))" }} />}>
-                <div className="w-24 h-24 rounded-xl overflow-hidden border" style={{ borderColor: "hsl(var(--primary) / 0.2)", background: "hsl(var(--card))" }}>
-                  <Component3DViewer type={activeCategory} />
-                </div>
-              </Suspense>
+            <div className="flex items-center gap-2 mb-1">
+              <span style={{ color: "#00F5FF" }}>⚙️</span>
+              <span className="text-xs font-semibold" style={{ color: "#00F5FF" }}>Inventory Management</span>
             </div>
+            <h1 className="text-3xl font-bold mb-1" style={{ color: "#FFFFFF" }}>My Components</h1>
+            <p className="text-sm" style={{ color: "#A0AED9" }}>
+              Add the Arduino components you own. We'll generate projects that match your inventory.
+            </p>
           </FadeInView>
 
           {/* Smart Recognition Panel */}
