@@ -20,26 +20,26 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden" style={{ background: "hsl(232, 45%, 8%)" }}>
       <Sidebar collapsed={sidebarCollapsed} />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
         <header
           className="flex items-center gap-2 px-4 py-2 border-b flex-shrink-0"
           style={{
-            background: "hsl(var(--sidebar-background))",
-            borderColor: "hsl(var(--border))",
+            background: "hsl(232, 48%, 6%)",
+            borderColor: "hsl(232, 40%, 16%)",
             minHeight: "48px",
           }}
         >
           {/* Hamburger toggle */}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200"
+            className="flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 hover:scale-105"
             style={{
-              color: "hsl(var(--primary))",
-              background: "hsl(var(--primary) / 0.06)",
-              border: "1px solid hsl(var(--primary) / 0.12)",
+              color: "#00F5FF",
+              background: "rgba(0,245,255,0.06)",
+              border: "1px solid rgba(0,245,255,0.15)",
             }}
           >
             {sidebarCollapsed ? <Menu size={16} /> : <X size={16} />}
@@ -47,43 +47,43 @@ export default function Layout({ children }: LayoutProps) {
 
           <div className="flex-1" />
 
-          {/* Language Switcher */}
+          {/* Language Switcher — floating button with scale-in */}
           <div className="relative" data-no-translate>
             <motion.button
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 400, damping: 22, delay: 0.1 }}
               onClick={() => setLangOpen(!langOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105"
               style={{
-                background: "hsl(var(--primary) / 0.06)",
-                border: "1px solid hsl(var(--primary) / 0.12)",
-                color: "hsl(var(--foreground))",
+                background: "rgba(0,245,255,0.06)",
+                border: "1px solid rgba(0,245,255,0.15)",
+                color: "#E0E7FF",
               }}
             >
               {translating ? (
-                <Loader2 size={12} className="animate-spin" style={{ color: "hsl(var(--primary))" }} />
+                <Loader2 size={12} className="animate-spin" style={{ color: "#00F5FF" }} />
               ) : (
                 <span>{selectedLang.flag}</span>
               )}
-              <Globe size={12} style={{ color: "hsl(var(--primary))" }} />
+              <Globe size={12} style={{ color: "#00F5FF" }} />
               <span>{selectedLang.label}</span>
-              <ChevronDown size={11} style={{ color: "hsl(var(--muted-foreground))" }} />
+              <ChevronDown size={11} style={{ color: "#A0AED9" }} />
             </motion.button>
 
-            {/* Language panel */}
+            {/* Language panel — slides in from right */}
             <AnimatePresence>
               {langOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
-                  className="absolute right-0 top-full mt-1 w-44 rounded-xl border py-1 z-50 max-h-64 overflow-y-auto"
+                  initial={{ opacity: 0, x: 60, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: 60, scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="absolute right-0 top-full mt-1 w-44 rounded-xl border py-1 z-50 shadow-xl max-h-64 overflow-y-auto"
                   style={{
-                    background: "hsl(var(--popover))",
-                    borderColor: "hsl(var(--border))",
-                    boxShadow: "0 8px 24px hsl(0 0% 0% / 0.4)",
+                    background: "hsl(229, 45%, 14%)",
+                    borderColor: "rgba(0,245,255,0.2)",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
                   }}
                 >
                   {languages.map((lang) => (
@@ -93,13 +93,13 @@ export default function Layout({ children }: LayoutProps) {
                       disabled={translating}
                       className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-left transition-all hover:bg-white/5 disabled:opacity-50"
                       style={{
-                        color: lang.code === selectedLang.code ? "hsl(var(--primary))" : "hsl(var(--foreground))",
+                        color: lang.code === selectedLang.code ? "#00F5FF" : "#E0E7FF",
                       }}
                     >
                       <span>{lang.flag}</span>
                       <span>{lang.label}</span>
                       {lang.code === selectedLang.code && (
-                        <span className="ml-auto text-xs" style={{ color: "hsl(var(--primary))" }}>✓</span>
+                        <span className="ml-auto text-xs" style={{ color: "#00F5FF" }}>✓</span>
                       )}
                     </button>
                   ))}

@@ -41,12 +41,14 @@ function getInventoryComponents(userId?: string): string[] {
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
-  const cls =
-    difficulty === "beginner" ? "badge-beginner"
-    : difficulty === "intermediate" ? "badge-intermediate"
-    : "badge-advanced";
+  const styles =
+    difficulty === "beginner"
+      ? { background: "rgba(0,255,136,0.15)", color: "#00FF88", border: "1px solid rgba(0,255,136,0.3)" }
+      : difficulty === "intermediate"
+      ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
+      : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
   return (
-    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold capitalize ${cls}`}>
+    <span className="text-xs px-2 py-0.5 rounded-full font-semibold capitalize" style={styles}>
       {difficulty}
     </span>
   );
@@ -400,10 +402,11 @@ export default function DashboardPage() {
 
             <button
               onClick={() => navigate("/achievements")}
-              className="w-full mt-3 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 hover:translate-y-[-1px]"
+              className="w-full mt-3 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
               style={{
-                background: "hsl(var(--purple))",
+                background: "linear-gradient(135deg, hsl(var(--purple)), hsl(var(--pink)))",
                 color: "hsl(var(--foreground))",
+                boxShadow: "0 0 15px hsl(var(--purple) / 0.3)",
               }}
             >
               ✦ View All Challenges
@@ -612,7 +615,7 @@ export default function DashboardPage() {
       {toast && (
         <div
           className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up z-50"
-          style={{ background: "hsl(var(--success))", color: "hsl(var(--primary-foreground))" }}
+          style={{ background: "linear-gradient(135deg, hsl(var(--success)), hsl(var(--success-deep)))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 20px hsl(var(--success) / 0.4)" }}
         >
           <CheckCircle size={16} /> {toast}
         </div>
