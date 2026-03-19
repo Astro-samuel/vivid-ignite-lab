@@ -615,7 +615,7 @@ export default function DashboardPage() {
       {toast && (
         <div
           className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up z-50"
-          style={{ background: "linear-gradient(135deg, hsl(var(--success)), hsl(var(--success-deep)))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 20px hsl(var(--success) / 0.4)" }}
+          style={{ background: "hsl(var(--success))", color: "hsl(var(--primary-foreground))" }}
         >
           <CheckCircle size={16} /> {toast}
         </div>
