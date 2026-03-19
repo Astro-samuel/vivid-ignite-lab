@@ -60,19 +60,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Muted neon palette
         neon: {
-          teal: "hsl(182, 45%, 45%)",
-          gold: "hsl(45, 40%, 50%)",
-          green: "hsl(150, 40%, 45%)",
-          pink: "hsl(328, 40%, 50%)",
-          purple: "hsl(284, 35%, 55%)",
-          orange: "hsl(16, 55%, 48%)",
+          teal: "hsl(190, 35%, 42%)",
+          gold: "hsl(40, 30%, 48%)",
+          green: "hsl(155, 30%, 42%)",
+          pink: "hsl(340, 25%, 50%)",
+          purple: "hsl(270, 25%, 52%)",
+          orange: "hsl(12, 45%, 46%)",
         },
         surface: {
-          DEFAULT: "hsl(232, 42%, 13%)",
-          hover: "hsl(232, 40%, 18%)",
-          deep: "hsl(232, 45%, 8%)",
+          DEFAULT: "hsl(228, 25%, 14%)",
+          hover: "hsl(228, 22%, 18%)",
+          deep: "hsl(228, 28%, 10%)",
         },
       },
       borderRadius: {
