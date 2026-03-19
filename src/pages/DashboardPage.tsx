@@ -402,11 +402,10 @@ export default function DashboardPage() {
 
             <button
               onClick={() => navigate("/achievements")}
-              className="w-full mt-3 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
+              className="w-full mt-3 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 hover:translate-y-[-1px]"
               style={{
-                background: "linear-gradient(135deg, hsl(var(--purple)), hsl(var(--pink)))",
+                background: "hsl(var(--purple))",
                 color: "hsl(var(--foreground))",
-                boxShadow: "0 0 15px hsl(var(--purple) / 0.3)",
               }}
             >
               ✦ View All Challenges
