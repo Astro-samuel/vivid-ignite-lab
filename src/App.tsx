@@ -29,6 +29,9 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AISettingsPage from "./pages/AISettingsPage";
+import SnippetsPage from "./pages/SnippetsPage";
+import ErrorDatabasePage from "./pages/ErrorDatabasePage";
+import InsightsPage from "./pages/InsightsPage";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +77,9 @@ function AnimatedRoutes() {
         <Route path="/submit-project" element={<ProtectedRoute><ErrorBoundary><SubmitProjectPage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="/resources" element={<ProtectedRoute><ErrorBoundary><ResourcesPage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="/ai-settings" element={<ProtectedRoute><ErrorBoundary><AISettingsPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/snippets" element={<ProtectedRoute><ErrorBoundary><SnippetsPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/errors" element={<ProtectedRoute><ErrorBoundary><ErrorDatabasePage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/insights" element={<ProtectedRoute><ErrorBoundary><InsightsPage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>

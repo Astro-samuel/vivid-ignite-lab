@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, LayoutDashboard, BookOpen, Cpu, Package, Zap, Lightbulb,
-  Trophy, User, LogOut, LogIn, Star, MessageSquareHeart, PlusCircle, Bot
+  Trophy, User, LogOut, LogIn, Star, MessageSquareHeart, PlusCircle, Bot,
+  Code, AlertTriangle, BarChart3
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -12,6 +13,9 @@ const navItems = [
   { icon: Cpu, label: "My Components", path: "/components" },
   { icon: Package, label: "Kits", path: "/kits" },
   { icon: Zap, label: "Generate", path: "/generate" },
+  { icon: Code, label: "Code Snippets", path: "/snippets" },
+  { icon: AlertTriangle, label: "Error Database", path: "/errors" },
+  { icon: BarChart3, label: "Insights", path: "/insights" },
   { icon: Lightbulb, label: "Think Bigger", path: "/think-bigger" },
   { icon: Trophy, label: "Achievements", path: "/achievements" },
   { icon: MessageSquareHeart, label: "Feedback", path: "/feedback" },
