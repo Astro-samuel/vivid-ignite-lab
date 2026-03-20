@@ -29,6 +29,9 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AISettingsPage from "./pages/AISettingsPage";
+import SnippetsPage from "./pages/SnippetsPage";
+import ErrorDatabasePage from "./pages/ErrorDatabasePage";
+import InsightsPage from "./pages/InsightsPage";
 
 const queryClient = new QueryClient();
 
