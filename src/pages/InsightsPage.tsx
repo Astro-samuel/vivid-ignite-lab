@@ -146,7 +146,7 @@ export default function InsightsPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {skills.map(skill => {
-                const pct = Math.min(Math.round((skill.current / skill.max) * 100), 100);
+                const pct = skill.percent;
                 return (
                   <div key={skill.name} className="p-3 rounded-xl" style={{ background: "hsl(var(--muted))" }}>
                     <div className="flex items-center justify-between mb-2">
@@ -162,7 +162,7 @@ export default function InsightsPage() {
                         style={{ background: skill.color }}
                       />
                     </div>
-                    <p className="text-[10px] mt-1" style={{ color: "hsl(var(--muted-foreground))" }}>{skill.current}/{skill.max} projects</p>
+                    <p className="text-[10px] mt-1" style={{ color: "hsl(var(--muted-foreground))" }}>{skill.completed}/{skill.total} projects</p>
                   </div>
                 );
               })}
