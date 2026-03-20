@@ -51,7 +51,7 @@ export default function InsightsPage() {
   const avgXP = completedCount > 0 ? Math.round(totalXP / completedCount) : 0;
 
   // Skills
-  const skills = useMemo(() => calculateSkillProgress(projects), [projects]);
+  const skills = useMemo(() => calculateSkillProgress(completed.map(p => p.project_id)), [completed]);
 
   // Time estimate stats
   const timeStats = useMemo(() => {
