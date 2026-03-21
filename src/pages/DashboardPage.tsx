@@ -162,23 +162,49 @@ export default function DashboardPage() {
   const [dbXp, setDbXp] = useState(0);
   const [streakDays, setStreakDays] = useState(0);
 
-  // Fetch XP and streak from profile (DB source of truth) + animate streak on change
+  // Fetch XP and streak from profile (DB source of truth) + update streak based on calendar
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("total_xp, streak_days, projects_completed").eq("id", user.id).single()
-      .then(({ data }) => {
-        if (data) {
-          const prevStreak = streakDays;
-          setDbXp(data.total_xp || 0);
-          setStreakDays(data.streak_days || 0);
-          // Trigger animation if streak changed (new day login)
-          if (prevStreak !== (data.streak_days || 0) && (data.streak_days || 0) > 0) {
-            setStreakAnimating(true);
-            setTimeout(() => setStreakAnimating(false), 2000);
-          }
+    const updateStreak = async () => {
+      const { data } = await supabase.from("profiles").select("total_xp, streak_days, projects_completed, last_active_date").eq("id", user.id).single();
+      if (!data) return;
+
+      const today = new Date().toISOString().split("T")[0];
+      const lastActive = data.last_active_date as string | null;
+      let newStreak = data.streak_days || 0;
+
+      if (lastActive !== today) {
+        // Calculate if yesterday was the last active date
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+        if (lastActive === yesterdayStr) {
+          newStreak = (data.streak_days || 0) + 1;
+        } else if (!lastActive) {
+          newStreak = 1;
+        } else {
+          newStreak = 1; // streak reset
         }
-      });
-  }, [user, projects]);
+
+        // Update last_active_date and streak in DB
+        await supabase.from("profiles").update({
+          last_active_date: today,
+          streak_days: newStreak,
+        }).eq("id", user.id);
+      }
+
+      const prevStreak = streakDays;
+      setDbXp(data.total_xp || 0);
+      setStreakDays(newStreak);
+
+      if (prevStreak !== newStreak && newStreak > 0 && prevStreak !== 0) {
+        setStreakAnimating(true);
+        setTimeout(() => setStreakAnimating(false), 2000);
+      }
+    };
+    updateStreak();
+  }, [user]);
 
   const [streakAnimating, setStreakAnimating] = useState(false);
 
