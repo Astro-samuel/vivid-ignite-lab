@@ -120,6 +120,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          last_active_date: string | null
           level: number
           projects_completed: number
           streak_days: number
@@ -133,6 +134,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          last_active_date?: string | null
           level?: number
           projects_completed?: number
           streak_days?: number
@@ -146,6 +148,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          last_active_date?: string | null
           level?: number
           projects_completed?: number
           streak_days?: number

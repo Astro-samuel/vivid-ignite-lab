@@ -31,8 +31,25 @@ export default function AchievementsPage() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("total_xp, level, projects_completed, streak_days").eq("id", user.id).single()
-      .then(({ data }) => { if (data) setProfile(data); });
+    const syncStreak = async () => {
+      const { data } = await supabase.from("profiles").select("total_xp, level, projects_completed, streak_days, last_active_date").eq("id", user.id).single();
+      if (!data) return;
+
+      const today = new Date().toISOString().split("T")[0];
+      const lastActive = (data as any).last_active_date as string | null;
+      let newStreak = data.streak_days || 0;
+
+      if (lastActive !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+        newStreak = lastActive === yesterdayStr ? (data.streak_days || 0) + 1 : !lastActive ? 1 : 1;
+        await supabase.from("profiles").update({ last_active_date: today, streak_days: newStreak } as any).eq("id", user.id);
+      }
+
+      setProfile({ ...data, streak_days: newStreak });
+    };
+    syncStreak();
   }, [user]);
 
   // Use the greater of profile.projects_completed and actual completed projects count

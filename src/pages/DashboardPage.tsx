@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn, Loader2, Zap } from "lucide-react";
+import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn, Loader2, Zap, ArrowRight, BookOpen } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
@@ -162,23 +162,49 @@ export default function DashboardPage() {
   const [dbXp, setDbXp] = useState(0);
   const [streakDays, setStreakDays] = useState(0);
 
-  // Fetch XP and streak from profile (DB source of truth) + animate streak on change
+  // Fetch XP and streak from profile (DB source of truth) + update streak based on calendar
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("total_xp, streak_days, projects_completed").eq("id", user.id).single()
-      .then(({ data }) => {
-        if (data) {
-          const prevStreak = streakDays;
-          setDbXp(data.total_xp || 0);
-          setStreakDays(data.streak_days || 0);
-          // Trigger animation if streak changed (new day login)
-          if (prevStreak !== (data.streak_days || 0) && (data.streak_days || 0) > 0) {
-            setStreakAnimating(true);
-            setTimeout(() => setStreakAnimating(false), 2000);
-          }
+    const updateStreak = async () => {
+      const { data } = await supabase.from("profiles").select("total_xp, streak_days, projects_completed, last_active_date").eq("id", user.id).single();
+      if (!data) return;
+
+      const today = new Date().toISOString().split("T")[0];
+      const lastActive = data.last_active_date as string | null;
+      let newStreak = data.streak_days || 0;
+
+      if (lastActive !== today) {
+        // Calculate if yesterday was the last active date
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+        if (lastActive === yesterdayStr) {
+          newStreak = (data.streak_days || 0) + 1;
+        } else if (!lastActive) {
+          newStreak = 1;
+        } else {
+          newStreak = 1; // streak reset
         }
-      });
-  }, [user, projects]);
+
+        // Update last_active_date and streak in DB
+        await supabase.from("profiles").update({
+          last_active_date: today,
+          streak_days: newStreak,
+        }).eq("id", user.id);
+      }
+
+      const prevStreak = streakDays;
+      setDbXp(data.total_xp || 0);
+      setStreakDays(newStreak);
+
+      if (prevStreak !== newStreak && newStreak > 0 && prevStreak !== 0) {
+        setStreakAnimating(true);
+        setTimeout(() => setStreakAnimating(false), 2000);
+      }
+    };
+    updateStreak();
+  }, [user]);
 
   const [streakAnimating, setStreakAnimating] = useState(false);
 
@@ -413,6 +439,58 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* Learning Pathway */}
+        <FadeInView delay={0.15} className="mb-6">
+          <div className="rounded-2xl border p-5" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <BookOpen size={16} style={{ color: "hsl(var(--primary))" }} />
+                <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>Learning Pathway</span>
+              </div>
+              <button onClick={() => navigate("/catalog")} className="text-xs font-semibold transition-all hover:opacity-80" style={{ color: "hsl(var(--primary))" }}>
+                View Catalog →
+              </button>
+            </div>
+            <div className="flex items-center gap-3 overflow-x-auto pb-2">
+              {[
+                { step: 1, label: "LED Basics", desc: "Digital output & timing", emoji: "💡", done: completedProjects.length >= 1 },
+                { step: 2, label: "Sensors", desc: "Read analog data", emoji: "🌡️", done: completedProjects.length >= 2 },
+                { step: 3, label: "Motors", desc: "PWM & servo control", emoji: "🤖", done: completedProjects.length >= 3 },
+                { step: 4, label: "Displays", desc: "LCD & OLED output", emoji: "📺", done: completedProjects.length >= 5 },
+                { step: 5, label: "Wireless", desc: "Bluetooth & WiFi", emoji: "📡", done: completedProjects.length >= 7 },
+                { step: 6, label: "Automation", desc: "IoT & smart systems", emoji: "🏠", done: completedProjects.length >= 10 },
+              ].map((s, i, arr) => (
+                <div key={s.step} className="flex items-center gap-3 flex-shrink-0">
+                  <motion.div
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="flex flex-col items-center gap-1.5 min-w-[80px]"
+                  >
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all"
+                      style={{
+                        background: s.done ? "hsl(var(--success) / 0.15)" : "hsl(var(--muted))",
+                        border: `2px solid ${s.done ? "hsl(var(--success) / 0.4)" : "hsl(var(--border))"}`,
+                        boxShadow: s.done ? "0 0 10px hsl(var(--success) / 0.2)" : "none",
+                      }}
+                    >
+                      {s.done ? "✓" : s.emoji}
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs font-bold" style={{ color: s.done ? "hsl(var(--success))" : "hsl(var(--foreground))" }}>{s.label}</p>
+                      <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{s.desc}</p>
+                    </div>
+                  </motion.div>
+                  {i < arr.length - 1 && (
+                    <ArrowRight size={14} className="flex-shrink-0" style={{ color: s.done ? "hsl(var(--success))" : "hsl(var(--muted-foreground))" }} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeInView>
 
         {/* "What Can I Make?" Widget */}
         <WhatCanIMakeWidget navigate={navigate} userId={user?.id} userProjectIds={userProjectIds} />
