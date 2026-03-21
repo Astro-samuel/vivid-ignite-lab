@@ -1963,9 +1963,17 @@ void loop() {
                   </div>
                   <div className="flex items-center gap-2">
                     {!showSolution && (
-                      <button onClick={() => { setUserCode(starterTemplate); setRunStep("idle"); setErrors([]); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
-                        <RefreshCw size={12} /> Reset
-                      </button>
+                      <>
+                        <button onClick={() => saveSnapshot()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}>
+                          <Save size={12} /> Save Snapshot
+                        </button>
+                        <button onClick={() => setShowVersionPanel(!showVersionPanel)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ background: showVersionPanel ? "rgba(255,215,0,0.15)" : "transparent", color: "#FFD700", border: "1px solid rgba(255,215,0,0.3)" }}>
+                          <History size={12} /> History{codeVersions.length > 0 ? ` (${codeVersions.length})` : ""}
+                        </button>
+                        <button onClick={() => { setUserCode(starterTemplate); setRunStep("idle"); setErrors([]); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
+                          <RefreshCw size={12} /> Reset
+                        </button>
+                      </>
                     )}
                     <button onClick={handleRevealSolution} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={showSolution ? { background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" } : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" }}>
                       {showSolution ? "Hide Solution" : "🔓 Reveal Solution"}
@@ -1979,6 +1987,38 @@ void loop() {
                     </button>
                   </div>
                 </div>
+
+                {/* Version History Panel */}
+                {showVersionPanel && !showSolution && (
+                  <div className="border-b px-5 py-3 space-y-2 animate-fade-in" style={{ background: "rgba(255,215,0,0.04)", borderColor: "rgba(255,215,0,0.2)" }}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold flex items-center gap-1.5" style={{ color: "#FFD700" }}><History size={12} /> Version History</span>
+                      <button onClick={() => setShowVersionPanel(false)} className="text-xs" style={{ color: "#A0AED9" }}>✕</button>
+                    </div>
+                    {codeVersions.length === 0 ? (
+                      <p className="text-xs" style={{ color: "#A0AED9" }}>No snapshots yet. Click "Save Snapshot" to create one.</p>
+                    ) : (
+                      <div className="max-h-40 overflow-y-auto space-y-1.5">
+                        {codeVersions.map((v, i) => (
+                          <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: "hsl(229, 42%, 15%)", border: "1px solid hsl(229, 42%, 22%)" }}>
+                            <div>
+                              <p className="text-xs font-semibold" style={{ color: "#E0E7FF" }}>{v.label}</p>
+                              <p className="text-xs" style={{ color: "#A0AED9" }}>{new Date(v.timestamp).toLocaleString()}</p>
+                            </div>
+                            <div className="flex gap-1.5">
+                              <button onClick={() => revertToVersion(i)} className="px-2 py-1 rounded text-xs font-bold transition-all hover:scale-105" style={{ color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}>
+                                <RotateCcw size={10} className="inline mr-1" />Revert
+                              </button>
+                              <button onClick={() => deleteVersion(i)} className="px-2 py-1 rounded text-xs transition-all hover:scale-105" style={{ color: "#FF4500" }}>
+                                <Trash2 size={10} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* File tab */}
                 <div className="flex items-center gap-2 px-4 py-1.5 border-b text-xs" style={{ borderColor: "hsl(229, 42%, 22%)", background: "hsl(232, 48%, 6%)", color: "hsl(228, 25%, 60%)" }}>
