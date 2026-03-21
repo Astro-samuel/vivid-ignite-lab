@@ -1325,6 +1325,37 @@ void loop() {
   const [aiTyping, setAiTyping] = useState(false);
   const debugBottomRef = useRef<HTMLDivElement>(null);
 
+  // ---- Version History ----
+  interface CodeSnapshot { code: string; label: string; timestamp: string; }
+  const versionKey = `code_versions_${projectId}`;
+  const [codeVersions, setCodeVersions] = useState<CodeSnapshot[]>(() => {
+    try { return JSON.parse(localStorage.getItem(versionKey) || "[]"); } catch { return []; }
+  });
+  const [showVersionPanel, setShowVersionPanel] = useState(false);
+
+  const saveSnapshot = (label?: string) => {
+    const snapshot: CodeSnapshot = {
+      code: userCode,
+      label: label || `Snapshot #${codeVersions.length + 1}`,
+      timestamp: new Date().toISOString(),
+    };
+    const updated = [snapshot, ...codeVersions].slice(0, 20); // max 20
+    setCodeVersions(updated);
+    localStorage.setItem(versionKey, JSON.stringify(updated));
+    sonnerToast.success("📸 Code snapshot saved");
+  };
+
+  const revertToVersion = (idx: number) => {
+    setUserCode(codeVersions[idx].code);
+    sonnerToast.success(`↩️ Reverted to "${codeVersions[idx].label}"`);
+  };
+
+  const deleteVersion = (idx: number) => {
+    const updated = codeVersions.filter((_, i) => i !== idx);
+    setCodeVersions(updated);
+    localStorage.setItem(versionKey, JSON.stringify(updated));
+  };
+
   const currentCode = showSolution
     ? (codeMode === "basic" ? project.basicCode : project.optimizedCode)
     : userCode;
