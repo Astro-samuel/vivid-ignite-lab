@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn, Loader2, Zap } from "lucide-react";
+import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn, Loader2, Zap, ArrowRight, BookOpen } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
@@ -12,9 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Tab = "inProgress" | "completed" | "saved";
 
-// Full project pool for "What Can I Make?" widget — uses all known projects for smarter matching
 const quickProjects = [
-  // Beginner
   { id: 104, emoji: "🚦", title: "Traffic Light Controller", difficulty: "beginner", time: "20 mins", xp: 55, components: ["LED", "Arduino Uno", "220Ω Resistor", "Breadboard"] },
   { id: 105, emoji: "🎹", title: "Button Piano", difficulty: "beginner", time: "25 mins", xp: 65, components: ["Push Button", "Buzzer", "Arduino Uno", "Breadboard"] },
   { id: 107, emoji: "🎲", title: "Electronic Dice", difficulty: "beginner", time: "25 mins", xp: 60, components: ["LED", "Push Button", "Arduino Uno", "220Ω Resistor"] },
@@ -23,13 +21,11 @@ const quickProjects = [
   { id: 106, emoji: "🌙", title: "Automatic Night Light", difficulty: "beginner", time: "20 mins", xp: 55, components: ["LED", "Photoresistor", "Arduino Uno", "10kΩ Resistor"] },
   { id: 108, emoji: "⏰", title: "Countdown Timer", difficulty: "beginner", time: "30 mins", xp: 70, components: ["7-Segment Display", "Buzzer", "Push Button", "Arduino Uno"] },
   { id: 110, emoji: "📢", title: "Clap Switch", difficulty: "beginner", time: "30 mins", xp: 70, components: ["Sound Sensor", "LED", "Arduino Uno", "Relay Module"] },
-  // Intermediate
   { id: 209, emoji: "🔔", title: "Motion Detection Alarm", difficulty: "intermediate", time: "40 mins", xp: 95, components: ["PIR Sensor", "Buzzer", "LED", "Arduino Uno"] },
   { id: 207, emoji: "🎯", title: "Laser Tripwire Alarm", difficulty: "intermediate", time: "45 mins", xp: 100, components: ["Laser Module", "Photoresistor", "Buzzer", "Arduino Uno"] },
   { id: 201, emoji: "🌡️", title: "Weather Station Dashboard", difficulty: "intermediate", time: "60 mins", xp: 150, components: ["DHT22", "BMP180", "OLED Display", "Arduino Uno"] },
   { id: 205, emoji: "⏱️", title: "Reaction Time Game", difficulty: "intermediate", time: "40 mins", xp: 90, components: ["LED", "Push Button", "LCD 16x2", "Arduino Uno"] },
   { id: 204, emoji: "📻", title: "IR Remote Decoder", difficulty: "intermediate", time: "35 mins", xp: 85, components: ["IR Receiver", "Arduino Uno", "Breadboard", "Jumper Wires"] },
-  // Advanced
   { id: 305, emoji: "🚁", title: "Ultrasonic Radar Scanner", difficulty: "advanced", time: "90 mins", xp: 200, components: ["HC-SR04", "Servo Motor", "Arduino Uno", "Breadboard"] },
   { id: 303, emoji: "🏠", title: "Smart Home Controller", difficulty: "advanced", time: "100 mins", xp: 220, components: ["ESP8266", "Relay Module", "LED", "Arduino Uno"] },
   { id: 301, emoji: "🔊", title: "Theremin Synthesizer", difficulty: "advanced", time: "75 mins", xp: 175, components: ["HC-SR04", "Piezo Buzzer", "Arduino Uno", "LED Strip"] },
@@ -42,22 +38,15 @@ function getInventoryComponents(userId?: string): string[] {
   } catch { return []; }
 }
 
-const days = ["M", "T", "W", "T", "F", "S", "S"];
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
-
-const dailyChallenges = [
-  { icon: "🎯", title: "Complete a Project", desc: "Finish any project from the catalog", xp: 50, done: false },
-  { icon: "🔧", title: "Add 3 Components", desc: "Add components to your inventory", xp: 25, done: false },
-  { icon: "✨", title: "Generate AI Project", desc: "Use AI to generate a custom project", xp: 35, done: false },
-];
 
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
   const styles =
     difficulty === "beginner"
       ? { background: "rgba(0,255,136,0.15)", color: "#00FF88", border: "1px solid rgba(0,255,136,0.3)" }
       : difficulty === "intermediate"
-        ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
-        : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
+      ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
+      : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
   return (
     <span className="text-xs px-2 py-0.5 rounded-full font-semibold capitalize" style={styles}>
       {difficulty}
@@ -69,7 +58,6 @@ function WhatCanIMakeWidget({ navigate, userId, userProjectIds }: { navigate: (p
   const inventory = useMemo(() => getInventoryComponents(userId), [userId]);
   const inventoryNorm = inventory.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
 
-  // Filter out projects the user already has (in progress, saved, or completed)
   const availableProjects = quickProjects.filter(p => !userProjectIds.has(p.id));
 
   const buildable = availableProjects.filter(p =>
@@ -105,7 +93,7 @@ function WhatCanIMakeWidget({ navigate, userId, userProjectIds }: { navigate: (p
         <div className="flex items-center gap-2">
           <Zap size={16} style={{ color: "hsl(var(--primary))" }} />
           <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>
-            What Can I Make?
+            What Can I Make? 
           </span>
           <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}>
             {buildable.length} project{buildable.length !== 1 ? "s" : ""}
@@ -172,19 +160,66 @@ export default function DashboardPage() {
   const [navigatingId, setNavigatingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [dbXp, setDbXp] = useState(0);
+  const [streakDays, setStreakDays] = useState(0);
 
-  // Fetch XP from profile (DB source of truth)
+  // Fetch XP and streak from profile (DB source of truth) + update streak based on calendar
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("total_xp").eq("id", user.id).single()
-      .then(({ data }) => { if (data) setDbXp(data.total_xp || 0); });
-  }, [user, projects]);
+    const updateStreak = async () => {
+      const { data } = await supabase.from("profiles").select("total_xp, streak_days, projects_completed, last_active_date").eq("id", user.id).single();
+      if (!data) return;
 
-  // Redirect to onboarding if not completed
+      const today = new Date().toISOString().split("T")[0];
+      const lastActive = data.last_active_date as string | null;
+      let newStreak = data.streak_days || 0;
+
+      if (lastActive !== today) {
+        // Calculate if yesterday was the last active date
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+        if (lastActive === yesterdayStr) {
+          newStreak = (data.streak_days || 0) + 1;
+        } else if (!lastActive) {
+          newStreak = 1;
+        } else {
+          newStreak = 1; // streak reset
+        }
+
+        // Update last_active_date and streak in DB
+        await supabase.from("profiles").update({
+          last_active_date: today,
+          streak_days: newStreak,
+        }).eq("id", user.id);
+      }
+
+      const prevStreak = streakDays;
+      setDbXp(data.total_xp || 0);
+      setStreakDays(newStreak);
+
+      if (prevStreak !== newStreak && newStreak > 0 && prevStreak !== 0) {
+        setStreakAnimating(true);
+        setTimeout(() => setStreakAnimating(false), 2000);
+      }
+    };
+    updateStreak();
+  }, [user]);
+
+  const [streakAnimating, setStreakAnimating] = useState(false);
+
+  // Check onboarding status from DB, not just localStorage
   useEffect(() => {
-    if (user && !localStorage.getItem(`onboarding_${user.id}`)) {
-      navigate("/onboarding");
-    }
+    if (!user) return;
+    if (localStorage.getItem(`onboarding_${user.id}`)) return; // already done
+    supabase.from("profiles").select("display_name").eq("id", user.id).single()
+      .then(({ data }) => {
+        if (data?.display_name) {
+          localStorage.setItem(`onboarding_${user.id}`, "done");
+        } else {
+          navigate("/onboarding");
+        }
+      });
   }, [user, navigate]);
 
   const openProject = async (p: typeof projects[0]) => {
@@ -193,16 +228,9 @@ export default function DashboardPage() {
     localStorage.setItem(
       "activeGeneratedProject",
       JSON.stringify({
-        id: p.project_id,
-        emoji: p.emoji,
-        title: p.title,
-        description: p.description,
-        desc: p.description,
-        difficulty: p.difficulty,
-        time: p.time,
-        xp: p.xp,
-        components: p.components || [],
-        source: "dashboard",
+        id: p.project_id, emoji: p.emoji, title: p.title, description: p.description,
+        desc: p.description, difficulty: p.difficulty, time: p.time, xp: p.xp,
+        components: p.components || [], source: "dashboard",
       })
     );
     navigate(`/project/${p.project_id}`);
@@ -216,7 +244,25 @@ export default function DashboardPage() {
     showToast("Project removed");
   };
 
-  // Redirect to auth if not logged in
+  const inProgressProjects = projects.filter(p => p.status === "inProgress");
+  const completedProjects = projects.filter(p => p.status === "completed");
+  const savedProjects = projects.filter(p => p.status === "saved");
+  const totalXP = dbXp;
+
+  const dailyChallenges = useMemo(() => {
+    const hasCompletedToday = completedProjects.some(p => {
+      const updated = new Date(p.updated_at);
+      const today = new Date();
+      return updated.toDateString() === today.toDateString();
+    });
+    const hasInProgress = inProgressProjects.length > 0;
+    return [
+      { icon: "🎯", title: "Complete a Project", desc: "Finish any project from the catalog", xp: 50, done: hasCompletedToday },
+      { icon: "🔧", title: "Work on a Project", desc: "Continue or start any project", xp: 25, done: hasInProgress },
+      { icon: "🔥", title: "Keep Your Streak", desc: `Current streak: ${streakDays} day${streakDays !== 1 ? "s" : ""}`, xp: 35, done: streakDays > 0 },
+    ];
+  }, [completedProjects, inProgressProjects, streakDays]);
+
   if (!authLoading && !user) {
     return (
       <Layout>
@@ -237,11 +283,6 @@ export default function DashboardPage() {
       </Layout>
     );
   }
-
-  const inProgressProjects = projects.filter(p => p.status === "inProgress");
-  const completedProjects = projects.filter(p => p.status === "completed");
-  const savedProjects = projects.filter(p => p.status === "saved");
-  const totalXP = dbXp;
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -278,7 +319,7 @@ export default function DashboardPage() {
             <motion.div
               key={label}
               variants={staggerItem}
-              className="glass-card rounded-2xl p-5 flex items-center gap-4 border"
+              className="rounded-2xl p-5 flex items-center gap-4 border"
               style={{ background: bg, borderColor: border }}
             >
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}22` }}>
@@ -294,40 +335,57 @@ export default function DashboardPage() {
 
         {/* Two columns: Streak + Daily Challenges */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          {/* Streak */}
-          <div
+          {/* Streak — synced from DB */}
+          <motion.div
             className="rounded-2xl p-5 border"
-            style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
+            style={{ background: "hsl(var(--card))", borderColor: streakAnimating ? "hsl(var(--success) / 0.5)" : "hsl(var(--border))" }}
+            animate={streakAnimating ? { scale: [1, 1.03, 1], boxShadow: ["0 0 0px transparent", "0 0 20px hsl(var(--success) / 0.3)", "0 0 0px transparent"] } : {}}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
           >
-            <div className="flex items-center gap-2 mb-4">
-              <Flame size={16} style={{ color: "hsl(var(--destructive))" }} />
-              <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>
-                Weekly Streak
-              </span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <motion.div animate={streakAnimating ? { rotate: [0, -15, 15, 0], scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.6 }}>
+                  <Flame size={16} style={{ color: "hsl(var(--destructive))" }} />
+                </motion.div>
+                <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>
+                  Weekly Streak
+                </span>
+              </div>
+              <motion.span
+                className="text-xs font-bold px-2 py-0.5 rounded-full"
+                style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}
+                animate={streakAnimating ? { scale: [1, 1.2, 1] } : {}}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                {streakDays} day{streakDays !== 1 ? "s" : ""} {streakAnimating ? "🎉" : ""}
+              </motion.span>
             </div>
             <div className="flex gap-2 justify-between">
-              {days.map((d, i) => {
-                const active = false;
+              {dayLabels.map((d, i) => {
+                const active = i < streakDays;
                 return (
                   <div key={i} className="flex flex-col items-center gap-1.5">
-                    <div
+                    <motion.div
+                      initial={false}
+                      animate={active ? { scale: [1, 1.15, 1], backgroundColor: "hsl(var(--success) / 0.2)" } : {}}
+                      transition={{ duration: 0.3, delay: i * 0.05 }}
                       className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-all"
                       style={
                         active
-                          ? { background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }
+                          ? { background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)", boxShadow: "0 0 8px hsl(var(--success) / 0.2)" }
                           : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
                       }
                     >
-                      {active ? "✓" : dayLabels[i]}
-                    </div>
-                    <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{d}</span>
+                      {active ? "✓" : d}
+                    </motion.div>
+                    <span className="text-xs" style={{ color: active ? "hsl(var(--success))" : "hsl(var(--muted-foreground))" }}>{d}</span>
                   </div>
                 );
               })}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Daily Challenges */}
+          {/* Daily Challenges — dynamic */}
           <div
             className="rounded-2xl p-5 border"
             style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
@@ -338,7 +396,13 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-3">
               {dailyChallenges.map((c, i) => (
-                <div key={i} className="flex items-center justify-between">
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center gap-2.5">
                     <span className="text-lg">{c.icon}</span>
                     <div>
@@ -358,7 +422,7 @@ export default function DashboardPage() {
                     <span className="text-xs font-bold" style={{ color: "hsl(var(--secondary))" }}>✦ +{c.xp}</span>
                     {c.done && <CheckCircle size={14} style={{ color: "hsl(var(--success))" }} />}
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
 
@@ -375,6 +439,58 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* Learning Pathway */}
+        <FadeInView delay={0.15} className="mb-6">
+          <div className="rounded-2xl border p-5" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <BookOpen size={16} style={{ color: "hsl(var(--primary))" }} />
+                <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>Learning Pathway</span>
+              </div>
+              <button onClick={() => navigate("/catalog")} className="text-xs font-semibold transition-all hover:opacity-80" style={{ color: "hsl(var(--primary))" }}>
+                View Catalog →
+              </button>
+            </div>
+            <div className="flex items-center gap-3 overflow-x-auto pb-2">
+              {[
+                { step: 1, label: "LED Basics", desc: "Digital output & timing", emoji: "💡", done: completedProjects.length >= 1 },
+                { step: 2, label: "Sensors", desc: "Read analog data", emoji: "🌡️", done: completedProjects.length >= 2 },
+                { step: 3, label: "Motors", desc: "PWM & servo control", emoji: "🤖", done: completedProjects.length >= 3 },
+                { step: 4, label: "Displays", desc: "LCD & OLED output", emoji: "📺", done: completedProjects.length >= 5 },
+                { step: 5, label: "Wireless", desc: "Bluetooth & WiFi", emoji: "📡", done: completedProjects.length >= 7 },
+                { step: 6, label: "Automation", desc: "IoT & smart systems", emoji: "🏠", done: completedProjects.length >= 10 },
+              ].map((s, i, arr) => (
+                <div key={s.step} className="flex items-center gap-3 flex-shrink-0">
+                  <motion.div
+                    initial={{ scale: 0.9 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="flex flex-col items-center gap-1.5 min-w-[80px]"
+                  >
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all"
+                      style={{
+                        background: s.done ? "hsl(var(--success) / 0.15)" : "hsl(var(--muted))",
+                        border: `2px solid ${s.done ? "hsl(var(--success) / 0.4)" : "hsl(var(--border))"}`,
+                        boxShadow: s.done ? "0 0 10px hsl(var(--success) / 0.2)" : "none",
+                      }}
+                    >
+                      {s.done ? "✓" : s.emoji}
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs font-bold" style={{ color: s.done ? "hsl(var(--success))" : "hsl(var(--foreground))" }}>{s.label}</p>
+                      <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{s.desc}</p>
+                    </div>
+                  </motion.div>
+                  {i < arr.length - 1 && (
+                    <ArrowRight size={14} className="flex-shrink-0" style={{ color: s.done ? "hsl(var(--success))" : "hsl(var(--muted-foreground))" }} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeInView>
 
         {/* "What Can I Make?" Widget */}
         <WhatCanIMakeWidget navigate={navigate} userId={user?.id} userProjectIds={userProjectIds} />
@@ -416,7 +532,7 @@ export default function DashboardPage() {
             {inProgressProjects.map((p) => (
               <div
                 key={p.id}
-                className="glass-card rounded-2xl border p-5 transition-all animate-fade-in-up"
+                className="rounded-2xl border p-5 transition-all"
                 style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
               >
                 <div className="flex items-start gap-4">
@@ -459,7 +575,6 @@ export default function DashboardPage() {
                       </span>
                     </div>
 
-                    {/* Progress bar */}
                     <div className="flex items-center gap-3">
                       <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Progress</span>
                       <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
