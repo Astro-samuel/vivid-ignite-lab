@@ -362,7 +362,11 @@ export default function DashboardPage() {
             </div>
             <div className="flex gap-2 justify-between">
               {dayLabels.map((d, i) => {
-                const active = i < streakDays;
+                // Map JS getDay() (0=Sun) to our Mon-based index (0=Mon...6=Sun)
+                const todayIdx = (new Date().getDay() + 6) % 7;
+                const active = streakDays >= 7
+                  ? true
+                  : i <= todayIdx && (todayIdx - i) < streakDays;
                 return (
                   <div key={i} className="flex flex-col items-center gap-1.5">
                     <motion.div

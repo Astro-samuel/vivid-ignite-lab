@@ -3,6 +3,8 @@ import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, Bug, Re
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import CodeEditor from "@/components/CodeEditor";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 type RunStep = "idle" | "compiling" | "simulating" | "safety" | "success" | "error";
 
@@ -107,6 +109,7 @@ const aiHints = [
 
 export default function IDEPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [code, setCode] = useState(starterCode);
   const [runStep, setRunStep] = useState<RunStep>("idle");
   const [errors, setErrors] = useState<string[]>([]);
@@ -153,6 +156,25 @@ export default function IDEPage() {
     await delay(1000);
     setRunStep("success");
     setXpAwarded(true);
+
+    // Persist +75 XP to the user's profile (only once per session)
+    if (user && !xpAwarded) {
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("total_xp")
+          .eq("id", user.id)
+          .single();
+        if (profile !== null) {
+          await supabase
+            .from("profiles")
+            .update({ total_xp: (profile.total_xp || 0) + 75 })
+            .eq("id", user.id);
+        }
+      } catch {
+        // Silently ignore XP save errors — the visual feedback still shows
+      }
+    }
   };
 
   const debugWithAI = () => {
