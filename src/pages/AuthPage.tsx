@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +7,8 @@ import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import FadeInView from "@/components/motion/FadeInView";
 
 export default function AuthPage() {
+  const { user, loading: authLoading, signIn, signUp } = useAuth();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,8 +17,32 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [confirmMsg, setConfirmMsg] = useState("");
-  const { signIn, signUp } = useAuth();
-  const navigate = useNavigate();
+
+  // Handle post-verification redirect or already logged-in users
+  useEffect(() => {
+    const checkUser = async () => {
+      if (user) {
+        // Check profile in DB — if display_name is set, user has already onboarded
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("id", user.id)
+          .single();
+        
+        if (profile?.display_name) {
+          localStorage.setItem(`onboarding_${user.id}`, "done");
+          navigate("/dashboard", { replace: true });
+        } else {
+          // If no display name, send to onboarding
+          navigate("/onboarding", { replace: true });
+        }
+      }
+    };
+    
+    if (!authLoading) {
+      checkUser();
+    }
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

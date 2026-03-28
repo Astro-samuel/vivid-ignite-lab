@@ -332,6 +332,56 @@ export default function DashboardPage() {
             </motion.div>
           ))}
         </StaggerContainer>
+        
+        {/* Onboarding Welcome Guide for new users with 0 stats */}
+        {inProgressProjects.length === 0 && completedProjects.length === 0 && savedProjects.length === 0 && (
+          <FadeInView delay={0.1} className="mb-6">
+            <div className="rounded-2xl p-6 border overflow-hidden relative" style={{ background: "linear-gradient(135deg, hsl(232, 42%, 11%), hsl(232, 45%, 8%))", borderColor: "hsl(var(--primary) / 0.3)" }}>
+              <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-[80px]" style={{ background: "hsl(var(--primary) / 0.15)" }} />
+              <div className="relative z-10 flex flex-col md:flex-row gap-6 items-center">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0" style={{ background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.2)" }}>
+                  🚀
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h2 className="text-xl font-bold mb-1" style={{ color: "hsl(var(--foreground))" }}>Welcome to ArduinoLab!</h2>
+                  <p className="text-sm mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>
+                    Your workspace is ready. Let's get you building your first project!
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-left">
+                    <div className="p-3 rounded-xl border border-dashed transition-all hover:bg-white/5" style={{ borderColor: "hsl(var(--border))" }}>
+                      <p className="text-xs font-bold mb-1 flex items-center gap-2" style={{ color: "hsl(var(--primary))" }}>
+                        <BookOpen size={12} /> Step 1: Browse Catalog
+                      </p>
+                      <p className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>Discover projects tailored to your skill level.</p>
+                    </div>
+                    <div className="p-3 rounded-xl border border-dashed transition-all hover:bg-white/5" style={{ borderColor: "hsl(var(--border))" }}>
+                      <p className="text-xs font-bold mb-1 flex items-center gap-2" style={{ color: "hsl(var(--success))" }}>
+                        <Zap size={12} /> Step 2: Set Inventory
+                      </p>
+                      <p className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>Add components you own for custom suggestions.</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                    <button
+                      onClick={() => navigate("/catalog")}
+                      className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all hover:scale-[1.05]"
+                      style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
+                    >
+                      Browse All Projects <ArrowRight size={14} />
+                    </button>
+                    <button
+                      onClick={() => navigate("/components")}
+                      className="px-4 py-2 rounded-xl text-xs font-bold transition-all hover:scale-[1.05] border"
+                      style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
+                    >
+                      Add Components
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </FadeInView>
+        )}
 
         {/* Two columns: Streak + Daily Challenges */}
         <div className="grid grid-cols-2 gap-4 mb-6">

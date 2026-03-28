@@ -1324,6 +1324,7 @@ void loop() {
   const [debugInput, setDebugInput] = useState("");
   const [aiTyping, setAiTyping] = useState(false);
   const debugBottomRef = useRef<HTMLDivElement>(null);
+  const [revertCount, setRevertCount] = useState(0);
 
   // ---- Version History ----
   interface CodeSnapshot { code: string; label: string; timestamp: string; }
@@ -1347,6 +1348,7 @@ void loop() {
 
   const revertToVersion = (idx: number) => {
     setUserCode(codeVersions[idx].code);
+    setRevertCount(prev => prev + 1);
     sonnerToast.success(`↩️ Reverted to "${codeVersions[idx].label}"`);
   };
 
@@ -2030,9 +2032,9 @@ void loop() {
 
                 {/* Code area - editable or read-only */}
                 {showSolution ? (
-                  <CodeEditor code={currentCode} readOnly maxHeight="500px" minHeight="300px" />
+                  <CodeEditor key="solution" code={currentCode} readOnly maxHeight="500px" minHeight="300px" />
                 ) : (
-                  <CodeEditor code={userCode} onChange={setUserCode} maxHeight="500px" minHeight="400px" />
+                  <CodeEditor key={`user-v${revertCount}`} code={userCode} onChange={setUserCode} maxHeight="500px" minHeight="400px" />
                 )}
 
                 {/* Error panel */}

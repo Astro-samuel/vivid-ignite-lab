@@ -15,8 +15,8 @@ const resources: Resource[] = [
   { title: "Arduino Official Documentation", description: "Complete reference for all Arduino functions, boards, and libraries", url: "https://docs.arduino.cc/", category: "docs" },
   { title: "Arduino Language Reference", description: "Full programming language reference for all Arduino functions and syntax", url: "https://www.arduino.cc/reference/en/", category: "docs" },
   // Video Tutorials
-  { title: "Arduino Getting Started", description: "YouTube search for beginner video tutorials to start your Arduino journey", url: "https://www.youtube.com/results?search_query=arduino+getting+started+tutorial", category: "videos" },
-  { title: "Advanced Arduino Projects", description: "Complex project walkthroughs for intermediate learners looking to level up", url: "https://www.youtube.com/results?search_query=advanced+arduino+projects", category: "videos" },
+  { title: "Arduino Basics (Paul McWhorter)", description: "The gold standard of Arduino tutorial series on YouTube - excellent for absolute beginners.", url: "https://www.youtube.com/playlist?list=PLGs0VKk2DiYw-L-RibttcvK-yZ9t6R30M", category: "videos" },
+  { title: "Advanced Projects (DroneBot Workshop)", description: "High-quality deep dives into advanced components and robotics projects.", url: "https://www.youtube.com/@DroneBotWorkshop", category: "videos" },
   // Code Libraries
   { title: "Arduino Library Manager", description: "Browse and install community libraries directly from the Arduino IDE", url: "https://www.arduino.cc/reference/en/libraries/", category: "libraries" },
   { title: "GitHub Arduino Libraries", description: "Official Arduino libraries repository with source code and documentation", url: "https://github.com/arduino-libraries", category: "libraries" },

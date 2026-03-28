@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { toast as sonnerToast } from "sonner";
 import { Minus, Plus, Save, Zap, Lightbulb, Package, Loader2, Brain, Heart, X, Sparkles, ShoppingCart, Camera, Eye } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
@@ -148,6 +149,7 @@ export default function ComponentsPage() {
     const inventory = Object.keys(quantities);
     const key = user ? `inventory_${user.id}` : "userInventory";
     localStorage.setItem(key, JSON.stringify(inventory));
+    sonnerToast.success("📦 Inventory saved successfully!");
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
