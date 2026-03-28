@@ -208,6 +208,24 @@ export default function DashboardPage() {
 
   const [streakAnimating, setStreakAnimating] = useState(false);
 
+  // Sync inventory from DB on login (for new devices)
+  useEffect(() => {
+    if (!user) return;
+    const invKey = `inventory_${user.id}`;
+    if (localStorage.getItem(invKey)) return;
+    
+    supabase.from("profiles").select("ai_preferences").eq("id", user.id).single()
+      .then(({ data }) => {
+        const inventory = (data?.ai_preferences as any)?.inventory_v1;
+        if (inventory) {
+          const names = Object.keys(inventory);
+          localStorage.setItem(invKey, JSON.stringify(names));
+          setToast("🎒 Inventory restored!");
+          setTimeout(() => setToast(""), 3000);
+        }
+      });
+  }, [user]);
+
   // Check onboarding status from DB, not just localStorage
   useEffect(() => {
     if (!user) return;

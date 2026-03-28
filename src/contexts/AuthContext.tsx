@@ -111,10 +111,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Clear all user-scoped and legacy app data
     const legacyKeys = ["userInventory", "activeGeneratedProject", "savedProjects", "removedCatalogProjects"];
     legacyKeys.forEach((key) => localStorage.removeItem(key));
-    if (userId) {
-      localStorage.removeItem(`inventory_${userId}`);
-      localStorage.removeItem(`onboarding_${userId}`);
-    }
   };
 
   return (

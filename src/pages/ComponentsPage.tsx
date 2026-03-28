@@ -149,7 +149,17 @@ export default function ComponentsPage() {
     const inventory = Object.keys(quantities);
     const key = user ? `inventory_${user.id}` : "userInventory";
     localStorage.setItem(key, JSON.stringify(inventory));
-    sonnerToast.success("📦 Inventory saved successfully!");
+    
+    // Sync to Supabase if user is logged in
+    if (user) {
+      const { data: profile } = await supabase.from("profiles").select("ai_preferences").eq("id", user.id).single();
+      const currentPrefs = (profile?.ai_preferences as any) || {};
+      await supabase.from("profiles").update({
+        ai_preferences: { ...currentPrefs, inventory_v1: quantities }
+      }).eq("id", user.id);
+    }
+    
+    sonnerToast.success("📦 Inventory saved and synced to account!");
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);

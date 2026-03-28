@@ -89,8 +89,13 @@ export default function AISettingsPage() {
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
+    
+    // Fetch latest profile to merge data
+    const { data: profile } = await supabase.from("profiles").select("ai_preferences").eq("id", user.id).single();
+    const currentPreferences = (profile?.ai_preferences as any) || {};
+
     await supabase.from("profiles").update({
-      ai_preferences: prefs as any,
+      ai_preferences: { ...currentPreferences, ...prefs },
     }).eq("id", user.id);
     setSaving(false);
     setSaved(true);
