@@ -453,10 +453,10 @@ export default function DashboardPage() {
                     >
                       {active ? "✓" : d}
                     </motion.div>
-                    <span className="text-xs" style={{ color: active ? "hsl(var(--success))" : "hsl(var(--muted-foreground))" }}>{d}</span>
+                    <span className="text-xs font-medium" style={{ color: isToday ? "hsl(var(--primary))" : active ? "hsl(var(--success))" : "hsl(var(--muted-foreground))" }}>{d}</span>
                   </div>
                 );
-              })}
+              })})()}
             </div>
           </motion.div>
 

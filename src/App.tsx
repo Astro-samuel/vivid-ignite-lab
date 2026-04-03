@@ -93,6 +93,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <ErrorBoundary fallbackTitle="Application Error">
             <AnimatedRoutes />

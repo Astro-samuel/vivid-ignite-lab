@@ -188,7 +188,7 @@ export default function AchievementsPage() {
                       }}>
                       {active ? <CheckCircle size={14} style={{ color: "hsl(var(--foreground))" }} /> : <div className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--muted-foreground) / 0.4)" }} />}
                     </div>
-                    <span className="text-xs" style={{ color: active ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))" }}>{day}</span>
+                    <span className="text-xs" style={{ color: isToday ? "hsl(var(--primary))" : active ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))" }}>{day}</span>
                   </div>
                 );
               })}
