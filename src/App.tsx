@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import PageTransition from "@/components/PageTransition";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import ScrollToTop from "@/components/ScrollToTop";
 import { Suspense, lazy } from "react";
 import ProjectSkeleton from "@/components/ProjectSkeleton";
 import Index from "./pages/Index";
@@ -92,6 +93,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <ErrorBoundary fallbackTitle="Application Error">
             <AnimatedRoutes />
