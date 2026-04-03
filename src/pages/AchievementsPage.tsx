@@ -175,7 +175,10 @@ export default function AchievementsPage() {
             </div>
             <div className="flex gap-2">
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, i) => {
-                const active = i < streakDays;
+                const todayDayIdx = (new Date().getDay() + 6) % 7; // 0=Mon, 6=Sun
+                const daysAgo = todayDayIdx - i;
+                const active = daysAgo >= 0 && daysAgo < streakDays;
+                const isToday = i === todayDayIdx;
                 return (
                   <div key={day} className="flex-1 text-center">
                     <div className="w-full aspect-square rounded-xl flex items-center justify-center mb-1 transition-all"
