@@ -429,12 +429,15 @@ export default function DashboardPage() {
               </motion.span>
             </div>
             <div className="flex gap-2 justify-between">
-              {dayLabels.map((d, i) => {
-                // Map JS getDay() (0=Sun) to our Mon-based index (0=Mon...6=Sun)
-                const todayIdx = (new Date().getDay() + 6) % 7;
-                const active = streakDays >= 7
-                  ? true
-                  : i <= todayIdx && (todayIdx - i) < streakDays;
+              {(() => {
+                // Build actual day labels for this week (Mon-Sun) with correct "today" highlight
+                const now = new Date();
+                const todayDayIdx = (now.getDay() + 6) % 7; // 0=Mon, 6=Sun
+                return dayLabels.map((d, i) => {
+                  // Active if this day is today or within the streak window before today
+                  const daysAgo = todayDayIdx - i;
+                  const active = daysAgo >= 0 && daysAgo < streakDays;
+                  const isToday = i === todayDayIdx;
                 return (
                   <div key={i} className="flex flex-col items-center gap-1.5">
                     <motion.div
