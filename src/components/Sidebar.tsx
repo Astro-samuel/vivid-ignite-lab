@@ -2,12 +2,13 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, LayoutDashboard, BookOpen, Cpu, Package, Zap, Lightbulb,
   Trophy, User, ChevronLeft, ChevronRight, LogOut, LogIn, Star, Code, MessageSquareHeart, PlusCircle, Bot,
-  AlertTriangle, BarChart3
+  AlertTriangle, BarChart3, GraduationCap
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
+  { icon: GraduationCap, label: "Learn", path: "/learn" },
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: BookOpen, label: "Catalog", path: "/catalog" },
   { icon: Cpu, label: "My Components", path: "/components" },

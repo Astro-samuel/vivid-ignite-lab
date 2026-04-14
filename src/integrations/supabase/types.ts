@@ -83,6 +83,56 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_challenges: {
+        Row: {
+          active_date: string
+          created_at: string
+          description: string | null
+          difficulty: string
+          hint: string | null
+          id: string
+          path_id: string | null
+          solution_code: string | null
+          starter_code: string | null
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          active_date?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          hint?: string | null
+          id?: string
+          path_id?: string | null
+          solution_code?: string | null
+          starter_code?: string | null
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          active_date?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          hint?: string | null
+          id?: string
+          path_id?: string | null
+          solution_code?: string | null
+          starter_code?: string | null
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_challenges_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           category: string
@@ -112,6 +162,109 @@ export type Database = {
           rating?: number
         }
         Relationships: []
+      }
+      learning_paths: {
+        Row: {
+          color: string
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          path_order: number
+          prerequisite_path_id: string | null
+          title: string
+          total_lessons: number
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          path_order?: number
+          prerequisite_path_id?: string | null
+          title: string
+          total_lessons?: number
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          path_order?: number
+          prerequisite_path_id?: string | null
+          title?: string
+          total_lessons?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_paths_prerequisite_path_id_fkey"
+            columns: ["prerequisite_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          build_task: string | null
+          challenge_prompt: string | null
+          challenge_solution: string | null
+          challenge_starter_code: string | null
+          concept_content: string
+          created_at: string
+          description: string | null
+          difficulty: string
+          estimated_minutes: number
+          id: string
+          lesson_order: number
+          path_id: string
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          build_task?: string | null
+          challenge_prompt?: string | null
+          challenge_solution?: string | null
+          challenge_starter_code?: string | null
+          concept_content?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          estimated_minutes?: number
+          id?: string
+          lesson_order?: number
+          path_id: string
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          build_task?: string | null
+          challenge_prompt?: string | null
+          challenge_solution?: string | null
+          challenge_starter_code?: string | null
+          concept_content?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          estimated_minutes?: number
+          id?: string
+          lesson_order?: number
+          path_id?: string
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -157,6 +310,92 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      user_challenge_completions: {
+        Row: {
+          challenge_id: string
+          completed_at: string
+          id: string
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string
+          id?: string
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string
+          id?: string
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenge_completions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "daily_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_lesson_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          lesson_id: string
+          path_id: string
+          score: number | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id: string
+          path_id: string
+          score?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          path_id?: string
+          score?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_lesson_progress_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_projects: {
         Row: {
