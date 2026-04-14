@@ -33,6 +33,9 @@ import AISettingsPage from "./pages/AISettingsPage";
 import SnippetsPage from "./pages/SnippetsPage";
 import ErrorDatabasePage from "./pages/ErrorDatabasePage";
 import InsightsPage from "./pages/InsightsPage";
+import LearnPage from "./pages/LearnPage";
+import LessonPage from "./pages/LessonPage";
+import DailyChallengePage from "./pages/DailyChallengePage";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +84,9 @@ function AnimatedRoutes() {
         <Route path="/snippets" element={<ProtectedRoute><ErrorBoundary><SnippetsPage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="/errors" element={<ProtectedRoute><ErrorBoundary><ErrorDatabasePage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="/insights" element={<ProtectedRoute><ErrorBoundary><InsightsPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/learn" element={<ProtectedRoute><ErrorBoundary><LearnPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/learn/lesson/:lessonId" element={<ProtectedRoute><ErrorBoundary><LessonPage /></ErrorBoundary></ProtectedRoute>} />
+        <Route path="/learn/challenge" element={<ProtectedRoute><ErrorBoundary><DailyChallengePage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>
