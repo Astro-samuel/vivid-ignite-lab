@@ -523,8 +523,8 @@ export default function DashboardPage() {
                 <BookOpen size={16} style={{ color: "hsl(var(--primary))" }} />
                 <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>Learning Pathway</span>
               </div>
-              <button onClick={() => navigate("/catalog")} className="text-xs font-semibold transition-all hover:opacity-80" style={{ color: "hsl(var(--primary))" }}>
-                View Catalog →
+              <button onClick={() => navigate("/learn")} className="text-xs font-semibold transition-all hover:opacity-80" style={{ color: "hsl(var(--primary))" }}>
+                Start Learning →
               </button>
             </div>
             <div className="flex items-center gap-3 overflow-x-auto pb-2">
