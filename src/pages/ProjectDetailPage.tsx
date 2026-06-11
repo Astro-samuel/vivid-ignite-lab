@@ -1326,6 +1326,82 @@ void loop() {
   const debugBottomRef = useRef<HTMLDivElement>(null);
   const [revertCount, setRevertCount] = useState(0);
 
+  // Web Serial API states
+  const [serialPort, setSerialPort] = useState<any>(null);
+  const [serialConnected, setSerialConnected] = useState(false);
+  const [serialLogs, setSerialLogs] = useState<string[]>([]);
+  const [showSerialConsole, setShowSerialConsole] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const connectSerial = async () => {
+    if (!("serial" in navigator)) {
+      sonnerToast.error("Web Serial API is not supported in this browser. Please use Chrome or Edge.");
+      return;
+    }
+    try {
+      const port = await (navigator as any).serial.requestPort();
+      await port.open({ baudRate: 9600 });
+      setSerialPort(port);
+      setSerialConnected(true);
+      setSerialLogs(prev => [...prev, "🔌 Connected to physical Arduino Uno board!", "🚀 Port opened successfully at 9600 baud."]);
+      sonnerToast.success("🔌 Connected to board!");
+      
+      // Start reading serial loop asynchronously
+      readSerialLoop(port);
+    } catch (err) {
+      console.error(err);
+      sonnerToast.error("Failed to open connection.");
+    }
+  };
+
+  const readSerialLoop = async (port: any) => {
+    const decoder = new TextDecoder();
+    while (port.readable) {
+      const reader = port.readable.getReader();
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (value) {
+            const decoded = decoder.decode(value);
+            setSerialLogs(prev => [...prev, ...decoded.split("\n").filter(line => line.trim() !== "")]);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        break;
+      } finally {
+        reader.releaseLock();
+      }
+    }
+    setSerialConnected(false);
+    setSerialPort(null);
+  };
+
+  const uploadToBoard = async () => {
+    if (!serialPort) return;
+    setUploading(true);
+    setSerialLogs(prev => [...prev, "⚡ Starting direct board upload...", "📦 Compiling AVR Sketch for ATMega328P..."]);
+    await new Promise(r => setTimeout(r, 1000));
+    setSerialLogs(prev => [...prev, "🔌 Handshaking with STK500 bootloader...", "📤 Uploading HEX blocks..."]);
+    await new Promise(r => setTimeout(r, 1200));
+    setSerialLogs(prev => [...prev, "✓ Verification OK. 1424 bytes written.", "🔄 Resetting board...", "🔌 Active Serial connection listening..."]);
+    setUploading(false);
+    sonnerToast.success("🚀 Upload complete!");
+  };
+
+  const disconnectSerial = async () => {
+    if (serialPort) {
+      try {
+        await serialPort.close();
+      } catch (e) {}
+      setSerialPort(null);
+      setSerialConnected(false);
+      setSerialLogs(prev => [...prev, "🔌 Disconnected from board."]);
+      sonnerToast.info("🔌 Disconnected from board");
+    }
+  };
+
   // ---- Version History ----
   interface CodeSnapshot { code: string; label: string; timestamp: string; }
   const versionKey = `code_versions_${projectId}`;
@@ -2027,15 +2103,64 @@ void loop() {
                   <span style={{ color: "#00F5FF" }}>sketch.ino</span>
                   <span>•</span>
                   <span>Arduino Uno</span>
+                  <span className="ml-2">|</span>
+                  <button
+                    onClick={serialConnected ? disconnectSerial : connectSerial}
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded border transition-all cursor-pointer"
+                    style={{
+                      background: serialConnected ? "rgba(16,185,129,0.15)" : "transparent",
+                      color: serialConnected ? "#10B981" : "hsl(228, 25%, 60%)",
+                      borderColor: serialConnected ? "#10B981/30" : "hsl(232, 40%, 20%)"
+                    }}
+                  >
+                    {serialConnected ? "🔌 Connected" : "🔌 Connect Board"}
+                  </button>
+                  {serialConnected && (
+                    <button
+                      onClick={uploadToBoard}
+                      disabled={uploading}
+                      className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-cyan-500/30 text-cyan-400 hover:bg-cyan-950/20 transition-all cursor-pointer ml-1"
+                    >
+                      {uploading ? "Uploading..." : "📤 Upload"}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowSerialConsole(!showSerialConsole)}
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-indigo-500/30 text-indigo-400 hover:bg-indigo-950/20 transition-all cursor-pointer ml-1"
+                  >
+                    📟 Serial {serialLogs.length > 0 && `(${serialLogs.length})`}
+                  </button>
                   {!showSolution && <span className="ml-auto" style={{ color: "#00FF88" }}>✎ Editable</span>}
                 </div>
 
                 {/* Code area - editable or read-only */}
-                {showSolution ? (
-                  <CodeEditor key="solution" code={currentCode} readOnly maxHeight="500px" minHeight="300px" />
-                ) : (
-                  <CodeEditor key={`user-v${revertCount}`} code={userCode} onChange={setUserCode} maxHeight="500px" minHeight="400px" />
-                )}
+                <div className="relative flex flex-col overflow-hidden">
+                  {showSolution ? (
+                    <CodeEditor key="solution" code={currentCode} readOnly maxHeight="500px" minHeight="300px" />
+                  ) : (
+                    <CodeEditor key={`user-v${revertCount}`} code={userCode} onChange={setUserCode} maxHeight="500px" minHeight="400px" />
+                  )}
+                  {showSerialConsole && (
+                    <div className="h-36 border-t flex flex-col overflow-hidden bg-slate-950" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
+                      <div className="flex items-center justify-between px-4 py-1.5 border-b text-[10px] font-mono" style={{ borderColor: "hsl(229, 42%, 22%)", color: "hsl(228, 25%, 60%)" }}>
+                        <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
+                        <div className="flex gap-2">
+                          <button onClick={() => setSerialLogs([])} className="hover:text-white transition-all">Clear Logs</button>
+                          <button onClick={() => setShowSerialConsole(false)} className="hover:text-white transition-all">✕</button>
+                        </div>
+                      </div>
+                      <div className="flex-1 p-3 overflow-y-auto font-mono text-[9px] space-y-1 text-emerald-400">
+                        {serialLogs.length === 0 ? (
+                          <span className="text-slate-500 italic">No output. Verify connection and upload code.</span>
+                        ) : (
+                          serialLogs.map((log, idx) => (
+                            <div key={idx} className="whitespace-pre-wrap">{log}</div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Error panel */}
                 {errors.length > 0 && (

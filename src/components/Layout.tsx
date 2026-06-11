@@ -183,60 +183,9 @@ export default function Layout({ children }: LayoutProps) {
         </header>
 
         {/* ── Page content ── */}
-        <main className="flex-1 overflow-y-auto page-transition-enter pb-20 md:pb-0">
+        <main className="flex-1 overflow-y-auto page-transition-enter pb-0">
           {children}
         </main>
-
-        {/* ── Mobile Bottom Tab Bar ── */}
-        <nav
-          className="flex md:hidden items-center justify-around fixed bottom-0 left-0 right-0 z-30 py-1"
-          style={{
-            background: "var(--card)",
-            borderTop: "2.5px solid var(--border)",
-            height: "68px",
-          }}
-          aria-label="Mobile navigation"
-        >
-          {mobileNavItems.map(({ icon: Icon, label, path }) => {
-            const isActive = location.pathname === path ||
-              (path !== "/" && location.pathname.startsWith(path));
-            return (
-              <Link
-                key={path}
-                to={path}
-                id={`mobile-nav-${label.toLowerCase()}`}
-                className="flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all cursor-pointer"
-                style={{ minWidth: 52 }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200"
-                  style={
-                    isActive
-                      ? {
-                          background: "var(--primary-light)",
-                          border: "2px solid hsl(var(--primary) / 0.3)",
-                        }
-                      : {}
-                  }
-                >
-                  <Icon
-                    size={20}
-                    style={{
-                      color: isActive ? "hsl(var(--primary))" : "hsl(var(--foreground-muted))",
-                      strokeWidth: isActive ? 2.5 : 1.8,
-                    }}
-                  />
-                </div>
-                <span
-                  className="text-[10px] font-bold"
-                  style={{ color: isActive ? "hsl(var(--primary))" : "hsl(var(--foreground-muted))" }}
-                >
-                  {label}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
       </div>
 
       {/* ── AI Mentor (floating) ── */}

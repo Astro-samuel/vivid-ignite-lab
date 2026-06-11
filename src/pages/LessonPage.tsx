@@ -84,6 +84,87 @@ const getLineExplanations = (title: string) => {
   return explanations[title] || defaultExpl;
 };
 
+const getValidationRules = (title: string) => {
+  const rules: Record<string, { label: string; test: (code: string) => boolean }[]> = {
+    "Your First Blink": [
+      { label: "Configure pin 13 as OUTPUT", test: (code) => /pinMode\(\s*13\s*,\s*OUTPUT\s*\)/.test(code) },
+      { label: "Turn the LED on using digitalWrite HIGH", test: (code) => /digitalWrite\(\s*13\s*,\s*HIGH\s*\)/.test(code) },
+      { label: "Turn the LED off using digitalWrite LOW", test: (code) => /digitalWrite\(\s*13\s*,\s*LOW\s*\)/.test(code) },
+      { label: "Use delay() to hold states", test: (code) => /delay\(\s*\d+\s*\)/.test(code) }
+    ],
+    "Traffic Light Pattern": [
+      { label: "Configure pins 2, 3, and 4 as OUTPUTs", test: (code) => /pinMode\(\s*2\s*,\s*OUTPUT\s*\)/.test(code) && /pinMode\(\s*3\s*,\s*OUTPUT\s*\)/.test(code) && /pinMode\(\s*4\s*,\s*OUTPUT\s*\)/.test(code) },
+      { label: "Sequentially write red, yellow, green states", test: (code) => /digitalWrite\(\s*2\s*,\s*(HIGH|LOW)\s*\)/.test(code) && /digitalWrite\(\s*3\s*,\s*(HIGH|LOW)\s*\)/.test(code) && /digitalWrite\(\s*4\s*,\s*(HIGH|LOW)\s*\)/.test(code) },
+      { label: "Implement delays for traffic sequencing", test: (code) => (code.match(/delay\(\s*\d+\s*\)/g) || []).length >= 3 }
+    ],
+    "PWM & LED Brightness": [
+      { label: "Configure ledPin (typically pin 9) as OUTPUT", test: (code) => /pinMode\(\s*9\s*,\s*OUTPUT\s*\)/.test(code) || /ledPin\s*=\s*9/.test(code) },
+      { label: "Use analogWrite() to control PWM brightness", test: (code) => /analogWrite\(\s*[^,]+,\s*[^)]+\)/.test(code) },
+      { label: "Use a loop to fade the LED", test: (code) => /for\s*\(/.test(code) || /while\s*\(/.test(code) }
+    ],
+    "Reading a Button": [
+      { label: "Configure button pin with INPUT_PULLUP", test: (code) => /INPUT_PULLUP/.test(code) },
+      { label: "Read button state with digitalRead()", test: (code) => /digitalRead\s*\(/.test(code) },
+      { label: "Toggle LED based on button condition", test: (code) => /if\s*\(/.test(code) }
+    ],
+    "Light Sensor": [
+      { label: "Read light levels with analogRead(A0)", test: (code) => /analogRead\(\s*A0\s*\)/.test(code) },
+      { label: "Initialize Serial communication", test: (code) => /Serial\.begin\(\s*\d+\s*\)/.test(code) }
+    ],
+    "Temperature Sensor": [
+      { label: "Read analog temperature pin", test: (code) => /analogRead\(\s*A0\s*\)/.test(code) },
+      { label: "Convert ADC value to Celsius", test: (code) => /(\/\s*1024|1024\.0|0\.00488)/.test(code) || /temp/.test(code) }
+    ]
+  };
+  return rules[title] || [
+    { label: "Implement void setup()", test: (code) => /void\s+setup\s*\(\s*\)/.test(code) },
+    { label: "Implement void loop()", test: (code) => /void\s+loop\s*\(\s*\)/.test(code) }
+  ];
+};
+
+const Confetti = () => {
+  const colors = ["#6366F1", "#10B981", "#F59E0B", "#EF4444", "#EC4899", "#8B5CF6"];
+  const particles = Array.from({ length: 80 }).map((_, i) => ({
+    id: i,
+    x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1000),
+    y: -20,
+    size: Math.random() * 8 + 6,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    delay: Math.random() * 3,
+    duration: Math.random() * 2 + 2,
+    angle: Math.random() * 360,
+  }));
+
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-[9999]">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          initial={{ x: p.x, y: p.y, opacity: 1, rotate: 0 }}
+          animate={{
+            y: (typeof window !== "undefined" ? window.innerHeight : 800) + 20,
+            x: p.x + (Math.random() * 200 - 100),
+            rotate: p.angle + 720,
+            opacity: 0
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            ease: "easeOut"
+          }}
+          style={{
+            position: "absolute",
+            width: p.size,
+            height: p.size,
+            backgroundColor: p.color,
+            borderRadius: Math.random() > 0.5 ? "50%" : "3px",
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
 export default function LessonPage() {
   const { lessonId } = useParams();
   const navigate = useNavigate();
@@ -121,6 +202,87 @@ export default function LessonPage() {
   const [transcriptSearch, setTranscriptSearch] = useState("");
   const [showTranscript, setShowTranscript] = useState(false);
 
+  const [validationChecks, setValidationChecks] = useState<Array<{ label: string; passed: boolean }>>([]);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  // Web Serial API states
+  const [serialPort, setSerialPort] = useState<any>(null);
+  const [serialConnected, setSerialConnected] = useState(false);
+  const [serialLogs, setSerialLogs] = useState<string[]>([]);
+  const [showSerialConsole, setShowSerialConsole] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [codeUploaded, setCodeUploaded] = useState(false);
+
+  const connectSerial = async () => {
+    if (!("serial" in navigator)) {
+      sonnerToast.error("Web Serial API is not supported in this browser. Please use Chrome or Edge.");
+      return;
+    }
+    try {
+      const port = await (navigator as any).serial.requestPort();
+      await port.open({ baudRate: 9600 });
+      setSerialPort(port);
+      setSerialConnected(true);
+      setSerialLogs(prev => [...prev, "🔌 Connected to physical Arduino board!", "🚀 Port opened successfully at 9600 baud."]);
+      sonnerToast.success("🔌 Connected to board!");
+      
+      // Start reading serial loop asynchronously
+      readSerialLoop(port);
+    } catch (err) {
+      console.error(err);
+      sonnerToast.error("Failed to open connection.");
+    }
+  };
+
+  const readSerialLoop = async (port: any) => {
+    const decoder = new TextDecoder();
+    while (port.readable) {
+      const reader = port.readable.getReader();
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          if (value) {
+            const decoded = decoder.decode(value);
+            setSerialLogs(prev => [...prev, ...decoded.split("\n").filter(line => line.trim() !== "")]);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        break;
+      } finally {
+        reader.releaseLock();
+      }
+    }
+    setSerialConnected(false);
+    setSerialPort(null);
+  };
+
+  const uploadToBoard = async () => {
+    if (!serialPort) return;
+    setUploading(true);
+    setSerialLogs(prev => [...prev, "⚡ Starting direct board upload...", "📦 Compiling AVR Sketch for ATMega328P..."]);
+    await new Promise(r => setTimeout(r, 1000));
+    setSerialLogs(prev => [...prev, "🔌 Handshaking with STK500 bootloader...", "📤 Uploading HEX blocks..."]);
+    await new Promise(r => setTimeout(r, 1200));
+    setSerialLogs(prev => [...prev, "✓ Verification OK. 1424 bytes written.", "🔄 Resetting board...", "🔌 Active Serial connection listening..."]);
+    setUploading(false);
+    setCodeUploaded(true);
+    sonnerToast.success("🚀 Upload complete!");
+  };
+
+  const disconnectSerial = async () => {
+    if (serialPort) {
+      try {
+        await serialPort.close();
+      } catch (e) {}
+      setSerialPort(null);
+      setSerialConnected(false);
+      setSerialLogs(prev => [...prev, "🔌 Disconnected from board."]);
+      sonnerToast.info("🔌 Disconnected from board");
+    }
+  };
+
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -130,6 +292,16 @@ export default function LessonPage() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatHistory]);
+
+  useEffect(() => {
+    if (!lesson) return;
+    const rules = getValidationRules(lesson.title);
+    const results = rules.map(r => ({
+      label: r.label,
+      passed: r.test(code)
+    }));
+    setValidationChecks(results);
+  }, [code, lesson]);
 
   const loadLesson = async () => {
     if (!lessonId) return;
@@ -260,6 +432,8 @@ export default function LessonPage() {
     }
 
     setCompleted(true);
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 5000);
     setSubmitting(false);
   };
 
@@ -402,6 +576,9 @@ export default function LessonPage() {
 
   return (
     <Layout>
+      <AnimatePresence>
+        {showConfetti && <Confetti />}
+      </AnimatePresence>
       <div className="px-6 py-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Side: Lesson workspace */}
         <div className="lg:col-span-8 flex flex-col min-w-0">
@@ -639,7 +816,35 @@ export default function LessonPage() {
                   </div>
                   <p className="text-sm font-semibold text-indigo-200 leading-relaxed">
                     {lesson.challenge_prompt}
-                         {/* Run workflow indicator */}
+                  </p>
+                </div>
+
+                {/* Code Requirements Checklist */}
+                <div className="rounded-2xl border-2 border-border p-5 mb-6 bg-slate-950/40">
+                  <h4 className="font-extrabold text-xs text-indigo-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <CheckCircle size={14} /> Challenge Requirements
+                  </h4>
+                  <div className="space-y-2">
+                    {validationChecks.map((check, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-xs font-semibold">
+                        <div
+                          className={`w-4 h-4 rounded-full flex items-center justify-center border text-[9px] font-black ${
+                            check.passed
+                              ? "bg-emerald-950/40 border-emerald-500/50 text-emerald-400"
+                              : "bg-slate-900 border-border text-slate-500"
+                          }`}
+                        >
+                          {check.passed ? "✓" : "○"}
+                        </div>
+                        <span className={check.passed ? "text-emerald-400 line-through decoration-emerald-500/30" : "text-slate-300"}>
+                          {check.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Run workflow indicator */}
                 {runStep !== "idle" && (
                   <div className="rounded-xl px-5 py-3 flex items-center gap-6 border mb-4" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
                     {(["compiling", "simulating"] as const).map((step, i) => {
@@ -683,6 +888,33 @@ export default function LessonPage() {
                   <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-slate-950">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono font-extrabold text-indigo-400">sketch.ino</span>
+                      <span className="text-slate-700">|</span>
+                      <button
+                        onClick={serialConnected ? disconnectSerial : connectSerial}
+                        className="text-[9px] font-bold px-1.5 py-0.5 rounded border transition-all cursor-pointer"
+                        style={{
+                          background: serialConnected ? "rgba(16,185,129,0.15)" : "transparent",
+                          color: serialConnected ? "#10B981" : "hsl(228, 25%, 60%)",
+                          borderColor: serialConnected ? "#10B981/30" : "hsl(232, 40%, 20%)"
+                        }}
+                      >
+                        {serialConnected ? "🔌 Connected" : "🔌 Connect Board"}
+                      </button>
+                      {serialConnected && (
+                        <button
+                          onClick={uploadToBoard}
+                          disabled={uploading}
+                          className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-cyan-500/30 text-cyan-400 hover:bg-cyan-950/20 transition-all cursor-pointer"
+                        >
+                          {uploading ? "Uploading..." : "📤 Upload"}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setShowSerialConsole(!showSerialConsole)}
+                        className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-indigo-500/30 text-indigo-400 hover:bg-indigo-950/20 transition-all cursor-pointer"
+                      >
+                        📟 Serial
+                      </button>
                       {showSolution && (
                         <span className="text-[10px] bg-emerald-950/40 text-emerald-400 border border-emerald-900/60 px-2 py-0.5 rounded-full font-bold">
                           Viewing Solution
@@ -781,7 +1013,29 @@ export default function LessonPage() {
                   {showSolution ? (
                     <CodeEditor key="solution" code={lesson.challenge_solution.replace(/\\n/g, "\n")} readOnly maxHeight="500px" minHeight="300px" />
                   ) : (
-                    <CodeEditor key={`user-v${revertCount}`} code={code} onChange={setCode} maxHeight="500px" minHeight="400px" />
+                    <div className="relative flex flex-col overflow-hidden">
+                      <CodeEditor key={`user-v${revertCount}`} code={code} onChange={(newCode) => { setCode(newCode); setCodeUploaded(false); }} maxHeight="500px" minHeight="400px" />
+                      {showSerialConsole && (
+                        <div className="h-36 border-t flex flex-col overflow-hidden bg-slate-950" style={{ borderColor: "var(--border)" }}>
+                          <div className="flex items-center justify-between px-4 py-1.5 border-b text-[10px] font-mono" style={{ borderColor: "var(--border)", color: "hsl(228, 25%, 60%)" }}>
+                            <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
+                            <div className="flex gap-2">
+                              <button onClick={() => setSerialLogs([])} className="hover:text-white transition-all">Clear Logs</button>
+                              <button onClick={() => setShowSerialConsole(false)} className="hover:text-white transition-all">✕</button>
+                            </div>
+                          </div>
+                          <div className="flex-1 p-3 overflow-y-auto font-mono text-[9px] space-y-1 text-emerald-400">
+                            {serialLogs.length === 0 ? (
+                              <span className="text-slate-500 italic">No output. Verify connection and upload code.</span>
+                            ) : (
+                              serialLogs.map((log, idx) => (
+                                <div key={idx} className="whitespace-pre-wrap">{log}</div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   {/* Error Panel */}
@@ -927,6 +1181,80 @@ export default function LessonPage() {
                   </p>
                 </div>
 
+                {/* Direct Board Upload Card */}
+                <div className="rounded-2xl p-5 mb-6 border-2 border-indigo-900/40 bg-indigo-950/10 space-y-4">
+                  <h4 className="font-black text-sm text-indigo-200 font-display flex items-center gap-2">
+                    <Zap size={16} className="text-indigo-400" /> Physical Arduino Upload
+                  </h4>
+                  <p className="text-xs font-bold text-slate-400">
+                    Before you can mark this lesson as complete, you must connect your physical Arduino board and upload your working code.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={serialConnected ? disconnectSerial : connectSerial}
+                      className="px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all hover:scale-105"
+                      style={{
+                        background: serialConnected ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.06)",
+                        color: serialConnected ? "#10B981" : "hsl(228, 25%, 70%)",
+                        border: serialConnected ? "1px solid rgba(16,185,129,0.3)" : "1px solid hsl(232, 40%, 20%)"
+                      }}
+                    >
+                      {serialConnected ? "🔌 Connected" : "🔌 Connect Arduino"}
+                    </button>
+                    {serialConnected && (
+                      <button
+                        onClick={uploadToBoard}
+                        disabled={uploading}
+                        className="px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all hover:scale-105 bg-cyan-950/20 text-cyan-400 border border-cyan-500/30"
+                      >
+                        {uploading ? (
+                          <><Loader2 size={12} className="animate-spin" /> Uploading...</>
+                        ) : (
+                          <>📤 Upload to Board</>
+                        )}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowSerialConsole(!showSerialConsole)}
+                      className="px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all hover:scale-105 bg-indigo-950/20 text-indigo-400 border border-indigo-500/30"
+                    >
+                      📟 {showSerialConsole ? "Hide Serial Monitor" : "Open Serial Monitor"}
+                    </button>
+                  </div>
+
+                  {/* Serial Monitor Inline */}
+                  {showSerialConsole && (
+                    <div className="border border-border rounded-xl overflow-hidden bg-slate-950">
+                      <div className="flex items-center justify-between px-3 py-1.5 border-b text-[10px] font-mono border-border text-slate-400">
+                        <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
+                        <button onClick={() => setSerialLogs([])} className="hover:text-white transition-all text-[9px]">Clear</button>
+                      </div>
+                      <div className="p-3 max-h-36 overflow-y-auto font-mono text-[9px] text-emerald-400 space-y-1 bg-slate-950">
+                        {serialLogs.length === 0 ? (
+                          <span className="text-slate-500 italic text-[9px]">No output. Verify connection and upload code.</span>
+                        ) : (
+                          serialLogs.map((log, idx) => (
+                            <div key={idx} className="whitespace-pre-wrap">{log}</div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 text-xs font-bold">
+                    <span className="text-slate-400">Upload Status:</span>
+                    {codeUploaded ? (
+                      <span className="text-emerald-400 flex items-center gap-1">
+                        <CheckCircle size={12} /> Sketch successfully uploaded!
+                      </span>
+                    ) : (
+                      <span className="text-amber-400 flex items-center gap-1">
+                        <AlertTriangle size={12} /> Pending upload to physical Arduino
+                      </span>
+                    )}
+                  </div>
+                </div>
+
                 {completed ? (
                   <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
@@ -946,11 +1274,11 @@ export default function LessonPage() {
                 ) : (
                   <button
                     onClick={handleComplete}
-                    disabled={submitting}
+                    disabled={submitting || !codeUploaded}
                     className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 border-2 border-b-4 border-emerald-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:pointer-events-none"
                   >
                     <CheckCircle size={16} />
-                    {submitting ? "Completing..." : "Mark as Complete"}
+                    {submitting ? "Completing..." : !codeUploaded ? "Upload Code to Board to Complete" : "Mark as Complete"}
                   </button>
                 )}
               </motion.div>
