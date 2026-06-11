@@ -47,29 +47,33 @@ export default function ProfilePage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Load profile from database — use DB as source of truth for XP/level
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("*").eq("id", user.id).single().then(({ data }) => {
-      if (data) {
-        setProfile({
-          name: data.display_name || "",
-          username: data.username || "",
-          bio: "",
-          level: data.level || 1,
-          xp: data.total_xp || 0,
-          maxXP: (data.level || 1) >= 3 ? 1000 : (data.level || 1) >= 2 ? 500 : 200,
-          streak: data.streak_days || 0,
-          projectsCompleted: data.projects_completed || 0,
-          avatar: data.avatar_url || null,
-        });
-        setEditData({
-          name: data.display_name || "",
-          username: data.username || "",
-          bio: "",
-        });
-      }
-    });
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setProfile({
+            name: data.display_name || "",
+            username: data.username || "",
+            bio: "",
+            level: data.level || 1,
+            xp: data.total_xp || 0,
+            maxXP: (data.level || 1) >= 3 ? 1000 : (data.level || 1) >= 2 ? 500 : 200,
+            streak: data.streak_days || 0,
+            projectsCompleted: data.projects_completed || 0,
+            avatar: data.avatar_url || null,
+          });
+          setEditData({
+            name: data.display_name || "",
+            username: data.username || "",
+            bio: "",
+          });
+        }
+      });
   }, [user, projects]);
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,21 +93,22 @@ export default function ProfilePage() {
     setProfile((prev) => ({ ...prev, ...editData }));
     setEditing(false);
 
-    // Persist to database
     if (user) {
-      await supabase.from("profiles").update({
-        display_name: editData.name,
-        username: editData.username,
-      }).eq("id", user.id);
+      await supabase
+        .from("profiles")
+        .update({
+          display_name: editData.name,
+          username: editData.username,
+        })
+        .eq("id", user.id);
     }
 
     setSavedToast(true);
     setTimeout(() => setSavedToast(false), 3000);
   };
 
-  // Calculate skill progress from completed projects
-  const completedProjectIds = useMemo(() =>
-    projects.filter(p => p.status === "completed").map(p => p.project_id),
+  const completedProjectIds = useMemo(
+    () => projects.filter((p) => p.status === "completed").map((p) => p.project_id),
     [projects]
   );
   const skillProgress = useMemo(() => calculateSkillProgress(completedProjectIds), [completedProjectIds]);
@@ -111,60 +116,56 @@ export default function ProfilePage() {
   const xpPercent = (profile.xp / profile.maxXP) * 100;
 
   const stats = [
-    { icon: Trophy, label: "Projects", value: profile.projectsCompleted, color: "#FFD700" },
-    { icon: Flame, label: "Day Streak", value: profile.streak, color: "#FF4500" },
-    { icon: Star, label: "Level", value: profile.level, color: "#B744FF" },
-    { icon: Zap, label: "Total XP", value: profile.xp, color: "#00F5FF" },
+    { icon: Trophy, label: "Projects", value: profile.projectsCompleted, color: "text-amber-500", border: "border-amber-200", bg: "bg-amber-50" },
+    { icon: Flame, label: "Streak", value: profile.streak, color: "text-rose-500", border: "border-rose-200", bg: "bg-rose-50" },
+    { icon: Star, label: "Level", value: profile.level, color: "text-violet-500", border: "border-violet-200", bg: "bg-violet-50" },
+    { icon: Zap, label: "XP Total", value: profile.xp, color: "text-indigo-500", border: "border-indigo-200", bg: "bg-indigo-50" },
   ];
 
   return (
     <Layout>
-      <div className="px-8 py-10 max-w-3xl mx-auto">
+      <div className="px-6 py-8 max-w-3xl mx-auto">
         {/* Header */}
         <FadeInView className="flex items-center gap-3 mb-8">
-          <User size={22} style={{ color: "#00F5FF" }} />
-          <h1 className="text-2xl font-bold" style={{ color: "#FFFFFF" }}>My Profile</h1>
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 border-2 border-b-4 border-indigo-200 flex items-center justify-center text-2xl shadow-sm">
+            👤
+          </div>
+          <div>
+            <h1 className="text-3xl font-extrabold font-display text-indigo-950">My Profile</h1>
+            <p className="text-sm font-semibold text-slate-400">Manage your avatar, username and view statistics</p>
+          </div>
         </FadeInView>
 
         {/* Profile Card */}
-        <div
-          className="rounded-2xl p-8 border mb-5"
-          style={{ background: "hsl(229, 45%, 14%)", borderColor: "rgba(0,245,255,0.2)" }}
-        >
+        <div className="bg-white border-2 border-b-4 border-slate-100 rounded-3xl p-8 mb-6 shadow-sm">
           {/* Avatar */}
           <div className="flex flex-col items-center mb-6">
             <div className="relative mb-4">
               <div
-                className="w-24 h-24 rounded-full flex items-center justify-center overflow-hidden"
+                className="w-24 h-24 rounded-full flex items-center justify-center overflow-hidden border-4 border-slate-100 shadow-inner"
                 style={{
-                  background: avatarPreview ? "transparent" : "linear-gradient(135deg, #00F5FF, #B744FF)",
-                  boxShadow: "0 0 30px rgba(0,245,255,0.3)",
-                  border: "3px solid rgba(0,245,255,0.5)",
+                  background: avatarPreview ? "transparent" : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))",
                 }}
               >
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-3xl font-bold" style={{ color: "#0A0E27" }}>
-                    {profile.name.charAt(0)}
+                  <span className="text-3xl font-extrabold text-white">
+                    {profile.name.charAt(0) || "U"}
                   </span>
                 )}
               </div>
               <button
                 onClick={() => fileRef.current?.click()}
-                className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110"
-                style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", boxShadow: "0 0 10px rgba(0,245,255,0.4)" }}
+                className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-indigo-500 border-2 border-indigo-700 text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm"
               >
-                <Camera size={14} style={{ color: "#0A0E27" }} />
+                <Camera size={14} className="text-white" />
               </button>
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
             </div>
 
             {/* Level badge */}
-            <div
-              className="px-4 py-1.5 rounded-full text-sm font-bold font-orbitron"
-              style={{ background: "linear-gradient(135deg, rgba(183,68,255,0.2), rgba(123,47,255,0.1))", color: "#B744FF", border: "1px solid rgba(183,68,255,0.4)" }}
-            >
+            <div className="px-4 py-1 bg-violet-50 border-2 border-b-4 border-violet-200 text-violet-600 font-extrabold rounded-full text-xs font-display">
               Level {profile.level} Maker
             </div>
           </div>
@@ -173,41 +174,40 @@ export default function ProfilePage() {
           {editing ? (
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold mb-1.5 block" style={{ color: "#A0AED9" }}>Display Name</label>
+                <label className="text-xs font-bold text-slate-400 mb-1.5 block">Display Name</label>
                 <input
                   value={editData.name}
                   onChange={(e) => setEditData((p) => ({ ...p, name: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none"
-                  style={{ background: "hsl(229, 42%, 20%)", border: "1px solid rgba(0,245,255,0.3)", color: "#FFFFFF" }}
+                  className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all"
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1.5 block" style={{ color: "#A0AED9" }}>Username</label>
+                <label className="text-xs font-bold text-slate-400 mb-1.5 block">Username</label>
                 <input
                   value={editData.username}
                   onChange={(e) => setEditData((p) => ({ ...p, username: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none"
-                  style={{ background: "hsl(229, 42%, 20%)", border: "1px solid rgba(0,245,255,0.3)", color: "#FFFFFF" }}
+                  className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all"
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1.5 block" style={{ color: "#A0AED9" }}>Bio</label>
+                <label className="text-xs font-bold text-slate-400 mb-1.5 block">Bio</label>
                 <textarea
                   value={editData.bio}
                   onChange={(e) => setEditData((p) => ({ ...p, bio: e.target.value }))}
                   rows={3}
-                  className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none resize-none"
-                  style={{ background: "hsl(229, 42%, 20%)", border: "1px solid rgba(0,245,255,0.3)", color: "#FFFFFF" }}
+                  className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all resize-none"
                 />
               </div>
-              <div className="flex gap-3">
-                <button onClick={handleSave} className="btn-neon-teal flex-1 py-2.5 text-sm font-bold flex items-center justify-center gap-2">
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={handleSave}
+                  className="flex-1 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-sm"
+                >
                   <Save size={14} /> Save Changes
                 </button>
                 <button
                   onClick={() => setEditing(false)}
-                  className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
-                  style={{ border: "1px solid hsl(229, 42%, 28%)", color: "#A0AED9" }}
+                  className="flex-1 py-3 bg-white hover:bg-slate-50 border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-slate-500 transition-all"
                 >
                   Cancel
                 </button>
@@ -215,12 +215,15 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className="text-center">
-              <h2 className="text-xl font-bold mb-1" style={{ color: "#FFFFFF" }}>{profile.name}</h2>
-              <p className="text-sm mb-3" style={{ color: "#00F5FF" }}>@{profile.username}</p>
-              <p className="text-sm mb-6" style={{ color: "#A0AED9" }}>{profile.bio}</p>
+              <h2 className="text-2xl font-extrabold text-indigo-950 mb-0.5">{profile.name || "Maker"}</h2>
+              <p className="text-sm font-bold text-indigo-600 mb-3">@{profile.username || "username"}</p>
+              <p className="text-sm font-semibold text-slate-400 mb-6 max-w-sm mx-auto">{profile.bio || "No biography added yet. Click edit profile to tell other builders about yourself!"}</p>
               <button
-                onClick={() => { setEditing(true); setEditData({ name: profile.name, username: profile.username, bio: profile.bio }); }}
-                className="btn-neon-outline-teal px-5 py-2 text-sm font-semibold flex items-center gap-2 mx-auto"
+                onClick={() => {
+                  setEditing(true);
+                  setEditData({ name: profile.name, username: profile.username, bio: profile.bio });
+                }}
+                className="px-5 py-2.5 bg-indigo-50 hover:bg-indigo-100 border-2 border-b-4 border-indigo-200 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-indigo-600 transition-all flex items-center gap-2 mx-auto"
               >
                 <Edit3 size={14} /> Edit Profile
               </button>
@@ -229,86 +232,72 @@ export default function ProfilePage() {
         </div>
 
         {/* XP Bar */}
-        <div
-          className="rounded-2xl p-5 border mb-5"
-          style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
-        >
+        <div className="bg-white border-2 border-b-4 border-slate-100 rounded-3xl p-6 mb-6 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <span className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>XP Progress</span>
-            <span className="text-sm font-bold" style={{ color: "#00F5FF" }}>{profile.xp} / {profile.maxXP} XP</span>
+            <span className="font-extrabold font-display text-indigo-950 text-sm">XP Progress</span>
+            <span className="text-sm font-extrabold text-indigo-600">
+              {profile.xp} / {profile.maxXP} XP
+            </span>
           </div>
-          <div className="progress-neon h-3">
-            <div className="progress-neon-fill" style={{ width: `${xpPercent}%`, height: "100%" }} />
+          <div className="h-3 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
+            <div
+              className="h-full rounded-full bg-indigo-500 transition-all duration-700"
+              style={{ width: `${xpPercent}%` }}
+            />
           </div>
-          <p className="text-xs mt-2" style={{ color: "#A0AED9" }}>
+          <p className="text-xs font-bold text-slate-400 mt-2">
             {profile.maxXP - profile.xp} XP needed to reach Level {profile.level + 1}
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-5">
-          {stats.map(({ icon: Icon, label, value, color }) => (
-            <div key={label} className="stat-card text-center">
-              <Icon size={22} style={{ color }} className="mx-auto mb-2" />
-              <p className="text-2xl font-bold font-orbitron" style={{ color }}>{value}</p>
-              <p className="text-xs mt-1" style={{ color: "#A0AED9" }}>{label}</p>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {stats.map(({ icon: Icon, label, value, color, border, bg }) => (
+            <div
+              key={label}
+              className={`bg-white border-2 border-b-4 ${border} rounded-2xl p-5 text-center shadow-sm hover:translate-y-[-1px] transition-all`}
+            >
+              <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mx-auto mb-2`}>
+                <Icon className={`w-5 h-5 ${color}`} />
+              </div>
+              <p className="text-2xl font-extrabold font-display text-indigo-950">{value}</p>
+              <p className="text-xs font-bold text-slate-400 mt-0.5 uppercase tracking-wider">{label}</p>
             </div>
           ))}
         </div>
 
         {/* Skill Progress */}
-        <div
-          className="rounded-2xl p-5 border mb-5"
-          style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
-        >
-          <h3 className="font-bold mb-4" style={{ color: "#FFFFFF" }}>Skill Progress</h3>
+        <div className="bg-white border-2 border-b-4 border-slate-100 rounded-3xl p-6 mb-6 shadow-sm">
+          <h3 className="text-lg font-extrabold font-display text-indigo-950 mb-4">Skill Progress</h3>
           <div className="space-y-4">
             {skillProgress.map((skill) => (
               <div key={skill.name}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm font-medium" style={{ color: "#E0E7FF" }}>{skill.name}</span>
+                  <span className="text-sm font-extrabold text-indigo-950">{skill.name}</span>
                   <span
-                    className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                    className="text-xs px-2.5 py-0.5 rounded-full font-bold border"
                     style={{
-                      background: `${skill.color}18`,
+                      background: `${skill.color}15`,
                       color: skill.color,
-                      border: `1px solid ${skill.color}33`,
+                      borderColor: `${skill.color}30`,
                     }}
                   >
                     {skill.level}
                   </span>
                 </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background: "hsl(229, 42%, 22%)" }}>
+                <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
                   <div
                     className="h-full rounded-full transition-all duration-700"
                     style={{
                       width: `${skill.percent}%`,
-                      background: `linear-gradient(90deg, ${skill.color}, ${skill.color}88)`,
-                      boxShadow: `0 0 8px ${skill.color}66`,
+                      background: skill.color,
                     }}
                   />
                 </div>
-                <p className="text-xs mt-1 text-right" style={{ color: "#A0AED9" }}>{skill.percent}%</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div
-          className="rounded-2xl p-5 border mb-5"
-          style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
-        >
-          <h3 className="font-bold mb-4" style={{ color: "#FFFFFF" }}>Recent Activity</h3>
-          <div className="space-y-3">
-            {recentActivity.map((act, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <span className="text-lg">{act.icon}</span>
-                <div className="flex-1">
-                  <p className="text-sm" style={{ color: "#E0E7FF" }}>{act.text}</p>
-                  <p className="text-xs" style={{ color: "#A0AED9" }}>{act.time}</p>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mastery</span>
+                  <span className="text-xs font-bold text-slate-400">{skill.percent}%</span>
                 </div>
-                <div className="w-2 h-2 rounded-full" style={{ background: act.color }} />
               </div>
             ))}
           </div>
@@ -316,22 +305,21 @@ export default function ProfilePage() {
 
         {/* Streak section - clickable */}
         <div
-          className="rounded-2xl p-5 border cursor-pointer transition-all hover:border-orange-500/50 group"
-          style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
+          className="bg-white border-2 border-b-4 border-slate-100 rounded-3xl p-6 shadow-sm cursor-pointer hover:border-rose-400/50 group transition-all"
           onClick={() => navigate("/achievements")}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ background: "rgba(255,69,0,0.15)" }}>
+              <div className="w-10 h-10 rounded-2xl bg-rose-50 border-2 border-b-4 border-rose-100 flex items-center justify-center text-xl shadow-sm">
                 🔥
               </div>
               <div>
-                <p className="font-bold" style={{ color: "#FFFFFF" }}>{profile.streak} Day Streak!</p>
-                <p className="text-xs" style={{ color: "#A0AED9" }}>Keep building every day</p>
+                <p className="font-extrabold text-indigo-950 text-sm">{profile.streak} Day Streak!</p>
+                <p className="text-xs font-semibold text-slate-400">Keep building every day to unlock badges</p>
               </div>
             </div>
-            <div className="flex items-center gap-1 transition-all group-hover:translate-x-1" style={{ color: "#FF4500" }}>
-              <span className="text-sm font-semibold">View Challenges</span>
+            <div className="flex items-center gap-1 transition-all group-hover:translate-x-1 text-rose-500">
+              <span className="text-xs font-bold uppercase tracking-wider">View Streak</span>
               <ChevronRight size={16} />
             </div>
           </div>
@@ -340,9 +328,13 @@ export default function ProfilePage() {
 
       <AnimatePresence>
         {savedToast && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold z-50" style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}>
-            <CheckCircle size={16} /> ✓ Profile Saved!
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-6 right-6 px-5 py-3 rounded-2xl bg-emerald-500 border-2 border-b-4 border-emerald-700 text-white flex items-center gap-2 font-extrabold z-50 shadow-md"
+          >
+            <CheckCircle size={16} /> Profile Saved!
           </motion.div>
         )}
       </AnimatePresence>

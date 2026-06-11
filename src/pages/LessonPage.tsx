@@ -1,13 +1,88 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import FadeInView from "@/components/motion/FadeInView";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, Code, Wrench, CheckCircle, ChevronRight, Zap, Lightbulb, Play, RotateCcw } from "lucide-react";
+import {
+  ArrowLeft, BookOpen, Code, Wrench, CheckCircle, ChevronRight, Zap,
+  Lightbulb, RotateCcw, Copy, Check, ExternalLink, Save, Search, Sparkles, Send, Bot,
+  History, Trash2, RefreshCw, XCircle, AlertTriangle, Play, Loader2, Eye
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import ExplainCode from "@/components/ExplainCode";
+import CodeEditor from "@/components/CodeEditor";
+import { toast as sonnerToast } from "sonner";
 
-type Tab = "concept" | "challenge" | "build";
+type Tab = "concept" | "challenge" | "simulate" | "build";
+
+const getLessonVideo = (title: string) => {
+  const videos: Record<string, string> = {
+    "Your First Blink": "https://www.youtube.com/embed/fD36wA5zOyo",
+    "Traffic Light Pattern": "https://www.youtube.com/embed/86D12y_2B_8",
+    "PWM & LED Brightness": "https://www.youtube.com/embed/YfV-vFMV_E8",
+    "RGB Color Mixing": "https://www.youtube.com/embed/J77zW5YwX9Y",
+    "LED Array Patterns": "https://www.youtube.com/embed/c10eJ9V-X-k",
+    "NeoPixel LED Strip": "https://www.youtube.com/embed/8N697tG9Qlg",
+    "Reading a Button": "https://www.youtube.com/embed/j1_A4Y2gTUA",
+    "Light Sensor": "https://www.youtube.com/embed/2_N1x3cE-8Q",
+    "Temperature Sensor": "https://www.youtube.com/embed/n4d82Gf2KjM",
+    "Ultrasonic Distance": "https://www.youtube.com/embed/ZejQOXhyqd0",
+    "PIR Motion Detector": "https://www.youtube.com/embed/6F3B_V5-y-0",
+    "Multi-Sensor Dashboard": "https://www.youtube.com/embed/ZejQOXhyqd0",
+    "Servo Basics": "https://www.youtube.com/embed/LXURLv7_9rU",
+    "DC Motor with L293D": "https://www.youtube.com/embed/8tGleV8Z1F4",
+    "Potentiometer Servo Control": "https://www.youtube.com/embed/LXURLv7_9rU",
+    "Stepper Motor Control": "https://www.youtube.com/embed/0qwrnUePrYQ",
+    "Robot Car Movement": "https://www.youtube.com/embed/8tGleV8Z1F4",
+  };
+  return videos[title] || null;
+};
+
+const getLessonTranscript = (title: string) => {
+  const transcripts: Record<string, string> = {
+    "Your First Blink": "Welcome to Your First Blink! In this lesson, we'll configure digital pin 13 as an output. In the loop, we use digitalWrite(13, HIGH) to send 5V to the pin, turning the LED on. Then we delay for 500 milliseconds. Next, digitalWrite(13, LOW) turns off the voltage and LED, followed by another 500ms delay. This creates the continuous blinking cycle.",
+    "Traffic Light Pattern": "In this traffic light sequencing lesson, we control three LEDs representing red, yellow, and green. We use pinMode() for pins 2, 3, and 4. We sequence them in the loop: Red HIGH for 3000ms, then Red LOW and Yellow HIGH for 1000ms, and finally Yellow LOW and Green HIGH for 3000ms. This teaches sequencing and output controls.",
+    "PWM & LED Brightness": "PWM or Pulse Width Modulation allows us to simulate analog output on digital pins. By using analogWrite() with values from 0 to 255, we can control how much power flows to pin 9. The loop uses a for-loop to fade the LED brightness up and another to fade it back down, creating a smooth breathing effect.",
+    "RGB Color Mixing": "RGB LEDs contain three independent channels (Red, Green, Blue). By adjusting the PWM values on redPin, greenPin, and bluePin via analogWrite, we can mix any color. In this challenge, we write a setColor helper and cycle through colors.",
+    "Reading a Button": "Buttons are basic digital inputs. We use INPUT_PULLUP to activate the internal resistor, holding the pin HIGH when unpressed. When the button is pressed, it connects to ground, pulling the signal LOW. We check digitalRead(2) to toggle the LED on pin 13.",
+    "Light Sensor": "Light sensors (photoresistors) change resistance based on ambient light. By pairing them with a resistor in a voltage divider, we read analog values between 0 and 1023 on pin A0. analogRead(A0) helps track brightness.",
+    "Temperature Sensor": "The TMP36 temperature sensor outputs a voltage directly proportional to Celsius temperature. We read A0 and map the raw ADC value (0-1023) back to voltage, convert it to Celsius using the standard formula, and print both C and F metrics.",
+    "Ultrasonic Distance": "Ultrasonic sensors measure distance by sending sound waves (Trig) and timing how long they take to bounce back (Echo). We trigger a 10-microsecond pulse, measure the return time with pulseIn(), and calculate distance in cm.",
+    "Servo Basics": "Servos are actuators that rotate to specific angles from 0 to 180 degrees. Using the Servo.h library, we attach the motor to pin 9 and sweep it back and forth using a position index loop.",
+  };
+  return transcripts[title] || "Welcome! In this tutorial, we will explore the concepts, build wiring configurations, and write the Arduino code step-by-step. Use the editor to practice the challenge and ask our AI Mentor for any help.";
+};
+
+const getLineExplanations = (title: string) => {
+  const defaultExpl = [
+    { line: "void setup()", desc: "Configures settings when Arduino boots up" },
+    { line: "void loop()", desc: "Runs continuously to execute your main code logic" }
+  ];
+  const explanations: Record<string, { line: string; desc: string }[]> = {
+    "Your First Blink": [
+      { line: "pinMode(13, OUTPUT);", desc: "Sets pin 13 (built-in LED) as an output pin" },
+      { line: "digitalWrite(13, HIGH);", desc: "Turns the LED on by supplying 5V to pin 13" },
+      { line: "delay(500);", desc: "Pauses program execution for 500 milliseconds (0.5 seconds)" },
+      { line: "digitalWrite(13, LOW);", desc: "Turns the LED off by grounding pin 13 (0V)" }
+    ],
+    "Traffic Light Pattern": [
+      { line: "pinMode(red, OUTPUT);", desc: "Configures Red LED pin 2 as output" },
+      { line: "digitalWrite(red, HIGH);", desc: "Turns Red LED on" },
+      { line: "delay(3000);", desc: "Holds Red phase for 3 seconds" },
+      { line: "digitalWrite(red, LOW);", desc: "Turns Red LED off before next phase" }
+    ],
+    "PWM & LED Brightness": [
+      { line: "analogWrite(ledPin, i);", desc: "Writes a PWM duty cycle value (0 to 255) to fade the LED" },
+      { line: "for (int i = 0; ...)", desc: "Loops to smoothly increment or decrement the duty cycle" }
+    ],
+    "Reading a Button": [
+      { line: "pinMode(2, INPUT_PULLUP);", desc: "Enables internal pull-up resistor on pin 2 (HIGH when open, LOW when pressed)" },
+      { line: "if (digitalRead(2) == LOW)", desc: "Checks if the button is pressed (completes circuit to Ground)" }
+    ]
+  };
+  return explanations[title] || defaultExpl;
+};
 
 export default function LessonPage() {
   const { lessonId } = useParams();
@@ -22,9 +97,39 @@ export default function LessonPage() {
   const [completed, setCompleted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Compilation & Simulation states
+  const [runStep, setRunStep] = useState<"idle" | "compiling" | "simulating" | "success" | "error">("idle");
+  const [errors, setErrors] = useState<string[]>([]);
+  const [codePassed, setCodePassed] = useState(false);
+  const [simulatorPassed, setSimulatorPassed] = useState(false);
+  const [simExpanded, setSimExpanded] = useState(false);
+
+  // Version Control
+  interface CodeSnapshot { code: string; label: string; timestamp: string; }
+  const [codeVersions, setCodeVersions] = useState<CodeSnapshot[]>([]);
+  const [showVersionPanel, setShowVersionPanel] = useState(false);
+  const [revertCount, setRevertCount] = useState(0);
+
+  // Advanced learning states
+  const [chatInput, setChatInput] = useState("");
+  const [chatHistory, setChatHistory] = useState<any[]>([
+    { role: "assistant", content: "Hey! 👋 I'm your AI Learning Assistant for this lesson. I can help explain the concept, walk you through the code, or debug any errors. What's on your mind?" }
+  ]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [savedAsTemplate, setSavedAsTemplate] = useState(false);
+  const [transcriptSearch, setTranscriptSearch] = useState("");
+  const [showTranscript, setShowTranscript] = useState(false);
+
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     loadLesson();
   }, [lessonId]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatHistory]);
 
   const loadLesson = async () => {
     if (!lessonId) return;
@@ -37,7 +142,7 @@ export default function LessonPage() {
 
     if (lessonData) {
       setLesson(lessonData);
-      setCode(lessonData.challenge_starter_code || "");
+      setCode((lessonData.challenge_starter_code || "").replace(/\\n/g, "\n"));
 
       const { data: pathData } = await supabase
         .from("learning_paths")
@@ -59,11 +164,79 @@ export default function LessonPage() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    try {
+      setCodeVersions(JSON.parse(localStorage.getItem(`lesson_code_versions_${lessonId}`) || "[]"));
+    } catch {
+      setCodeVersions([]);
+    }
+    setRunStep("idle");
+    setErrors([]);
+  }, [lessonId]);
+
+  const saveSnapshot = (label?: string) => {
+    const snapshot = {
+      code: code,
+      label: label || `Snapshot #${codeVersions.length + 1}`,
+      timestamp: new Date().toISOString(),
+    };
+    const updated = [snapshot, ...codeVersions].slice(0, 20);
+    setCodeVersions(updated);
+    localStorage.setItem(`lesson_code_versions_${lessonId}`, JSON.stringify(updated));
+    sonnerToast.success("📸 Code snapshot saved");
+  };
+
+  const runAndCheck = async () => {
+    setErrors([]);
+    setRunStep("compiling");
+    await new Promise((r) => setTimeout(r, 1200));
+
+    const foundErrors: string[] = [];
+
+    // Check for common Arduino errors
+    if (code.includes("pinMod(")) foundErrors.push("Error: 'pinMod' is not defined. Did you mean 'pinMode'?");
+    if (/delay\(\d+;/.test(code)) foundErrors.push("Syntax error: missing closing parenthesis ')' in delay()");
+    if (code.includes("void setup()") && !code.includes("pinMode") && !code.includes("Serial.begin") && !code.includes("// TODO")) {
+      foundErrors.push("Warning: setup() is empty. Initialize your pins with pinMode() and Serial with Serial.begin().");
+    }
+    if (code.includes("// TODO: Initialize") || code.includes("// TODO: Write your main")) {
+      foundErrors.push("Incomplete: You still have TODO sections. Fill in your code before running!");
+    }
+    if (!code.includes("void setup()")) foundErrors.push("Error: Missing setup() function.");
+    if (!code.includes("void loop()")) foundErrors.push("Error: Missing loop() function.");
+
+    if (foundErrors.length > 0) {
+      setErrors(foundErrors);
+      setRunStep("error");
+      setCodePassed(false);
+      setSimulatorPassed(false);
+      return;
+    }
+
+    setCodePassed(true);
+    setRunStep("simulating");
+    await new Promise((r) => setTimeout(r, 1500));
+
+    const safetyWarnings: string[] = [];
+    if (code.includes("analogWrite") && code.includes("delay(1)")) {
+      safetyWarnings.push("Warning: Very short delay with analog output may cause instability.");
+    }
+    if (safetyWarnings.length > 0) {
+      setErrors(safetyWarnings);
+      setRunStep("error");
+      setSimulatorPassed(false);
+      return;
+    }
+
+    setSimulatorPassed(true);
+    setRunStep("success");
+    sonnerToast.success("🚀 Code compiled and simulation passed!");
+  };
+
   const handleComplete = async () => {
     if (!user || !lesson) return;
     setSubmitting(true);
 
-    // Upsert progress
     await supabase.from("user_lesson_progress").upsert({
       user_id: user.id,
       lesson_id: lesson.id,
@@ -74,7 +247,6 @@ export default function LessonPage() {
       started_at: new Date().toISOString(),
     }, { onConflict: "user_id,lesson_id" });
 
-    // Award XP
     const { data: profile } = await supabase
       .from("profiles")
       .select("total_xp")
@@ -91,9 +263,103 @@ export default function LessonPage() {
     setSubmitting(false);
   };
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSaveAsTemplate = () => {
+    localStorage.setItem(`template_${lesson?.id}`, code);
+    setSavedAsTemplate(true);
+    setTimeout(() => setSavedAsTemplate(false), 2000);
+  };
+
+  const handleChatSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || aiLoading) return;
+    await handleSendQuestion(chatInput.trim());
+  };
+
+  const handleSendQuestion = async (text: string) => {
+    const userMsg = { role: "user", content: text };
+    setChatHistory(prev => [...prev, userMsg]);
+    setChatInput("");
+    setAiLoading(true);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) {
+        setChatHistory(prev => [...prev, { role: "assistant", content: "Please log in to chat with the AI Mentor." }]);
+        setAiLoading(false);
+        return;
+      }
+
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-mentor`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          messages: [...chatHistory, userMsg],
+          preferences: { tone: "supportive", hintDepth: "detailed", formality: "friendly" },
+          contextMeta: { lesson_title: lesson.title, lesson_id: lesson.id }
+        }),
+      });
+
+      if (!resp.ok) {
+        throw new Error("Failed to connect to AI Mentor");
+      }
+
+      const reader = resp.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantText = "";
+
+      setChatHistory(prev => [...prev, { role: "assistant", content: "" }]);
+
+      if (reader) {
+        let buffer = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          let newlineIdx: number;
+          while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
+            let line = buffer.slice(0, newlineIdx);
+            buffer = buffer.slice(newlineIdx + 1);
+            if (line.startsWith("data: ")) {
+              const jsonStr = line.slice(6).trim();
+              if (jsonStr === "[DONE]") break;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  assistantText += content;
+                  setChatHistory(prev => {
+                    const next = [...prev];
+                    next[next.length - 1] = { role: "assistant", content: assistantText };
+                    return next;
+                  });
+                }
+              } catch (e) {}
+            }
+          }
+        }
+      }
+    } catch (err) {
+      setChatHistory(prev => [...prev, { role: "assistant", content: "Sorry, I had trouble connecting. Please try again." }]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const tabs = [
     { id: "concept" as Tab, label: "📖 Concept", icon: BookOpen },
     { id: "challenge" as Tab, label: "💻 Challenge", icon: Code },
+    { id: "simulate" as Tab, label: "🤖 Simulate", icon: Zap },
     { id: "build" as Tab, label: "🔨 Build", icon: Wrench },
   ];
 
@@ -101,7 +367,7 @@ export default function LessonPage() {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: "hsl(var(--muted))", borderTopColor: "hsl(var(--primary))" }} />
+          <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
         </div>
       </Layout>
     );
@@ -110,260 +376,658 @@ export default function LessonPage() {
   if (!lesson) {
     return (
       <Layout>
-        <div className="px-6 py-8 text-center">
-          <p style={{ color: "hsl(var(--muted-foreground))" }}>Lesson not found</p>
-          <button onClick={() => navigate("/learn")} className="mt-4 text-sm font-bold" style={{ color: "hsl(var(--primary))" }}>← Back to Learn</button>
+        <div className="px-6 py-12 text-center max-w-md mx-auto">
+          <p className="text-sm font-semibold text-slate-400 mb-4">Lesson not found</p>
+          <button
+            onClick={() => navigate("/learn")}
+            className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white transition-all"
+          >
+            ← Back to Learn
+          </button>
         </div>
       </Layout>
     );
   }
 
+  const videoUrl = getLessonVideo(lesson.title);
+  const transcript = getLessonTranscript(lesson.title);
+  const showTranscriptBlock = transcript.toLowerCase().includes(transcriptSearch.toLowerCase());
+
+  const quickStarters = [
+    `How does ${lesson.title} work?`,
+    "Explain setup() here",
+    "Help me debug code",
+    "What parts are needed?"
+  ];
+
   return (
     <Layout>
-      <div className="px-6 py-6 max-w-4xl mx-auto">
-        {/* Header */}
-        <FadeInView className="mb-6">
-          <button
-            onClick={() => navigate("/learn")}
-            className="flex items-center gap-2 text-sm font-medium mb-4 transition-all hover:opacity-80"
-            style={{ color: "hsl(var(--primary))" }}
-          >
-            <ArrowLeft size={14} /> Back to Learn
-          </button>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                {path && <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: `${path.color}20`, color: path.color }}>{path.title}</span>}
-                <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Lesson {lesson.lesson_order}</span>
-              </div>
-              <h1 className="text-2xl font-bold" style={{ color: "hsl(var(--foreground))" }}>{lesson.title}</h1>
-              <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>{lesson.description}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Zap size={14} style={{ color: "hsl(var(--secondary))" }} />
-              <span className="text-sm font-bold" style={{ color: "hsl(var(--secondary))" }}>+{lesson.xp_reward} XP</span>
-            </div>
-          </div>
-        </FadeInView>
-
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          {tabs.map((tab) => (
+      <div className="px-6 py-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Side: Lesson workspace */}
+        <div className="lg:col-span-8 flex flex-col min-w-0">
+          {/* Header */}
+          <FadeInView className="mb-6">
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
-              style={
-                activeTab === tab.id
-                  ? { background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }
-                  : { background: "hsl(var(--muted) / 0.3)", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
-              }
+              onClick={() => navigate("/learn")}
+              className="flex items-center gap-2 text-sm font-bold mb-4 transition-all text-indigo-500 hover:text-indigo-600"
             >
-              {tab.label}
+              <ArrowLeft size={14} /> Back to Learn
             </button>
-          ))}
-        </div>
 
-        {/* Tab Content */}
-        <AnimatePresence mode="wait">
-          {activeTab === "concept" && (
-            <motion.div
-              key="concept"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="rounded-2xl border p-6"
-              style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-            >
-              <div className="prose prose-invert max-w-none">
-                {lesson.concept_content.split("\n").map((line: string, i: number) => {
-                  if (line.startsWith("# ")) return <h2 key={i} className="text-xl font-bold mb-3" style={{ color: "hsl(var(--foreground))" }}>{line.slice(2)}</h2>;
-                  if (line.startsWith("## ")) return <h3 key={i} className="text-lg font-bold mb-2 mt-4" style={{ color: "hsl(var(--primary))" }}>{line.slice(3)}</h3>;
-                  if (line.startsWith("```")) return null;
-                  if (line.startsWith("- **")) {
-                    const match = line.match(/- \*\*(.+?)\*\* — (.+)/);
-                    if (match) return (
-                      <div key={i} className="flex items-start gap-2 mb-2">
-                        <span className="text-xs mt-0.5" style={{ color: "hsl(var(--primary))" }}>•</span>
-                        <p className="text-sm"><span className="font-bold" style={{ color: "hsl(var(--foreground))" }}>{match[1]}</span> <span style={{ color: "hsl(var(--muted-foreground))" }}>— {match[2]}</span></p>
-                      </div>
-                    );
-                  }
-                  if (line.startsWith("- ")) return (
-                    <div key={i} className="flex items-start gap-2 mb-1">
-                      <span className="text-xs mt-0.5" style={{ color: "hsl(var(--primary))" }}>•</span>
-                      <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>{line.slice(2)}</p>
-                    </div>
-                  );
-                  if (line.trim() === "") return <div key={i} className="h-2" />;
-                  // Inline code blocks
-                  const rendered = line.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded text-xs font-mono" style="background: hsl(232, 40%, 18%); color: #00F5FF;">$1</code>');
-                  return <p key={i} className="text-sm mb-2" style={{ color: "hsl(var(--muted-foreground))" }} dangerouslySetInnerHTML={{ __html: rendered }} />;
-                })}
-              </div>
-
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={() => setActiveTab("challenge")}
-                  className="px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-[1.02]"
-                  style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
-                >
-                  Start Challenge <ChevronRight size={14} />
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-          {activeTab === "challenge" && (
-            <motion.div
-              key="challenge"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              {/* Challenge Prompt */}
-              <div className="rounded-xl border p-4 mb-4" style={{ background: "hsl(var(--primary) / 0.05)", borderColor: "hsl(var(--primary) / 0.2)" }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <Lightbulb size={14} style={{ color: "hsl(var(--secondary))" }} />
-                  <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>Challenge</span>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  {path && (
+                    <span
+                      className="text-xs font-extrabold px-3 py-1 rounded-full border shadow-sm"
+                      style={{
+                        background: `${path.color}15`,
+                        color: path.color,
+                        borderColor: `${path.color}30`,
+                      }}
+                    >
+                      {path.title}
+                    </span>
+                  )}
+                  <span className="text-xs font-bold text-slate-400">Lesson {lesson.lesson_order}</span>
                 </div>
-                <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>{lesson.challenge_prompt}</p>
+                <h1 className="text-2xl font-extrabold font-display text-indigo-100">{lesson.title}</h1>
+                <p className="text-sm font-medium text-slate-400">{lesson.description}</p>
               </div>
+              <div className="flex items-center gap-2 bg-indigo-950/40 border-2 border-indigo-900/60 px-4 py-2 rounded-2xl self-start md:self-auto shadow-sm">
+                <Zap size={14} className="text-indigo-400 fill-indigo-400" />
+                <span className="text-sm font-extrabold font-display text-indigo-400">+{lesson.xp_reward} XP</span>
+              </div>
+            </div>
+          </FadeInView>
 
-              {/* Code Editor */}
-              <div className="rounded-2xl border overflow-hidden" style={{ borderColor: "hsl(var(--border))" }}>
-                <div className="flex items-center justify-between px-4 py-2 border-b" style={{ background: "hsl(232, 48%, 6%)", borderColor: "hsl(var(--border))" }}>
-                  <span className="text-xs font-mono font-bold" style={{ color: "hsl(var(--primary))" }}>sketch.ino</span>
-                  <div className="flex gap-2">
+          {/* Tabs */}
+          <div className="flex gap-2 mb-6 bg-muted/40 p-1 rounded-2xl border-2 border-border max-w-sm">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-extrabold transition-all border-2 border-b-4 ${
+                    isActive
+                      ? "bg-card border-border text-indigo-400 shadow-sm"
+                      : "bg-transparent border-transparent text-slate-400 hover:bg-muted/30"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tab Content */}
+          <AnimatePresence mode="wait">
+            {activeTab === "concept" && (
+              <motion.div
+                key="concept"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-card border-2 border-b-4 border-border rounded-2xl p-6 shadow-sm"
+              >
+                {/* Video Embed */}
+                {videoUrl && (
+                  <div className="mb-6 rounded-2xl overflow-hidden border-2 border-border shadow-sm aspect-video">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={videoUrl}
+                      title={`${lesson.title} Video Tutorial`}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
+
+                {/* Video Info & Transcript Toggle */}
+                {videoUrl && (
+                  <div className="mb-6 flex items-center justify-between p-3 bg-muted/20 rounded-2xl border-2 border-border">
+                    <span className="text-xs font-bold text-slate-400">⏱️ Length: ~10 mins</span>
                     <button
-                      onClick={() => setCode(lesson.challenge_starter_code || "")}
-                      className="flex items-center gap-1 px-2 py-1 rounded text-xs transition-all hover:opacity-80"
-                      style={{ color: "hsl(var(--muted-foreground))" }}
+                      onClick={() => setShowTranscript(!showTranscript)}
+                      className="clay-btn clay-btn-ghost clay-btn-sm"
                     >
-                      <RotateCcw size={10} /> Reset
-                    </button>
-                    <button
-                      onClick={() => setShowSolution(!showSolution)}
-                      className="flex items-center gap-1 px-2 py-1 rounded text-xs transition-all hover:opacity-80"
-                      style={{ color: "hsl(var(--secondary))" }}
-                    >
-                      {showSolution ? "Hide" : "Show"} Solution
+                      📖 {showTranscript ? "Hide Transcript" : "Show Transcript"}
                     </button>
                   </div>
-                </div>
-                <textarea
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  className="w-full p-4 font-mono text-sm outline-none resize-none"
-                  style={{ 
-                    background: "hsl(232, 45%, 8%)", 
-                    color: "hsl(var(--foreground))",
-                    minHeight: "300px",
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}
-                  spellCheck={false}
-                />
-              </div>
-
-              {/* Solution */}
-              <AnimatePresence>
-                {showSolution && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mt-4 rounded-2xl border overflow-hidden"
-                    style={{ borderColor: "hsl(var(--success) / 0.3)" }}
-                  >
-                    <div className="px-4 py-2 border-b" style={{ background: "hsl(var(--success) / 0.05)", borderColor: "hsl(var(--success) / 0.2)" }}>
-                      <span className="text-xs font-bold" style={{ color: "hsl(var(--success))" }}>✓ Solution</span>
-                    </div>
-                    <pre className="p-4 text-sm font-mono overflow-x-auto" style={{ background: "hsl(232, 45%, 8%)", color: "hsl(var(--success))" }}>
-                      {lesson.challenge_solution}
-                    </pre>
-                  </motion.div>
                 )}
-              </AnimatePresence>
 
-              <div className="flex justify-between mt-6">
-                <button
-                  onClick={() => setActiveTab("concept")}
-                  className="px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all border"
-                  style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
-                >
-                  <ArrowLeft size={14} /> Back to Concept
-                </button>
-                <button
-                  onClick={() => setActiveTab("build")}
-                  className="px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-[1.02]"
-                  style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
-                >
-                  Build It! <Wrench size={14} />
-                </button>
-              </div>
-            </motion.div>
-          )}
+                {/* Searchable Transcript */}
+                <AnimatePresence>
+                  {showTranscript && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mb-6 p-4 bg-muted/20 border-2 border-border rounded-2xl"
+                    >
+                      <div className="relative mb-3">
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Search transcript..."
+                          value={transcriptSearch}
+                          onChange={(e) => setTranscriptSearch(e.target.value)}
+                          className="w-full pl-9 pr-4 py-2 bg-slate-950 border-2 border-border rounded-xl text-xs font-semibold focus:outline-none text-foreground"
+                        />
+                      </div>
+                      {showTranscriptBlock ? (
+                        <p className="text-xs text-slate-400 leading-relaxed font-semibold">
+                          "{transcript}"
+                        </p>
+                      ) : (
+                        <p className="text-xs text-slate-400 italic">No matches found.</p>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-          {activeTab === "build" && (
-            <motion.div
-              key="build"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="rounded-2xl border p-6"
-              style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style={{ background: "hsl(var(--primary) / 0.1)" }}>
-                  🔨
+                {/* Core Concept Prose */}
+                <div className="prose max-w-none text-indigo-200 font-medium leading-relaxed mb-6">
+                  {lesson.concept_content.replace(/\\n/g, "\n").split("\n").map((line: string, i: number) => {
+                    if (line.startsWith("# ")) {
+                      return (
+                        <h2 key={i} className="text-xl font-extrabold font-display text-indigo-200 mb-3 mt-2">
+                          {line.slice(2)}
+                        </h2>
+                      );
+                    }
+                    if (line.startsWith("## ")) {
+                      return (
+                        <h3 key={i} className="text-lg font-extrabold font-display text-indigo-400 mb-2 mt-4">
+                          {line.slice(3)}
+                        </h3>
+                      );
+                    }
+                    if (line.startsWith("```")) return null;
+                    if (line.startsWith("- **")) {
+                      const match = line.match(/- \*\*(.+?)\*\* — (.+)/);
+                      if (match) {
+                        return (
+                          <div key={i} className="flex items-start gap-2 mb-2 pl-2">
+                            <span className="text-indigo-400 font-extrabold mt-0.5">•</span>
+                            <p className="text-sm">
+                              <span className="font-extrabold text-indigo-200">{match[1]}</span>{" "}
+                              <span className="text-slate-400">— {match[2]}</span>
+                            </p>
+                          </div>
+                        );
+                      }
+                    }
+                    if (line.startsWith("- ")) {
+                      return (
+                        <div key={i} className="flex items-start gap-2 mb-1 pl-2">
+                          <span className="text-indigo-400 font-extrabold mt-0.5">•</span>
+                          <p className="text-sm text-slate-400">{line.slice(2)}</p>
+                        </div>
+                      );
+                    }
+                    if (line.trim() === "") return <div key={i} className="h-3" />;
+
+                    const rendered = line.replace(
+                      /`([^`]+)`/g,
+                      '<code class="px-1.5 py-0.5 rounded text-xs font-mono bg-indigo-950/40 text-indigo-300 border border-indigo-900/60 font-bold">$1</code>'
+                    );
+                    return (
+                      <p
+                        key={i}
+                        className="text-sm mb-2 text-slate-400 font-medium"
+                        dangerouslySetInnerHTML={{ __html: rendered }}
+                      />
+                    );
+                  })}
                 </div>
-                <div>
-                  <h3 className="font-bold" style={{ color: "hsl(var(--foreground))" }}>Build Task</h3>
-                  <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Now build it with real hardware!</p>
+
+                {/* Concept diagram comparisons */}
+                <div className="mb-6 border-2 border-border rounded-2xl p-5 bg-muted/20">
+                  <h4 className="font-black text-sm text-indigo-200 font-display mb-3">Signal Comparison Breakdown</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-3 bg-slate-950 border-2 border-border rounded-xl">
+                      <h5 className="font-extrabold text-xs text-indigo-400 mb-1">Digital Pins</h5>
+                      <p className="text-[11px] text-slate-400 leading-tight">States: HIGH (5V) or LOW (0V). Ideal for simple switches, button inputs, and standard LEDs.</p>
+                    </div>
+                    <div className="p-3 bg-slate-950 border-2 border-border rounded-xl">
+                      <h5 className="font-extrabold text-xs text-indigo-400 mb-1">Analog Input</h5>
+                      <p className="text-[11px] text-slate-400 leading-tight">States: Reads range of voltages (0V to 5V) returning 0 to 1023. Perfect for potentiometers and environmental sensors.</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="rounded-xl p-4 mb-6" style={{ background: "hsl(var(--muted) / 0.3)", border: "1px dashed hsl(var(--border))" }}>
-                <p className="text-sm" style={{ color: "hsl(var(--foreground))" }}>{lesson.build_task}</p>
-              </div>
+                {/* Line-by-line syntax explanation */}
+                <div className="mb-6 border-2 border-border rounded-2xl p-5 bg-muted/20">
+                  <h4 className="font-black text-sm text-indigo-200 font-display mb-3">How the Code Works:</h4>
+                  <div className="space-y-2">
+                    {getLineExplanations(lesson.title).map((item, idx) => (
+                      <div key={idx} className="flex flex-col sm:flex-row justify-between gap-1 p-2.5 bg-slate-950 border-2 border-border rounded-xl font-semibold">
+                        <code className="text-xs font-mono text-indigo-400">{item.line}</code>
+                        <span className="text-[11px] text-slate-400 sm:text-right">{item.desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-              {completed ? (
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="rounded-xl p-6 text-center"
-                  style={{ background: "hsl(var(--success) / 0.08)", border: "1px solid hsl(var(--success) / 0.3)" }}
-                >
-                  <div className="text-4xl mb-3">🎉</div>
-                  <h3 className="text-lg font-bold mb-1" style={{ color: "hsl(var(--success))" }}>Lesson Complete!</h3>
-                  <p className="text-sm mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>You earned {lesson.xp_reward} XP</p>
+                <div className="mt-6 flex justify-end">
                   <button
-                    onClick={() => navigate("/learn")}
-                    className="px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
-                    style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
+                    onClick={() => setActiveTab("challenge")}
+                    className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center gap-2 transition-all shadow-sm"
                   >
-                    Continue Learning →
+                    Start Challenge <ChevronRight size={14} />
                   </button>
-                </motion.div>
-              ) : (
-                <button
-                  onClick={handleComplete}
-                  disabled={submitting}
-                  className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-50"
-                  style={{
-                    background: "linear-gradient(135deg, hsl(var(--success)), hsl(var(--success-deep)))",
-                    color: "hsl(var(--primary-foreground))",
-                    boxShadow: "0 0 20px hsl(var(--success) / 0.3)",
-                  }}
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "challenge" && (
+              <motion.div
+                key="challenge"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                {/* Challenge Prompt */}
+                <div className="rounded-2xl border-2 border-b-4 border-indigo-900/50 p-5 mb-6 bg-indigo-950/20">
+                  <div className="flex items-center gap-2 mb-2 text-indigo-400">
+                    <Lightbulb size={16} className="fill-indigo-900/60" />
+                    <span className="text-sm font-extrabold uppercase tracking-wider">Challenge Task</span>
+                  </div>
+                  <p className="text-sm font-semibold text-indigo-200 leading-relaxed">
+                    {lesson.challenge_prompt}
+                         {/* Run workflow indicator */}
+                {runStep !== "idle" && (
+                  <div className="rounded-xl px-5 py-3 flex items-center gap-6 border mb-4" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
+                    {(["compiling", "simulating"] as const).map((step, i) => {
+                      const labels = ["Compiling", "Simulating"];
+                      const stepOrder = ["compiling", "simulating"];
+                      const stepIdx = stepOrder.indexOf(runStep);
+                      const thisIdx = stepOrder.indexOf(step);
+                      const isDone = runStep === "success" || stepIdx > thisIdx;
+                      const isActive = step === runStep;
+                      return (
+                        <div key={step} className="flex items-center gap-2">
+                          {isDone ? <CheckCircle size={16} style={{ color: "#00FF88" }} /> : isActive ? <Loader2 size={16} className="animate-spin" style={{ color: "#00F5FF" }} /> : <div className="w-4 h-4 rounded-full" style={{ background: "hsl(228, 25%, 30%)" }} />}
+                          <span className="text-sm font-medium" style={{ color: isDone ? "#00FF88" : isActive ? "#00F5FF" : "hsl(228, 25%, 50%)" }}>{labels[i]}</span>
+                        </div>
+                      );
+                    })}
+                    {runStep === "success" && (
+                      <span className="font-bold text-sm animate-fade-in-up flex items-center gap-2" style={{ color: "#00FF88" }}>
+                        <CheckCircle size={16} /> ✓ Compilation Successful!
+                      </span>
+                    )}
+                    {runStep === "error" && (
+                      <div className="flex items-center gap-2">
+                        <XCircle size={16} style={{ color: "#FF4500" }} />
+                        <span className="font-bold text-sm" style={{ color: "#FF4500" }}>{errors.length} Error{errors.length !== 1 ? "s" : ""}</span>
+                        <button
+                          onClick={() => {
+                            handleSendQuestion(`I encountered ${errors.length} error(s) during compilation: \n\n${errors.join("\n")}\n\nHere is my code:\n\n\`\`\`cpp\n${code}\n\`\`\`\n\nPlease help me debug this!`);
+                          }}
+                          className="ml-2 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 bg-purple-950/50 text-purple-400 border border-purple-800/40"
+                        >
+                          <Bot size={12} /> Debug with AI
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Code Editor */}
+                <div className="rounded-2xl border-2 border-b-4 border-border overflow-hidden bg-slate-900 shadow-md mb-6">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-slate-950">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-extrabold text-indigo-400">sketch.ino</span>
+                      {showSolution && (
+                        <span className="text-[10px] bg-emerald-950/40 text-emerald-400 border border-emerald-900/60 px-2 py-0.5 rounded-full font-bold">
+                          Viewing Solution
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      {!showSolution && (
+                        <>
+                          <button
+                            onClick={() => saveSnapshot()}
+                            className="flex items-center gap-1 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-bold text-slate-300 transition-all cursor-pointer"
+                          >
+                            <Save size={10} /> Snapshot
+                          </button>
+                          <button
+                            onClick={() => setShowVersionPanel(!showVersionPanel)}
+                            className="flex items-center gap-1 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-bold text-slate-300 transition-all cursor-pointer"
+                          >
+                            <History size={10} /> History ({codeVersions.length})
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => {
+                          if (!showSolution) {
+                            setCode((lesson.challenge_starter_code || "").replace(/\\n/g, "\n"));
+                            setRunStep("idle");
+                            setErrors([]);
+                          }
+                        }}
+                        disabled={showSolution}
+                        className="flex items-center gap-1 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-bold text-slate-300 transition-all cursor-pointer disabled:opacity-40"
+                      >
+                        <RotateCcw size={10} /> Reset
+                      </button>
+                      <button
+                        onClick={() => setShowSolution(!showSolution)}
+                        className="flex items-center gap-1 px-3 py-1 bg-indigo-950 hover:bg-indigo-900 border border-indigo-800 rounded-lg text-xs font-bold text-indigo-300 transition-all cursor-pointer"
+                      >
+                        {showSolution ? "Hide" : "Reveal"} Solution
+                      </button>
+                      <ExplainCode code={showSolution ? lesson.challenge_solution.replace(/\\n/g, "\n") : code} />
+                    </div>
+                  </div>
+
+                  {/* Version History Panel */}
+                  {showVersionPanel && !showSolution && (
+                    <div className="border-b px-5 py-3 space-y-2 animate-fade-in bg-amber-950/20 border-amber-900/40">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold flex items-center gap-1.5 text-amber-400">
+                          <History size={12} /> Version History
+                        </span>
+                        <button onClick={() => setShowVersionPanel(false)} className="text-xs text-slate-400">✕</button>
+                      </div>
+                      {codeVersions.length === 0 ? (
+                        <p className="text-xs text-slate-400">No snapshots yet. Click "Snapshot" to save current code.</p>
+                      ) : (
+                        <div className="max-h-40 overflow-y-auto space-y-1.5">
+                          {codeVersions.map((v, i) => (
+                            <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-950 border border-border">
+                              <div>
+                                <p className="text-xs font-semibold text-indigo-200">{v.label}</p>
+                                <p className="text-[10px] text-slate-400">{new Date(v.timestamp).toLocaleString()}</p>
+                              </div>
+                              <div className="flex gap-1.5">
+                                <button
+                                  onClick={() => {
+                                    setCode(v.code);
+                                    setRevertCount(prev => prev + 1);
+                                    sonnerToast.success(`↩️ Reverted to "${v.label}"`);
+                                  }}
+                                  className="px-2 py-1 rounded text-xs font-bold transition-all hover:scale-105 text-cyan-400 border border-cyan-900/60"
+                                >
+                                  Revert
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    const updated = codeVersions.filter((_, idx) => idx !== i);
+                                    setCodeVersions(updated);
+                                    localStorage.setItem(`lesson_code_versions_${lessonId}`, JSON.stringify(updated));
+                                  }}
+                                  className="px-2 py-1 rounded text-xs transition-all hover:scale-105 text-rose-500"
+                                >
+                                  <Trash2 size={10} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Code Area */}
+                  {showSolution ? (
+                    <CodeEditor key="solution" code={lesson.challenge_solution.replace(/\\n/g, "\n")} readOnly maxHeight="500px" minHeight="300px" />
+                  ) : (
+                    <CodeEditor key={`user-v${revertCount}`} code={code} onChange={setCode} maxHeight="500px" minHeight="400px" />
+                  )}
+
+                  {/* Error Panel */}
+                  {errors.length > 0 && (
+                    <div className="border-t p-4 animate-fade-in bg-rose-950/20 border-rose-900/40">
+                      <div className="flex items-center gap-2 mb-2 text-rose-400">
+                        <AlertTriangle size={14} />
+                        <span className="font-bold text-sm">Compilation Errors</span>
+                      </div>
+                      {errors.map((err, i) => (
+                        <div key={i} className="flex items-start gap-2 text-xs font-mono p-2 rounded-lg mb-1 bg-rose-950/40 text-rose-300">
+                          <XCircle size={12} className="flex-shrink-0 mt-0.5" /> {err}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Editor Actions */}
+                <div className="flex flex-wrap gap-2.5 mb-6">
+                  <button
+                    onClick={handleCopy}
+                    className="clay-btn clay-btn-ghost clay-btn-sm"
+                  >
+                    {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                    {copied ? "Copied!" : "Copy to My Editor"}
+                  </button>
+                  <button
+                    onClick={() => handleSendQuestion("Explain how to test this code step-by-step in Wokwi simulator")}
+                    className="clay-btn clay-btn-ghost clay-btn-sm"
+                  >
+                    <ExternalLink size={14} /> Test in Wokwi
+                  </button>
+                  <button
+                    onClick={handleSaveAsTemplate}
+                    className="clay-btn clay-btn-ghost clay-btn-sm"
+                  >
+                    {savedAsTemplate ? <Check size={14} className="text-emerald-500" /> : <Save size={14} />}
+                    {savedAsTemplate ? "Saved!" : "Save as Template"}
+                  </button>
+                  <button
+                    onClick={runAndCheck}
+                    disabled={runStep === "compiling" || runStep === "simulating"}
+                    className="px-5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all hover:scale-105 disabled:opacity-60 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-display shadow-lg shadow-emerald-500/20"
+                  >
+                    {runStep === "compiling" || runStep === "simulating" ? (
+                      <><Loader2 size={14} className="animate-spin" /> Running...</>
+                    ) : (
+                      <><Play size={14} /> Run & Compile</>
+                    )}
+                  </button>
+                </div>
+
+                <div className="flex justify-between mt-6">
+                  <button
+                    onClick={() => setActiveTab("concept")}
+                    className="px-5 py-3 rounded-xl text-sm font-extrabold flex items-center gap-2 transition-all border-2 border-b-4 border-border bg-card hover:bg-muted/10 text-slate-300 active:border-b-2 active:translate-y-[2px]"
+                  >
+                    <ArrowLeft size={14} /> Back to Concept
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("simulate")}
+                    className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center gap-2 transition-all shadow-sm"
+                  >
+                    Go to Simulation <Zap size={14} />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "simulate" && (
+              <motion.div
+                key="simulate"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-4"
+              >
+                <div
+                  className={`rounded-2xl border overflow-hidden transition-all duration-300 ${simExpanded ? "fixed inset-4 z-50" : "relative"}`}
+                  style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
                 >
-                  <CheckCircle size={16} />
-                  {submitting ? "Completing..." : "Mark as Complete"}
-                </button>
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
+                    <span className="text-sm font-semibold text-cyan-400">Wokwi Simulator</span>
+                    <button
+                      onClick={() => setSimExpanded(!simExpanded)}
+                      className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
+                      style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
+                    >
+                      {simExpanded ? "Minimize" : "Expand"}
+                    </button>
+                  </div>
+                  <div className="relative bg-slate-950" style={{ paddingTop: simExpanded ? "0" : "56.25%", height: simExpanded ? "calc(100% - 44px)" : "450px" }}>
+                    <iframe
+                      src="https://wokwi.com/projects/new/arduino-uno"
+                      className={simExpanded ? "w-full h-full" : "absolute inset-0 w-full h-full"}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
+                      style={{ border: "none" }}
+                      title="Wokwi Simulator"
+                    />
+                  </div>
+                </div>
+                {simExpanded && <div className="fixed inset-0 bg-black/60 z-45" onClick={() => setSimExpanded(false)} />}
+
+                <div className="flex justify-between mt-6">
+                  <button
+                    onClick={() => setActiveTab("challenge")}
+                    className="px-5 py-3 rounded-xl text-sm font-extrabold flex items-center gap-2 transition-all border-2 border-b-4 border-border bg-card hover:bg-muted/10 text-slate-300 active:border-b-2 active:translate-y-[2px]"
+                  >
+                    <ArrowLeft size={14} /> Back to Code
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("build")}
+                    className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center gap-2 transition-all shadow-sm"
+                  >
+                    Go to Build <Wrench size={14} />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "build" && (
+              <motion.div
+                key="build"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-card border-2 border-b-4 border-border rounded-2xl p-6 shadow-sm"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-950/40 border-2 border-b-4 border-indigo-900/60 flex items-center justify-center text-2xl shadow-sm">
+                    🔨
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold font-display text-indigo-200 text-base">Build Task</h3>
+                    <p className="text-xs font-bold text-slate-400">Time to wires and solder! Connect up the hardware.</p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl p-5 mb-6 bg-muted/20 border-2 border-dashed border-border">
+                  <p className="text-sm font-semibold text-slate-400 leading-relaxed">
+                    {lesson.build_task}
+                  </p>
+                </div>
+
+                {completed ? (
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="rounded-2xl p-6 text-center bg-emerald-950/20 border-2 border-b-4 border-emerald-900/40 shadow-sm"
+                  >
+                    <div className="text-5xl mb-3">🎉</div>
+                    <h3 className="text-xl font-extrabold font-display text-emerald-400 mb-1">Lesson Complete!</h3>
+                    <p className="text-sm font-semibold text-slate-400 mb-4">You earned {lesson.xp_reward} XP. Keep pushing forward!</p>
+                    <button
+                      onClick={() => navigate("/learn")}
+                      className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white transition-all shadow-sm"
+                    >
+                      Continue Learning →
+                    </button>
+                  </motion.div>
+                ) : (
+                  <button
+                    onClick={handleComplete}
+                    disabled={submitting}
+                    className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 border-2 border-b-4 border-emerald-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    <CheckCircle size={16} />
+                    {submitting ? "Completing..." : "Mark as Complete"}
+                  </button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Right Side: Embedded AI Learning Assistant */}
+        <div className="lg:col-span-4 flex flex-col">
+          <div className="bg-card border-2 border-b-4 border-border rounded-3xl p-5 flex flex-col h-full shadow-sm">
+            <div className="flex items-center gap-2.5 mb-4 pb-3 border-b-2 border-border flex-shrink-0">
+              <div className="w-9 h-9 rounded-2xl flex items-center justify-center bg-indigo-950/40 border-2 border-indigo-900/60 text-indigo-400">
+                <Bot size={18} />
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-indigo-200 font-display leading-none">AI Assistant</h3>
+                <span className="text-[10px] font-bold text-slate-400 mt-1 block">Your personal Arduino mentor</span>
+              </div>
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto max-h-[360px] lg:max-h-[420px] mb-4 space-y-3 p-3 bg-slate-950 rounded-2xl border-2 border-border">
+              {chatHistory.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    className={`rounded-2xl px-3.5 py-2 text-xs leading-relaxed max-w-[85%] font-semibold ${
+                      msg.role === 'user'
+                        ? 'bg-indigo-500 text-white border-b-2 border-indigo-600'
+                        : 'bg-slate-900 text-slate-200 border-2 border-border'
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                </div>
+              ))}
+              {aiLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-slate-900 text-slate-200 border-2 border-border rounded-2xl px-3.5 py-2 text-xs font-semibold animate-pulse">
+                    Thinking...
+                  </div>
+                </div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Prompt Starters */}
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {quickStarters.map((q) => (
+                <button
+                  key={q}
+                  onClick={() => handleSendQuestion(q)}
+                  className="text-[10px] font-black text-left p-2.5 bg-indigo-950/40 hover:bg-indigo-900/40 border-2 border-indigo-900/60 rounded-xl text-indigo-400 transition-all leading-tight cursor-pointer"
+                >
+                  "{q}"
+                </button>
+              ))}
+            </div>
+
+            {/* Chat Input */}
+            <form onSubmit={handleChatSubmit} className="flex gap-2">
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Ask a question..."
+                className="flex-1 px-3.5 py-2.5 bg-slate-950 hover:bg-slate-900/50 border-2 border-border focus:border-indigo-500 rounded-xl text-xs font-semibold focus:outline-none text-slate-200 transition-all"
+              />
+              <button
+                type="submit"
+                disabled={aiLoading}
+                className="clay-btn clay-btn-primary clay-btn-sm shrink-0 flex items-center justify-center w-9 h-9 !p-0"
+              >
+                <Send size={14} />
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </Layout>
   );

@@ -11,15 +11,24 @@ import { useUserProjects } from "@/hooks/useUserProjects";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Achievement {
-  id: number; emoji: string; title: string; desc: string; xp: number;
-  unlocked: boolean; color: string; progress: number; total: number;
+  id: number;
+  emoji: string;
+  title: string;
+  desc: string;
+  xp: number;
+  unlocked: boolean;
+  color: string;
+  progress: number;
+  total: number;
 }
 
 function getInventoryCount(userId?: string): number {
   try {
     const key = userId ? `inventory_${userId}` : "userInventory";
     return JSON.parse(localStorage.getItem(key) || "[]").length;
-  } catch { return 0; }
+  } catch {
+    return 0;
+  }
 }
 
 export default function AchievementsPage() {
@@ -32,7 +41,11 @@ export default function AchievementsPage() {
   useEffect(() => {
     if (!user) return;
     const syncStreak = async () => {
-      const { data } = await supabase.from("profiles").select("total_xp, level, projects_completed, streak_days, last_active_date").eq("id", user.id).single();
+      const { data } = await supabase
+        .from("profiles")
+        .select("total_xp, level, projects_completed, streak_days, last_active_date")
+        .eq("id", user.id)
+        .single();
       if (!data) return;
 
       const today = new Date().toISOString().split("T")[0];
@@ -43,8 +56,11 @@ export default function AchievementsPage() {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayStr = yesterday.toISOString().split("T")[0];
-        newStreak = lastActive === yesterdayStr ? (data.streak_days || 0) + 1 : !lastActive ? 1 : 1;
-        await supabase.from("profiles").update({ last_active_date: today, streak_days: newStreak } as any).eq("id", user.id);
+        newStreak = lastActive === yesterdayStr ? (data.streak_days || 0) + 1 : 1;
+        await supabase
+          .from("profiles")
+          .update({ last_active_date: today, streak_days: newStreak } as any)
+          .eq("id", user.id);
       }
 
       setProfile({ ...data, streak_days: newStreak });
@@ -52,83 +68,132 @@ export default function AchievementsPage() {
     syncStreak();
   }, [user]);
 
-  // Use the greater of profile.projects_completed and actual completed projects count
-  const actualCompleted = projects.filter(p => p.status === "completed").length;
+  const actualCompleted = projects.filter((p) => p.status === "completed").length;
   const completedCount = Math.max(profile?.projects_completed ?? 0, actualCompleted);
-  
-  // Use the greater of profile.total_xp and actual sum of completed project XP
-  const actualXP = projects.filter(p => p.status === "completed").reduce((s, p) => s + (p.xp || 0), 0);
+
+  const actualXP = projects.filter((p) => p.status === "completed").reduce((s, p) => s + (p.xp || 0), 0);
   const totalXP = Math.max(profile?.total_xp ?? 0, actualXP);
-  
+
   const streakDays = profile?.streak_days ?? 0;
   const inventoryCount = useMemo(() => getInventoryCount(user?.id), [user?.id]);
 
-  // Compute achievements dynamically from real data
-  const achievements: Achievement[] = useMemo(() => [
-    {
-      id: 1, emoji: "⚡", title: "First Spark", desc: "Complete your first Arduino project",
-      xp: 50, color: "#00F5FF",
-      progress: Math.min(completedCount, 1), total: 1,
-      unlocked: completedCount >= 1,
-    },
-    {
-      id: 2, emoji: "🔥", title: "On Fire", desc: "Complete 3 projects",
-      xp: 100, color: "#FF4500",
-      progress: Math.min(completedCount, 3), total: 3,
-      unlocked: completedCount >= 3,
-    },
-    {
-      id: 3, emoji: "🌈", title: "Color Wizard", desc: "Complete 5 projects",
-      xp: 75, color: "#B744FF",
-      progress: Math.min(completedCount, 5), total: 5,
-      unlocked: completedCount >= 5,
-    },
-    {
-      id: 4, emoji: "🤖", title: "Robotics Pioneer", desc: "Reach Level 2",
-      xp: 200, color: "#00F5FF",
-      progress: Math.min(profile?.level ?? 1, 2), total: 2,
-      unlocked: (profile?.level ?? 1) >= 2,
-    },
-    {
-      id: 5, emoji: "🏆", title: "Champion Builder", desc: "Complete 10 projects",
-      xp: 500, color: "#FFD700",
-      progress: Math.min(completedCount, 10), total: 10,
-      unlocked: completedCount >= 10,
-    },
-    {
-      id: 6, emoji: "💪", title: "XP Hunter", desc: "Earn 500+ XP total",
-      xp: 150, color: "#B744FF",
-      progress: Math.min(totalXP, 500), total: 500,
-      unlocked: totalXP >= 500,
-    },
-    {
-      id: 7, emoji: "🌟", title: "Star Maker", desc: "Earn 1000+ XP total",
-      xp: 300, color: "#FFD700",
-      progress: Math.min(totalXP, 1000), total: 1000,
-      unlocked: totalXP >= 1000,
-    },
-    {
-      id: 8, emoji: "⚙️", title: "Component Master", desc: "Add 20+ components to your inventory",
-      xp: 125, color: "#00FF88",
-      progress: Math.min(inventoryCount, 20), total: 20,
-      unlocked: inventoryCount >= 20,
-    },
-    {
-      id: 9, emoji: "🔥", title: "Streak Starter", desc: "Maintain a 3-day streak",
-      xp: 75, color: "#FF4500",
-      progress: Math.min(streakDays, 3), total: 3,
-      unlocked: streakDays >= 3,
-    },
-    {
-      id: 10, emoji: "📅", title: "Week Warrior", desc: "Maintain a 7-day streak",
-      xp: 200, color: "#FF4500",
-      progress: Math.min(streakDays, 7), total: 7,
-      unlocked: streakDays >= 7,
-    },
-  ], [completedCount, totalXP, inventoryCount, profile?.level, streakDays]);
+  const achievements: Achievement[] = useMemo(
+    () => [
+      {
+        id: 1,
+        emoji: "⚡",
+        title: "First Spark",
+        desc: "Complete your first Arduino project",
+        xp: 50,
+        color: "#06B6D4", // Cyan
+        progress: Math.min(completedCount, 1),
+        total: 1,
+        unlocked: completedCount >= 1,
+      },
+      {
+        id: 2,
+        emoji: "🔥",
+        title: "On Fire",
+        desc: "Complete 3 projects",
+        xp: 100,
+        color: "#EF4444", // Red/Orange
+        progress: Math.min(completedCount, 3),
+        total: 3,
+        unlocked: completedCount >= 3,
+      },
+      {
+        id: 3,
+        emoji: "🌈",
+        title: "Color Wizard",
+        desc: "Complete 5 projects",
+        xp: 75,
+        color: "#8B5CF6", // Purple
+        progress: Math.min(completedCount, 5),
+        total: 5,
+        unlocked: completedCount >= 5,
+      },
+      {
+        id: 4,
+        emoji: "🤖",
+        title: "Robotics Pioneer",
+        desc: "Reach Level 2",
+        xp: 200,
+        color: "#3B82F6", // Blue
+        progress: Math.min(profile?.level ?? 1, 2),
+        total: 2,
+        unlocked: (profile?.level ?? 1) >= 2,
+      },
+      {
+        id: 5,
+        emoji: "🏆",
+        title: "Champion Builder",
+        desc: "Complete 10 projects",
+        xp: 500,
+        color: "#F59E0B", // Amber
+        progress: Math.min(completedCount, 10),
+        total: 10,
+        unlocked: completedCount >= 10,
+      },
+      {
+        id: 6,
+        emoji: "💪",
+        title: "XP Hunter",
+        desc: "Earn 500+ XP total",
+        xp: 150,
+        color: "#EC4899", // Pink
+        progress: Math.min(totalXP, 500),
+        total: 500,
+        unlocked: totalXP >= 500,
+      },
+      {
+        id: 7,
+        emoji: "🌟",
+        title: "Star Maker",
+        desc: "Earn 1000+ XP total",
+        xp: 300,
+        color: "#F59E0B",
+        progress: Math.min(totalXP, 1000),
+        total: 1000,
+        unlocked: totalXP >= 1000,
+      },
+      {
+        id: 8,
+        emoji: "⚙️",
+        title: "Component Master",
+        desc: "Add 20+ components to your inventory",
+        xp: 125,
+        color: "#10B981", // Emerald
+        progress: Math.min(inventoryCount, 20),
+        total: 20,
+        unlocked: inventoryCount >= 20,
+      },
+      {
+        id: 9,
+        emoji: "🔥",
+        title: "Streak Starter",
+        desc: "Maintain a 3-day streak",
+        xp: 75,
+        color: "#EF4444",
+        progress: Math.min(streakDays, 3),
+        total: 3,
+        unlocked: streakDays >= 3,
+      },
+      {
+        id: 10,
+        emoji: "📅",
+        title: "Week Warrior",
+        desc: "Maintain a 7-day streak",
+        xp: 200,
+        color: "#EF4444",
+        progress: Math.min(streakDays, 7),
+        total: 7,
+        unlocked: streakDays >= 7,
+      },
+    ],
+    [completedCount, totalXP, inventoryCount, profile?.level, streakDays]
+  );
 
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
-  const achievementXP = achievements.filter((a) => a.unlocked).reduce((sum, a) => sum + a.xp, 0);
 
   const filtered = achievements.filter((a) => {
     if (filter === "unlocked") return a.unlocked;
@@ -138,38 +203,86 @@ export default function AchievementsPage() {
 
   return (
     <Layout>
-      <div className="px-8 py-10 max-w-4xl mx-auto">
-        <FadeInView className="mb-10">
+      <div className="px-6 py-8 max-w-4xl mx-auto">
+        {/* Title */}
+        <FadeInView className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <Trophy size={24} style={{ color: "hsl(var(--secondary))" }} />
-            <h1 className="text-3xl font-bold" style={{ color: "hsl(var(--foreground))" }}>
-              <span className="gradient-text-gold">Achievements</span>
-            </h1>
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 border-2 border-b-4 border-amber-300 flex items-center justify-center text-2xl shadow-sm">
+              🏆
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold font-display text-indigo-950">
+                Achievements
+              </h1>
+              <p className="text-sm font-medium text-slate-500">
+                Level up your skills and unlock legendary build badges
+              </p>
+            </div>
           </div>
-          <p style={{ color: "hsl(var(--muted-foreground))" }}>Track your progress and earn badges</p>
         </FadeInView>
 
+        {/* Quick Stats Grid */}
         <StaggerContainer className="grid grid-cols-3 gap-4 mb-8">
           {[
-            { icon: Trophy, label: "Unlocked", value: `${unlockedCount}/${achievements.length}`, color: "hsl(var(--secondary))" },
-            { icon: Zap, label: "Total XP", value: `${totalXP}`, color: "hsl(var(--primary))" },
-            { icon: Star, label: "Projects Done", value: `${completedCount}`, color: "hsl(var(--success))" },
-          ].map(({ icon: Icon, label, value, color }) => (
-            <motion.div key={label} variants={staggerItem} className="rounded-2xl border p-5 text-center"
-              style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
-              <Icon size={20} style={{ color }} className="mx-auto mb-2" />
-              <p className="text-xl font-bold font-orbitron" style={{ color }}>{value}</p>
-              <p className="text-xs mt-1" style={{ color: "hsl(var(--muted-foreground))" }}>{label}</p>
+            {
+              icon: Trophy,
+              label: "Unlocked",
+              value: `${unlockedCount}/${achievements.length}`,
+              bg: "bg-amber-50",
+              border: "border-amber-200",
+              textColor: "text-amber-600",
+            },
+            {
+              icon: Zap,
+              label: "Total XP",
+              value: `${totalXP}`,
+              bg: "bg-indigo-50",
+              border: "border-indigo-200",
+              textColor: "text-indigo-600",
+            },
+            {
+              icon: Star,
+              label: "Completed",
+              value: `${completedCount}`,
+              bg: "bg-emerald-50",
+              border: "border-emerald-200",
+              textColor: "text-emerald-600",
+            },
+          ].map(({ icon: Icon, label, value, bg, border, textColor }) => (
+            <motion.div
+              key={label}
+              variants={staggerItem}
+              className={`bg-white border-2 border-b-4 ${border} rounded-2xl p-5 text-center shadow-sm hover:translate-y-[-2px] transition-all`}
+            >
+              <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mx-auto mb-2`}>
+                <Icon className={`w-5 h-5 ${textColor}`} />
+              </div>
+              <p className="text-2xl font-extrabold font-display text-indigo-950">
+                {value}
+              </p>
+              <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">
+                {label}
+              </p>
             </motion.div>
           ))}
         </StaggerContainer>
 
+        {/* Weekly Progress Tracker */}
         <FadeInView>
-          <div className="rounded-2xl border p-5 mb-8" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
+          <div className="bg-white border-2 border-b-4 border-slate-100 rounded-2xl p-6 mb-8 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold" style={{ color: "hsl(var(--foreground))" }}>🔥 Daily Streak</h3>
-              <button onClick={() => navigate("/dashboard")} className="text-sm font-semibold px-3 py-1 rounded-lg transition-all hover:scale-105"
-                style={{ background: "hsl(var(--destructive) / 0.1)", color: "hsl(var(--destructive))", border: "1px solid hsl(var(--destructive) / 0.3)" }}>
+              <div>
+                <h3 className="font-extrabold font-display text-indigo-950 text-lg flex items-center gap-2">
+                  <span>🔥</span> Daily Streak Tracker
+                </h3>
+                <p className="text-xs font-semibold text-slate-400">
+                  Earn XP daily to protect your streak!
+                </p>
+              </div>
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="text-xs font-bold px-4 py-2 bg-rose-50 hover:bg-rose-100 border-2 border-b-4 border-rose-200 active:border-b-2 active:translate-y-[2px] text-rose-600 rounded-xl transition-all"
+              >
                 View Challenges →
               </button>
             </div>
@@ -181,14 +294,32 @@ export default function AchievementsPage() {
                 const isToday = i === todayDayIdx;
                 return (
                   <div key={day} className="flex-1 text-center">
-                    <div className="w-full aspect-square rounded-xl flex items-center justify-center mb-1 transition-all"
-                      style={{
-                        background: active ? "linear-gradient(135deg, hsl(var(--destructive)), hsl(var(--destructive) / 0.7))" : "hsl(var(--muted))",
-                        boxShadow: active ? "0 0 12px hsl(var(--destructive) / 0.4)" : "none",
-                      }}>
-                      {active ? <CheckCircle size={14} style={{ color: "hsl(var(--foreground))" }} /> : <div className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--muted-foreground) / 0.4)" }} />}
+                    <div
+                      className={`w-full aspect-square rounded-xl flex items-center justify-center mb-1 transition-all ${
+                        active
+                          ? "bg-rose-500 border-2 border-b-4 border-rose-700 text-white"
+                          : isToday
+                          ? "bg-slate-100 border-2 border-dashed border-slate-300"
+                          : "bg-slate-50 border-2 border-slate-100"
+                      }`}
+                    >
+                      {active ? (
+                        <CheckCircle size={14} className="text-white" />
+                      ) : (
+                        <div className="w-2 h-2 rounded-full bg-slate-300" />
+                      )}
                     </div>
-                    <span className="text-xs" style={{ color: isToday ? "hsl(var(--primary))" : active ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))" }}>{day}</span>
+                    <span
+                      className={`text-xs font-bold ${
+                        isToday
+                          ? "text-indigo-600 font-extrabold"
+                          : active
+                          ? "text-rose-600 font-extrabold"
+                          : "text-slate-400"
+                      }`}
+                    >
+                      {day}
+                    </span>
                   </div>
                 );
               })}
@@ -196,56 +327,100 @@ export default function AchievementsPage() {
           </div>
         </FadeInView>
 
+        {/* Filters */}
         <FadeInView>
           <div className="flex gap-2 mb-6">
             {(["all", "unlocked", "locked"] as const).map((f) => (
-              <button key={f} onClick={() => setFilter(f)} className="px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all"
-                style={filter === f
-                  ? { background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.4)" }
-                  : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
-                }
-              >{f}</button>
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-5 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all border-2 border-b-4 ${
+                  filter === f
+                    ? "bg-indigo-500 border-indigo-700 text-white"
+                    : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                }`}
+              >
+                {f}
+              </button>
             ))}
           </div>
         </FadeInView>
 
+        {/* Achievements Grid */}
         <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {filtered.map((ach) => (
             <motion.div key={ach.id} variants={staggerItem}>
               <MotionCard
-                className="rounded-2xl border p-5"
-                style={ach.unlocked
-                  ? { background: "hsl(var(--card))", borderColor: `${ach.color}44`, boxShadow: `0 0 15px ${ach.color}11` }
-                  : { background: "hsl(var(--card))", borderColor: "hsl(var(--border))", opacity: 0.7 }
-                }
+                className={`rounded-2xl border-2 border-b-4 bg-white p-5 shadow-sm transition-all hover:translate-y-[-2px]`}
+                style={{
+                  borderColor: ach.unlocked ? `${ach.color}44` : "#E2E8F0",
+                }}
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                    style={{ background: ach.unlocked ? `${ach.color}22` : "hsl(var(--muted))", border: `1px solid ${ach.unlocked ? ach.color + "44" : "hsl(var(--border))"}` }}
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 border-2 border-b-4 shadow-sm"
+                    style={{
+                      background: ach.unlocked ? `${ach.color}15` : "#F8FAFC",
+                      borderColor: ach.unlocked ? ach.color : "#CBD5E1",
+                    }}
                   >
-                    {ach.unlocked ? ach.emoji : <Lock size={18} style={{ color: "hsl(var(--muted-foreground))" }} />}
+                    {ach.unlocked ? (
+                      ach.emoji
+                    ) : (
+                      <Lock size={18} className="text-slate-400" />
+                    )}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h3 className="font-bold text-sm" style={{ color: ach.unlocked ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}>{ach.title}</h3>
-                        <p className="text-xs mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>{ach.desc}</p>
+                        <h3
+                          className="font-extrabold text-sm"
+                          style={{
+                            color: ach.unlocked ? "hsl(var(--foreground))" : "hsl(var(--foreground-muted))",
+                          }}
+                        >
+                          {ach.title}
+                        </h3>
+                        <p className="text-xs font-semibold text-slate-400 mt-0.5">
+                          {ach.desc}
+                        </p>
                       </div>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${ach.color}22`, color: ach.color, border: `1px solid ${ach.color}44` }}>+{ach.xp} XP</span>
+                      <span
+                        className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 border"
+                        style={{
+                          background: `${ach.color}15`,
+                          color: ach.color,
+                          borderColor: `${ach.color}40`,
+                        }}
+                      >
+                        +{ach.xp} XP
+                      </span>
                     </div>
                     {!ach.unlocked && (
                       <div className="mt-3">
-                        <div className="flex items-center justify-between text-xs mb-1" style={{ color: "hsl(var(--muted-foreground))" }}>
-                          <span>Progress</span><span>{ach.progress}/{ach.total}</span>
+                        <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                          <span>Progress</span>
+                          <span>
+                            {ach.progress}/{ach.total}
+                          </span>
                         </div>
-                        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
-                          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${(ach.progress / ach.total) * 100}%`, background: `linear-gradient(90deg, ${ach.color}, ${ach.color}88)`, boxShadow: `0 0 8px ${ach.color}66` }} />
+                        <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
+                          <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{
+                              width: `${(ach.progress / ach.total) * 100}%`,
+                              background: ach.color,
+                            }}
+                          />
                         </div>
                       </div>
                     )}
                     {ach.unlocked && (
                       <div className="flex items-center gap-1 mt-2">
-                        <CheckCircle size={12} style={{ color: "hsl(var(--success))" }} /><span className="text-xs font-medium" style={{ color: "hsl(var(--success))" }}>Unlocked!</span>
+                        <CheckCircle size={12} className="text-emerald-500" />
+                        <span className="text-xs font-bold text-emerald-500">
+                          Unlocked!
+                        </span>
                       </div>
                     )}
                   </div>

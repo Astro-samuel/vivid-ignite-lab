@@ -12,9 +12,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Space Grotesk', 'sans-serif'],
+        sans: ['Nunito', 'sans-serif'],
+        display: ['Baloo 2', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
-        orbitron: ['Orbitron', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

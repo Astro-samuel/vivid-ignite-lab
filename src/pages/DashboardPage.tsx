@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import { Play, CheckCircle, Save, Trash2, Clock, Bookmark, Flame, Star, Target, LogIn, Loader2, Zap, ArrowRight, BookOpen } from "lucide-react";
+import {
+  Play, CheckCircle, Trash2, Clock, Bookmark, Flame, Star, LogIn,
+  Loader2, Zap, ArrowRight, BookOpen, GraduationCap, Gem, Trophy,
+} from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
-import FadeInView from "@/components/motion/FadeInView";
-import MotionCard from "@/components/motion/MotionCard";
-import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,25 +41,34 @@ function getInventoryComponents(userId?: string): string[] {
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
-  const styles =
+  const style =
     difficulty === "beginner"
-      ? { background: "rgba(0,255,136,0.15)", color: "#00FF88", border: "1px solid rgba(0,255,136,0.3)" }
+      ? { background: "#DCFCE7", color: "#16A34A", border: "2px solid #86EFAC" }
       : difficulty === "intermediate"
-      ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
-      : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
+      ? { background: "#FFFBEB", color: "#D97706", border: "2px solid #FDE68A" }
+      : { background: "#F5F3FF", color: "#7C3AED", border: "2px solid #C4B5FD" };
   return (
-    <span className="text-xs px-2 py-0.5 rounded-full font-semibold capitalize" style={styles}>
+    <span
+      className="text-xs px-2.5 py-0.5 rounded-full font-bold capitalize"
+      style={{ fontFamily: "'Baloo 2', sans-serif", ...style }}
+    >
       {difficulty}
     </span>
   );
 }
 
-function WhatCanIMakeWidget({ navigate, userId, userProjectIds }: { navigate: (path: string) => void; userId?: string; userProjectIds: Set<number> }) {
+function WhatCanIMakeWidget({
+  navigate,
+  userId,
+  userProjectIds,
+}: {
+  navigate: (path: string) => void;
+  userId?: string;
+  userProjectIds: Set<number>;
+}) {
   const inventory = useMemo(() => getInventoryComponents(userId), [userId]);
   const inventoryNorm = inventory.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
-
   const availableProjects = quickProjects.filter(p => !userProjectIds.has(p.id));
-
   const buildable = availableProjects.filter(p =>
     p.components.every(req =>
       inventoryNorm.some(owned => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
@@ -68,41 +77,57 @@ function WhatCanIMakeWidget({ navigate, userId, userProjectIds }: { navigate: (p
 
   if (inventory.length === 0) {
     return (
-      <div className="rounded-2xl border p-5 mb-6" style={{ background: "hsl(var(--primary) / 0.04)", borderColor: "hsl(var(--primary) / 0.15)" }}>
+      <motion.div
+        className="clay-card p-5 mb-6"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
         <div className="flex items-center gap-2 mb-2">
-          <Zap size={16} style={{ color: "hsl(var(--primary))" }} />
-          <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>What Can I Make?</span>
+          <Zap size={18} style={{ color: "#6366F1" }} />
+          <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+            What Can I Make?
+          </span>
         </div>
-        <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
+        <p className="text-sm font-semibold mb-3" style={{ color: "hsl(240, 14%, 60%)" }}>
           Add components to your inventory to see projects you can build right now!
         </p>
         <button
           onClick={() => navigate("/components")}
-          className="px-4 py-2 rounded-xl text-xs font-bold transition-all hover:scale-[1.02]"
-          style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
+          className="clay-btn clay-btn-primary clay-btn-sm"
+          id="setup-inventory-btn"
         >
           Set Up Inventory
         </button>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="rounded-2xl border p-5 mb-6" style={{ background: "hsl(var(--primary) / 0.04)", borderColor: "hsl(var(--primary) / 0.15)" }}>
-      <div className="flex items-center justify-between mb-3">
+    <motion.div
+      className="clay-card p-5 mb-6"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+    >
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Zap size={16} style={{ color: "hsl(var(--primary))" }} />
-          <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>
-            What Can I Make? 
+          <Zap size={18} style={{ color: "#6366F1" }} />
+          <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+            What Can I Make?
           </span>
-          <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}>
-            {buildable.length} project{buildable.length !== 1 ? "s" : ""}
+          <span
+            className="text-xs px-2.5 py-0.5 rounded-full font-black"
+            style={{ background: "#DCFCE7", color: "#16A34A", border: "2px solid #86EFAC", fontFamily: "'Baloo 2', sans-serif" }}
+          >
+            {buildable.length} ready
           </span>
         </div>
         <button
           onClick={() => navigate("/generate")}
-          className="text-xs font-semibold transition-all hover:opacity-80"
-          style={{ color: "hsl(var(--primary))" }}
+          className="text-xs font-black"
+          style={{ color: "#6366F1" }}
+          id="see-all-projects-btn"
         >
           See all →
         </button>
@@ -110,13 +135,12 @@ function WhatCanIMakeWidget({ navigate, userId, userProjectIds }: { navigate: (p
 
       {buildable.length === 0 ? (
         <div>
-          <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
-            No fully buildable projects found with your current inventory. Try adding more components!
+          <p className="text-sm font-semibold mb-3" style={{ color: "hsl(240, 14%, 60%)" }}>
+            No fully buildable projects found. Try adding more components!
           </p>
           <button
             onClick={() => navigate("/components")}
-            className="px-4 py-2 rounded-xl text-xs font-bold transition-all hover:scale-[1.02]"
-            style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
+            className="clay-btn clay-btn-ghost clay-btn-sm"
           >
             Update Inventory
           </button>
@@ -126,6 +150,7 @@ function WhatCanIMakeWidget({ navigate, userId, userProjectIds }: { navigate: (p
           {buildable.slice(0, 3).map(p => (
             <button
               key={p.id}
+              id={`buildable-project-${p.id}`}
               onClick={() => {
                 localStorage.setItem("activeGeneratedProject", JSON.stringify({
                   id: p.id, emoji: p.emoji, title: p.title, difficulty: p.difficulty,
@@ -133,20 +158,26 @@ function WhatCanIMakeWidget({ navigate, userId, userProjectIds }: { navigate: (p
                 }));
                 navigate(`/project/${p.id}`);
               }}
-              className="rounded-xl p-3 text-left transition-all hover:scale-[1.02] border"
-              style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
+              className="rounded-2xl p-3 text-left transition-all cursor-pointer"
+              style={{
+                background: "#EEF2FF",
+                border: "2px solid #C7D2FE",
+                boxShadow: "0 3px 0 0 #A5B4FC",
+              }}
             >
               <div className="text-xl mb-1">{p.emoji}</div>
-              <p className="text-xs font-bold truncate" style={{ color: "hsl(var(--foreground))" }}>{p.title}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{p.time}</span>
-                <span className="text-xs font-bold" style={{ color: "hsl(var(--secondary))" }}>+{p.xp}</span>
+              <p className="text-xs font-black truncate" style={{ color: "hsl(244, 61%, 33%)", fontFamily: "'Baloo 2', sans-serif" }}>
+                {p.title}
+              </p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-[10px] font-semibold" style={{ color: "hsl(240, 14%, 60%)" }}>{p.time}</span>
+                <span className="text-[10px] font-black" style={{ color: "#A855F7" }}>+{p.xp}</span>
               </div>
             </button>
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -161,12 +192,16 @@ export default function DashboardPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [dbXp, setDbXp] = useState(0);
   const [streakDays, setStreakDays] = useState(0);
+  const [streakAnimating, setStreakAnimating] = useState(false);
 
-  // Fetch XP and streak from profile (DB source of truth) + update streak based on calendar
   useEffect(() => {
     if (!user) return;
     const updateStreak = async () => {
-      const { data } = await supabase.from("profiles").select("total_xp, streak_days, projects_completed, last_active_date").eq("id", user.id).single();
+      const { data } = await supabase
+        .from("profiles")
+        .select("total_xp, streak_days, last_active_date")
+        .eq("id", user.id)
+        .single();
       if (!data) return;
 
       const today = new Date().toISOString().split("T")[0];
@@ -174,7 +209,6 @@ export default function DashboardPage() {
       let newStreak = data.streak_days || 0;
 
       if (lastActive !== today) {
-        // Calculate if yesterday was the last active date
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayStr = yesterday.toISOString().split("T")[0];
@@ -184,14 +218,10 @@ export default function DashboardPage() {
         } else if (!lastActive) {
           newStreak = 1;
         } else {
-          newStreak = 1; // streak reset
+          newStreak = 1;
         }
 
-        // Update last_active_date and streak in DB
-        await supabase.from("profiles").update({
-          last_active_date: today,
-          streak_days: newStreak,
-        }).eq("id", user.id);
+        await supabase.from("profiles").update({ last_active_date: today, streak_days: newStreak }).eq("id", user.id);
       }
 
       const prevStreak = streakDays;
@@ -206,51 +236,40 @@ export default function DashboardPage() {
     updateStreak();
   }, [user]);
 
-  const [streakAnimating, setStreakAnimating] = useState(false);
-
-  // Sync inventory from DB on login (for new devices)
   useEffect(() => {
     if (!user) return;
     const invKey = `inventory_${user.id}`;
     if (localStorage.getItem(invKey)) return;
-    
-    supabase.from("profiles").select("ai_preferences").eq("id", user.id).single()
-      .then(({ data }) => {
-        const inventory = (data?.ai_preferences as any)?.inventory_v1;
-        if (inventory) {
-          const names = Object.keys(inventory);
-          localStorage.setItem(invKey, JSON.stringify(names));
-          setToast("🎒 Inventory restored!");
-          setTimeout(() => setToast(""), 3000);
-        }
-      });
+    supabase.from("profiles").select("ai_preferences").eq("id", user.id).single().then(({ data }) => {
+      const inventory = (data?.ai_preferences as any)?.inventory_v1;
+      if (inventory) {
+        const names = Object.keys(inventory);
+        localStorage.setItem(invKey, JSON.stringify(names));
+        showToast("Inventory restored!");
+      }
+    });
   }, [user]);
 
-  // Check onboarding status from DB, not just localStorage
   useEffect(() => {
     if (!user) return;
-    if (localStorage.getItem(`onboarding_${user.id}`)) return; // already done
-    supabase.from("profiles").select("display_name").eq("id", user.id).single()
-      .then(({ data }) => {
-        if (data?.display_name) {
-          localStorage.setItem(`onboarding_${user.id}`, "done");
-        } else {
-          navigate("/onboarding");
-        }
-      });
+    if (localStorage.getItem(`onboarding_${user.id}`)) return;
+    supabase.from("profiles").select("display_name").eq("id", user.id).single().then(({ data }) => {
+      if (data?.display_name) {
+        localStorage.setItem(`onboarding_${user.id}`, "done");
+      } else {
+        navigate("/onboarding");
+      }
+    });
   }, [user, navigate]);
 
   const openProject = async (p: typeof projects[0]) => {
     setNavigatingId(p.project_id);
     await new Promise(r => setTimeout(r, 500));
-    localStorage.setItem(
-      "activeGeneratedProject",
-      JSON.stringify({
-        id: p.project_id, emoji: p.emoji, title: p.title, description: p.description,
-        desc: p.description, difficulty: p.difficulty, time: p.time, xp: p.xp,
-        components: p.components || [], source: "dashboard",
-      })
-    );
+    localStorage.setItem("activeGeneratedProject", JSON.stringify({
+      id: p.project_id, emoji: p.emoji, title: p.title, description: p.description,
+      desc: p.description, difficulty: p.difficulty, time: p.time, xp: p.xp,
+      components: p.components || [], source: "dashboard",
+    }));
     navigate(`/project/${p.project_id}`);
   };
 
@@ -262,517 +281,646 @@ export default function DashboardPage() {
     showToast("Project removed");
   };
 
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 3000);
+  };
+
   const inProgressProjects = projects.filter(p => p.status === "inProgress");
   const completedProjects = projects.filter(p => p.status === "completed");
   const savedProjects = projects.filter(p => p.status === "saved");
-  const totalXP = dbXp;
 
   const dailyChallenges = useMemo(() => {
     const hasCompletedToday = completedProjects.some(p => {
       const updated = new Date(p.updated_at);
-      const today = new Date();
-      return updated.toDateString() === today.toDateString();
+      return updated.toDateString() === new Date().toDateString();
     });
-    const hasInProgress = inProgressProjects.length > 0;
     return [
-      { icon: "🎯", title: "Complete a Project", desc: "Finish any project from the catalog", xp: 50, done: hasCompletedToday },
-      { icon: "🔧", title: "Work on a Project", desc: "Continue or start any project", xp: 25, done: hasInProgress },
-      { icon: "🔥", title: "Keep Your Streak", desc: `Current streak: ${streakDays} day${streakDays !== 1 ? "s" : ""}`, xp: 35, done: streakDays > 0 },
+      { title: "Complete a Project", desc: "Finish any project from the catalog", xp: 50, done: hasCompletedToday },
+      { title: "Work on a Project", desc: "Continue or start any project", xp: 25, done: inProgressProjects.length > 0 },
+      { title: "Keep Your Streak", desc: `${streakDays} day streak`, xp: 35, done: streakDays > 0 },
     ];
   }, [completedProjects, inProgressProjects, streakDays]);
 
   if (!authLoading && !user) {
     return (
       <Layout>
-        <div className="px-6 py-8 max-w-5xl mx-auto text-center">
-          <FadeInView>
-            <div className="text-5xl mb-4">🔒</div>
-            <h1 className="text-2xl font-bold mb-2" style={{ color: "hsl(var(--foreground))" }}>Sign in to access your Dashboard</h1>
-            <p className="text-sm mb-6" style={{ color: "hsl(var(--muted-foreground))" }}>Save projects, track progress, and earn XP</p>
+        <div className="px-4 py-12 max-w-lg mx-auto text-center">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+            <div
+              className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mx-auto mb-6"
+              style={{ background: "#EEF2FF", border: "3px solid #C7D2FE", boxShadow: "0 5px 0 0 #A5B4FC" }}
+            >
+              🔒
+            </div>
+            <h1 className="text-3xl font-black mb-2" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+              Sign in to continue
+            </h1>
+            <p className="text-sm font-semibold mb-6" style={{ color: "hsl(240, 14%, 60%)" }}>
+              Save projects, track progress, and earn XP
+            </p>
             <button
               onClick={() => navigate("/auth")}
-              className="px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-2 mx-auto transition-all hover:scale-105"
-              style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
+              className="clay-btn clay-btn-primary clay-btn-lg mx-auto"
+              id="dashboard-signin-btn"
             >
-              <LogIn size={16} /> Sign In / Sign Up
+              <LogIn size={18} />
+              Sign In / Sign Up
             </button>
-          </FadeInView>
+          </motion.div>
         </div>
       </Layout>
     );
   }
 
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(""), 3000);
-  };
-
-  const tabs: { id: Tab; label: string; count: number; icon: typeof Play }[] = [
-    { id: "inProgress", label: "In Progress", count: inProgressProjects.length, icon: Play },
-    { id: "completed", label: "Completed", count: completedProjects.length, icon: CheckCircle },
-    { id: "saved", label: "Saved", count: savedProjects.length, icon: Bookmark },
+  const tabs: { id: Tab; label: string; count: number; emoji: string }[] = [
+    { id: "inProgress", label: "In Progress", count: inProgressProjects.length, emoji: "▶️" },
+    { id: "completed",  label: "Completed",   count: completedProjects.length,  emoji: "✅" },
+    { id: "saved",      label: "Saved",       count: savedProjects.length,      emoji: "🔖" },
   ];
 
   return (
     <Layout>
-      <div className="px-6 py-8 max-w-5xl mx-auto">
-        {/* Header */}
-        <FadeInView className="mb-6">
-          <div className="flex items-center gap-2 mb-1">
-            <Target size={14} style={{ color: "hsl(var(--primary))" }} />
-            <span className="text-xs font-semibold" style={{ color: "hsl(var(--primary))" }}>Your Workspace</span>
-          </div>
-          <h1 className="text-3xl font-bold mb-1" style={{ color: "hsl(var(--foreground))" }}>Dashboard</h1>
-          <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>Track your projects and see your progress</p>
-        </FadeInView>
+      <div className="px-4 md:px-6 py-6 max-w-4xl mx-auto">
 
-        {/* Stats Row */}
-        <StaggerContainer className="grid grid-cols-4 gap-4 mb-6">
+        {/* ── Page Header ── */}
+        <motion.div className="mb-6" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-3xl font-black mb-0.5" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+            Dashboard
+          </h1>
+          <p className="text-sm font-semibold" style={{ color: "hsl(240, 14%, 60%)" }}>
+            Track your progress and keep the streak alive 🔥
+          </p>
+        </motion.div>
+
+        {/* ── Stats Grid ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {[
-            { label: "In Progress", value: inProgressProjects.length, icon: Play, color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.08)", border: "hsl(var(--primary) / 0.2)" },
-            { label: "Completed", value: completedProjects.length, icon: CheckCircle, color: "hsl(var(--success))", bg: "hsl(var(--success) / 0.08)", border: "hsl(var(--success) / 0.2)" },
-            { label: "Saved", value: savedProjects.length, icon: Bookmark, color: "hsl(var(--purple))", bg: "hsl(var(--purple) / 0.08)", border: "hsl(var(--purple) / 0.2)" },
-            { label: "Total XP", value: totalXP, icon: Star, color: "hsl(var(--secondary))", bg: "hsl(var(--secondary) / 0.08)", border: "hsl(var(--secondary) / 0.2)" },
-          ].map(({ label, value, icon: Icon, color, bg, border }) => (
+            { label: "In Progress", value: inProgressProjects.length, bg: "#EEF2FF", border: "#C7D2FE", shadow: "#A5B4FC", text: "#4F46E5", emoji: "▶️" },
+            { label: "Completed",   value: completedProjects.length,  bg: "#DCFCE7", border: "#86EFAC", shadow: "#4ADE80", text: "#16A34A", emoji: "✅" },
+            { label: "Saved",       value: savedProjects.length,      bg: "#F5F3FF", border: "#C4B5FD", shadow: "#A78BFA", text: "#7C3AED", emoji: "🔖" },
+            { label: "Total XP",    value: dbXp,                      bg: "#FFFBEB", border: "#FDE68A", shadow: "#FCD34D", text: "#D97706", emoji: "💎" },
+          ].map(({ label, value, bg, border, shadow, text, emoji }, i) => (
             <motion.div
               key={label}
-              variants={staggerItem}
-              className="rounded-2xl p-5 flex items-center gap-4 border"
-              style={{ background: bg, borderColor: border }}
+              className="rounded-2xl p-5 text-center"
+              style={{
+                background: bg,
+                border: `2.5px solid ${border}`,
+                boxShadow: `0 5px 0 0 ${shadow}`,
+              }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.06, type: "spring", stiffness: 300, damping: 25 }}
+              whileHover={{ translateY: -2, boxShadow: `0 7px 0 0 ${shadow}` }}
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}22` }}>
-                <Icon size={18} style={{ color }} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold font-orbitron" style={{ color }}>{value}</p>
-                <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{label}</p>
-              </div>
+              <div className="text-2xl mb-1">{emoji}</div>
+              <p className="text-3xl font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: text }}>
+                {value.toLocaleString()}
+              </p>
+              <p className="text-xs font-bold mt-0.5" style={{ color: "hsl(240, 14%, 60%)" }}>{label}</p>
             </motion.div>
           ))}
-        </StaggerContainer>
-        
-        {/* Onboarding Welcome Guide for new users with 0 stats */}
+        </div>
+
+        {/* ── Welcome guide for new users ── */}
         {inProgressProjects.length === 0 && completedProjects.length === 0 && savedProjects.length === 0 && (
-          <FadeInView delay={0.1} className="mb-6">
-            <div className="rounded-2xl p-6 border overflow-hidden relative" style={{ background: "linear-gradient(135deg, hsl(232, 42%, 11%), hsl(232, 45%, 8%))", borderColor: "hsl(var(--primary) / 0.3)" }}>
-              <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-[80px]" style={{ background: "hsl(var(--primary) / 0.15)" }} />
-              <div className="relative z-10 flex flex-col md:flex-row gap-6 items-center">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0" style={{ background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.2)" }}>
-                  🚀
-                </div>
-                <div className="flex-1 text-center md:text-left">
-                  <h2 className="text-xl font-bold mb-1" style={{ color: "hsl(var(--foreground))" }}>Welcome to ArduinoLab!</h2>
-                  <p className="text-sm mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>
-                    Your workspace is ready. Let's get you building your first project!
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-left">
-                    <div className="p-3 rounded-xl border border-dashed transition-all hover:bg-white/5" style={{ borderColor: "hsl(var(--border))" }}>
-                      <p className="text-xs font-bold mb-1 flex items-center gap-2" style={{ color: "hsl(var(--primary))" }}>
-                        <BookOpen size={12} /> Step 1: Browse Catalog
-                      </p>
-                      <p className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>Discover projects tailored to your skill level.</p>
-                    </div>
-                    <div className="p-3 rounded-xl border border-dashed transition-all hover:bg-white/5" style={{ borderColor: "hsl(var(--border))" }}>
-                      <p className="text-xs font-bold mb-1 flex items-center gap-2" style={{ color: "hsl(var(--success))" }}>
-                        <Zap size={12} /> Step 2: Set Inventory
-                      </p>
-                      <p className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>Add components you own for custom suggestions.</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                    <button
-                      onClick={() => navigate("/catalog")}
-                      className="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all hover:scale-[1.05]"
-                      style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
-                    >
-                      Browse All Projects <ArrowRight size={14} />
-                    </button>
-                    <button
-                      onClick={() => navigate("/components")}
-                      className="px-4 py-2 rounded-xl text-xs font-bold transition-all hover:scale-[1.05] border"
-                      style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
-                    >
-                      Add Components
-                    </button>
-                  </div>
+          <motion.div
+            className="clay-card p-6 mb-6 overflow-hidden relative"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            {/* Decorative bubble */}
+            <div
+              className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20"
+              style={{ background: "#6366F1" }}
+            />
+            <div className="relative z-10 flex flex-col sm:flex-row gap-5 items-center">
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
+                style={{ background: "#EEF2FF", border: "2.5px solid #C7D2FE", boxShadow: "0 4px 0 0 #A5B4FC" }}
+              >
+                🚀
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <h2 className="text-xl font-black mb-1" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+                  Welcome to ArduinoLab!
+                </h2>
+                <p className="text-sm font-semibold mb-4" style={{ color: "hsl(240, 14%, 60%)" }}>
+                  Your workspace is ready. Let's build your first project!
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                  <button
+                    onClick={() => navigate("/catalog")}
+                    className="clay-btn clay-btn-primary clay-btn-sm"
+                    id="welcome-browse-btn"
+                  >
+                    Browse Projects <ArrowRight size={14} />
+                  </button>
+                  <button
+                    onClick={() => navigate("/learn")}
+                    className="clay-btn clay-btn-ghost clay-btn-sm"
+                    id="welcome-learn-btn"
+                  >
+                    <GraduationCap size={14} /> Start Learning
+                  </button>
                 </div>
               </div>
             </div>
-          </FadeInView>
+          </motion.div>
         )}
 
-        {/* Two columns: Streak + Daily Challenges */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          {/* Streak — synced from DB */}
+        {/* ── Streak + Daily Challenges ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+
+          {/* Streak Calendar */}
           <motion.div
-            className="rounded-2xl p-5 border"
-            style={{ background: "hsl(var(--card))", borderColor: streakAnimating ? "hsl(var(--success) / 0.5)" : "hsl(var(--border))" }}
-            animate={streakAnimating ? { scale: [1, 1.03, 1], boxShadow: ["0 0 0px transparent", "0 0 20px hsl(var(--success) / 0.3)", "0 0 0px transparent"] } : {}}
-            transition={{ duration: 1.2, ease: "easeInOut" }}
+            className="clay-card p-5"
+            animate={streakAnimating ? { scale: [1, 1.03, 1] } : {}}
+            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <motion.div animate={streakAnimating ? { rotate: [0, -15, 15, 0], scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.6 }}>
-                  <Flame size={16} style={{ color: "hsl(var(--destructive))" }} />
+                  <Flame size={18} style={{ color: streakDays > 0 ? "#F59E0B" : "#94A3B8" }} />
                 </motion.div>
-                <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>
-                  Weekly Streak
+                <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+                  Daily Streak
                 </span>
               </div>
               <motion.span
-                className="text-xs font-bold px-2 py-0.5 rounded-full"
-                style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}
+                className="font-black text-sm px-3 py-1 rounded-full"
+                style={{
+                  background: streakDays > 0 ? "#FFFBEB" : "#F1F5F9",
+                  color: streakDays > 0 ? "#D97706" : "#94A3B8",
+                  border: `2px solid ${streakDays > 0 ? "#FDE68A" : "#E2E8F0"}`,
+                  fontFamily: "'Baloo 2', sans-serif",
+                }}
                 animate={streakAnimating ? { scale: [1, 1.2, 1] } : {}}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                {streakDays} day{streakDays !== 1 ? "s" : ""} {streakAnimating ? "🎉" : ""}
+                {streakDays} {streakDays === 1 ? "day" : "days"} {streakAnimating ? "🎉" : ""}
               </motion.span>
             </div>
+
+            {/* Week calendar dots — Duolingo style */}
             <div className="flex gap-2 justify-between">
               {(() => {
-                // Build actual day labels for this week (Mon-Sun) with correct "today" highlight
                 const now = new Date();
-                const todayDayIdx = (now.getDay() + 6) % 7; // 0=Mon, 6=Sun
+                const todayDayIdx = (now.getDay() + 6) % 7;
                 return dayLabels.map((d, i) => {
-                  // Active if this day is today or within the streak window before today
                   const daysAgo = todayDayIdx - i;
                   const active = daysAgo >= 0 && daysAgo < streakDays;
                   const isToday = i === todayDayIdx;
-                return (
-                  <div key={i} className="flex flex-col items-center gap-1.5">
-                    <motion.div
-                      initial={false}
-                      animate={active ? { scale: [1, 1.15, 1], backgroundColor: "hsl(var(--success) / 0.2)" } : {}}
-                      transition={{ duration: 0.3, delay: i * 0.05 }}
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-all"
-                      style={
-                        active
-                          ? { background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)", boxShadow: "0 0 8px hsl(var(--success) / 0.2)" }
-                          : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
-                      }
-                    >
-                      {active ? "✓" : d}
-                    </motion.div>
-                    <span className="text-xs font-medium" style={{ color: isToday ? "hsl(var(--primary))" : active ? "hsl(var(--success))" : "hsl(var(--muted-foreground))" }}>{d}</span>
-                  </div>
-                );
-              })})()}
+                  return (
+                    <div key={i} className="flex flex-col items-center gap-1.5">
+                      <motion.div
+                        className="w-9 h-9 rounded-full flex items-center justify-center font-black text-sm"
+                        style={
+                          active
+                            ? { background: "#22C55E", color: "white", border: "2.5px solid #16A34A", boxShadow: "0 3px 0 0 #15803D" }
+                            : { background: "hsl(238, 80%, 95%)", color: "hsl(240, 14%, 65%)", border: "2px solid hsl(238, 45%, 88%)" }
+                        }
+                        initial={false}
+                        animate={active && streakAnimating ? { scale: [1, 1.2, 1] } : {}}
+                        transition={{ duration: 0.3, delay: i * 0.05 }}
+                      >
+                        {active ? "✓" : d}
+                      </motion.div>
+                      <span
+                        className="text-[10px] font-bold"
+                        style={{ color: isToday ? "#6366F1" : active ? "#16A34A" : "hsl(240, 14%, 65%)" }}
+                      >
+                        {d}
+                      </span>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </motion.div>
 
-          {/* Daily Challenges — dynamic */}
-          <div
-            className="rounded-2xl p-5 border"
-            style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
+          {/* Daily Challenges */}
+          <motion.div
+            className="clay-card p-5"
+            initial={{ opacity: 0, x: 10 }}
+            whileInView={{ opacity: 1, x: 0 }}
           >
             <div className="flex items-center gap-2 mb-4">
-              <Star size={16} style={{ color: "hsl(var(--secondary))" }} />
-              <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>Daily Challenges</span>
+              <Star size={18} style={{ color: "#F59E0B" }} />
+              <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+                Daily Challenges
+              </span>
             </div>
+
             <div className="space-y-3">
               {dailyChallenges.map((c, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, x: -10 }}
+                  className="flex items-center justify-between rounded-xl p-3"
+                  style={{
+                    background: c.done ? "#DCFCE7" : "hsl(238, 80%, 96%)",
+                    border: `2px solid ${c.done ? "#86EFAC" : "hsl(238, 45%, 88%)"}`,
+                  }}
+                  initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="flex items-center justify-between"
+                  transition={{ delay: i * 0.08 }}
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="text-lg">{c.icon}</span>
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{
+                        background: c.done ? "#22C55E" : "white",
+                        border: `2px solid ${c.done ? "#16A34A" : "hsl(238, 45%, 82%)"}`,
+                      }}
+                    >
+                      {c.done && <CheckCircle size={14} color="white" strokeWidth={3} />}
+                    </div>
                     <div>
                       <p
-                        className="text-xs font-semibold"
+                        className="text-xs font-black"
                         style={{
-                          color: c.done ? "hsl(var(--muted-foreground))" : "hsl(var(--foreground))",
+                          color: c.done ? "#15803D" : "hsl(244, 61%, 33%)",
                           textDecoration: c.done ? "line-through" : "none",
+                          fontFamily: "'Baloo 2', sans-serif",
                         }}
                       >
                         {c.title}
                       </p>
-                      <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{c.desc}</p>
+                      <p className="text-[10px] font-semibold" style={{ color: "hsl(240, 14%, 60%)" }}>{c.desc}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <span className="text-xs font-bold" style={{ color: "hsl(var(--secondary))" }}>✦ +{c.xp}</span>
-                    {c.done && <CheckCircle size={14} style={{ color: "hsl(var(--success))" }} />}
-                  </div>
+                  <span
+                    className="text-xs font-black px-2 py-0.5 rounded-full flex-shrink-0"
+                    style={{ background: "#F5F3FF", color: "#7C3AED", border: "2px solid #C4B5FD", fontFamily: "'Baloo 2', sans-serif" }}
+                  >
+                    +{c.xp} XP
+                  </span>
                 </motion.div>
               ))}
             </div>
 
             <button
               onClick={() => navigate("/achievements")}
-              className="w-full mt-3 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
-              style={{
-                background: "linear-gradient(135deg, hsl(var(--purple)), hsl(var(--pink)))",
-                color: "hsl(var(--foreground))",
-                boxShadow: "0 0 15px hsl(var(--purple) / 0.3)",
-              }}
+              className="clay-btn clay-btn-primary w-full mt-4"
+              style={{ borderRadius: 14 }}
+              id="view-all-challenges-btn"
             >
-              ✦ View All Challenges
+              <Trophy size={15} /> View Achievements
             </button>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Learning Pathway */}
-        <FadeInView delay={0.15} className="mb-6">
-          <div className="rounded-2xl border p-5" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <BookOpen size={16} style={{ color: "hsl(var(--primary))" }} />
-                <span className="text-sm font-bold" style={{ color: "hsl(var(--foreground))" }}>Learning Pathway</span>
-              </div>
-              <button onClick={() => navigate("/learn")} className="text-xs font-semibold transition-all hover:opacity-80" style={{ color: "hsl(var(--primary))" }}>
-                Start Learning →
-              </button>
+        {/* ── Learning Pathway ── */}
+        <motion.div
+          className="clay-card p-5 mb-6"
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <BookOpen size={18} style={{ color: "#6366F1" }} />
+              <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
+                Learning Pathway
+              </span>
             </div>
-            <div className="flex items-center gap-3 overflow-x-auto pb-2">
-              {[
-                { step: 1, label: "LED Basics", desc: "Digital output & timing", emoji: "💡", done: completedProjects.length >= 1 },
-                { step: 2, label: "Sensors", desc: "Read analog data", emoji: "🌡️", done: completedProjects.length >= 2 },
-                { step: 3, label: "Motors", desc: "PWM & servo control", emoji: "🤖", done: completedProjects.length >= 3 },
-                { step: 4, label: "Displays", desc: "LCD & OLED output", emoji: "📺", done: completedProjects.length >= 5 },
-                { step: 5, label: "Wireless", desc: "Bluetooth & WiFi", emoji: "📡", done: completedProjects.length >= 7 },
-                { step: 6, label: "Automation", desc: "IoT & smart systems", emoji: "🏠", done: completedProjects.length >= 10 },
-              ].map((s, i, arr) => (
-                <div key={s.step} className="flex items-center gap-3 flex-shrink-0">
-                  <motion.div
-                    initial={{ scale: 0.9 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="flex flex-col items-center gap-1.5 min-w-[80px]"
-                  >
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all"
-                      style={{
-                        background: s.done ? "hsl(var(--success) / 0.15)" : "hsl(var(--muted))",
-                        border: `2px solid ${s.done ? "hsl(var(--success) / 0.4)" : "hsl(var(--border))"}`,
-                        boxShadow: s.done ? "0 0 10px hsl(var(--success) / 0.2)" : "none",
-                      }}
-                    >
-                      {s.done ? "✓" : s.emoji}
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs font-bold" style={{ color: s.done ? "hsl(var(--success))" : "hsl(var(--foreground))" }}>{s.label}</p>
-                      <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{s.desc}</p>
-                    </div>
-                  </motion.div>
-                  {i < arr.length - 1 && (
-                    <ArrowRight size={14} className="flex-shrink-0" style={{ color: s.done ? "hsl(var(--success))" : "hsl(var(--muted-foreground))" }} />
-                  )}
-                </div>
-              ))}
-            </div>
+            <button
+              onClick={() => navigate("/learn")}
+              className="text-xs font-black flex items-center gap-1"
+              style={{ color: "hsl(var(--primary))" }}
+              id="go-to-learn-btn"
+            >
+              📚 Explore Learning Hub
+            </button>
           </div>
-        </FadeInView>
 
-        {/* "What Can I Make?" Widget */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+            {[
+              { step: 1, label: "LED Basics", emoji: "💡", done: completedProjects.length >= 1 },
+              { step: 2, label: "Sensors",    emoji: "🌡️", done: completedProjects.length >= 2 },
+              { step: 3, label: "Motors",     emoji: "🤖", done: completedProjects.length >= 3 },
+              { step: 4, label: "Displays",   emoji: "📺", done: completedProjects.length >= 5 },
+              { step: 5, label: "Wireless",   emoji: "📡", done: completedProjects.length >= 7 },
+              { step: 6, label: "IoT",        emoji: "🏠", done: completedProjects.length >= 10 },
+            ].map((s, i, arr) => (
+              <div key={s.step} className="flex items-center gap-2 flex-shrink-0">
+                <motion.div
+                  className="flex flex-col items-center gap-1 min-w-[64px]"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-xl"
+                    style={
+                      s.done
+                        ? { background: "#DCFCE7", border: "2.5px solid #86EFAC", boxShadow: "0 3px 0 0 #4ADE80" }
+                        : { background: "hsl(238, 80%, 95%)", border: "2px solid hsl(238, 45%, 88%)", boxShadow: "0 3px 0 0 hsl(238, 45%, 82%)" }
+                    }
+                  >
+                    {s.done ? "✅" : s.emoji}
+                  </div>
+                  <p
+                    className="text-[10px] font-black text-center"
+                    style={{ color: s.done ? "#16A34A" : "hsl(244, 61%, 33%)", fontFamily: "'Baloo 2', sans-serif" }}
+                  >
+                    {s.label}
+                  </p>
+                </motion.div>
+                {i < arr.length - 1 && (
+                  <div
+                    style={{
+                      width: 24,
+                      height: 3,
+                      borderTop: `3px dashed ${s.done ? "#22C55E" : "hsl(238, 45%, 82%)"}`,
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* ── What Can I Make? ── */}
         <WhatCanIMakeWidget navigate={navigate} userId={user?.id} userProjectIds={userProjectIds} />
 
-        {/* Project Tabs */}
+        {/* ── Project Tabs ── */}
         <div className="flex gap-2 mb-5">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
-            const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
+                id={`tab-${tab.id}`}
                 onClick={() => setActiveTab(tab.id)}
-                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-black cursor-pointer transition-all"
                 style={
                   isActive
-                    ? { background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }
-                    : { background: "transparent", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
+                    ? {
+                        background: "#EEF2FF",
+                        color: "#4F46E5",
+                        border: "2.5px solid #C7D2FE",
+                        boxShadow: "0 3px 0 0 #A5B4FC",
+                        fontFamily: "'Baloo 2', sans-serif",
+                      }
+                    : {
+                        background: "white",
+                        color: "hsl(240, 14%, 60%)",
+                        border: "2px solid hsl(238, 45%, 88%)",
+                        fontFamily: "'Baloo 2', sans-serif",
+                      }
                 }
               >
-                <Icon size={13} />
-                {tab.label} ({tab.count})
+                {tab.emoji} {tab.label} ({tab.count})
               </button>
             );
           })}
         </div>
 
-        {/* Loading */}
+        {/* ── Loading ── */}
         {projectsLoading && (
           <div className="text-center py-16">
-            <div className="text-5xl mb-4 animate-spin">⚡</div>
-            <p style={{ color: "hsl(var(--muted-foreground))" }}>Loading projects...</p>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-12 h-12 rounded-full border-4 mx-auto mb-3"
+              style={{ borderColor: "#E0E7FF", borderTopColor: "#6366F1" }}
+            />
+            <p className="font-bold text-sm" style={{ color: "hsl(240, 14%, 60%)", fontFamily: "'Baloo 2', sans-serif" }}>
+              Loading projects...
+            </p>
           </div>
         )}
 
-        {/* Tab Content */}
-        {!projectsLoading && activeTab === "inProgress" && (
-          <div className="space-y-4">
-            {inProgressProjects.map((p) => (
-              <div
-                key={p.id}
-                className="rounded-2xl border p-5 transition-all"
-                style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-              >
-                <div className="flex items-start gap-4">
-                  <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                    style={{ background: "hsl(var(--primary) / 0.08)", border: "1px solid hsl(var(--primary) / 0.15)" }}
-                  >
-                    {p.emoji}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-3 mb-1">
-                      <div>
-                        <h3 className="font-bold" style={{ color: "hsl(var(--foreground))" }}>{p.title}</h3>
-                        <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "hsl(var(--muted-foreground))" }}>{p.description || ""}</p>
-                      </div>
-                      <div className="flex gap-2 flex-shrink-0">
-                        <button
-                          onClick={() => openProject(p)}
-                          disabled={navigatingId === p.project_id}
-                          className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-1.5"
-                          style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
-                        >
-                          {navigatingId === p.project_id ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : "Continue"}
-                        </button>
-                        <button
-                          onClick={() => handleDelete(p.project_id)}
-                          disabled={deletingId === p.project_id}
-                          className="p-1.5 rounded-lg transition-all hover:scale-110 disabled:opacity-70 disabled:cursor-not-allowed"
-                          style={{ color: "hsl(var(--destructive))", background: "hsl(var(--destructive) / 0.08)", border: "1px solid hsl(var(--destructive) / 0.2)" }}
-                        >
-                          {deletingId === p.project_id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                        </button>
-                      </div>
+        {/* ── Tab Content — In Progress ── */}
+        <AnimatePresence mode="wait">
+          {!projectsLoading && activeTab === "inProgress" && (
+            <motion.div
+              key="inProgress"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="space-y-4"
+            >
+              {inProgressProjects.map((p) => (
+                <div
+                  key={p.id}
+                  className="clay-card p-5"
+                >
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
+                      style={{ background: "#EEF2FF", border: "2px solid #C7D2FE" }}
+                    >
+                      {p.emoji}
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div>
+                          <h3 className="font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+                            {p.title}
+                          </h3>
+                          <p className="text-xs font-semibold mt-0.5 line-clamp-1" style={{ color: "hsl(240, 14%, 60%)" }}>
+                            {p.description || ""}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 flex-shrink-0">
+                          <button
+                            id={`continue-project-${p.project_id}`}
+                            onClick={() => openProject(p)}
+                            disabled={navigatingId === p.project_id}
+                            className="clay-btn clay-btn-success clay-btn-sm disabled:opacity-60"
+                          >
+                            {navigatingId === p.project_id
+                              ? <><Loader2 size={12} className="animate-spin" /> Loading...</>
+                              : <><Play size={12} /> Continue</>}
+                          </button>
+                          <button
+                            id={`delete-project-${p.project_id}`}
+                            onClick={() => handleDelete(p.project_id)}
+                            disabled={deletingId === p.project_id}
+                            className="clay-btn clay-btn-danger clay-btn-sm disabled:opacity-60"
+                            style={{ padding: "8px 10px" }}
+                          >
+                            {deletingId === p.project_id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                          </button>
+                        </div>
+                      </div>
 
-                    <div className="flex items-center gap-3 mb-3 mt-2">
-                      <DifficultyBadge difficulty={p.difficulty || "beginner"} />
-                      <span className="flex items-center gap-1 text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
-                        <Clock size={10} /> {p.time}
-                      </span>
-                    </div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <DifficultyBadge difficulty={p.difficulty || "beginner"} />
+                        <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: "hsl(240, 14%, 60%)" }}>
+                          <Clock size={11} /> {p.time}
+                        </span>
+                      </div>
 
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Progress</span>
-                      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
-                        <div
-                          className="h-full rounded-full transition-all duration-700"
-                          style={{
-                            width: `${p.progress || 0}%`,
-                            background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary-deep)))",
-                            boxShadow: "0 0 8px hsl(var(--primary) / 0.5)",
-                          }}
+                      {/* Progress bar */}
+                      <div className="clay-progress-track" style={{ height: 12 }}>
+                        <motion.div
+                          className="clay-progress-fill"
+                          style={{ height: "100%" }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${p.progress || 0}%` }}
+                          transition={{ duration: 0.8, delay: 0.1 }}
                         />
                       </div>
-                      <span className="text-xs font-bold" style={{ color: "hsl(var(--primary))" }}>{p.progress || 0}%</span>
+                      <p className="text-right text-xs font-black mt-1" style={{ color: "#16A34A", fontFamily: "'Baloo 2', sans-serif" }}>
+                        {p.progress || 0}%
+                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            {inProgressProjects.length === 0 && (
-              <div className="text-center py-16">
-                <div className="text-5xl mb-4">🚀</div>
-                <p style={{ color: "hsl(var(--muted-foreground))" }}>No projects in progress. Start one!</p>
-                <button onClick={() => navigate("/generate")} className="mt-4 px-6 py-2.5 rounded-full text-sm font-bold" style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}>
-                  Generate a Project
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+              ))}
+              {inProgressProjects.length === 0 && (
+                <EmptyState emoji="🚀" message="No projects in progress. Start one!" action={() => navigate("/generate")} actionLabel="Generate a Project" />
+              )}
+            </motion.div>
+          )}
 
-        {!projectsLoading && activeTab === "completed" && (
-          <div className="space-y-4">
-            {completedProjects.map((p) => (
-              <div key={p.id} className="rounded-2xl border p-5" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--success) / 0.2)" }}>
-                <div className="flex items-center gap-4">
-                  <div className="text-3xl">{p.emoji}</div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold" style={{ color: "hsl(var(--foreground))" }}>{p.title}</h3>
-                          <CheckCircle size={15} style={{ color: "hsl(var(--success))" }} />
+          {/* ── Tab Content — Completed ── */}
+          {!projectsLoading && activeTab === "completed" && (
+            <motion.div key="completed" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
+              {completedProjects.map((p) => (
+                <div
+                  key={p.id}
+                  className="rounded-2xl p-5"
+                  style={{ background: "#DCFCE7", border: "2.5px solid #86EFAC", boxShadow: "0 4px 0 0 #4ADE80" }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="text-3xl">{p.emoji}</div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>{p.title}</h3>
+                            <CheckCircle size={16} style={{ color: "#16A34A" }} />
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <DifficultyBadge difficulty={p.difficulty || "beginner"} />
+                            <span className="text-xs font-black" style={{ color: "#16A34A", fontFamily: "'Baloo 2', sans-serif" }}>
+                              +{p.xp} XP
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <DifficultyBadge difficulty={p.difficulty || "beginner"} />
-                          <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Completed</span>
-                          <span className="text-xs font-bold" style={{ color: "hsl(var(--success))" }}>+{p.xp} XP</span>
-                        </div>
+                        <button
+                          id={`view-code-${p.project_id}`}
+                          onClick={() => openProject(p)}
+                          disabled={navigatingId === p.project_id}
+                          className="clay-btn clay-btn-ghost clay-btn-sm disabled:opacity-60"
+                        >
+                          {navigatingId === p.project_id ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : "View Code"}
+                        </button>
                       </div>
-                      <button
-                        onClick={() => openProject(p)}
-                        disabled={navigatingId === p.project_id}
-                        className="px-4 py-1.5 rounded-full text-xs font-bold border transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-1.5"
-                        style={{ borderColor: "hsl(var(--primary) / 0.4)", color: "hsl(var(--primary))" }}
-                      >
-                        {navigatingId === p.project_id ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : "View Code"}
-                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            {completedProjects.length === 0 && (
-              <div className="text-center py-16">
-                <div className="text-5xl mb-4">🏆</div>
-                <p style={{ color: "hsl(var(--muted-foreground))" }}>No completed projects yet. Start building!</p>
-              </div>
-            )}
-          </div>
-        )}
+              ))}
+              {completedProjects.length === 0 && (
+                <EmptyState emoji="🏆" message="No completed projects yet. Start building!" action={() => navigate("/catalog")} actionLabel="Browse Catalog" />
+              )}
+            </motion.div>
+          )}
 
-        {!projectsLoading && activeTab === "saved" && (
-          <div className="space-y-4">
-            {savedProjects.map((p) => (
-              <div key={p.id} className="rounded-2xl border p-5" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--purple) / 0.2)" }}>
-                <div className="flex items-center gap-4">
-                  <div className="text-3xl">{p.emoji}</div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div>
-                        <h3 className="font-bold" style={{ color: "hsl(var(--foreground))" }}>{p.title}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <DifficultyBadge difficulty={p.difficulty || "beginner"} />
-                          <span className="flex items-center gap-1 text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
-                            <Clock size={10} /> {p.time}
-                          </span>
-                          <span className="text-xs font-bold" style={{ color: "hsl(var(--secondary))" }}>+{p.xp} XP</span>
+          {/* ── Tab Content — Saved ── */}
+          {!projectsLoading && activeTab === "saved" && (
+            <motion.div key="saved" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
+              {savedProjects.map((p) => (
+                <div
+                  key={p.id}
+                  className="rounded-2xl p-5"
+                  style={{ background: "#F5F3FF", border: "2.5px solid #C4B5FD", boxShadow: "0 4px 0 0 #A78BFA" }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="text-3xl">{p.emoji}</div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div>
+                          <h3 className="font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>{p.title}</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <DifficultyBadge difficulty={p.difficulty || "beginner"} />
+                            <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: "hsl(240, 14%, 60%)" }}>
+                              <Clock size={10} /> {p.time}
+                            </span>
+                            <span className="text-xs font-black" style={{ color: "#7C3AED", fontFamily: "'Baloo 2', sans-serif" }}>+{p.xp} XP</span>
+                          </div>
                         </div>
+                        <button
+                          id={`start-saved-${p.project_id}`}
+                          onClick={() => openProject(p)}
+                          disabled={navigatingId === p.project_id}
+                          className="clay-btn clay-btn-primary clay-btn-sm disabled:opacity-60"
+                        >
+                          {navigatingId === p.project_id ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : <><Play size={12} /> Start</>}
+                        </button>
                       </div>
-                      <button
-                        onClick={() => openProject(p)}
-                        disabled={navigatingId === p.project_id}
-                        className="px-4 py-1.5 rounded-full text-xs font-bold transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-1.5"
-                        style={{ background: "linear-gradient(135deg, hsl(var(--purple)), hsl(var(--pink)))", color: "hsl(var(--foreground))" }}
-                      >
-                        {navigatingId === p.project_id ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : "Start Project"}
-                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            {savedProjects.length === 0 && (
-              <div className="text-center py-16">
-                <div className="text-5xl mb-4">📚</div>
-                <p style={{ color: "hsl(var(--muted-foreground))" }}>No saved projects yet.</p>
-                <button onClick={() => navigate("/catalog")} className="mt-4 px-6 py-2.5 rounded-full text-sm font-bold" style={{ background: "linear-gradient(135deg, hsl(var(--purple)), hsl(var(--pink)))", color: "hsl(var(--foreground))" }}>
-                  Browse Catalog
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+              ))}
+              {savedProjects.length === 0 && (
+                <EmptyState emoji="📚" message="No saved projects yet." action={() => navigate("/catalog")} actionLabel="Browse Catalog" />
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {toast && (
-        <div
-          className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up z-50"
-          style={{ background: "linear-gradient(135deg, hsl(var(--success)), hsl(var(--success-deep)))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 20px hsl(var(--success) / 0.4)" }}
-        >
-          <CheckCircle size={16} /> {toast}
-        </div>
-      )}
+      {/* ── Toast ── */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            className="fixed bottom-24 md:bottom-6 right-6 px-5 py-3 rounded-2xl flex items-center gap-2 font-black z-50"
+            style={{
+              background: "#22C55E",
+              color: "white",
+              border: "2.5px solid #16A34A",
+              boxShadow: "0 5px 0 0 #15803D",
+              fontFamily: "'Baloo 2', sans-serif",
+            }}
+            initial={{ y: 40, opacity: 0, scale: 0.9 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 20, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          >
+            <CheckCircle size={16} /> {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Layout>
   );
 }
+
+function EmptyState({
+  emoji, message, action, actionLabel,
+}: {
+  emoji: string;
+  message: string;
+  action: () => void;
+  actionLabel: string;
+}) {
+  return (
+    <motion.div
+      className="text-center py-14"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+    >
+      <div
+        className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4"
+        style={{ background: "#EEF2FF", border: "3px solid #C7D2FE", boxShadow: "0 5px 0 0 #A5B4FC" }}
+      >
+        {emoji}
+      </div>
+      <p className="font-bold text-sm mb-4" style={{ color: "hsl(240, 14%, 60%)", fontFamily: "'Baloo 2', sans-serif" }}>
+        {message}
+      </p>
+      <button onClick={action} className="clay-btn clay-btn-primary clay-btn-sm mx-auto">
+        {actionLabel}
+      </button>
+    </motion.div>
+  );
+}
+
+

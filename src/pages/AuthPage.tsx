@@ -18,27 +18,24 @@ export default function AuthPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [confirmMsg, setConfirmMsg] = useState("");
 
-  // Handle post-verification redirect or already logged-in users
   useEffect(() => {
     const checkUser = async () => {
       if (user) {
-        // Check profile in DB — if display_name is set, user has already onboarded
         const { data: profile } = await supabase
           .from("profiles")
           .select("display_name")
           .eq("id", user.id)
           .single();
-        
+
         if (profile?.display_name) {
           localStorage.setItem(`onboarding_${user.id}`, "done");
           navigate("/dashboard", { replace: true });
         } else {
-          // If no display name, send to onboarding
           navigate("/onboarding", { replace: true });
         }
       }
     };
-    
+
     if (!authLoading) {
       checkUser();
     }
@@ -62,7 +59,6 @@ export default function AuthPage() {
         return;
       }
 
-      // Check username availability
       const { data: available, error: checkErr } = await supabase.rpc("check_username_available", {
         desired_username: username.trim(),
       });
@@ -86,7 +82,6 @@ export default function AuthPage() {
       else {
         const userId = data?.user?.id;
         if (userId) {
-          // Check profile in DB — if display_name is set, user has already onboarded
           const { data: profile } = await supabase
             .from("profiles")
             .select("display_name")
@@ -119,13 +114,13 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "hsl(var(--background))" }}>
       <FadeInView className="w-full max-w-md">
-        <div className="rounded-2xl p-8" style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
+        <div className="bg-white border-2 border-b-4 border-slate-100 rounded-3xl p-8 shadow-sm">
           {/* Logo */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold font-orbitron" style={{ color: "hsl(var(--foreground))" }}>
-              ⚡ Arduino<span style={{ color: "hsl(var(--primary))" }}>Lab</span>
+            <h1 className="text-3xl font-extrabold font-display text-indigo-950 flex items-center justify-center gap-1.5">
+              <span>⚡</span> Ignite<span className="text-indigo-600 font-extrabold font-display">Lab</span>
             </h1>
-            <p className="text-sm mt-2" style={{ color: "hsl(var(--muted-foreground))" }}>
+            <p className="text-sm font-bold text-slate-400 mt-2">
               {mode === "login" ? "Welcome back, maker!" : "Join the maker community"}
             </p>
           </div>
@@ -134,11 +129,10 @@ export default function AuthPage() {
           <button
             onClick={handleGoogleSignIn}
             disabled={googleLoading}
-            className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-3 transition-all hover:scale-[1.02] disabled:opacity-50 mb-4"
-            style={{ background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))" }}
+            className="w-full py-3 bg-white hover:bg-slate-50 border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold flex items-center justify-center gap-3 transition-all text-slate-600 mb-6"
           >
             {googleLoading ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={16} className="animate-spin text-slate-500" />
             ) : (
               <>
                 <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
@@ -152,32 +146,40 @@ export default function AuthPage() {
             )}
           </button>
 
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px" style={{ background: "hsl(var(--border))" }} />
-            <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>or</span>
-            <div className="flex-1 h-px" style={{ background: "hsl(var(--border))" }} />
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex-1 h-0.5 bg-slate-100" />
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">or</span>
+            <div className="flex-1 h-0.5 bg-slate-100" />
           </div>
 
-          {/* Tabs */}
-          <div className="flex rounded-xl mb-6 p-1" style={{ background: "hsl(var(--muted))" }}>
-            {(["login", "signup"] as const).map((m) => (
-              <button
-                key={m}
-                onClick={() => { setMode(m); setError(""); setConfirmMsg(""); }}
-                className="flex-1 py-2 rounded-lg text-sm font-semibold capitalize transition-all"
-                style={mode === m
-                  ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }
-                  : { color: "hsl(var(--muted-foreground))" }}
-              >
-                {m === "login" ? "Log In" : "Sign Up"}
-              </button>
-            ))}
+          {/* Mode Switcher Tabs */}
+          <div className="flex bg-slate-100 p-1 rounded-2xl mb-6">
+            {(["login", "signup"] as const).map((m) => {
+              const active = mode === m;
+              return (
+                <button
+                  key={m}
+                  onClick={() => {
+                    setMode(m);
+                    setError("");
+                    setConfirmMsg("");
+                  }}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all border-2 border-b-4 ${
+                    active
+                      ? "bg-white border-slate-200 text-indigo-600 shadow-sm"
+                      : "bg-transparent border-transparent text-slate-500 hover:text-slate-600"
+                  }`}
+                >
+                  {m === "login" ? "Log In" : "Sign Up"}
+                </button>
+              );
+            })}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
               <div className="relative">
-                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "hsl(var(--muted-foreground))" }} />
+                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Username"
@@ -186,25 +188,23 @@ export default function AuthPage() {
                   maxLength={30}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2"
-                  style={{ background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", "--tw-ring-color": "hsl(var(--primary))" } as any}
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 hover:bg-slate-100/50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 placeholder:font-bold"
                 />
               </div>
             )}
             <div className="relative">
-              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "hsl(var(--muted-foreground))" }} />
+              <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="email"
-                placeholder="Email"
+                placeholder="Email address"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2"
-                style={{ background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", "--tw-ring-color": "hsl(var(--primary))" } as any}
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 hover:bg-slate-100/50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 placeholder:font-bold"
               />
             </div>
             <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "hsl(var(--muted-foreground))" }} />
+              <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="password"
                 placeholder="Password"
@@ -212,26 +212,25 @@ export default function AuthPage() {
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2"
-                style={{ background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))", "--tw-ring-color": "hsl(var(--primary))" } as any}
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 hover:bg-slate-100/50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 placeholder:font-bold"
               />
             </div>
 
             {mode === "login" && (
               <div className="text-right">
-                <Link to="/forgot-password" className="text-xs hover:underline" style={{ color: "hsl(var(--primary))" }}>
+                <Link to="/forgot-password" className="text-xs font-bold text-indigo-500 hover:text-indigo-600 hover:underline">
                   Forgot password?
                 </Link>
               </div>
             )}
 
             {error && (
-              <p className="text-sm px-3 py-2 rounded-lg" style={{ background: "hsl(var(--destructive) / 0.1)", color: "hsl(var(--destructive))" }}>
+              <p className="text-xs font-bold px-4 py-3 bg-rose-50 border border-rose-100 text-rose-600 rounded-xl">
                 {error}
               </p>
             )}
             {confirmMsg && (
-              <p className="text-sm px-3 py-2 rounded-lg" style={{ background: "hsl(var(--success) / 0.1)", color: "hsl(var(--success))" }}>
+              <p className="text-xs font-bold px-4 py-3 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-xl">
                 {confirmMsg}
               </p>
             )}
@@ -239,10 +238,11 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:opacity-50"
-              style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
+              className="w-full py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-50 disabled:pointer-events-none"
             >
-              {loading ? <Loader2 size={16} className="animate-spin" /> : (
+              {loading ? (
+                <Loader2 size={16} className="animate-spin text-white" />
+              ) : (
                 <>
                   {mode === "login" ? "Log In" : "Create Account"}
                   <ArrowRight size={16} />
