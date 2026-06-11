@@ -56,13 +56,13 @@ const iconMap: Record<string, string> = {
 
 // Path colors mapped to clay-style palette
 const pathColorMap: Record<string, { bg: string; border: string; shadow: string; text: string; light: string }> = {
-  "#3B82F6": { bg: "#3B82F6", border: "#2563EB", shadow: "#1D4ED8", text: "#1D4ED8", light: "#EFF6FF" },
-  "#10B981": { bg: "#10B981", border: "#059669", shadow: "#047857", text: "#065F46", light: "#ECFDF5" },
-  "#F59E0B": { bg: "#F59E0B", border: "#D97706", shadow: "#B45309", text: "#92400E", light: "#FFFBEB" },
-  "#8B5CF6": { bg: "#8B5CF6", border: "#7C3AED", shadow: "#6D28D9", text: "#4C1D95", light: "#F5F3FF" },
-  "#EF4444": { bg: "#EF4444", border: "#DC2626", shadow: "#B91C1C", text: "#7F1D1D", light: "#FEF2F2" },
+  "#3B82F6": { bg: "#3B82F6", border: "rgba(59, 130, 246, 0.4)", shadow: "rgba(59, 130, 246, 0.2)", text: "#93C5FD", light: "rgba(59, 130, 246, 0.1)" },
+  "#10B981": { bg: "#10B981", border: "rgba(16, 185, 129, 0.4)", shadow: "rgba(16, 185, 129, 0.2)", text: "#6EE7B7", light: "rgba(16, 185, 129, 0.1)" },
+  "#F59E0B": { bg: "#F59E0B", border: "rgba(245, 158, 11, 0.4)", shadow: "rgba(245, 158, 11, 0.2)", text: "#FCD34D", light: "rgba(245, 158, 11, 0.1)" },
+  "#8B5CF6": { bg: "#8B5CF6", border: "rgba(139, 92, 246, 0.4)", shadow: "rgba(139, 92, 246, 0.2)", text: "#C4B5FD", light: "rgba(139, 92, 246, 0.1)" },
+  "#EF4444": { bg: "#EF4444", border: "rgba(239, 68, 68, 0.4)", shadow: "rgba(239, 68, 68, 0.2)", text: "#FCA5A5", light: "rgba(239, 68, 68, 0.1)" },
 };
-const defaultColor = { bg: "#6366F1", border: "#4F46E5", shadow: "#4338CA", text: "#312E81", light: "#EEF2FF" };
+const defaultColor = { bg: "#6366F1", border: "rgba(99, 102, 241, 0.4)", shadow: "rgba(99, 102, 241, 0.2)", text: "#A5B4FC", light: "rgba(99, 102, 241, 0.1)" };
 
 function getPathColor(hex: string) {
   return pathColorMap[hex] || defaultColor;
@@ -117,10 +117,10 @@ function LessonNode({
                 animation: "nodeFloat 3s ease-in-out infinite",
               }
             : {
-                background: "hsl(238, 45%, 90%)",
-                borderColor: "hsl(238, 45%, 82%)",
-                boxShadow: "0 4px 0 0 hsl(238, 45%, 76%)",
-                color: "hsl(240, 14%, 65%)",
+                background: "hsl(240, 10%, 15%)",
+                borderColor: "hsl(240, 10%, 25%)",
+                boxShadow: "0 4px 0 0 hsl(240, 10%, 10%)",
+                color: "hsl(240, 5%, 45%)",
                 width: 64,
                 height: 64,
                 cursor: "not-allowed",
@@ -147,7 +147,7 @@ function LessonNode({
       {/* Label below node */}
       <p
         className="text-center mt-1.5 font-bold text-xs leading-tight max-w-[80px]"
-        style={{ color: isLocked ? "hsl(240, 14%, 70%)" : pathColor.text, fontFamily: "'Baloo 2', sans-serif" }}
+        style={{ color: isLocked ? "hsl(240, 5%, 50%)" : pathColor.text, fontFamily: "'Baloo 2', sans-serif" }}
       >
         {lesson.title}
       </p>
@@ -163,7 +163,7 @@ function PathConnector({ completed }: { completed: boolean }) {
         style={{
           width: 3,
           height: 24,
-          borderLeft: `3px dashed ${completed ? "#22C55E" : "hsl(238, 45%, 80%)"}`,
+          borderLeft: `3px dashed ${completed ? "#22C55E" : "hsl(var(--border))"}`,
         }}
       />
     </div>
@@ -291,7 +291,7 @@ export default function LearnPage() {
         >
           <h1
             className="text-3xl font-black mb-1"
-            style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}
+            style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}
           >
             Learn Arduino
           </h1>
@@ -303,9 +303,9 @@ export default function LearnPage() {
         {/* ── Quick Stats Row ── */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-            { label: "Lessons Done", value: totalCompleted, icon: CheckCircle, color: "#22C55E", bg: "#DCFCE7", border: "#86EFAC" },
-            { label: "XP Earned",    value: totalXpEarned,  icon: Zap,         color: "#A855F7", bg: "#F5F3FF", border: "#C4B5FD" },
-            { label: "Total Lessons", value: lessons.length, icon: Star,        color: "#F59E0B", bg: "#FFFBEB", border: "#FDE68A" },
+            { label: "Lessons Done", value: totalCompleted, icon: CheckCircle, color: "#22C55E", bg: "rgba(34, 197, 94, 0.1)", border: "rgba(34, 197, 94, 0.3)" },
+            { label: "XP Earned",    value: totalXpEarned,  icon: Zap,         color: "#A855F7", bg: "rgba(168, 85, 247, 0.1)", border: "rgba(168, 85, 247, 0.3)" },
+            { label: "Total Lessons", value: lessons.length, icon: Star,        color: "#F59E0B", bg: "rgba(245, 158, 11, 0.1)", border: "rgba(245, 158, 11, 0.3)" },
           ].map(({ label, value, icon: Icon, color, bg, border }, i) => (
             <motion.div
               key={label}
@@ -344,14 +344,14 @@ export default function LearnPage() {
               style={
                 challengeCompleted
                   ? {
-                      background: "#DCFCE7",
-                      border: "2.5px solid #86EFAC",
-                      boxShadow: "0 4px 0 0 #4ADE80",
+                      background: "rgba(34, 197, 94, 0.1)",
+                      border: "2.5px solid rgba(34, 197, 94, 0.3)",
+                      boxShadow: "0 4px 0 0 rgba(34, 197, 94, 0.15)",
                     }
                   : {
-                      background: "linear-gradient(135deg, #FFFBEB, #FEF9C3)",
-                      border: "2.5px solid #FDE68A",
-                      boxShadow: "0 4px 0 0 #FCD34D",
+                      background: "hsl(var(--card))",
+                      border: "2.5px solid rgba(245, 158, 11, 0.3)",
+                      boxShadow: "0 4px 0 0 rgba(245, 158, 11, 0.15)",
                     }
               }
             >
@@ -359,8 +359,8 @@ export default function LearnPage() {
                 <div
                   className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
                   style={{
-                    background: challengeCompleted ? "#BBF7D0" : "#FEF3C7",
-                    border: `2px solid ${challengeCompleted ? "#86EFAC" : "#FDE68A"}`,
+                    background: challengeCompleted ? "rgba(34, 197, 94, 0.2)" : "rgba(245, 158, 11, 0.2)",
+                    border: `2px solid ${challengeCompleted ? "rgba(34, 197, 94, 0.4)" : "rgba(245, 158, 11, 0.4)"}`,
                   }}
                 >
                   {challengeCompleted ? "✅" : "⚡"}
@@ -370,12 +370,12 @@ export default function LearnPage() {
                     <Flame size={13} style={{ color: "#F59E0B" }} />
                     <span
                       className="text-xs font-black uppercase tracking-wider"
-                      style={{ color: "#92400E", fontFamily: "'Baloo 2', sans-serif" }}
+                      style={{ color: "#F59E0B", fontFamily: "'Baloo 2', sans-serif" }}
                     >
                       Daily Challenge
                     </span>
                   </div>
-                  <h3 className="font-black text-sm" style={{ color: "hsl(244, 61%, 33%)", fontFamily: "'Baloo 2', sans-serif" }}>
+                  <h3 className="font-black text-sm" style={{ color: "hsl(var(--foreground))", fontFamily: "'Baloo 2', sans-serif" }}>
                     {dailyChallenge.title}
                   </h3>
                   <p className="text-xs font-semibold" style={{ color: "hsl(240, 14%, 55%)" }}>
@@ -386,11 +386,11 @@ export default function LearnPage() {
               <div className="flex items-center gap-3 flex-shrink-0">
                 <span
                   className="font-black text-sm px-3 py-1 rounded-full"
-                  style={{ background: "#FEF3C7", color: "#92400E", border: "2px solid #FDE68A" }}
+                  style={{ background: "rgba(245, 158, 11, 0.2)", color: "#FCD34D", border: "2px solid rgba(245, 158, 11, 0.3)" }}
                 >
                   +{dailyChallenge.xp_reward} XP
                 </span>
-                <ChevronRight size={18} style={{ color: "#92400E" }} />
+                <ChevronRight size={18} style={{ color: "#FCD34D" }} />
               </div>
             </div>
           </motion.div>
@@ -460,9 +460,9 @@ export default function LearnPage() {
                             transform: "translateY(-2px)",
                           }
                         : {
-                            background: "white",
-                            border: "2.5px solid hsl(238, 45%, 88%)",
-                            boxShadow: "0 4px 0 0 hsl(238, 40%, 82%)",
+                            background: "hsl(var(--card))",
+                            border: "2.5px solid hsl(var(--border))",
+                            boxShadow: "0 4px 0 0 hsl(240, 15%, 12%)",
                           }
                     }
                     initial={{ opacity: 0, y: 8 }}
@@ -494,7 +494,7 @@ export default function LearnPage() {
                     </div>
                     <p
                       className="text-xs font-black leading-tight"
-                      style={{ color: isSelected ? c.text : "hsl(244, 61%, 33%)", fontFamily: "'Baloo 2', sans-serif" }}
+                      style={{ color: isSelected ? c.text : "hsl(var(--foreground))", fontFamily: "'Baloo 2', sans-serif" }}
                     >
                       {path.title}
                     </p>
@@ -532,7 +532,7 @@ export default function LearnPage() {
                 <div
                   className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
                   style={{
-                    background: "white",
+                    background: "hsl(var(--card))",
                     border: `2px solid ${selectedColor.border}`,
                     boxShadow: `0 3px 0 0 ${selectedColor.shadow}`,
                   }}
@@ -566,9 +566,9 @@ export default function LearnPage() {
               <div
                 className="rounded-2xl p-6"
                 style={{
-                  background: "white",
-                  border: "2.5px solid hsl(238, 45%, 88%)",
-                  boxShadow: "0 4px 0 0 hsl(238, 40%, 82%)",
+                  background: "hsl(var(--card))",
+                  border: "2.5px solid hsl(var(--border))",
+                  boxShadow: "0 4px 0 0 hsl(240, 15%, 12%)",
                 }}
               >
                 <h3
@@ -652,14 +652,14 @@ export default function LearnPage() {
                       <div
                         className="w-16 h-16 rounded-full flex items-center justify-center"
                         style={{
-                          background: "#FEF3C7",
-                          border: "3px solid #FDE68A",
-                          boxShadow: "0 5px 0 0 #FCD34D",
+                          background: "rgba(245, 158, 11, 0.1)",
+                          border: "3px solid rgba(245, 158, 11, 0.3)",
+                          boxShadow: "0 5px 0 0 rgba(245, 158, 11, 0.15)",
                         }}
                       >
                         <Trophy size={28} style={{ color: "#F59E0B" }} />
                       </div>
-                      <p className="font-black text-sm" style={{ color: "#92400E", fontFamily: "'Baloo 2', sans-serif" }}>
+                      <p className="font-black text-sm" style={{ color: "#FCD34D", fontFamily: "'Baloo 2', sans-serif" }}>
                         Path Complete! 🎉
                       </p>
                     </motion.div>
@@ -678,10 +678,10 @@ export default function LearnPage() {
             animate={{ opacity: 1 }}
           >
             <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4"
-              style={{ background: "#EEF2FF", border: "3px solid #C7D2FE" }}>
+              style={{ background: "hsl(var(--card))", border: "3px solid hsl(var(--border))" }}>
               📚
             </div>
-            <h3 className="text-xl font-black mb-2" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+            <h3 className="text-xl font-black mb-2" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
               No learning paths yet
             </h3>
             <p className="text-sm font-semibold" style={{ color: "hsl(240, 14%, 60%)" }}>

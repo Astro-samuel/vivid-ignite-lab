@@ -277,7 +277,7 @@ void loop() {
   Serial.println(smoothed);
   delay(50);
 }` },
-  { id: 16, title: "State Machine", desc: "Implement a finite state machine for sequential logic.", category: "state", difficulty: "intermediate", tags: ["FSM", "Logic"], code: `enum State { IDLE, RUNNING, PAUSED, DONE };
+  { id: 16, title: "State Machine (FSM)", desc: "Implement a finite state machine for multi-stage sequential logic.", category: "state", difficulty: "advanced", tags: ["FSM", "Logic", "Structure"], code: `enum State { IDLE, RUNNING, PAUSED, DONE };
 State currentState = IDLE;
 unsigned long stateTimer = 0;
 
@@ -311,7 +311,7 @@ void loop() {
       break;
   }
 }` },
-  { id: 17, title: "Toggle with Debounce", desc: "Toggle between states with proper button debouncing.", category: "state", difficulty: "beginner", tags: ["Toggle", "Debounce"], code: `const int BTN = 2;
+  { id: 17, title: "Toggle with Debounce", desc: "Toggle between states with software button debouncing.", category: "state", difficulty: "beginner", tags: ["Toggle", "Debounce"], code: `const int BTN = 2;
 const int LED = 13;
 bool ledState = false;
 bool lastBtnState = HIGH;
@@ -332,6 +332,138 @@ void loop() {
     }
   }
   lastBtnState = reading;
+}` },
+  { id: 18, title: "Hardware Interrupts", desc: "Instantly trigger functions using hardware interrupts (Pins 2 & 3 on Uno).", category: "state", difficulty: "advanced", tags: ["Interrupt", "Hardware", "ISR"], code: `const int BUTTON_PIN = 2;
+const int LED_PIN = 13;
+volatile bool ledState = false;
+
+// Interrupt Service Routine (ISR)
+// Must be as fast as possible; do not use delay() or Serial.print() inside
+void toggleLED() {
+  ledState = !ledState;
+}
+
+void setup() {
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
+  
+  // Attach interrupt to pin 2
+  // Options: LOW, CHANGE, RISING, FALLING
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), toggleLED, FALLING);
+}
+
+void loop() {
+  digitalWrite(LED_PIN, ledState);
+}` },
+  { id: 19, title: "EEPROM Persistent Storage", desc: "Save calibration values or state variables across resets/power loss.", category: "math", difficulty: "advanced", tags: ["EEPROM", "Storage", "Memory"], code: `#include <EEPROM.h>
+
+const int ADDR_BOOT_COUNT = 0;
+int bootCount = 0;
+
+void setup() {
+  Serial.begin(9600);
+  
+  // Read value from address 0
+  bootCount = EEPROM.read(ADDR_BOOT_COUNT);
+  bootCount++;
+  
+  // Save updated value back to address 0
+  EEPROM.write(ADDR_BOOT_COUNT, bootCount);
+  
+  Serial.print("This Arduino has booted ");
+  Serial.print(bootCount);
+  Serial.println(" times.");
+}
+
+void loop() {
+  // Your main program runs here
+}` },
+  { id: 20, title: "Sleep Mode (Low Power)", desc: "Shut down parts of the MCU to run your Arduino for months on batteries.", category: "timing", difficulty: "advanced", tags: ["Sleep", "Low Power", "Battery"], code: `#include <avr/sleep.h>
+#include <avr/power.h>
+
+const int INTERRUPT_PIN = 2;
+
+void wakeUp() {
+  // Handler executes after waking up
+}
+
+void enterSleepMode() {
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // Deep sleep
+  sleep_enable();
+  
+  // Wake up when pin 2 is pulled LOW
+  attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), wakeUp, LOW);
+  
+  sleep_cpu(); // Arduino goes to sleep here
+  
+  // --- PROGRAM RESUMES HERE AFTER WAKING UP ---
+  sleep_disable();
+  detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN));
+}
+
+void setup() {
+  pinMode(INTERRUPT_PIN, INPUT_PULLUP);
+  pinMode(LED_BUILTIN, OUTPUT);
+}
+
+void loop() {
+  // Blink LED to indicate activity
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000);
+  digitalWrite(LED_BUILTIN, LOW);
+  
+  // Enter sleep mode to save energy
+  enterSleepMode();
+}` },
+  { id: 21, title: "Custom Class Structure", desc: "Design a modular class to wrap hardware features (like a library).", category: "state", difficulty: "advanced", tags: ["Class", "Library", "OOP"], code: `// Object Oriented programming for cleaner code structure
+class Flasher {
+  private:
+    int ledPin;
+    long onTime;
+    long offTime;
+    int ledState;
+    unsigned long previousMillis;
+
+  public:
+    Flasher(int pin, long on, long off) {
+      ledPin = pin;
+      onTime = on;
+      offTime = off;
+      ledState = LOW;
+      previousMillis = 0;
+    }
+
+    void Begin() {
+      pinMode(ledPin, OUTPUT);
+    }
+
+    void Update() {
+      unsigned long currentMillis = millis();
+      if ((ledState == HIGH) && (currentMillis - previousMillis >= onTime)) {
+        ledState = LOW;
+        previousMillis = currentMillis;
+        digitalWrite(ledPin, ledState);
+      }
+      else if ((ledState == LOW) && (currentMillis - previousMillis >= offTime)) {
+        ledState = HIGH;
+        previousMillis = currentMillis;
+        digitalWrite(ledPin, ledState);
+      }
+    }
+};
+
+// Create flasher objects
+Flasher led1(12, 100, 400);
+Flasher led2(13, 350, 350);
+
+void setup() {
+  led1.Begin();
+  led2.Begin();
+}
+
+void loop() {
+  led1.Update();
+  led2.Update();
 }` },
 ];
 

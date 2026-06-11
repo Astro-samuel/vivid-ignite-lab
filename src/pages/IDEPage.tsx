@@ -108,6 +108,121 @@ const aiHints = [
   "You're almost there! Once you fix the syntax errors, think about what `delay(1000)` does. How long will the LED stay on vs off?",
 ];
 
+interface LibraryItem {
+  name: string;
+  includeName: string;
+  description: string;
+  sampleCode: string;
+}
+
+const LIBRARIES_DB: LibraryItem[] = [
+  {
+    name: "DHT Sensor Library",
+    includeName: "DHT.h",
+    description: "Read temperature and humidity values from DHT11/DHT22 sensors.",
+    sampleCode: `#include "DHT.h"
+#define DHTPIN 2
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+}
+
+void loop() {
+  float temp = dht.readTemperature();
+  float hum = dht.readHumidity();
+  Serial.print("Temp: "); Serial.print(temp); Serial.print(" C | Hum: "); Serial.println(hum);
+  delay(2000);
+}`
+  },
+  {
+    name: "LiquidCrystal I2C",
+    includeName: "LiquidCrystal_I2C.h",
+    description: "Drive character LCD displays via the standard I2C interface.",
+    sampleCode: `#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+void setup() {
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("Arduino Lab!");
+}
+
+void loop() {
+}`
+  },
+  {
+    name: "Servo",
+    includeName: "Servo.h",
+    description: "Allows an Arduino board to control RC hobby servo motors easily.",
+    sampleCode: `#include <Servo.h>
+Servo myservo;
+int pos = 0;
+
+void setup() {
+  myservo.attach(9);
+}
+
+void loop() {
+  for (pos = 0; pos <= 180; pos += 1) {
+    myservo.write(pos);
+    delay(15);
+  }
+  for (pos = 180; pos >= 0; pos -= 1) {
+    myservo.write(pos);
+    delay(15);
+  }
+}`
+  },
+  {
+    name: "FastLED",
+    includeName: "FastLED.h",
+    description: "Easy control of addressable LED strips (NeoPixel, WS2812B, APA102).",
+    sampleCode: `#include <FastLED.h>
+#define NUM_LEDS 10
+#define DATA_PIN 6
+CRGB leds[NUM_LEDS];
+
+void setup() {
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+}
+
+void loop() {
+  for(int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = CRGB::Red; FastLED.show(); delay(50);
+    leds[i] = CRGB::Black; FastLED.show();
+  }
+}`
+  },
+  {
+    name: "Adafruit SSD1306",
+    includeName: "Adafruit_SSD1306.h",
+    description: "Full graphics library for SSD1306 based 128x64 or 128x32 OLED screens.",
+    sampleCode: `#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+void setup() {
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0,0);
+  display.println("Hello, World!");
+  display.display();
+}
+
+void loop() {}`
+  }
+];
+
 export default function IDEPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -122,7 +237,39 @@ export default function IDEPage() {
   const [activeStep, setActiveStep] = useState(3);
   const [showInstructions, setShowInstructions] = useState(true);
   const [showSimulator, setShowSimulator] = useState(true);
+  const [showLibrariesPanel, setShowLibrariesPanel] = useState(false);
+  const [librarySearch, setLibrarySearch] = useState("");
+  const [installedLibraries, setInstalledLibraries] = useState<string[]>([]);
   const codeRef = useRef<HTMLTextAreaElement>(null);
+
+  // Parse code to find active includes on load/edit
+  useEffect(() => {
+    const includes = code.match(/#include\s*[<"]([^>"]+)[>"]/g) || [];
+    const detected = includes.map(inc => {
+      const match = inc.match(/[<"]([^>"]+)[>"]/);
+      return match ? match[1] : "";
+    }).filter(Boolean);
+    setInstalledLibraries(detected);
+  }, [code]);
+
+  const toggleInstallLibrary = (lib: LibraryItem) => {
+    const isInstalled = installedLibraries.includes(lib.includeName);
+    if (isInstalled) {
+      // Remove include line
+      const regex = new RegExp(`#include\\s*[<"]${lib.includeName}[>"]\\n?`, "g");
+      setCode(prev => prev.replace(regex, ""));
+      sonnerToast.info(`Uninstalled ${lib.name}`);
+    } else {
+      // Add include line at the top of the code
+      setCode(prev => `#include <${lib.includeName}>\n` + prev);
+      sonnerToast.success(`Installed ${lib.name}`);
+    }
+  };
+
+  const injectBoilerplate = (sample: string) => {
+    setCode(sample);
+    sonnerToast.success("Test code loaded into editor!");
+  };
 
   // Web Serial API states
   const [serialPort, setSerialPort] = useState<any>(null);
@@ -330,6 +477,18 @@ export default function IDEPage() {
               title={showInstructions ? "Hide Instructions" : "Show Instructions"}
             >
               {showInstructions ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
+            </button>
+            <button
+              onClick={() => setShowLibrariesPanel(!showLibrariesPanel)}
+              className="p-1.5 rounded-lg transition-all hover:scale-105"
+              style={{
+                background: showLibrariesPanel ? "rgba(6,182,212,0.15)" : "rgba(255,255,255,0.06)",
+                color: showLibrariesPanel ? "#00F5FF" : "hsl(228, 25%, 60%)",
+                border: showLibrariesPanel ? "1px solid rgba(6,182,212,0.3)" : "1px solid transparent",
+              }}
+              title={showLibrariesPanel ? "Hide Library Manager" : "Show Library Manager"}
+            >
+              <Package size={14} />
             </button>
             <button
               onClick={() => setShowSimulator(!showSimulator)}
@@ -593,6 +752,87 @@ export default function IDEPage() {
             </div>
           )}
 
+          {/* Library Manager Panel */}
+          {showLibrariesPanel && (
+            <div
+              className="w-80 flex-shrink-0 border-l flex flex-col transition-all duration-300 animate-slide-in-right bg-slate-950"
+              style={{ borderColor: "hsl(232, 40%, 16%)" }}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
+                <div className="flex items-center gap-2">
+                  <Package size={15} className="text-cyan-400" />
+                  <span className="font-bold text-sm text-white">Library Manager</span>
+                </div>
+                <button
+                  onClick={() => setShowLibrariesPanel(false)}
+                  className="text-slate-400 hover:text-white text-xs transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Search Bar */}
+              <div className="p-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
+                <input
+                  type="text"
+                  placeholder="Search libraries (e.g. FastLED, Servo)..."
+                  value={librarySearch}
+                  onChange={(e) => setLibrarySearch(e.target.value)}
+                  className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              {/* Library list */}
+              <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                {LIBRARIES_DB.filter(lib =>
+                  lib.name.toLowerCase().includes(librarySearch.toLowerCase()) ||
+                  lib.includeName.toLowerCase().includes(librarySearch.toLowerCase())
+                ).map(lib => {
+                  const isInstalled = installedLibraries.includes(lib.includeName);
+                  return (
+                    <div
+                      key={lib.includeName}
+                      className="p-3 rounded-xl border transition-all space-y-2"
+                      style={{
+                        background: isInstalled ? "rgba(0, 245, 255, 0.03)" : "rgba(255, 255, 255, 0.02)",
+                        borderColor: isInstalled ? "rgba(0, 245, 255, 0.25)" : "hsl(232, 40%, 20%)"
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h4 className="font-bold text-xs text-white">{lib.name}</h4>
+                          <code className="text-[10px] text-cyan-400 block mt-0.5">&lt;{lib.includeName}&gt;</code>
+                        </div>
+                        <button
+                          onClick={() => toggleInstallLibrary(lib)}
+                          className="px-2 py-1 rounded text-[10px] font-bold transition-all hover:scale-105"
+                          style={
+                            isInstalled
+                              ? { background: "rgba(255, 69, 0, 0.15)", color: "#FF4500", border: "1px solid rgba(255, 69, 0, 0.3)" }
+                              : { background: "rgba(0, 245, 255, 0.15)", color: "#00F5FF", border: "1px solid rgba(0, 245, 255, 0.3)" }
+                          }
+                        >
+                          {isInstalled ? "Uninstall" : "Install"}
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-slate-400 leading-normal">{lib.description}</p>
+                      
+                      {/* Inject sample button */}
+                      {isInstalled && (
+                        <button
+                          onClick={() => injectBoilerplate(lib.sampleCode)}
+                          className="w-full py-1.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-bold text-cyan-400 hover:bg-slate-850 hover:text-white transition-all flex items-center justify-center gap-1.5"
+                        >
+                          <Play size={10} /> Insert Test Code
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* AI Debug Panel */}
           {showDebug && (
             <div className="w-72 flex flex-col border-l flex-shrink-0 glass-card animate-slide-in-right" style={{ borderColor: "rgba(255,255,255,0.05)", animationDelay: "150ms" }}>
@@ -620,7 +860,7 @@ export default function IDEPage() {
 
               <div className="p-4 border-t space-y-2" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
                 <button onClick={askNextHint} className="btn-neon-outline-teal w-full py-2 text-sm font-semibold flex items-center justify-center gap-2">
-                  <Zap size={14} /> Get Next Hint
+					<Zap size={14} /> Get Next Hint
                 </button>
                 <p className="text-xs text-center" style={{ color: "hsl(228, 25%, 60%)" }}>
                   AI gives hints, not answers 🎓

@@ -165,25 +165,53 @@ export default function Index() {
       <div className="min-h-screen">
         {/* Hero Section */}
         <section
-          className="relative px-8 pt-16 pb-20 overflow-hidden"
-          style={{ background: "hsl(232, 48%, 6%)" }}
+          className="relative px-8 pt-24 pb-28 overflow-hidden min-h-[80vh] flex items-center justify-center"
         >
+          {/* Background Video (Cropped slightly on the right/bottom to hide watermarks) */}
+          <video
+            className="absolute pointer-events-none z-0"
+            style={{
+              top: "-2%",
+              left: "-2%",
+              width: "106%",
+              height: "106%",
+              objectFit: "cover",
+              objectPosition: "40% center", // shifts focus to balance centering while keeping the right watermark cropped
+            }}
+            src="/Copy_iPhone_17_transition_Arduino_202606112016.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            controls={false}
+          />
+
+          {/* Dark Overlay Gradient */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 z-0"
             style={{
               background:
-                "radial-gradient(ellipse at 50% 0%, rgba(183,68,255,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(0,245,255,0.05) 0%, transparent 40%)",
+                "linear-gradient(to bottom, rgba(10, 14, 39, 0.2) 0%, rgba(10, 14, 39, 0.35) 60%, hsl(232, 48%, 6%) 100%)",
+            }}
+          />
+          <div
+            className="absolute inset-0 z-0"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 50%, transparent 40%, rgba(10, 14, 39, 0.25) 95%)",
             }}
           />
 
-          <div className="relative max-w-3xl mx-auto text-center">
+          {/* Hero Content */}
+          <div className="relative max-w-3xl mx-auto text-center z-10">
             <FadeInView>
               <div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border text-sm font-medium animate-float"
                 style={{
-                  background: "rgba(183,68,255,0.08)",
-                  borderColor: "rgba(183,68,255,0.25)",
+                  background: "rgba(183,68,255,0.12)",
+                  borderColor: "rgba(183,68,255,0.3)",
                   color: "#B744FF",
+                  backdropFilter: "blur(4px)",
                 }}
               >
                 <Zap size={14} className="animate-pulse" />{" "}
@@ -195,7 +223,7 @@ export default function Index() {
             <FadeInView delay={0.1}>
               <h1
                 className="font-black mb-6 leading-tight"
-                style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)" }}
+                style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", textShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
               >
                 <span style={{ color: "#FFFFFF" }}>Build Amazing</span>
                 <br />
@@ -211,7 +239,7 @@ export default function Index() {
             <FadeInView delay={0.2}>
               <p
                 className="text-base mb-10 max-w-xl mx-auto leading-relaxed"
-                style={{ color: "#A0AED9" }}
+                style={{ color: "#D1D5DB", textShadow: "0 2px 4px rgba(0,0,0,0.6)" }}
               >
                 Tell us what components you have, and our AI will generate
                 custom Arduino projects tailored to your skill level. Learn,
@@ -237,8 +265,10 @@ export default function Index() {
                   <button
                     className="px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 border transition-all hover:scale-105 hover:bg-white/5"
                     style={{
-                      borderColor: "rgba(183,68,255,0.4)",
-                      color: "#B744FF",
+                      borderColor: "rgba(183,68,255,0.5)",
+                      color: "#FFFFFF",
+                      background: "rgba(10, 14, 39, 0.4)",
+                      backdropFilter: "blur(4px)",
                     }}
                   >
                     <BookOpen size={16} /> Browse Projects
@@ -249,13 +279,13 @@ export default function Index() {
 
             {/* Stats */}
             <FadeInView delay={0.4}>
-              <div className="flex gap-12 justify-center mt-16">
+              <div className="flex gap-12 justify-center mt-16 bg-slate-950/40 backdrop-blur-md border border-white/5 rounded-2xl p-4 max-w-md mx-auto">
                 {[
                   { value: "50+", label: "Projects", color: "#00F5FF" },
                   { value: "100+", label: "Components", color: "#B744FF" },
                   { value: "AI", label: "Powered", color: "#FFD700" },
                 ].map(({ value, label, color }) => (
-                  <div key={label} className="text-center">
+                  <div key={label} className="text-center flex-1">
                     <p className="font-black text-3xl" style={{ color }}>
                       {value}
                     </p>
@@ -385,35 +415,33 @@ export default function Index() {
         {/* Featured Projects */}
         <section className="px-8 py-14">
           <div className="max-w-5xl mx-auto">
-            <FadeInView>
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <p
-                    className="text-xs font-semibold mb-1"
-                    style={{ color: "#FFD700" }}
-                  >
-                    Featured
-                  </p>
-                  <h2
-                    className="text-xl font-bold"
-                    style={{ color: "#FFFFFF" }}
-                  >
-                    Popular Projects to Get Started
-                  </h2>
-                </div>
-                <Link to="/catalog">
-                  <button
-                    className="px-4 py-2 rounded-lg text-xs font-semibold border transition-all hover:scale-105"
-                    style={{
-                      borderColor: "rgba(0,245,255,0.3)",
-                      color: "#00F5FF",
-                    }}
-                  >
-                    View All
-                  </button>
-                </Link>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <p
+                  className="text-xs font-semibold mb-1"
+                  style={{ color: "#FFD700" }}
+                >
+                  Featured
+                </p>
+                <h2
+                  className="text-xl font-bold"
+                  style={{ color: "#FFFFFF" }}
+                >
+                  Popular Projects to Get Started
+                </h2>
               </div>
-            </FadeInView>
+              <Link to="/catalog">
+                <button
+                  className="px-4 py-2 rounded-lg text-xs font-semibold border transition-all hover:scale-105"
+                  style={{
+                    borderColor: "rgba(0,245,255,0.3)",
+                    color: "#00F5FF",
+                  }}
+                >
+                  View All
+                </button>
+              </Link>
+            </div>
             <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {featuredProjects.map((p) => (
                 <motion.div key={p.id} variants={staggerItem}>
@@ -467,18 +495,6 @@ export default function Index() {
                 </motion.div>
               ))}
             </StaggerContainer>
-          </div>
-        </section>
-
-        {/* Glowing Demo */}
-        <section className="px-8 py-14">
-          <div className="max-w-5xl mx-auto">
-            <FadeInView className="text-center mb-10">
-              <h2 className="text-xl font-bold" style={{ color: "#FFFFFF" }}>
-                Premium Features
-              </h2>
-            </FadeInView>
-            <GlowingEffectDemo />
           </div>
         </section>
 
