@@ -126,21 +126,6 @@ const cardVariants = {
   }),
 };
 
-export default function CatalogPage() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const { projects: userProjects } = useUserProjects();
-  const userProjectIds = useMemo(() => new Set(userProjects.map(p => p.project_id)), [userProjects]);
-  const [search, setSearch] = useState("");
-  const [diffFilter, setDiffFilter] = useState<string>("all");
-  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-  const [costFilter, setCostFilter] = useState(0);
-  const [componentFilter, setComponentFilter] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-  const [removedIds, setRemovedIds] = useState<number[]>(() => {
-    const saved = localStorage.getItem("removedCatalogProjects");
-    return saved ? JSON.parse(saved) : [];
-  });
 const getPurchaseUrl = (componentName: string) => {
   const clean = componentName.toLowerCase();
   if (clean.includes("bluetooth") || clean.includes("hc-05")) return "https://www.adafruit.com/product/2633";
