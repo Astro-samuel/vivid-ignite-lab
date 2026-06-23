@@ -49,6 +49,14 @@ export default function ProfilePage() {
   const xpBarRef = useRef<HTMLDivElement>(null);
   const skillRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  const completedProjectIds = useMemo(
+    () => projects.filter((p) => p.status === "completed").map((p) => p.project_id),
+    [projects]
+  );
+  const skillProgress = useMemo(() => calculateSkillProgress(completedProjectIds), [completedProjectIds]);
+  const xpPercent = (profile.xp / profile.maxXP) * 100;
+
+
   useEffect(() => {
     if (xpBarRef.current) {
       xpBarRef.current.style.width = `${xpPercent}%`;
