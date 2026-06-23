@@ -6,9 +6,9 @@ import { ZoomIn, ZoomOut, RotateCcw, Info, X } from "lucide-react";
 function SymbolResistor({ x, y }: { x: number; y: number }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <line x1="-20" y1="0" x2="-14" y2="0" stroke="#00FF88" strokeWidth="1.5" />
-      <polyline points="-14,-6 -10,6 -6,-6 -2,6 2,-6 6,6 10,-6 14,6" fill="none" stroke="#00FF88" strokeWidth="1.5" />
-      <line x1="14" y1="0" x2="20" y2="0" stroke="#00FF88" strokeWidth="1.5" />
+      <line x1="-20" y1="0" x2="-14" y2="0" stroke="#10B981" strokeWidth="1.5" />
+      <polyline points="-14,-6 -10,6 -6,-6 -2,6 2,-6 6,6 10,-6 14,6" fill="none" stroke="#10B981" strokeWidth="1.5" />
+      <line x1="14" y1="0" x2="20" y2="0" stroke="#10B981" strokeWidth="1.5" />
     </g>
   );
 }
@@ -32,10 +32,10 @@ function SymbolLED({ x, y, color = "#FF4500" }: { x: number; y: number; color?: 
 function SymbolCapacitor({ x, y }: { x: number; y: number }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <line x1="-20" y1="0" x2="-3" y2="0" stroke="#FFD700" strokeWidth="1.5" />
-      <line x1="-3" y1="-8" x2="-3" y2="8" stroke="#FFD700" strokeWidth="2" />
-      <line x1="3" y1="-8" x2="3" y2="8" stroke="#FFD700" strokeWidth="2" />
-      <line x1="3" y1="0" x2="20" y2="0" stroke="#FFD700" strokeWidth="1.5" />
+      <line x1="-20" y1="0" x2="-3" y2="0" stroke="#F59E0B" strokeWidth="1.5" />
+      <line x1="-3" y1="-8" x2="-3" y2="8" stroke="#F59E0B" strokeWidth="2" />
+      <line x1="3" y1="-8" x2="3" y2="8" stroke="#F59E0B" strokeWidth="2" />
+      <line x1="3" y1="0" x2="20" y2="0" stroke="#F59E0B" strokeWidth="1.5" />
     </g>
   );
 }
@@ -45,8 +45,8 @@ function SymbolIC({ x, y, label, pins }: { x: number; y: number; label: string; 
   const w = 80;
   return (
     <g transform={`translate(${x},${y})`}>
-      <rect x={-w / 2} y={-h / 2} width={w} height={h} fill="none" stroke="#00F5FF" strokeWidth="1.5" />
-      <text x="0" y={-h / 2 + 14} fill="#00F5FF" fontSize="9" textAnchor="middle" fontWeight="bold" fontFamily="monospace">{label}</text>
+      <rect x={-w / 2} y={-h / 2} width={w} height={h} fill="none" stroke="#3B82F6" strokeWidth="1.5" />
+      <text x="0" y={-h / 2 + 14} fill="#3B82F6" fontSize="9" textAnchor="middle" fontWeight="bold" fontFamily="monospace">{label}</text>
       {pins.map((pin, i) => {
         const py = -h / 2 + 24 + i * 12;
         const isLeft = i % 2 === 0;
@@ -65,9 +65,9 @@ function SymbolIC({ x, y, label, pins }: { x: number; y: number; label: string; 
 function SymbolServo({ x, y }: { x: number; y: number }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <rect x="-22" y="-14" width="44" height="28" rx="3" fill="none" stroke="#00FF88" strokeWidth="1.5" />
-      <circle cx="0" cy="0" r="8" fill="none" stroke="#00FF88" strokeWidth="1.2" />
-      <line x1="0" y1="0" x2="6" y2="-5" stroke="#00FF88" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="-22" y="-14" width="44" height="28" rx="3" fill="none" stroke="#10B981" strokeWidth="1.5" />
+      <circle cx="0" cy="0" r="8" fill="none" stroke="#10B981" strokeWidth="1.2" />
+      <line x1="0" y1="0" x2="6" y2="-5" stroke="#10B981" strokeWidth="1.5" strokeLinecap="round" />
       <text x="0" y="22" fill="#A0AED9" fontSize="7" textAnchor="middle" fontFamily="monospace">M</text>
       {/* pins */}
       <line x1="-22" y1="-6" x2="-32" y2="-6" stroke="#FF4500" strokeWidth="1" />
@@ -83,12 +83,12 @@ function SymbolServo({ x, y }: { x: number; y: number }) {
 function SymbolSensor({ x, y, label }: { x: number; y: number; label: string }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <rect x="-25" y="-14" width="50" height="28" rx="4" fill="none" stroke="#B744FF" strokeWidth="1.5" strokeDasharray="4 2" />
-      <text x="0" y="4" fill="#B744FF" fontSize="8" textAnchor="middle" fontWeight="bold" fontFamily="monospace">{label.length > 8 ? label.slice(0, 7) + "…" : label}</text>
-      <line x1="-25" y1="0" x2="-35" y2="0" stroke="#B744FF" strokeWidth="1" />
-      <line x1="25" y1="0" x2="35" y2="0" stroke="#B744FF" strokeWidth="1" />
-      <circle cx="-35" cy="0" r="2" fill="#B744FF" />
-      <circle cx="35" cy="0" r="2" fill="#B744FF" />
+      <rect x="-25" y="-14" width="50" height="28" rx="4" fill="none" stroke="#8B5CF6" strokeWidth="1.5" strokeDasharray="4 2" />
+      <text x="0" y="4" fill="#8B5CF6" fontSize="8" textAnchor="middle" fontWeight="bold" fontFamily="monospace">{label.length > 8 ? label.slice(0, 7) + "…" : label}</text>
+      <line x1="-25" y1="0" x2="-35" y2="0" stroke="#8B5CF6" strokeWidth="1" />
+      <line x1="25" y1="0" x2="35" y2="0" stroke="#8B5CF6" strokeWidth="1" />
+      <circle cx="-35" cy="0" r="2" fill="#8B5CF6" />
+      <circle cx="35" cy="0" r="2" fill="#8B5CF6" />
     </g>
   );
 }
@@ -96,12 +96,12 @@ function SymbolSensor({ x, y, label }: { x: number; y: number; label: string }) 
 function SymbolBuzzer({ x, y }: { x: number; y: number }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <rect x="-12" y="-10" width="24" height="20" rx="2" fill="none" stroke="#FF1493" strokeWidth="1.5" />
-      <text x="0" y="3" fill="#FF1493" fontSize="9" textAnchor="middle" fontFamily="monospace">♪</text>
-      <line x1="-12" y1="0" x2="-22" y2="0" stroke="#FF1493" strokeWidth="1.5" />
-      <line x1="12" y1="0" x2="22" y2="0" stroke="#FF1493" strokeWidth="1.5" />
-      <circle cx="-22" cy="0" r="2" fill="#FF1493" />
-      <circle cx="22" cy="0" r="2" fill="#FF1493" />
+      <rect x="-12" y="-10" width="24" height="20" rx="2" fill="none" stroke="#EC4899" strokeWidth="1.5" />
+      <text x="0" y="3" fill="#EC4899" fontSize="9" textAnchor="middle" fontFamily="monospace">♪</text>
+      <line x1="-12" y1="0" x2="-22" y2="0" stroke="#EC4899" strokeWidth="1.5" />
+      <line x1="12" y1="0" x2="22" y2="0" stroke="#EC4899" strokeWidth="1.5" />
+      <circle cx="-22" cy="0" r="2" fill="#EC4899" />
+      <circle cx="22" cy="0" r="2" fill="#EC4899" />
     </g>
   );
 }
@@ -109,12 +109,12 @@ function SymbolBuzzer({ x, y }: { x: number; y: number }) {
 function SymbolButton({ x, y }: { x: number; y: number }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <line x1="-20" y1="0" x2="-8" y2="0" stroke="#00FF88" strokeWidth="1.5" />
-      <line x1="8" y1="0" x2="20" y2="0" stroke="#00FF88" strokeWidth="1.5" />
-      <circle cx="-8" cy="0" r="2.5" fill="none" stroke="#00FF88" strokeWidth="1.5" />
-      <circle cx="8" cy="0" r="2.5" fill="none" stroke="#00FF88" strokeWidth="1.5" />
-      <line x1="-6" y1="-8" x2="6" y2="-8" stroke="#00FF88" strokeWidth="1.5" />
-      <line x1="0" y1="-8" x2="0" y2="-3" stroke="#00FF88" strokeWidth="1" strokeDasharray="2 1" />
+      <line x1="-20" y1="0" x2="-8" y2="0" stroke="#10B981" strokeWidth="1.5" />
+      <line x1="8" y1="0" x2="20" y2="0" stroke="#10B981" strokeWidth="1.5" />
+      <circle cx="-8" cy="0" r="2.5" fill="none" stroke="#10B981" strokeWidth="1.5" />
+      <circle cx="8" cy="0" r="2.5" fill="none" stroke="#10B981" strokeWidth="1.5" />
+      <line x1="-6" y1="-8" x2="6" y2="-8" stroke="#10B981" strokeWidth="1.5" />
+      <line x1="0" y1="-8" x2="0" y2="-3" stroke="#10B981" strokeWidth="1" strokeDasharray="2 1" />
     </g>
   );
 }
@@ -163,24 +163,24 @@ interface SchematicWire {
 
 function classifyComponent(name: string): { type: SchematicPart["type"]; refPrefix: string; color: string; pin: string; desc: string } {
   const n = name.toLowerCase();
-  if (n.includes("arduino")) return { type: "ic", refPrefix: "U", color: "#00F5FF", pin: "", desc: "ATmega328P microcontroller board with 14 digital and 6 analog I/O pins." };
-  if (n.includes("led") && n.includes("rgb")) return { type: "led", refPrefix: "D", color: "#B744FF", pin: "Pin 9,10,11", desc: "RGB LED — Common cathode LED with separate red, green, blue channels controlled via PWM." };
+  if (n.includes("arduino")) return { type: "ic", refPrefix: "U", color: "#3B82F6", pin: "", desc: "ATmega328P microcontroller board with 14 digital and 6 analog I/O pins." };
+  if (n.includes("led") && n.includes("rgb")) return { type: "led", refPrefix: "D", color: "#8B5CF6", pin: "Pin 9,10,11", desc: "RGB LED — Common cathode LED with separate red, green, blue channels controlled via PWM." };
   if (n.includes("led")) return { type: "led", refPrefix: "D", color: "#FF4500", pin: "Pin 13", desc: "Light-emitting diode. Anode → resistor → digital pin. Cathode → GND." };
-  if (n.includes("resistor")) return { type: "resistor", refPrefix: "R", color: "#00FF88", pin: "", desc: "Current-limiting resistor. Protects LEDs and provides pull-up/pull-down for inputs." };
-  if (n.includes("servo")) return { type: "servo", refPrefix: "M", color: "#00FF88", pin: "Pin 9", desc: "SG90 micro servo. VCC→5V, GND→GND, Signal→PWM pin. 0-180° range." };
-  if (n.includes("potentiometer")) return { type: "sensor", refPrefix: "RV", color: "#FFD700", pin: "A0", desc: "Variable resistor. Outer pins → 5V and GND. Wiper → analog pin (0-1023)." };
-  if (n.includes("dht") || n.includes("temperature")) return { type: "sensor", refPrefix: "U", color: "#B744FF", pin: "Pin 2", desc: "Digital temperature & humidity sensor. Requires 10kΩ pull-up on data line." };
-  if (n.includes("ldr") || n.includes("photoresistor")) return { type: "sensor", refPrefix: "R", color: "#FFD700", pin: "A0", desc: "Light-dependent resistor. Forms voltage divider with fixed resistor for light sensing." };
-  if (n.includes("soil") || n.includes("moisture")) return { type: "sensor", refPrefix: "U", color: "#00FF88", pin: "A0", desc: "Capacitive or resistive soil moisture sensor. Analog output 0-1023." };
-  if (n.includes("ultrasonic") || n.includes("hc-sr04")) return { type: "sensor", refPrefix: "U", color: "#B744FF", pin: "Pin 9/10", desc: "HC-SR04 ultrasonic distance sensor. Trig → digital out, Echo → digital in. Range: 2-400cm." };
-  if (n.includes("buzzer") || n.includes("piezo")) return { type: "buzzer", refPrefix: "BZ", color: "#FF1493", pin: "Pin 8", desc: "Piezoelectric buzzer. Use tone(pin, frequency) to generate sounds." };
-  if (n.includes("button")) return { type: "button", refPrefix: "SW", color: "#00FF88", pin: "Pin 2", desc: "Momentary push button. Wire with pull-down resistor or use INPUT_PULLUP." };
+  if (n.includes("resistor")) return { type: "resistor", refPrefix: "R", color: "#10B981", pin: "", desc: "Current-limiting resistor. Protects LEDs and provides pull-up/pull-down for inputs." };
+  if (n.includes("servo")) return { type: "servo", refPrefix: "M", color: "#10B981", pin: "Pin 9", desc: "SG90 micro servo. VCC→5V, GND→GND, Signal→PWM pin. 0-180° range." };
+  if (n.includes("potentiometer")) return { type: "sensor", refPrefix: "RV", color: "#F59E0B", pin: "A0", desc: "Variable resistor. Outer pins → 5V and GND. Wiper → analog pin (0-1023)." };
+  if (n.includes("dht") || n.includes("temperature")) return { type: "sensor", refPrefix: "U", color: "#8B5CF6", pin: "Pin 2", desc: "Digital temperature & humidity sensor. Requires 10kΩ pull-up on data line." };
+  if (n.includes("ldr") || n.includes("photoresistor")) return { type: "sensor", refPrefix: "R", color: "#F59E0B", pin: "A0", desc: "Light-dependent resistor. Forms voltage divider with fixed resistor for light sensing." };
+  if (n.includes("soil") || n.includes("moisture")) return { type: "sensor", refPrefix: "U", color: "#10B981", pin: "A0", desc: "Capacitive or resistive soil moisture sensor. Analog output 0-1023." };
+  if (n.includes("ultrasonic") || n.includes("hc-sr04")) return { type: "sensor", refPrefix: "U", color: "#8B5CF6", pin: "Pin 9/10", desc: "HC-SR04 ultrasonic distance sensor. Trig → digital out, Echo → digital in. Range: 2-400cm." };
+  if (n.includes("buzzer") || n.includes("piezo")) return { type: "buzzer", refPrefix: "BZ", color: "#EC4899", pin: "Pin 8", desc: "Piezoelectric buzzer. Use tone(pin, frequency) to generate sounds." };
+  if (n.includes("button")) return { type: "button", refPrefix: "SW", color: "#10B981", pin: "Pin 2", desc: "Momentary push button. Wire with pull-down resistor or use INPUT_PULLUP." };
   if (n.includes("relay")) return { type: "sensor", refPrefix: "K", color: "#FF4500", pin: "Pin 7", desc: "Relay module. Signal pin controls high-power switching (up to 10A/250VAC)." };
   if (n.includes("motor") && !n.includes("servo")) return { type: "sensor", refPrefix: "M", color: "#FFA500", pin: "Pin 5-8", desc: "DC motor controlled via H-bridge driver (L298N). Requires external power supply." };
-  if (n.includes("lcd") || n.includes("oled") || n.includes("display")) return { type: "ic", refPrefix: "U", color: "#00F5FF", pin: "I2C (A4/A5)", desc: "Display module using I2C bus. SDA→A4, SCL→A5. Address typically 0x3C or 0x27." };
-  if (n.includes("bluetooth") || n.includes("hc-05")) return { type: "ic", refPrefix: "U", color: "#0099FF", pin: "RX/TX", desc: "HC-05 Bluetooth module. TX→Arduino RX, RX→Arduino TX (use voltage divider!)." };
+  if (n.includes("lcd") || n.includes("oled") || n.includes("display")) return { type: "ic", refPrefix: "U", color: "#3B82F6", pin: "I2C (A4/A5)", desc: "Display module using I2C bus. SDA→A4, SCL→A5. Address typically 0x3C or 0x27." };
+  if (n.includes("bluetooth") || n.includes("hc-05")) return { type: "ic", refPrefix: "U", color: "#2563EB", pin: "RX/TX", desc: "HC-05 Bluetooth module. TX→Arduino RX, RX→Arduino TX (use voltage divider!)." };
   if (n.includes("breadboard") || n.includes("jumper")) return { type: "generic", refPrefix: "", color: "#A0AED9", pin: "", desc: "Prototyping hardware — not shown in schematic." };
-  if (n.includes("battery")) return { type: "generic", refPrefix: "BT", color: "#FFD700", pin: "", desc: "External power supply for motors and high-current loads." };
+  if (n.includes("battery")) return { type: "generic", refPrefix: "BT", color: "#F59E0B", pin: "", desc: "External power supply for motors and high-current loads." };
   return { type: "generic", refPrefix: "X", color: "#A0AED9", pin: "", desc: "Electronic component used in this project." };
 }
 
@@ -199,7 +199,7 @@ function buildSchematic(components: string[]): { parts: SchematicPart[]; wires: 
     y: 190,
     description: "ATmega328P microcontroller — 14 digital I/O, 6 analog inputs, 16MHz clock.",
     refDes: "U1",
-    color: "#00F5FF",
+    color: "#3B82F6",
     icPins: arduinoPins.slice(0, 16),
   });
 
@@ -320,8 +320,8 @@ export default function InteractiveSchematic({ components, title }: InteractiveS
         style={{ background: "#161B22", borderColor: "#30363D" }}
       >
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full" style={{ background: "#00FF88" }} />
-          <span className="text-xs font-bold font-mono" style={{ color: "#00F5FF" }}>
+          <div className="w-2 h-2 rounded-full" style={{ background: "#10B981" }} />
+          <span className="text-xs font-bold font-mono" style={{ color: "#3B82F6" }}>
             KiCad Schematic — {title}
           </span>
           <span className="text-xs font-mono px-2 py-0.5 rounded" style={{ background: "#21262D", color: "#8B949E" }}>
@@ -463,7 +463,7 @@ export default function InteractiveSchematic({ components, title }: InteractiveS
               </button>
             </div>
             {selectedPart.pin && (
-              <div className="text-xs font-mono mb-2 px-2 py-1 rounded flex items-center gap-1" style={{ background: "#0D1117", color: "#00F5FF", border: "1px solid #21262D" }}>
+              <div className="text-xs font-mono mb-2 px-2 py-1 rounded flex items-center gap-1" style={{ background: "#0D1117", color: "#3B82F6", border: "1px solid #21262D" }}>
                 <span style={{ color: "#484F58" }}>NET:</span> {selectedPart.pin}
               </div>
             )}

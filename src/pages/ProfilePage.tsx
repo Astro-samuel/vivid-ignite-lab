@@ -46,6 +46,23 @@ export default function ProfilePage() {
   const [savedToast, setSavedToast] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const xpBarRef = useRef<HTMLDivElement>(null);
+  const skillRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    if (xpBarRef.current) {
+      xpBarRef.current.style.width = `${xpPercent}%`;
+    }
+  }, [xpPercent]);
+
+  useEffect(() => {
+    skillProgress.forEach((skill) => {
+      const el = skillRefs.current[skill.name];
+      if (el) {
+        el.style.width = `${skill.percent}%`;
+      }
+    });
+  }, [skillProgress]);
 
   useEffect(() => {
     if (!user) return;
@@ -142,10 +159,7 @@ export default function ProfilePage() {
           <div className="flex flex-col items-center mb-6">
             <div className="relative mb-4">
               <div
-                className="w-24 h-24 rounded-full flex items-center justify-center overflow-hidden border-4 border-slate-100 shadow-inner"
-                style={{
-                  background: avatarPreview ? "transparent" : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))",
-                }}
+                className={`w-24 h-24 rounded-full flex items-center justify-center overflow-hidden border-4 border-slate-100 shadow-inner ${avatarPreview ? "bg-transparent" : "profile-avatar-gradient"}`}
               >
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
@@ -157,11 +171,13 @@ export default function ProfilePage() {
               </div>
               <button
                 onClick={() => fileRef.current?.click()}
+                title="Upload Avatar"
+                aria-label="Upload Avatar"
                 className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-indigo-500 border-2 border-indigo-700 text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm"
               >
                 <Camera size={14} className="text-white" />
               </button>
-              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" title="Upload Avatar file" aria-label="Upload Avatar file" onChange={handleAvatarUpload} />
             </div>
 
             {/* Level badge */}
@@ -174,24 +190,33 @@ export default function ProfilePage() {
           {editing ? (
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-400 mb-1.5 block">Display Name</label>
+                <label htmlFor="display-name-input" className="text-xs font-bold text-slate-400 mb-1.5 block">Display Name</label>
                 <input
+                  id="display-name-input"
+                  placeholder="Display Name"
+                  title="Display Name"
                   value={editData.name}
                   onChange={(e) => setEditData((p) => ({ ...p, name: e.target.value }))}
                   className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all"
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-400 mb-1.5 block">Username</label>
+                <label htmlFor="username-input" className="text-xs font-bold text-slate-400 mb-1.5 block">Username</label>
                 <input
+                  id="username-input"
+                  placeholder="Username"
+                  title="Username"
                   value={editData.username}
                   onChange={(e) => setEditData((p) => ({ ...p, username: e.target.value }))}
                   className="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all"
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-400 mb-1.5 block">Bio</label>
+                <label htmlFor="bio-input" className="text-xs font-bold text-slate-400 mb-1.5 block">Bio</label>
                 <textarea
+                  id="bio-input"
+                  placeholder="Bio"
+                  title="Bio"
                   value={editData.bio}
                   onChange={(e) => setEditData((p) => ({ ...p, bio: e.target.value }))}
                   rows={3}
@@ -241,8 +266,8 @@ export default function ProfilePage() {
           </div>
           <div className="h-3 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
             <div
+              ref={xpBarRef}
               className="h-full rounded-full bg-indigo-500 transition-all duration-700"
-              style={{ width: `${xpPercent}%` }}
             />
           </div>
           <p className="text-xs font-bold text-slate-400 mt-2">
@@ -275,23 +300,15 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-sm font-extrabold text-indigo-950">{skill.name}</span>
                   <span
-                    className="text-xs px-2.5 py-0.5 rounded-full font-bold border"
-                    style={{
-                      background: `${skill.color}15`,
-                      color: skill.color,
-                      borderColor: `${skill.color}30`,
-                    }}
+                    className={`text-xs px-2.5 py-0.5 rounded-full font-bold border skill-badge-${skill.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
                   >
                     {skill.level}
                   </span>
                 </div>
                 <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
                   <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${skill.percent}%`,
-                      background: skill.color,
-                    }}
+                    ref={(el) => { skillRefs.current[skill.name] = el; }}
+                    className={`h-full rounded-full transition-all duration-700 skill-bar-${skill.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
                   />
                 </div>
                 <div className="flex justify-between items-center mt-1">

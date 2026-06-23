@@ -41,16 +41,15 @@ function getInventoryComponents(userId?: string): string[] {
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
-  const style =
+  const badgeClasses =
     difficulty === "beginner"
-      ? { background: "rgba(34, 197, 94, 0.15)", color: "#4ADE80", border: "2px solid rgba(34, 197, 94, 0.3)" }
+      ? "bg-green-500/15 text-green-400 border-2 border-green-500/30"
       : difficulty === "intermediate"
-      ? { background: "rgba(245, 158, 11, 0.15)", color: "#FBBF24", border: "2px solid rgba(245, 158, 11, 0.3)" }
-      : { background: "rgba(139, 92, 246, 0.15)", color: "#A78BFA", border: "2px solid rgba(139, 92, 246, 0.3)" };
+      ? "bg-amber-500/15 text-amber-400 border-2 border-amber-500/30"
+      : "bg-purple-500/15 text-purple-400 border-2 border-purple-500/30";
   return (
     <span
-      className="text-xs px-2.5 py-0.5 rounded-full font-bold capitalize"
-      style={{ fontFamily: "'Baloo 2', sans-serif", ...style }}
+      className={`text-xs px-2.5 py-0.5 rounded-full font-bold capitalize font-display ${badgeClasses}`}
     >
       {difficulty}
     </span>

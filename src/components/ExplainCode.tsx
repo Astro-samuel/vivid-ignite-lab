@@ -86,7 +86,7 @@ export default function ExplainCode({ code }: ExplainCodeProps) {
         onClick={explain}
         disabled={loading}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105 disabled:opacity-60"
-        style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.3)" }}
+        style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.3)" }}
       >
         <BookOpen size={12} /> {loading ? "Explaining..." : "Explain Code"}
       </button>
@@ -96,13 +96,13 @@ export default function ExplainCode({ code }: ExplainCodeProps) {
           <div className="fixed inset-0 bg-black/60" />
           <div
             className="relative w-full max-w-2xl max-h-[80vh] rounded-2xl border overflow-hidden flex flex-col"
-            style={{ background: "hsl(229, 45%, 12%)", borderColor: "rgba(255,215,0,0.3)" }}
+            style={{ background: "hsl(229, 45%, 12%)", borderColor: "rgba(245,158,11,0.3)" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "hsl(229, 42%, 22%)", background: "rgba(255,215,0,0.06)" }}>
+            <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "hsl(229, 42%, 22%)", background: "rgba(245,158,11,0.06)" }}>
               <div className="flex items-center gap-2">
-                <BookOpen size={16} style={{ color: "#FFD700" }} />
-                <span className="font-bold text-sm" style={{ color: "#FFD700" }}>AI Code Explanation</span>
+                <BookOpen size={16} style={{ color: "#F59E0B" }} />
+                <span className="font-bold text-sm" style={{ color: "#F59E0B" }}>AI Code Explanation</span>
               </div>
               <button onClick={() => setOpen(false)} className="p-1 rounded hover:bg-white/10" style={{ color: "#A0AED9" }}>
                 <X size={16} />

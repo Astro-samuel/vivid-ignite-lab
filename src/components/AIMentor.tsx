@@ -225,19 +225,19 @@ export default function AIMentor({ projectId }: AIMentorProps) {
         transition={{ type: "spring", stiffness: 400, damping: 22, delay: 0.2 }}
         onClick={() => setOpen((o) => !o)}
         className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center z-50 shadow-2xl"
-        whileHover={{ scale: 1.1 }}
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         style={{
-          background: "linear-gradient(135deg, #B744FF, #FF1493)",
+          background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))",
           boxShadow: open
-            ? "0 0 25px rgba(183,68,255,0.7), 0 0 50px rgba(255,20,147,0.3)"
-            : "0 0 15px rgba(183,68,255,0.5)",
+            ? "0 0 25px rgba(99, 102, 241, 0.4)"
+            : "0 0 15px rgba(99, 102, 241, 0.2)",
         }}
       >
         {open ? <ChevronDown size={22} color="#fff" /> : <MessageSquare size={22} color="#fff" />}
         <span
           className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full"
-          style={{ background: "#00FF88", border: "2px solid hsl(229, 48%, 8%)" }}
+          style={{ background: "hsl(var(--success))", border: "2px solid hsl(var(--background))" }}
         />
       </motion.button>
 
@@ -250,9 +250,9 @@ export default function AIMentor({ projectId }: AIMentorProps) {
             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
             className={`fixed bottom-24 right-6 ${panelWidth} rounded-2xl border z-50 flex flex-col overflow-hidden shadow-2xl`}
             style={{
-              background: "hsl(229, 45%, 14%)",
-              borderColor: "rgba(183,68,255,0.4)",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(183,68,255,0.2)",
+              background: "hsl(var(--background-card))",
+              borderColor: "hsl(var(--border))",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(99,102,241,0.05)",
               transform: `translate(${position.x}px, ${position.y}px)`,
               maxHeight: expanded ? "680px" : "480px",
               transition: isDragging ? "none" : "width 0.3s, max-height 0.3s",
@@ -262,8 +262,8 @@ export default function AIMentor({ projectId }: AIMentorProps) {
             <div
               className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0"
               style={{
-                background: "linear-gradient(135deg, rgba(183,68,255,0.2), rgba(255,20,147,0.1))",
-                borderColor: "rgba(183,68,255,0.3)",
+                background: "linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--secondary) / 0.05))",
+                borderColor: "hsl(var(--border))",
               }}
             >
               <div className="flex items-center gap-2.5">
@@ -276,15 +276,15 @@ export default function AIMentor({ projectId }: AIMentorProps) {
                 </div>
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}
+                  style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))" }}
                 >
                   <Bot size={16} color="#fff" />
                 </div>
                 <div>
                   <p className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Mentor</p>
                   <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#00FF88" }} />
-                    <p className="text-xs" style={{ color: "#00FF88" }}>Online</p>
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--success))" }} />
+                    <p className="text-xs" style={{ color: "hsl(var(--success))" }}>Online</p>
                   </div>
                 </div>
               </div>
@@ -317,7 +317,7 @@ export default function AIMentor({ projectId }: AIMentorProps) {
                   {m.role === "assistant" && (
                     <div
                       className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                      style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}
+                      style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))" }}
                     >
                       <Sparkles size={11} color="#fff" />
                     </div>
@@ -327,14 +327,14 @@ export default function AIMentor({ projectId }: AIMentorProps) {
                     style={
                       m.role === "user"
                         ? {
-                            background: "linear-gradient(135deg, #00F5FF, #0099FF)",
-                            color: "#0A0E27",
+                            background: "hsl(var(--primary))",
+                            color: "hsl(var(--primary-foreground))",
                             borderBottomRightRadius: "4px",
                           }
                         : {
-                            background: "rgba(255,255,255,0.06)",
-                            color: "#E0E7FF",
-                            border: "1px solid rgba(255,255,255,0.08)",
+                            background: "hsl(var(--background-hover))",
+                            color: "hsl(var(--foreground))",
+                            border: "1px solid hsl(var(--border))",
                             borderBottomLeftRadius: "4px",
                           }
                     }
@@ -345,13 +345,13 @@ export default function AIMentor({ projectId }: AIMentorProps) {
               ))}
               {streaming && messages[messages.length - 1]?.role !== "assistant" && (
                 <div className="flex gap-2 justify-start">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}>
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))" }}>
                     <Sparkles size={11} color="#fff" />
                   </div>
-                  <div className="px-3 py-2 rounded-2xl text-xs flex items-center gap-1" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF" }} />
-                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF", animationDelay: "0.15s" }} />
-                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "#B744FF", animationDelay: "0.3s" }} />
+                  <div className="px-3 py-2 rounded-2xl text-xs flex items-center gap-1" style={{ background: "hsl(var(--background-hover))", border: "1px solid hsl(var(--border))" }}>
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "hsl(var(--primary))" }} />
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "hsl(var(--primary))", animationDelay: "0.15s" }} />
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "hsl(var(--primary))", animationDelay: "0.3s" }} />
                   </div>
                 </div>
               )}
@@ -360,7 +360,7 @@ export default function AIMentor({ projectId }: AIMentorProps) {
 
             {/* Context indicator */}
             {projectId && context.questions_asked.length > 0 && (
-              <div className="px-4 py-1.5 text-xs flex items-center gap-1.5 border-t" style={{ borderColor: "rgba(183,68,255,0.15)", color: "#A0AED9" }}>
+              <div className="px-4 py-1.5 text-xs flex items-center gap-1.5 border-t" style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground-muted))" }}>
                 <Sparkles size={10} /> {context.questions_asked.length} previous questions remembered
               </div>
             )}
@@ -368,7 +368,7 @@ export default function AIMentor({ projectId }: AIMentorProps) {
             {/* Input */}
             <div
               className="flex items-center gap-2 px-3 py-3 border-t flex-shrink-0"
-              style={{ borderColor: "rgba(183,68,255,0.2)", background: "hsl(229, 48%, 10%)" }}
+              style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background-card))" }}
             >
               <input
                 value={input}
@@ -382,8 +382,8 @@ export default function AIMentor({ projectId }: AIMentorProps) {
               <button
                 onClick={send}
                 disabled={!input.trim() || streaming}
-                className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110 disabled:opacity-40"
-                style={{ background: "linear-gradient(135deg, #B744FF, #FF1493)" }}
+                className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-105 disabled:opacity-40"
+                style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))" }}
               >
                 <Send size={12} color="#fff" />
               </button>

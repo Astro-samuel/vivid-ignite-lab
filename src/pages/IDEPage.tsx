@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, Bug, RefreshCw, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, Bug, RefreshCw, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import CodeEditor from "@/components/CodeEditor";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast as sonnerToast } from "sonner";
+
+const DEBUG_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/debug-code`;
 
 type RunStep = "idle" | "compiling" | "simulating" | "safety" | "success" | "error";
 
@@ -231,7 +233,9 @@ export default function IDEPage() {
   const [errors, setErrors] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
   const [debugMessages, setDebugMessages] = useState<DebugMessage[]>([]);
-  const [hintIndex, setHintIndex] = useState(0);
+  const [customDebugInput, setCustomDebugInput] = useState("");
+  const [debugStreaming, setDebugStreaming] = useState(false);
+  const [debugError, setDebugError] = useState("");
   const [xpAwarded, setXpAwarded] = useState(false);
   const [autoSaveCountdown, setAutoSaveCountdown] = useState(30);
   const [activeStep, setActiveStep] = useState(3);
@@ -241,6 +245,7 @@ export default function IDEPage() {
   const [librarySearch, setLibrarySearch] = useState("");
   const [installedLibraries, setInstalledLibraries] = useState<string[]>([]);
   const codeRef = useRef<HTMLTextAreaElement>(null);
+  const debugBottomRef = useRef<HTMLDivElement>(null);
 
   // Parse code to find active includes on load/edit
   useEffect(() => {
@@ -251,6 +256,13 @@ export default function IDEPage() {
     }).filter(Boolean);
     setInstalledLibraries(detected);
   }, [code]);
+
+  // Scroll debug panel to bottom on new messages
+  useEffect(() => {
+    if (showDebug) {
+      debugBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [debugMessages, showDebug]);
 
   const toggleInstallLibrary = (lib: LibraryItem) => {
     const isInstalled = installedLibraries.includes(lib.includeName);
@@ -401,23 +413,128 @@ export default function IDEPage() {
     }
   };
 
+  const runDebugRequest = async (currentMessages: DebugMessage[]) => {
+    if (debugStreaming) return;
+    setDebugStreaming(true);
+    setDebugError("");
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) {
+        setDebugStreaming(false);
+        setDebugMessages(prev => [
+          ...prev,
+          { role: "ai", content: "Please log in to use the AI Debug Assistant." }
+        ]);
+        return;
+      }
+
+      const response = await fetch(DEBUG_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          code,
+          errors,
+          messages: currentMessages,
+        }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to get debugging hint from AI.");
+      }
+
+      if (!response.body) {
+        throw new Error("No response body received from AI service.");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let aiText = "";
+
+      // Append empty assistant message that we'll stream into
+      setDebugMessages(prev => [...prev, { role: "ai", content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let idx: number;
+        while ((idx = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              aiText += content;
+              setDebugMessages(prev => {
+                const updated = [...prev];
+                if (updated.length > 0 && updated[updated.length - 1].role === "ai") {
+                  updated[updated.length - 1] = { role: "ai", content: aiText };
+                }
+                return updated;
+              });
+            }
+          } catch {
+            buffer = line + "\n" + buffer;
+            break;
+          }
+        }
+      }
+    } catch (err: any) {
+      setDebugError(err.message || "Failed to connect to AI Debug Assistant.");
+      setDebugMessages(prev => [
+        ...prev,
+        { role: "ai", content: `❌ Error: ${err.message || "Something went wrong. Please try again."}` }
+      ]);
+    } finally {
+      setDebugStreaming(false);
+    }
+  };
+
   const debugWithAI = () => {
     setShowDebug(true);
     if (debugMessages.length === 0) {
-      setDebugMessages([
-        { role: "ai", content: "🧠 I can see your code and the errors. Let me help you think through this. " + aiHints[0] },
-      ]);
+      const initialUserMsg: DebugMessage = {
+        role: "user",
+        content: "I ran into some compilation errors. Can you help me debug my code?"
+      };
+      setDebugMessages([initialUserMsg]);
+      runDebugRequest([initialUserMsg]);
     }
   };
 
   const askNextHint = () => {
-    const nextIdx = (hintIndex + 1) % aiHints.length;
-    setHintIndex(nextIdx);
-    setDebugMessages((prev) => [
-      ...prev,
-      { role: "user", content: "Give me another hint" },
-      { role: "ai", content: aiHints[nextIdx] },
-    ]);
+    const followUpMsg: DebugMessage = {
+      role: "user",
+      content: "I'm still stuck. Could you give me another hint or explain the issue further?"
+    };
+    const updatedMessages = [...debugMessages, followUpMsg];
+    setDebugMessages(updatedMessages);
+    runDebugRequest(updatedMessages);
+  };
+
+  const sendCustomDebugMessage = () => {
+    if (!customDebugInput.trim() || debugStreaming) return;
+    const msg: DebugMessage = {
+      role: "user",
+      content: customDebugInput.trim()
+    };
+    setCustomDebugInput("");
+    const updatedMessages = [...debugMessages, msg];
+    setDebugMessages(updatedMessages);
+    runDebugRequest(updatedMessages);
   };
 
   const loadErrorCode = () => {
@@ -442,23 +559,21 @@ export default function IDEPage() {
 
   return (
     <Layout>
-      <div className="flex flex-col" style={{ height: "calc(100vh - 48px)" }}>
+      <div className="flex flex-col h-[calc(100vh-48px)]">
         {/* Top Bar */}
-        <div
-          className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0"
-          style={{ background: "hsl(232, 48%, 6%)", borderColor: "hsl(232, 40%, 16%)" }}
-        >
+        <div className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0 ide-top-bar">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="p-1.5 rounded-lg transition-all hover:scale-105"
-              style={{ background: "rgba(255,255,255,0.06)", color: "hsl(228, 25%, 70%)" }}
+              title="Go Back"
+              aria-label="Go Back"
+              className="p-1.5 rounded-lg transition-all hover:scale-105 ide-top-back-btn"
             >
               <ArrowLeft size={14} />
             </button>
             <div>
-              <h1 className="font-bold text-sm" style={{ color: "#FFFFFF" }}>Smart LED Mood Lamp</h1>
-              <p className="text-xs" style={{ color: "hsl(228, 25%, 60%)" }}>
+              <h1 className="font-bold text-sm ide-title-text">Smart LED Mood Lamp</h1>
+              <p className="text-xs ide-subtitle-text">
                 Step {activeStep} of {projectSteps.length} • Auto-save in {autoSaveCountdown}s
               </p>
             </div>
@@ -468,47 +583,32 @@ export default function IDEPage() {
             {/* Panel toggles */}
             <button
               onClick={() => setShowInstructions(!showInstructions)}
-              className="p-1.5 rounded-lg transition-all hover:scale-105"
-              style={{
-                background: showInstructions ? "rgba(183,68,255,0.15)" : "rgba(255,255,255,0.06)",
-                color: showInstructions ? "#B744FF" : "hsl(228, 25%, 60%)",
-                border: showInstructions ? "1px solid rgba(183,68,255,0.3)" : "1px solid transparent",
-              }}
+              className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showInstructions ? "bg-purple-500/15 text-purple-500 border border-purple-500/30" : "bg-white/5 text-slate-400 border border-transparent"}`}
               title={showInstructions ? "Hide Instructions" : "Show Instructions"}
             >
               {showInstructions ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
             </button>
             <button
               onClick={() => setShowLibrariesPanel(!showLibrariesPanel)}
-              className="p-1.5 rounded-lg transition-all hover:scale-105"
-              style={{
-                background: showLibrariesPanel ? "rgba(6,182,212,0.15)" : "rgba(255,255,255,0.06)",
-                color: showLibrariesPanel ? "#00F5FF" : "hsl(228, 25%, 60%)",
-                border: showLibrariesPanel ? "1px solid rgba(6,182,212,0.3)" : "1px solid transparent",
-              }}
+              className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showLibrariesPanel ? "bg-blue-500/15 text-blue-500 border border-blue-500/30" : "bg-white/5 text-slate-400 border border-transparent"}`}
               title={showLibrariesPanel ? "Hide Library Manager" : "Show Library Manager"}
             >
               <Package size={14} />
             </button>
             <button
               onClick={() => setShowSimulator(!showSimulator)}
-              className="p-1.5 rounded-lg transition-all hover:scale-105"
-              style={{
-                background: showSimulator ? "rgba(0,255,136,0.15)" : "rgba(255,255,255,0.06)",
-                color: showSimulator ? "#00FF88" : "hsl(228, 25%, 60%)",
-                border: showSimulator ? "1px solid rgba(0,255,136,0.3)" : "1px solid transparent",
-              }}
+              className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showSimulator ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30" : "bg-white/5 text-slate-400 border border-transparent"}`}
               title={showSimulator ? "Hide Simulator" : "Show Simulator"}
             >
               {showSimulator ? <PanelRightClose size={14} /> : <PanelRightOpen size={14} />}
             </button>
 
-            <div className="w-px h-5 mx-1" style={{ background: "hsl(232, 40%, 20%)" }} />
+            <div className="w-px h-5 mx-1 ide-top-btn-divider" />
 
             <button onClick={loadErrorCode} className="btn-neon-outline-teal px-2.5 py-1.5 text-xs flex items-center gap-1.5">
               <Bug size={11} /> Load Errors
             </button>
-            <button onClick={resetCode} className="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105" style={{ background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
+            <button onClick={resetCode} className="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105 ide-btn-reset">
               <RefreshCw size={11} /> Reset
             </button>
             <button
@@ -526,10 +626,7 @@ export default function IDEPage() {
 
         {/* Run workflow indicator */}
         {runStep !== "idle" && (
-          <div
-            className="px-4 py-2 border-b flex items-center gap-4 flex-shrink-0"
-            style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}
-          >
+          <div className="px-4 py-2 border-b flex items-center gap-4 flex-shrink-0 ide-workflow-indicator">
             {(["compiling", "simulating", "safety"] as RunStep[]).map((step, i) => {
               const labels = ["Compiling", "Simulating", "Safety Check"];
               const stepOrder = ["compiling", "simulating", "safety"];
@@ -541,30 +638,30 @@ export default function IDEPage() {
               return (
                 <div key={step} className="flex items-center gap-2">
                   {isDone ? (
-                    <CheckCircle size={16} style={{ color: "#00FF88" }} />
+                    <CheckCircle size={16} className="text-emerald-500" />
                   ) : isActive ? (
-                    <Loader2 size={16} className="animate-spin" style={{ color: "#00F5FF" }} />
+                    <Loader2 size={16} className="animate-spin text-blue-500" />
                   ) : (
-                    <Circle size={16} style={{ color: "hsl(228, 25%, 40%)" }} />
+                    <Circle size={16} className="text-slate-500" />
                   )}
-                  <span className="text-sm font-medium" style={{ color: isDone ? "#00FF88" : isActive ? "#00F5FF" : "hsl(228, 25%, 50%)" }}>
+                  <span className={`text-sm font-medium ${isDone ? "text-emerald-500" : isActive ? "text-blue-500" : "text-slate-400"}`}>
                     {labels[i]}
                   </span>
-                  {i < 2 && <ChevronRight size={14} style={{ color: "hsl(228, 25%, 40%)" }} />}
+                  {i < 2 && <ChevronRight size={14} className="text-slate-500" />}
                 </div>
               );
             })}
             {runStep === "success" && (
               <div className="flex items-center gap-2 animate-fade-in-up ml-2">
-                <CheckCircle size={18} style={{ color: "#00FF88" }} />
-                <span className="font-bold text-sm" style={{ color: "#00FF88" }}>✓ Task Complete! +75 XP Awarded</span>
+                <CheckCircle size={18} className="text-emerald-500" />
+                <span className="font-bold text-sm text-emerald-500">✓ Task Complete! +75 XP Awarded</span>
               </div>
             )}
             {runStep === "error" && (
               <div className="flex items-center gap-2 animate-fade-in-up ml-2">
-                <XCircle size={18} style={{ color: "#FF4500" }} />
-                <span className="font-bold text-sm" style={{ color: "#FF4500" }}>{errors.length} Error{errors.length !== 1 ? "s" : ""} Found</span>
-                <button onClick={debugWithAI} className="ml-2 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1" style={{ background: "rgba(183,68,255,0.2)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.4)" }}>
+                <XCircle size={18} className="text-rose-500" />
+                <span className="font-bold text-sm text-rose-500">{errors.length} Error{errors.length !== 1 ? "s" : ""} Found</span>
+                <button onClick={debugWithAI} className="ml-2 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 bg-purple-500/20 text-purple-400 border border-purple-500/40">
                   <Brain size={12} /> Debug with AI
                 </button>
               </div>
@@ -576,45 +673,37 @@ export default function IDEPage() {
         <div className="flex flex-1 overflow-hidden">
           {/* Instructions Panel */}
           {showInstructions && (
-            <div
-              className="w-64 flex-shrink-0 border-r flex flex-col overflow-y-auto glass-card transition-all duration-300 animate-fade-in-up"
-              style={{ borderColor: "rgba(255,255,255,0.05)" }}
-            >
-              <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
-                <BookOpen size={15} style={{ color: "#B744FF" }} />
-                <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>Instructions</span>
+            <div className="w-64 flex-shrink-0 border-r flex flex-col overflow-y-auto glass-card transition-all duration-300 animate-fade-in-up ide-instructions-panel">
+              <div className="flex items-center gap-2 px-4 py-3 border-b ide-instructions-panel-title">
+                <BookOpen size={15} className="text-purple-500" />
+                <span className="font-bold text-sm text-white">Instructions</span>
               </div>
               <div className="p-3 space-y-2">
                 {projectSteps.map((step) => (
                   <div
                     key={step.id}
-                    className="rounded-xl overflow-hidden border cursor-pointer transition-all duration-200"
-                    style={{
-                      borderColor: step.id === activeStep
-                        ? "rgba(0,245,255,0.4)"
+                    className={`rounded-xl overflow-hidden border cursor-pointer transition-all duration-200 ${
+                      step.id === activeStep
+                        ? "border-blue-500/45 bg-blue-500/5"
                         : step.done
-                          ? "rgba(0,255,136,0.2)"
-                          : "hsl(232, 38%, 20%)",
-                      background: step.id === activeStep
-                        ? "rgba(0,245,255,0.06)"
-                        : "transparent",
-                    }}
+                          ? "border-emerald-500/20 bg-transparent"
+                          : "border-slate-800 bg-transparent"
+                    }`}
                     onClick={() => setActiveStep(step.id)}
                   >
                     <div className="flex items-center gap-2.5 px-3 py-2.5">
                       <div
-                        className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
-                        style={
+                        className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
                           step.done
-                            ? { background: "#00FF88", color: "#0A0E27" }
+                            ? "bg-emerald-500 text-slate-950"
                             : step.id === activeStep
-                              ? { background: "#00F5FF", color: "#0A0E27" }
-                              : { background: "hsl(232, 40%, 22%)", color: "hsl(228, 25%, 60%)" }
-                        }
+                              ? "bg-blue-500 text-slate-950"
+                              : "bg-slate-800 text-slate-400"
+                        }`}
                       >
                         {step.done ? "✓" : step.id}
                       </div>
-                      <span className="text-xs font-semibold" style={{ color: step.done ? "#00FF88" : step.id === activeStep ? "#FFFFFF" : "hsl(228, 25%, 60%)" }}>
+                      <span className={`text-xs font-semibold ${step.done ? "text-emerald-500" : step.id === activeStep ? "text-white" : "text-slate-400"}`}>
                         {step.title}
                       </span>
                     </div>
@@ -623,8 +712,8 @@ export default function IDEPage() {
                       <div className="px-3 pb-3 animate-fade-in">
                         <ul className="space-y-1.5">
                           {step.instructions.map((inst, i) => (
-                            <li key={i} className="flex items-start gap-2 text-xs" style={{ color: "hsl(228, 30%, 70%)" }}>
-                              <span className="mt-0.5 flex-shrink-0" style={{ color: "#00F5FF" }}>→</span>
+                            <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                              <span className="mt-0.5 flex-shrink-0 text-blue-500">→</span>
                               <span>{inst}</span>
                             </li>
                           ))}
@@ -640,21 +729,17 @@ export default function IDEPage() {
           {/* Code Editor */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div
-              className="flex items-center gap-2 px-4 py-2 border-b text-xs font-mono flex-shrink-0"
-              style={{ background: "hsl(232, 48%, 6%)", borderColor: "hsl(232, 40%, 16%)", color: "hsl(228, 25%, 60%)" }}
+              className="flex items-center gap-2 px-4 py-2 border-b text-xs font-mono flex-shrink-0 bg-[hsl(232,48%,6%)] border-[hsl(232,40%,16%)] text-[hsl(228,25%,60%)]"
             >
-              <span style={{ color: "#00F5FF" }}>sketch.ino</span>
+              <span className="text-[#3B82F6]">sketch.ino</span>
               <span>•</span>
               <span>Arduino Uno</span>
               <span className="ml-2">|</span>
               <button
                 onClick={serialConnected ? disconnectSerial : connectSerial}
-                className="text-[10px] font-bold px-2 py-0.5 rounded border transition-all cursor-pointer"
-                style={{
-                  background: serialConnected ? "rgba(0,255,136,0.15)" : "transparent",
-                  color: serialConnected ? "#00FF88" : "hsl(228, 25%, 60%)",
-                  borderColor: serialConnected ? "#00FF88/30" : "hsl(232, 40%, 20%)"
-                }}
+                className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-all cursor-pointer ${
+                  serialConnected ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" : "bg-transparent text-slate-400 border-slate-800"
+                }`}
               >
                 {serialConnected ? "🔌 Connected" : "🔌 Connect Board"}
               </button>
@@ -673,15 +758,15 @@ export default function IDEPage() {
               >
                 📟 Serial Monitor {serialLogs.length > 0 && `(${serialLogs.length})`}
               </button>
-              <span className="ml-auto text-xs" style={{ color: "#00FF88" }}>✎ Editable</span>
+              <span className="ml-auto text-xs text-emerald-500">✎ Editable</span>
             </div>
             <div className="relative flex-1 flex flex-col overflow-hidden">
               <div className="flex-1 relative">
                 <CodeEditor code={code} onChange={setCode} minHeight="100%" maxHeight="100%" />
               </div>
               {showSerialConsole && (
-                <div className="h-44 border-t flex flex-col overflow-hidden bg-slate-950" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
-                  <div className="flex items-center justify-between px-4 py-1.5 border-b text-xs font-mono" style={{ borderColor: "hsl(232, 40%, 16%)", color: "hsl(228, 25%, 60%)" }}>
+                <div className="h-44 border-t flex flex-col overflow-hidden bg-slate-950 ide-serial-console">
+                  <div className="flex items-center justify-between px-4 py-1.5 border-b text-xs font-mono ide-serial-console-header">
                     <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
                     <div className="flex gap-2">
                       <button
@@ -713,14 +798,14 @@ export default function IDEPage() {
 
             {/* Error panel */}
             {errors.length > 0 && (
-              <div className="border-t p-4 flex-shrink-0 animate-fade-in" style={{ background: "rgba(255,69,0,0.08)", borderColor: "rgba(255,69,0,0.3)" }}>
+              <div className="border-t p-4 flex-shrink-0 animate-fade-in bg-rose-500/10 border-rose-500/30">
                 <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle size={16} style={{ color: "#FF4500" }} />
-                  <span className="font-bold text-sm" style={{ color: "#FF4500" }}>Compilation Errors</span>
+                  <AlertTriangle size={16} className="text-rose-500" />
+                  <span className="font-bold text-sm text-rose-500">Compilation Errors</span>
                 </div>
                 <div className="space-y-2">
                   {errors.map((err, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm font-mono p-2 rounded-lg" style={{ background: "rgba(255,69,0,0.1)", color: "#FF6B35" }}>
+                    <div key={i} className="flex items-start gap-2 text-sm font-mono p-2 rounded-lg bg-rose-500/15 text-rose-400">
                       <XCircle size={14} className="flex-shrink-0 mt-0.5" />
                       {err}
                     </div>
@@ -732,20 +817,16 @@ export default function IDEPage() {
 
           {/* Wokwi Simulator Panel */}
           {showSimulator && (
-            <div
-              className="w-72 flex-shrink-0 border-l flex flex-col transition-all duration-300"
-              style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}
-            >
-              <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
-                <Play size={14} style={{ color: "#00FF88" }} />
-                <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>Simulator</span>
+            <div className="w-72 flex-shrink-0 border-l flex flex-col transition-all duration-300 ide-wokwi-simulator-panel">
+              <div className="flex items-center gap-2 px-4 py-3 border-b ide-wokwi-simulator-panel-header">
+                <Play size={14} className="text-emerald-500" />
+                <span className="font-bold text-sm text-white">Simulator</span>
               </div>
               <div className="flex-1 relative">
                 <iframe
                   src="https://wokwi.com/projects/new/arduino-uno"
-                  className="w-full h-full"
+                  className="w-full h-full border-none"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
-                  style={{ border: "none" }}
                   title="Wokwi Simulator"
                 />
               </div>
@@ -754,11 +835,8 @@ export default function IDEPage() {
 
           {/* Library Manager Panel */}
           {showLibrariesPanel && (
-            <div
-              className="w-80 flex-shrink-0 border-l flex flex-col transition-all duration-300 animate-slide-in-right bg-slate-950"
-              style={{ borderColor: "hsl(232, 40%, 16%)" }}
-            >
-              <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
+            <div className="w-80 flex-shrink-0 border-l flex flex-col transition-all duration-300 animate-slide-in-right bg-slate-950 ide-library-manager-panel">
+              <div className="flex items-center justify-between px-4 py-3 border-b ide-library-manager-header">
                 <div className="flex items-center gap-2">
                   <Package size={15} className="text-cyan-400" />
                   <span className="font-bold text-sm text-white">Library Manager</span>
@@ -772,7 +850,7 @@ export default function IDEPage() {
               </div>
 
               {/* Search Bar */}
-              <div className="p-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
+              <div className="p-3 border-b ide-library-manager-search">
                 <input
                   type="text"
                   placeholder="Search libraries (e.g. FastLED, Servo)..."
@@ -792,11 +870,9 @@ export default function IDEPage() {
                   return (
                     <div
                       key={lib.includeName}
-                      className="p-3 rounded-xl border transition-all space-y-2"
-                      style={{
-                        background: isInstalled ? "rgba(0, 245, 255, 0.03)" : "rgba(255, 255, 255, 0.02)",
-                        borderColor: isInstalled ? "rgba(0, 245, 255, 0.25)" : "hsl(232, 40%, 20%)"
-                      }}
+                      className={`p-3 rounded-xl border transition-all space-y-2 ${
+                        isInstalled ? "bg-blue-500/5 border-blue-500/25" : "bg-white/5 border-slate-800"
+                      }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div>
@@ -805,12 +881,9 @@ export default function IDEPage() {
                         </div>
                         <button
                           onClick={() => toggleInstallLibrary(lib)}
-                          className="px-2 py-1 rounded text-[10px] font-bold transition-all hover:scale-105"
-                          style={
-                            isInstalled
-                              ? { background: "rgba(255, 69, 0, 0.15)", color: "#FF4500", border: "1px solid rgba(255, 69, 0, 0.3)" }
-                              : { background: "rgba(0, 245, 255, 0.15)", color: "#00F5FF", border: "1px solid rgba(0, 245, 255, 0.3)" }
-                          }
+                          className={`px-2 py-1 rounded text-[10px] font-bold transition-all hover:scale-105 ${
+                            isInstalled ? "bg-rose-500/15 text-rose-500 border border-rose-500/30" : "bg-blue-500/15 text-blue-500 border border-blue-500/30"
+                          }`}
                         >
                           {isInstalled ? "Uninstall" : "Install"}
                         </button>
@@ -835,34 +908,64 @@ export default function IDEPage() {
 
           {/* AI Debug Panel */}
           {showDebug && (
-            <div className="w-72 flex flex-col border-l flex-shrink-0 glass-card animate-slide-in-right" style={{ borderColor: "rgba(255,255,255,0.05)", animationDelay: "150ms" }}>
-              <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
-                <Brain size={16} style={{ color: "#B744FF" }} />
-                <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Debug Assistant</span>
+            <div className="w-72 flex flex-col border-l flex-shrink-0 glass-card animate-slide-in-right ide-library-manager-panel">
+              <div className="flex items-center gap-2 px-4 py-3 border-b ide-wokwi-simulator-panel-header">
+                <Brain size={16} className="text-purple-500" />
+                <span className="font-bold text-sm text-white">AI Debug Assistant</span>
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {debugMessages.map((msg, i) => (
                   <div
                     key={i}
-                    className={`p-3 rounded-xl text-sm ${msg.role === "user" ? "ml-4" : ""}`}
-                    style={{
-                      background: msg.role === "ai" ? "rgba(183,68,255,0.1)" : "rgba(0,245,255,0.1)",
-                      border: `1px solid ${msg.role === "ai" ? "rgba(183,68,255,0.3)" : "rgba(0,245,255,0.3)"}`,
-                      color: msg.role === "ai" ? "#E0E7FF" : "#00F5FF",
-                    }}
+                    className={`p-3 rounded-xl text-sm ${msg.role === "user" ? "ml-4 bg-blue-500/10 border border-blue-500/30 text-blue-400" : "bg-purple-500/10 border border-purple-500/30 text-slate-100"}`}
                   >
-                    {msg.role === "ai" && <span className="text-xs font-bold block mb-1" style={{ color: "#B744FF" }}>🧠 AI Assistant</span>}
+                    {msg.role === "ai" && <span className="text-xs font-bold block mb-1 text-purple-400">🧠 AI Assistant</span>}
                     {msg.content}
                   </div>
                 ))}
+                {debugStreaming && debugMessages[debugMessages.length - 1]?.role !== "ai" && (
+                  <div className="flex gap-2 justify-start p-3 rounded-xl bg-purple-500/10 border border-purple-500/30">
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-purple-400" />
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-purple-400 [animation-delay:0.15s]" />
+                    <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-purple-400 [animation-delay:0.3s]" />
+                  </div>
+                )}
+                <div ref={debugBottomRef} />
               </div>
 
-              <div className="p-4 border-t space-y-2" style={{ borderColor: "hsl(232, 40%, 16%)" }}>
-                <button onClick={askNextHint} className="btn-neon-outline-teal w-full py-2 text-sm font-semibold flex items-center justify-center gap-2">
-					<Zap size={14} /> Get Next Hint
+              <div className="p-4 border-t space-y-3 ide-wokwi-simulator-panel-header">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={customDebugInput}
+                    onChange={(e) => setCustomDebugInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && customDebugInput.trim() && !debugStreaming) {
+                        sendCustomDebugMessage();
+                      }
+                    }}
+                    placeholder={debugStreaming ? "AI is thinking..." : "Ask follow up..."}
+                    disabled={debugStreaming}
+                    className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                  />
+                  <button
+                    onClick={sendCustomDebugMessage}
+                    disabled={!customDebugInput.trim() || debugStreaming}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:hover:scale-100 transition-all flex-shrink-0"
+                  >
+                    Send
+                  </button>
+                </div>
+                
+                <button
+                  onClick={askNextHint}
+                  disabled={debugStreaming}
+                  className="btn-neon-outline-teal w-full py-2 text-xs font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50"
+                >
+                  <Zap size={11} /> {debugStreaming ? "Thinking..." : "Get Next Hint"}
                 </button>
-                <p className="text-xs text-center" style={{ color: "hsl(228, 25%, 60%)" }}>
+                <p className="text-[10px] text-center text-slate-400">
                   AI gives hints, not answers 🎓
                 </p>
               </div>

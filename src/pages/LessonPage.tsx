@@ -14,6 +14,25 @@ import ExplainCode from "@/components/ExplainCode";
 import CodeEditor from "@/components/CodeEditor";
 import { toast as sonnerToast } from "sonner";
 
+const PathBadge = ({ path }: { path: any }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (ref.current && path?.color) {
+      ref.current.style.background = `${path.color}15`;
+      ref.current.style.color = path.color;
+      ref.current.style.borderColor = `${path.color}30`;
+    }
+  }, [path]);
+  return (
+    <span
+      ref={ref}
+      className="text-xs font-extrabold px-3 py-1 rounded-full border shadow-sm"
+    >
+      {path?.title}
+    </span>
+  );
+};
+
 type Tab = "concept" | "challenge" | "simulate" | "build";
 
 const getLessonVideo = (title: string) => {
@@ -594,18 +613,7 @@ export default function LessonPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  {path && (
-                    <span
-                      className="text-xs font-extrabold px-3 py-1 rounded-full border shadow-sm"
-                      style={{
-                        background: `${path.color}15`,
-                        color: path.color,
-                        borderColor: `${path.color}30`,
-                      }}
-                    >
-                      {path.title}
-                    </span>
-                  )}
+                  {path && <PathBadge path={path} />}
                   <span className="text-xs font-bold text-slate-400">Lesson {lesson.lesson_order}</span>
                 </div>
                 <h1 className="text-2xl font-extrabold font-display text-indigo-100">{lesson.title}</h1>
@@ -846,7 +854,7 @@ export default function LessonPage() {
 
                 {/* Run workflow indicator */}
                 {runStep !== "idle" && (
-                  <div className="rounded-xl px-5 py-3 flex items-center gap-6 border mb-4" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
+                  <div className="rounded-xl px-5 py-3 flex items-center gap-6 border mb-4 bg-[hsl(232,42%,11%)] border-[hsl(232,40%,16%)]">
                     {(["compiling", "simulating"] as const).map((step, i) => {
                       const labels = ["Compiling", "Simulating"];
                       const stepOrder = ["compiling", "simulating"];
@@ -856,20 +864,32 @@ export default function LessonPage() {
                       const isActive = step === runStep;
                       return (
                         <div key={step} className="flex items-center gap-2">
-                          {isDone ? <CheckCircle size={16} style={{ color: "#00FF88" }} /> : isActive ? <Loader2 size={16} className="animate-spin" style={{ color: "#00F5FF" }} /> : <div className="w-4 h-4 rounded-full" style={{ background: "hsl(228, 25%, 30%)" }} />}
-                          <span className="text-sm font-medium" style={{ color: isDone ? "#00FF88" : isActive ? "#00F5FF" : "hsl(228, 25%, 50%)" }}>{labels[i]}</span>
+                          {isDone ? (
+                            <CheckCircle size={16} className="text-[#10B981]" />
+                          ) : isActive ? (
+                            <Loader2 size={16} className="animate-spin text-[#3B82F6]" />
+                          ) : (
+                            <div className="w-4 h-4 rounded-full bg-[hsl(228,25%,30%)]" />
+                          )}
+                          <span
+                            className={`text-sm font-medium ${
+                              isDone ? "text-[#10B981]" : isActive ? "text-[#3B82F6]" : "text-[hsl(228,25%,50%)]"
+                            }`}
+                          >
+                            {labels[i]}
+                          </span>
                         </div>
                       );
                     })}
                     {runStep === "success" && (
-                      <span className="font-bold text-sm animate-fade-in-up flex items-center gap-2" style={{ color: "#00FF88" }}>
+                      <span className="font-bold text-sm animate-fade-in-up flex items-center gap-2 text-[#10B981]">
                         <CheckCircle size={16} /> ✓ Compilation Successful!
                       </span>
                     )}
                     {runStep === "error" && (
                       <div className="flex items-center gap-2">
-                        <XCircle size={16} style={{ color: "#FF4500" }} />
-                        <span className="font-bold text-sm" style={{ color: "#FF4500" }}>{errors.length} Error{errors.length !== 1 ? "s" : ""}</span>
+                        <XCircle size={16} className="text-[#FF4500]" />
+                        <span className="font-bold text-sm text-[#FF4500]">{errors.length} Error{errors.length !== 1 ? "s" : ""}</span>
                         <button
                           onClick={() => {
                             handleSendQuestion(`I encountered ${errors.length} error(s) during compilation: \n\n${errors.join("\n")}\n\nHere is my code:\n\n\`\`\`cpp\n${code}\n\`\`\`\n\nPlease help me debug this!`);
@@ -891,12 +911,11 @@ export default function LessonPage() {
                       <span className="text-slate-700">|</span>
                       <button
                         onClick={serialConnected ? disconnectSerial : connectSerial}
-                        className="text-[9px] font-bold px-1.5 py-0.5 rounded border transition-all cursor-pointer"
-                        style={{
-                          background: serialConnected ? "rgba(16,185,129,0.15)" : "transparent",
-                          color: serialConnected ? "#10B981" : "hsl(228, 25%, 60%)",
-                          borderColor: serialConnected ? "#10B981/30" : "hsl(232, 40%, 20%)"
-                        }}
+                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded border transition-all cursor-pointer ${
+                          serialConnected
+                            ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
+                            : "bg-transparent text-[hsl(228,25%,60%)] border-[hsl(232,40%,20%)]"
+                        }`}
                       >
                         {serialConnected ? "🔌 Connected" : "🔌 Connect Board"}
                       </button>
@@ -997,6 +1016,8 @@ export default function LessonPage() {
                                     setCodeVersions(updated);
                                     localStorage.setItem(`lesson_code_versions_${lessonId}`, JSON.stringify(updated));
                                   }}
+                                  title="Delete version"
+                                  aria-label="Delete version"
                                   className="px-2 py-1 rounded text-xs transition-all hover:scale-105 text-rose-500"
                                 >
                                   <Trash2 size={10} />
@@ -1016,8 +1037,8 @@ export default function LessonPage() {
                     <div className="relative flex flex-col overflow-hidden">
                       <CodeEditor key={`user-v${revertCount}`} code={code} onChange={(newCode) => { setCode(newCode); setCodeUploaded(false); }} maxHeight="500px" minHeight="400px" />
                       {showSerialConsole && (
-                        <div className="h-36 border-t flex flex-col overflow-hidden bg-slate-950" style={{ borderColor: "var(--border)" }}>
-                          <div className="flex items-center justify-between px-4 py-1.5 border-b text-[10px] font-mono" style={{ borderColor: "var(--border)", color: "hsl(228, 25%, 60%)" }}>
+                        <div className="h-36 border-t flex flex-col overflow-hidden bg-slate-950 border-border">
+                          <div className="flex items-center justify-between px-4 py-1.5 border-b text-[10px] font-mono border-border text-[hsl(228,25%,60%)]">
                             <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
                             <div className="flex gap-2">
                               <button onClick={() => setSerialLogs([])} className="hover:text-white transition-all">Clear Logs</button>
@@ -1115,25 +1136,22 @@ export default function LessonPage() {
                 className="space-y-4"
               >
                 <div
-                  className={`rounded-2xl border overflow-hidden transition-all duration-300 ${simExpanded ? "fixed inset-4 z-50" : "relative"}`}
-                  style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
+                  className={`rounded-2xl border overflow-hidden transition-all duration-300 bg-[hsl(229,45%,14%)] border-[hsl(229,42%,26%)] ${simExpanded ? "fixed inset-4 z-50" : "relative"}`}
                 >
-                  <div className="flex items-center justify-between px-4 py-2.5 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-[hsl(229,42%,22%)]">
                     <span className="text-sm font-semibold text-cyan-400">Wokwi Simulator</span>
                     <button
                       onClick={() => setSimExpanded(!simExpanded)}
-                      className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
-                      style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
+                      className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105 text-[#A0AED9] border border-[hsl(229,42%,30%)]"
                     >
                       {simExpanded ? "Minimize" : "Expand"}
                     </button>
                   </div>
-                  <div className="relative bg-slate-950" style={{ paddingTop: simExpanded ? "0" : "56.25%", height: simExpanded ? "calc(100% - 44px)" : "450px" }}>
+                  <div className={simExpanded ? "relative bg-slate-950 w-full h-[calc(100%-44px)]" : "relative bg-slate-950 w-full h-[450px]"}>
                     <iframe
                       src="https://wokwi.com/projects/new/arduino-uno"
-                      className={simExpanded ? "w-full h-full" : "absolute inset-0 w-full h-full"}
+                      className={simExpanded ? "w-full h-full border-none" : "absolute inset-0 w-full h-full border-none"}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
-                      style={{ border: "none" }}
                       title="Wokwi Simulator"
                     />
                   </div>
@@ -1192,12 +1210,11 @@ export default function LessonPage() {
                   <div className="flex flex-wrap items-center gap-3">
                     <button
                       onClick={serialConnected ? disconnectSerial : connectSerial}
-                      className="px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all hover:scale-105"
-                      style={{
-                        background: serialConnected ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.06)",
-                        color: serialConnected ? "#10B981" : "hsl(228, 25%, 70%)",
-                        border: serialConnected ? "1px solid rgba(16,185,129,0.3)" : "1px solid hsl(232, 40%, 20%)"
-                      }}
+                      className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all hover:scale-105 border ${
+                        serialConnected
+                          ? "bg-emerald-500/15 text-[#10B981] border-emerald-500/30"
+                          : "bg-white/5 text-[hsl(228,25%,70%)] border-[hsl(232,40%,20%)]"
+                      }`}
                     >
                       {serialConnected ? "🔌 Connected" : "🔌 Connect Arduino"}
                     </button>
@@ -1349,6 +1366,8 @@ export default function LessonPage() {
               <button
                 type="submit"
                 disabled={aiLoading}
+                title="Send message"
+                aria-label="Send message"
                 className="clay-btn clay-btn-primary clay-btn-sm shrink-0 flex items-center justify-center w-9 h-9 !p-0"
               >
                 <Send size={14} />

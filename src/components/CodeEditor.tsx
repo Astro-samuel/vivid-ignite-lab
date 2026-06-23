@@ -83,7 +83,7 @@ export default function CodeEditor({ code, onChange, readOnly = false, maxHeight
             lineHeight: "1.7",
             color: "#E0E7FF",
             background: "hsl(232, 48%, 8%)",
-            caretColor: "#00F5FF",
+            caretColor: "#3B82F6",
             border: "none",
           }}
           spellCheck={false}

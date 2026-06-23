@@ -1,3 +1,4 @@
+import { useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, GraduationCap, LayoutDashboard, BookOpen, Cpu, Package, Zap,
@@ -84,40 +85,37 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const navRef = useRef<HTMLElement>(null);
+
+  // Restore scroll position when sidebar mounts
+  useEffect(() => {
+    const savedScroll = sessionStorage.getItem("sidebar-scroll");
+    if (savedScroll && navRef.current) {
+      navRef.current.scrollTop = parseInt(savedScroll, 10);
+    }
+  }, []);
+
+  // Save scroll position when user scrolls the navigation
+  const handleScroll = (e: React.UIEvent<HTMLElement>) => {
+    sessionStorage.setItem("sidebar-scroll", e.currentTarget.scrollTop.toString());
+  };
 
   const sidebarContent = (
-    <aside
-      className="flex flex-col h-full overflow-hidden select-none"
-      style={{
-        width: "240px",
-        background: "var(--sidebar-background)",
-        borderRight: "2.5px solid var(--sidebar-border)",
-      }}
-    >
+    <aside className="flex flex-col h-full overflow-hidden select-none sidebar-aside">
       {/* ── Logo / Brand ── */}
-      <div
-        className="flex items-center justify-between px-4 py-4 flex-shrink-0"
-        style={{ borderBottom: "2px solid var(--sidebar-border)" }}
-      >
+      <div className="flex items-center justify-between px-4 py-4 flex-shrink-0 sidebar-header">
         <div
           className="flex items-center gap-2.5 cursor-pointer"
           onClick={() => { navigate("/"); onClose?.(); }}
         >
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-sm"
-            style={{
-              background: "hsl(var(--primary))",
-              boxShadow: "0 3px 0 hsl(var(--primary-dark))",
-              border: "2px solid hsl(var(--primary-dark))",
-            }}
-          >
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-sm sidebar-logo-icon">
             A
           </div>
           <div>
-            <p className="font-black text-sm leading-none" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
+            <p className="font-black text-sm leading-none sidebar-logo-text">
               ArduinoLab
             </p>
-            <p className="text-[10px] font-semibold" style={{ color: "hsl(var(--foreground-muted))" }}>
+            <p className="text-[10px] font-semibold sidebar-logo-sub">
               Learn Electronics
             </p>
           </div>
@@ -125,8 +123,9 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
         {mobile && (
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer"
-            style={{ background: "var(--background-hover)", color: "hsl(var(--foreground-muted))" }}
+            title="Close sidebar"
+            aria-label="Close sidebar"
+            className="w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer sidebar-close-btn"
           >
             <X size={16} />
           </button>
@@ -142,24 +141,25 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
           <RobotMascot />
         </motion.div>
         {user ? (
-          <p className="text-xs font-bold mt-1" style={{ color: "hsl(var(--primary))", fontFamily: "'Baloo 2', sans-serif" }}>
+          <p className="text-xs font-bold mt-1 sidebar-mascot-txt-primary">
             Keep it up! 🎉
           </p>
         ) : (
-          <p className="text-xs font-bold mt-1" style={{ color: "hsl(var(--foreground-muted))", fontFamily: "'Baloo 2', sans-serif" }}>
+          <p className="text-xs font-bold mt-1 sidebar-mascot-txt-muted">
             Let's build things!
           </p>
         )}
       </div>
 
       {/* ── Navigation ── */}
-      <nav className="flex-1 overflow-y-auto px-3 pb-2 space-y-4">
+      <nav
+        ref={navRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto px-3 pb-2 space-y-4"
+      >
         {navSections.map((section) => (
           <div key={section.label}>
-            <p
-              className="text-[10px] font-black uppercase tracking-widest px-2 mb-1"
-              style={{ color: "hsl(240, 14%, 72%)", fontFamily: "'Baloo 2', sans-serif" }}
-            >
+            <p className="text-[10px] font-black uppercase tracking-widest px-2 mb-1 sidebar-section-label">
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -172,27 +172,16 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
                     to={path}
                     id={`nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
                     onClick={onClose}
-                    className="duo-nav-item"
-                    style={
-                      isActive
-                        ? {
-                            background: "var(--primary-light)",
-                            color: "hsl(var(--primary))",
-                            borderColor: "hsl(var(--primary) / 0.3)",
-                            boxShadow: "0 2px 0 0 hsl(var(--primary) / 0.2)",
-                          }
-                        : {}
-                    }
+                    className={`duo-nav-item ${isActive ? "active" : ""}`}
                   >
                     <Icon
                       size={18}
                       className="flex-shrink-0"
                       strokeWidth={isActive ? 2.5 : 2}
-                      style={{ color: isActive ? "hsl(var(--primary))" : "hsl(var(--foreground-muted))" }}
                     />
                     <span className="flex-1 truncate">{label}</span>
                     {isActive && (
-                      <ChevronRight size={14} style={{ color: "hsl(var(--primary))" }} />
+                      <ChevronRight size={14} />
                     )}
                   </Link>
                 );
@@ -203,23 +192,11 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
       </nav>
 
       {/* ── Bottom: Profile + Auth ── */}
-      <div
-        className="px-3 pb-3 pt-2 flex-shrink-0 space-y-1"
-        style={{ borderTop: "2px solid var(--sidebar-border)" }}
-      >
+      <div className="px-3 pb-3 pt-2 flex-shrink-0 space-y-1 sidebar-footer">
         <Link
           to="/profile"
           onClick={onClose}
-          className="duo-nav-item"
-          style={
-            location.pathname === "/profile"
-              ? {
-                  background: "var(--primary-light)",
-                  color: "hsl(var(--primary))",
-                  borderColor: "hsl(var(--primary) / 0.3)",
-                }
-              : {}
-          }
+          className={`duo-nav-item ${location.pathname === "/profile" ? "active" : ""}`}
         >
           <User size={18} strokeWidth={location.pathname === "/profile" ? 2.5 : 2} />
           <span>Profile</span>
@@ -228,17 +205,15 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
         {user ? (
           <button
             onClick={async () => { await signOut(); navigate("/auth"); onClose?.(); }}
-            className="duo-nav-item w-full text-left"
-            style={{ color: "hsl(0, 84%, 55%)" }}
+            className="duo-nav-item w-full text-left sidebar-signout-btn"
           >
-            <LogOut size={18} style={{ color: "hsl(0, 84%, 55%)" }} />
+            <LogOut size={18} />
             <span>Sign Out</span>
           </button>
         ) : (
           <button
             onClick={() => { navigate("/auth"); onClose?.(); }}
-            className="clay-btn clay-btn-primary w-full"
-            style={{ borderRadius: 12, padding: "10px 16px", fontSize: "0.85rem" }}
+            className="clay-btn clay-btn-primary w-full sidebar-signin-btn"
           >
             <LogIn size={16} />
             Sign In

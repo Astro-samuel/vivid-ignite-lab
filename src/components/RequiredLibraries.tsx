@@ -118,8 +118,8 @@ export default function RequiredLibraries({ basicCode, optimizedCode }: Props) {
               <div
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer hover:scale-[1.01]"
                 style={{
-                  background: isInstalled ? "rgba(0,255,136,0.06)" : "hsl(229, 42%, 18%)",
-                  border: `1px solid ${isInstalled ? "rgba(0,255,136,0.2)" : isExpanded ? "rgba(0,212,170,0.3)" : "hsl(229, 42%, 28%)"}`,
+                  background: isInstalled ? "rgba(16,185,129,0.06)" : "hsl(229, 42%, 18%)",
+                  border: `1px solid ${isInstalled ? "rgba(16,185,129,0.2)" : isExpanded ? "rgba(0,212,170,0.3)" : "hsl(229, 42%, 28%)"}`,
                 }}
                 onClick={() => setExpanded(isExpanded ? null : lib.name)}
               >
@@ -131,7 +131,7 @@ export default function RequiredLibraries({ basicCode, optimizedCode }: Props) {
                   className="flex-shrink-0 transition-all hover:scale-110"
                 >
                   {isInstalled ? (
-                    <CheckSquare size={18} style={{ color: "#00FF88" }} />
+                    <CheckSquare size={18} style={{ color: "#10B981" }} />
                   ) : (
                     <Square size={18} style={{ color: "#A0AED9" }} />
                   )}
@@ -173,9 +173,9 @@ export default function RequiredLibraries({ basicCode, optimizedCode }: Props) {
             <span className="text-xs font-medium block mb-2" style={{ color: "#A0AED9" }}>Built-in (no install needed):</span>
             {builtInLibs.map((lib) => (
               <div key={lib.name} className="flex items-center gap-2 px-3 py-1.5 text-xs" style={{ color: "#A0AED9" }}>
-                <CheckSquare size={14} style={{ color: "#00FF88" }} />
+                <CheckSquare size={14} style={{ color: "#10B981" }} />
                 <span>{lib.name}</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(0,255,136,0.1)", color: "#00FF88" }}>
+                <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(16,185,129,0.1)", color: "#10B981" }}>
                   Pre-installed
                 </span>
               </div>

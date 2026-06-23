@@ -59,7 +59,7 @@ export default function ArduinoSetupGuide() {
           <span className="text-lg">🛠️</span>
           <span className="font-bold text-sm" style={{ color: "#4ADE80" }}>New to Arduino? Setup Guide</span>
           {completedSteps.every(Boolean) && completedSteps.length > 0 && (
-            <CheckCircle size={14} style={{ color: "#00FF88" }} />
+            <CheckCircle size={14} style={{ color: "#10B981" }} />
           )}
         </div>
         {isOpen ? <ChevronUp size={16} style={{ color: "#A0AED9" }} /> : <ChevronDown size={16} style={{ color: "#A0AED9" }} />}
@@ -72,16 +72,16 @@ export default function ArduinoSetupGuide() {
               key={i}
               className="rounded-xl p-4 transition-all"
               style={{
-                background: completedSteps[i] ? "rgba(0,255,136,0.05)" : "hsl(229, 42%, 16%)",
-                border: `1px solid ${completedSteps[i] ? "rgba(0,255,136,0.2)" : "hsl(229, 42%, 26%)"}`,
+                background: completedSteps[i] ? "rgba(16,185,129,0.05)" : "hsl(229, 42%, 16%)",
+                border: `1px solid ${completedSteps[i] ? "rgba(16,185,129,0.2)" : "hsl(229, 42%, 26%)"}`,
               }}
             >
               <div className="flex items-center gap-3 mb-3 cursor-pointer" onClick={() => toggleStep(i)}>
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{
-                    background: completedSteps[i] ? "rgba(0,255,136,0.15)" : "rgba(74,222,128,0.12)",
-                    color: completedSteps[i] ? "#00FF88" : "#4ADE80",
+                    background: completedSteps[i] ? "rgba(16,185,129,0.15)" : "rgba(74,222,128,0.12)",
+                    color: completedSteps[i] ? "#10B981" : "#4ADE80",
                   }}
                 >
                   {completedSteps[i] ? <CheckCircle size={14} /> : step.icon}

@@ -66,10 +66,10 @@ function getInventoryComponents(userId?: string): string[] {
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
   const styles =
     difficulty === "beginner"
-      ? { background: "rgba(0,255,136,0.15)", color: "#00FF88", border: "1px solid rgba(0,255,136,0.3)" }
+      ? { background: "rgba(16,185,129,0.15)", color: "#10B981", border: "1px solid rgba(16,185,129,0.3)" }
       : difficulty === "intermediate"
       ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
-      : { background: "rgba(183,68,255,0.15)", color: "#B744FF", border: "1px solid rgba(183,68,255,0.3)" };
+      : { background: "rgba(139,92,246,0.15)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.3)" };
   return (
     <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold capitalize" style={styles}>
       {difficulty}
@@ -96,8 +96,8 @@ function ProjectCard({
           </div>
         </div>
         <div className="flex items-center gap-2 mt-3">
-          <Loader2 size={14} className="animate-spin" style={{ color: "#00F5FF" }} />
-          <span className="text-sm" style={{ color: "#00F5FF" }}>Generating {index + 1}/5...</span>
+          <Loader2 size={14} className="animate-spin" style={{ color: "#3B82F6" }} />
+          <span className="text-sm" style={{ color: "#3B82F6" }}>Generating {index + 1}/5...</span>
         </div>
       </div>
     );
@@ -108,20 +108,20 @@ function ProjectCard({
       className="rounded-2xl border overflow-hidden transition-all duration-300"
       style={
         isSelected
-          ? { background: "hsl(229, 45%, 16%)", borderColor: "rgba(0,245,255,0.5)", boxShadow: "0 0 20px rgba(0,245,255,0.1)" }
+          ? { background: "hsl(229, 45%, 16%)", borderColor: "rgba(59,130,246,0.5)", boxShadow: "0 0 20px rgba(59,130,246,0.1)" }
           : { background: "hsl(229, 45%, 16%)", borderColor: "hsl(229, 42%, 28%)" }
       }
     >
       <div className="p-5">
         <div className="flex items-start gap-3">
-          <button onClick={onSelect} className="mt-1 flex-shrink-0 transition-transform hover:scale-110" style={{ color: isSelected ? "#00F5FF" : "#A0AED9" }}>
+          <button onClick={onSelect} title={isSelected ? "Deselect project" : "Select project"} aria-label={isSelected ? "Deselect project" : "Select project"} className="mt-1 flex-shrink-0 transition-transform hover:scale-110" style={{ color: isSelected ? "#3B82F6" : "#A0AED9" }}>
             {isSelected ? <CheckSquare size={17} /> : <Square size={17} />}
           </button>
           <div className="text-2xl flex-shrink-0">{project.emoji}</div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <h3 className="font-bold text-base" style={{ color: "#FFFFFF" }}>{project.title}</h3>
-              <button onClick={() => setExpanded(!expanded)} className="flex-shrink-0 transition-all hover:scale-110" style={{ color: "#A0AED9" }}>
+              <button onClick={() => setExpanded(!expanded)} title={expanded ? "Collapse details" : "Expand details"} aria-label={expanded ? "Collapse details" : "Expand details"} className="flex-shrink-0 transition-all hover:scale-110" style={{ color: "#A0AED9" }}>
                 {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
             </div>
@@ -130,7 +130,7 @@ function ProjectCard({
               <span className="flex items-center gap-1 text-xs" style={{ color: "#A0AED9" }}>
                 <Clock size={11} /> {project.time}
               </span>
-              <span className="text-xs font-bold" style={{ color: "#FFD700" }}>+{project.xp} XP</span>
+              <span className="text-xs font-bold" style={{ color: "#F59E0B" }}>+{project.xp} XP</span>
             </div>
           </div>
         </div>
@@ -139,10 +139,10 @@ function ProjectCard({
           <div className="mt-4 pl-10 animate-fade-in-up">
             <p className="text-sm mb-3" style={{ color: "#A0AED9" }}>{project.description}</p>
             <div className="mb-4">
-              <p className="text-xs font-semibold mb-1.5" style={{ color: "#00F5FF" }}>Required Components:</p>
+              <p className="text-xs font-semibold mb-1.5" style={{ color: "#3B82F6" }}>Required Components:</p>
               <div className="flex flex-wrap gap-1.5">
                 {project.components.map((c) => (
-                  <span key={c} className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "rgba(0,245,255,0.08)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.2)" }}>
+                  <span key={c} className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "rgba(59,130,246,0.08)", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.2)" }}>
                     {c}
                   </span>
                 ))}
@@ -153,9 +153,9 @@ function ProjectCard({
               disabled={isStarting}
               className="px-5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{
-                background: "linear-gradient(135deg, #00F5FF, #0099FF)",
+                background: "linear-gradient(135deg, #3B82F6, #2563EB)",
                 color: "#0A0E27",
-                boxShadow: "0 0 15px rgba(0,245,255,0.3)",
+                boxShadow: "0 0 15px rgba(59,130,246,0.3)",
               }}
             >
               {isStarting ? <><Loader2 size={14} className="animate-spin" /> Starting...</> : <><Zap size={14} /> Start This Project</>}
@@ -432,8 +432,8 @@ export default function GeneratePage() {
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-1">
-            <Zap size={14} style={{ color: "#B744FF" }} />
-            <span className="text-xs font-semibold" style={{ color: "#B744FF" }}>AI-Powered Generation</span>
+            <Zap size={14} style={{ color: "#8B5CF6" }} />
+            <span className="text-xs font-semibold" style={{ color: "#8B5CF6" }}>AI-Powered Generation</span>
           </div>
           <h1 className="text-3xl font-bold mb-1" style={{ color: "#FFFFFF" }}>Generate Project</h1>
           <p className="text-sm" style={{ color: "#A0AED9" }}>
@@ -446,11 +446,11 @@ export default function GeneratePage() {
           {/* Components Panel */}
           <div className="rounded-2xl border p-5" style={{ background: "hsl(229, 45%, 16%)", borderColor: "hsl(229, 42%, 28%)" }}>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,245,255,0.12)" }}>
-                <Zap size={14} style={{ color: "#00F5FF" }} />
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(59,130,246,0.12)" }}>
+                <Zap size={14} style={{ color: "#3B82F6" }} />
               </div>
               <span className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>Your Components</span>
-              <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF" }}>{components.length}</span>
+              <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "rgba(59,130,246,0.15)", color: "#3B82F6" }}>{components.length}</span>
             </div>
             <div className="flex flex-wrap gap-1.5 mb-3 max-h-32 overflow-y-auto">
               {components.map((c) => (
@@ -462,6 +462,8 @@ export default function GeneratePage() {
                   {c}
                   <button
                     onClick={() => removeComponent(c)}
+                    title="Remove component"
+                    aria-label={`Remove component ${c}`}
                     className="opacity-0 group-hover:opacity-100 transition-opacity ml-0.5"
                     style={{ color: "#FF4500" }}
                   >
@@ -477,12 +479,14 @@ export default function GeneratePage() {
                 onKeyDown={(e) => e.key === "Enter" && addComponent()}
                 placeholder="Add component..."
                 className="flex-1 px-3 py-1.5 rounded-lg text-xs focus:outline-none"
-                style={{ background: "hsl(229, 42%, 22%)", border: "1px solid rgba(0,245,255,0.2)", color: "#FFFFFF" }}
+                style={{ background: "hsl(229, 42%, 22%)", border: "1px solid rgba(59,130,246,0.2)", color: "#FFFFFF" }}
               />
               <button
                 onClick={addComponent}
+                title="Add component"
+                aria-label="Add component"
                 className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105"
-                style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                style={{ background: "rgba(59,130,246,0.15)", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.3)" }}
               >
                 <Plus size={12} />
               </button>
@@ -492,16 +496,18 @@ export default function GeneratePage() {
           {/* Filters Panel */}
           <div className="rounded-2xl border p-5" style={{ background: "hsl(229, 45%, 16%)", borderColor: "hsl(229, 42%, 28%)" }}>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,215,0,0.12)" }}>
-                <Star size={14} style={{ color: "#FFD700" }} />
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)" }}>
+                <Star size={14} style={{ color: "#F59E0B" }} />
               </div>
               <span className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>Generation Options</span>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-semibold mb-1.5 block" style={{ color: "#A0AED9" }}>Difficulty</label>
+                <label htmlFor="difficulty-select" className="text-xs font-semibold mb-1.5 block" style={{ color: "#A0AED9" }}>Difficulty</label>
                 <select
+                  id="difficulty-select"
+                  title="Select difficulty"
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none appearance-none"
@@ -514,8 +520,10 @@ export default function GeneratePage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1.5 block" style={{ color: "#A0AED9" }}>Category</label>
+                <label htmlFor="category-select" className="text-xs font-semibold mb-1.5 block" style={{ color: "#A0AED9" }}>Category</label>
                 <select
+                  id="category-select"
+                  title="Select category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none appearance-none"
@@ -540,9 +548,9 @@ export default function GeneratePage() {
             disabled={generating || aiRecommending}
             className="py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70"
             style={{
-              background: generating ? "rgba(183,68,255,0.3)" : "linear-gradient(135deg, #B744FF, #FF1493, #FF4500)",
+              background: generating ? "rgba(139,92,246,0.3)" : "linear-gradient(135deg, #8B5CF6, #EC4899, #FF4500)",
               color: "#FFFFFF",
-              boxShadow: generating ? "none" : "0 0 30px rgba(183,68,255,0.4)",
+              boxShadow: generating ? "none" : "0 0 30px rgba(139,92,246,0.4)",
             }}
           >
             {generating ? (
@@ -556,9 +564,9 @@ export default function GeneratePage() {
             disabled={generating || aiRecommending}
             className="py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70"
             style={{
-              background: aiRecommending ? "rgba(0,245,255,0.15)" : "linear-gradient(135deg, #00F5FF, #0099FF, #00FF88)",
-              color: aiRecommending ? "#00F5FF" : "#0A0E27",
-              boxShadow: aiRecommending ? "none" : "0 0 30px rgba(0,245,255,0.3)",
+              background: aiRecommending ? "rgba(59,130,246,0.15)" : "linear-gradient(135deg, #3B82F6, #2563EB, #10B981)",
+              color: aiRecommending ? "#3B82F6" : "#0A0E27",
+              boxShadow: aiRecommending ? "none" : "0 0 30px rgba(59,130,246,0.3)",
             }}
           >
             {aiRecommending ? (
@@ -575,7 +583,7 @@ export default function GeneratePage() {
             <button
               onClick={generateProjects}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:scale-105"
-              style={{ borderColor: "rgba(0,245,255,0.4)", color: "#00F5FF" }}
+              style={{ borderColor: "rgba(59,130,246,0.4)", color: "#3B82F6" }}
             >
               <RefreshCw size={14} /> Generate Different Ideas
             </button>
@@ -583,7 +591,7 @@ export default function GeneratePage() {
               onClick={handleSave}
               disabled={savingAll}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
-              style={{ background: "rgba(255,215,0,0.15)", color: "#FFD700", border: "1px solid rgba(255,215,0,0.3)" }}
+              style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.3)" }}
             >
               {savingAll ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Save size={14} /> {selected.size > 0 ? `Save Selected (${selected.size})` : "Save All"}</>}
             </button>
@@ -592,10 +600,10 @@ export default function GeneratePage() {
 
         {/* Progress indicator */}
         {generating && (
-          <div className="mb-5 p-4 rounded-xl border" style={{ background: "rgba(0,245,255,0.04)", borderColor: "rgba(0,245,255,0.15)" }}>
+          <div className="mb-5 p-4 rounded-xl border" style={{ background: "rgba(59,130,246,0.04)", borderColor: "rgba(59,130,246,0.15)" }}>
             <div className="flex items-center gap-3 mb-2">
-              <Loader2 size={14} className="animate-spin" style={{ color: "#00F5FF" }} />
-              <span className="text-sm font-semibold" style={{ color: "#00F5FF" }}>
+              <Loader2 size={14} className="animate-spin" style={{ color: "#3B82F6" }} />
+              <span className="text-sm font-semibold" style={{ color: "#3B82F6" }}>
                 Generating {Math.min(projects.length + 1, 5)}/5 projects...
               </span>
             </div>
@@ -604,8 +612,8 @@ export default function GeneratePage() {
                 className="h-full rounded-full transition-all duration-700"
                 style={{
                   width: `${(projects.length / 5) * 100}%`,
-                  background: "linear-gradient(90deg, #00F5FF, #B744FF)",
-                  boxShadow: "0 0 10px rgba(0,245,255,0.6)",
+                  background: "linear-gradient(90deg, #3B82F6, #8B5CF6)",
+                  boxShadow: "0 0 10px rgba(59,130,246,0.6)",
                 }}
               />
             </div>
@@ -629,7 +637,7 @@ export default function GeneratePage() {
               <button
                 onClick={() => setShowAll(true)}
                 className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-                style={{ background: "rgba(183,68,255,0.08)", border: "1px dashed rgba(183,68,255,0.4)", color: "#B744FF" }}
+                style={{ background: "rgba(139,92,246,0.08)", border: "1px dashed rgba(139,92,246,0.4)", color: "#8B5CF6" }}
               >
                 <ChevronDown size={18} />
                 Show 2 More Projects
@@ -649,7 +657,7 @@ export default function GeneratePage() {
       </div>
 
       {toast && (
-        <div className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up z-50" style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}>
+        <div className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up z-50" style={{ background: "linear-gradient(135deg, #10B981, #059669)", color: "#0A0E27", boxShadow: "0 0 20px rgba(16,185,129,0.4)" }}>
           <Star size={16} /> {toast}
         </div>
       )}

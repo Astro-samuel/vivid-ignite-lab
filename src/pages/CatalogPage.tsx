@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Search, Clock, X, Filter, Tag, Lock, Sparkles } from "lucide-react";
 import { PROJECT_SKILLS, SKILL_COLORS } from "@/lib/skillMapping";
 import Layout from "@/components/Layout";
@@ -10,6 +10,26 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
 import { useUserProjects } from "@/hooks/useUserProjects";
+
+const SkillBadge = ({ skill }: { skill: string }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (ref.current) {
+      const color = SKILL_COLORS[skill] || "#6366f1";
+      ref.current.style.background = `${color}18`;
+      ref.current.style.color = color;
+      ref.current.style.borderColor = `${color}33`;
+    }
+  }, [skill]);
+  return (
+    <span
+      ref={ref}
+      className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold border"
+    >
+      {skill}
+    </span>
+  );
+};
 
 const PROJECTS_PER_LEVEL = 5;
 
@@ -82,13 +102,13 @@ function getInventoryComponents(userId?: string): string[] {
 }
 
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
-  const styles =
+  const badgeClasses =
     difficulty === "beginner"
-      ? { background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }
+      ? "bg-success/15 text-success border border-success/30"
       : difficulty === "intermediate"
-      ? { background: "hsl(var(--secondary) / 0.15)", color: "hsl(var(--secondary))", border: "1px solid hsl(var(--secondary) / 0.3)" }
-      : { background: "hsl(var(--purple) / 0.15)", color: "hsl(var(--purple))", border: "1px solid hsl(var(--purple) / 0.3)" };
-  return <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold capitalize" style={styles}>{difficulty}</span>;
+      ? "bg-secondary/15 text-secondary border border-secondary/30"
+      : "bg-purple-500/15 text-purple-400 border border-purple-500/30";
+  return <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold capitalize ${badgeClasses}`}>{difficulty}</span>;
 }
 
 const costRanges = [
@@ -121,8 +141,47 @@ export default function CatalogPage() {
     const saved = localStorage.getItem("removedCatalogProjects");
     return saved ? JSON.parse(saved) : [];
   });
+const getPurchaseUrl = (componentName: string) => {
+  const clean = componentName.toLowerCase();
+  if (clean.includes("bluetooth") || clean.includes("hc-05")) return "https://www.adafruit.com/product/2633";
+  if (clean.includes("temperature") || clean.includes("dht22")) return "https://www.adafruit.com/product/386";
+  if (clean.includes("dht11")) return "https://www.adafruit.com/product/386";
+  if (clean.includes("servo") || clean.includes("sg90")) return "https://www.adafruit.com/product/169";
+  if (clean.includes("soil") || clean.includes("moisture")) return "https://www.adafruit.com/product/3290";
+  if (clean.includes("oled") || clean.includes("display")) return "https://www.adafruit.com/product/326";
+  if (clean.includes("lcd")) return "https://www.adafruit.com/product/181";
+  if (clean.includes("ultrasonic") || clean.includes("hc-sr04")) return "https://www.adafruit.com/product/4007";
+  if (clean.includes("gps")) return "https://www.adafruit.com/product/1059";
+  if (clean.includes("motor") || clean.includes("l298n")) return "https://www.adafruit.com/product/292";
+  if (clean.includes("esp8266") || clean.includes("wifi")) return "https://www.adafruit.com/product/2471";
+  if (clean.includes("buzzer") || clean.includes("piezo")) return "https://www.adafruit.com/product/160";
+  if (clean.includes("photoresistor") || clean.includes("ldr")) return "https://www.adafruit.com/product/161";
+  if (clean.includes("potentiometer")) return "https://www.adafruit.com/product/1833";
+  if (clean.includes("keypad")) return "https://www.adafruit.com/product/3847";
+  if (clean.includes("pir") || clean.includes("motion")) return "https://www.adafruit.com/product/189";
+  if (clean.includes("led")) return "https://www.adafruit.com/product/777";
+  return `https://www.adafruit.com/?q=${encodeURIComponent(componentName)}`;
+};
+
+export default function CatalogPage() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { projects: userProjects } = useUserProjects();
+  const userProjectIds = useMemo(() => new Set(userProjects.map(p => p.project_id)), [userProjects]);
+  const [search, setSearch] = useState("");
+  const [diffFilter, setDiffFilter] = useState<string>("all");
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [costFilter, setCostFilter] = useState(0);
+  const [componentFilter, setComponentFilter] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [removedIds, setRemovedIds] = useState<number[]>(() => {
+    const saved = localStorage.getItem("removedCatalogProjects");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [userLevel, setUserLevel] = useState(1);
   const [userXp, setUserXp] = useState(0);
+  const [invMatchFilter, setInvMatchFilter] = useState<'all' | 'buildable' | 'almost'>('all');
+  const [wishlist, setWishlist] = useState<string[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -134,6 +193,32 @@ export default function CatalogPage() {
         }
       });
   }, [user]);
+
+  useEffect(() => {
+    try {
+      const key = user?.id ? `wishlist_${user.id}` : "wishlist";
+      setWishlist(JSON.parse(localStorage.getItem(key) || "[]"));
+    } catch {
+      setWishlist([]);
+    }
+  }, [user?.id]);
+
+  const addToWishlist = (componentName: string) => {
+    try {
+      const key = user?.id ? `wishlist_${user.id}` : "wishlist";
+      const current = JSON.parse(localStorage.getItem(key) || "[]") as string[];
+      if (!current.includes(componentName)) {
+        const updated = [...current, componentName];
+        localStorage.setItem(key, JSON.stringify(updated));
+        setWishlist(updated);
+        sonnerToast.success(`💖 Added ${componentName} to Wishlist!`);
+      } else {
+        sonnerToast.info(`${componentName} is already in your Wishlist.`);
+      }
+    } catch {
+      sonnerToast.error("Failed to update Wishlist.");
+    }
+  };
 
   const isLocked = (difficulty: string) => {
     const req = LEVEL_REQUIREMENTS[difficulty];
@@ -185,6 +270,16 @@ export default function CatalogPage() {
     return result;
   }, [removedIds, userProjectIds]);
 
+  const inventoryNorm = inventory.map(c => c.toLowerCase().trim());
+  const canBuild = (project: typeof allProjects[0]) =>
+    project.components.every(req => inventoryNorm.some(owned => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned)));
+
+  const getMissingComponents = (project: typeof allProjects[0]) => {
+    return project.components.filter(
+      req => !inventoryNorm.some(owned => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
+    );
+  };
+
   // Apply search/filter on top — but always show the level header even if 0 results
   const filtered = visibleProjects.filter((p) => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
@@ -193,12 +288,16 @@ export default function CatalogPage() {
     const range = costRanges[costFilter];
     const matchCost = p.cost >= range.min && p.cost < range.max;
     const matchComponent = !componentFilter || p.components.some(c => c.toLowerCase().includes(componentFilter.toLowerCase()));
-    return matchSearch && matchDiff && matchTags && matchCost && matchComponent;
-  });
+    
+    // Inventory matching filters
+    const missing = getMissingComponents(p);
+    const matchInventory = 
+      invMatchFilter === "all" ? true :
+      invMatchFilter === "buildable" ? missing.length === 0 :
+      invMatchFilter === "almost" ? missing.length === 1 : true;
 
-  const inventoryNorm = inventory.map(c => c.toLowerCase().trim());
-  const canBuild = (project: typeof allProjects[0]) =>
-    project.components.every(req => inventoryNorm.some(owned => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned)));
+    return matchSearch && matchDiff && matchTags && matchCost && matchComponent && matchInventory;
+  });
 
   const levels = ["beginner", "intermediate", "advanced"];
   const levelLabels: Record<string, string> = { beginner: "🟢 Beginner", intermediate: "🟡 Intermediate", advanced: "🟣 Advanced" };
@@ -259,6 +358,33 @@ export default function CatalogPage() {
                 }
               >
                 {d}
+              </motion.button>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            {[
+              { id: "all", label: "All Projects" },
+              { id: "buildable", label: "⚡ Can Build" },
+              { id: "almost", label: "🔍 1 Part Away" },
+            ].map((f) => (
+              <motion.button
+                key={f.id}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setInvMatchFilter(f.id as any)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
+                style={
+                  invMatchFilter === f.id
+                    ? f.id === "buildable"
+                      ? { background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.4)" }
+                      : f.id === "almost"
+                      ? { background: "hsl(var(--secondary) / 0.15)", color: "hsl(var(--secondary))", border: "1px solid hsl(var(--secondary) / 0.4)" }
+                      : { background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.4)" }
+                    : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
+                }
+              >
+                {f.label}
               </motion.button>
             ))}
           </div>
@@ -434,8 +560,7 @@ export default function CatalogPage() {
                             {!locked && (
                               <button
                                 onClick={(e) => { e.stopPropagation(); handleRemove(p.id); }}
-                                className="absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
-                                style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))", border: "1px solid hsl(var(--destructive) / 0.3)" }}
+                                className="absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 bg-red-500/15 text-red-500 border border-red-500/30"
                                 title="Remove project"
                               >
                                 <X size={12} />
@@ -446,31 +571,30 @@ export default function CatalogPage() {
                               <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold"
-                                style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}
+                                className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold bg-success/15 text-success border border-success/30"
                               >
                                 ✓ Can Build
                               </motion.div>
                             )}
 
-                            <div className={`text-2xl mb-2 ${buildable && !locked ? "mt-5" : ""}`}>{p.emoji}</div>
-                            <h3 className="font-bold text-sm mb-1" style={{ color: "hsl(var(--foreground))" }}>{p.title}</h3>
-                            <p className="text-xs mb-3 line-clamp-2" style={{ color: "hsl(var(--muted-foreground))" }}>{p.desc}</p>
+                            {!buildable && !locked && getMissingComponents(p).length === 1 && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold bg-amber-500/15 text-amber-500 border border-amber-500/30"
+                              >
+                                ⚡ 1 Part Away
+                              </motion.div>
+                            )}
+
+                            <div className={`text-2xl mb-2 ${(buildable || getMissingComponents(p).length === 1) && !locked ? "mt-5" : ""}`}>{p.emoji}</div>
+                            <h3 className="font-bold text-sm mb-1 text-foreground">{p.title}</h3>
+                            <p className="text-xs mb-3 line-clamp-2 text-muted-foreground">{p.desc}</p>
 
                             {PROJECT_SKILLS[p.id] && (
                               <div className="flex flex-wrap gap-1 mb-2">
                                 {PROJECT_SKILLS[p.id].map((skill) => (
-                                  <span
-                                    key={skill}
-                                    className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold"
-                                    style={{
-                                      background: `${SKILL_COLORS[skill]}18`,
-                                      color: SKILL_COLORS[skill],
-                                      border: `1px solid ${SKILL_COLORS[skill]}33`,
-                                    }}
-                                  >
-                                    {skill}
-                                  </span>
+                                  <SkillBadge key={skill} skill={skill} />
                                 ))}
                               </div>
                             )}
@@ -479,21 +603,66 @@ export default function CatalogPage() {
                               {p.tags.map((tag) => (
                                 <span
                                   key={tag}
-                                  className="text-xs px-1.5 py-0.5 rounded"
-                                  style={{ background: "hsl(var(--purple) / 0.1)", color: "hsl(var(--purple))", border: "1px solid hsl(var(--purple) / 0.2)" }}
+                                  className="text-xs px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20"
                                 >
                                   {tag}
                                 </span>
                               ))}
                             </div>
 
-                            <div className="flex items-center justify-between text-xs mb-1" style={{ color: "hsl(var(--muted-foreground))" }}>
+                            <div className="flex items-center justify-between text-xs mb-1 text-muted-foreground">
                               <span className="flex items-center gap-1"><Clock size={10} /> {p.time}</span>
-                              <span className="font-bold" style={{ color: "hsl(var(--secondary))" }}>+{p.xp} XP</span>
                             </div>
                             <div className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
                               ~${p.cost} in parts
                             </div>
+
+                            {!locked && (() => {
+                              const missing = getMissingComponents(p);
+                              return (
+                                <div className="mt-3 mb-3 p-2 rounded-xl text-xs" style={{ background: "hsl(var(--muted) / 0.4)", border: "1px solid hsl(var(--border) / 0.5)" }}>
+                                  {buildable ? (
+                                    <span className="font-semibold text-emerald-400">Ready to build! All parts owned.</span>
+                                  ) : (
+                                    <div className="space-y-1">
+                                      <span className="text-[10px] block text-slate-400 font-bold uppercase tracking-wider">Missing parts ({missing.length}):</span>
+                                      <div className="flex flex-col gap-1 max-h-20 overflow-y-auto">
+                                        {missing.map(m => {
+                                          const isWishlisted = wishlist.includes(m);
+                                          return (
+                                            <div key={m} className="flex items-center justify-between text-[10px] font-medium text-slate-300 bg-slate-900/40 px-2 py-1 rounded gap-1.5">
+                                              <span className="truncate flex-1" title={m}>{m}</span>
+                                              <div className="flex items-center gap-1 flex-shrink-0">
+                                                <button
+                                                  onClick={(e) => { e.stopPropagation(); addToWishlist(m); }}
+                                                  disabled={isWishlisted}
+                                                  className={`text-[9px] px-1.5 py-0.5 rounded transition-all hover:scale-105 ${
+                                                    isWishlisted
+                                                      ? "bg-pink-500/10 text-pink-500"
+                                                      : "bg-blue-500/15 text-blue-400"
+                                                  }`}
+                                                >
+                                                  {isWishlisted ? "✓ Wishlisted" : "+ Wishlist"}
+                                                </button>
+                                                <a
+                                                  href={getPurchaseUrl(m)}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  onClick={(e) => e.stopPropagation()}
+                                                  className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 hover:scale-105 transition-all text-center"
+                                                >
+                                                  Buy 🛒
+                                                </a>
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
 
                             <motion.button
                               whileHover={{ scale: locked ? 1 : 1.03 }}
@@ -513,11 +682,11 @@ export default function CatalogPage() {
                                 }));
                                 navigate(`/project/${p.id}`);
                               }}
-                              className="w-full py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 disabled:hover:scale-100"
-                              style={locked
-                                ? { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }
-                                : { background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 12px hsl(var(--primary) / 0.25)" }
-                              }
+                              className={`w-full py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 disabled:hover:scale-100 ${
+                                locked
+                                  ? "bg-muted text-muted-foreground border border-border"
+                                  : "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+                              }`}
                             >
                               {locked ? "Locked" : "View Project"}
                             </motion.button>

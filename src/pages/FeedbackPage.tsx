@@ -75,11 +75,11 @@ export default function FeedbackPage() {
           <div
             className="text-center p-10 rounded-2xl border max-w-md w-full"
             style={{
-              background: "rgba(0,255,136,0.04)",
-              borderColor: "rgba(0,255,136,0.2)",
+              background: "rgba(16,185,129,0.04)",
+              borderColor: "rgba(16,185,129,0.2)",
             }}
           >
-            <CheckCircle size={56} className="mx-auto mb-4" style={{ color: "#00FF88" }} />
+            <CheckCircle size={56} className="mx-auto mb-4" style={{ color: "#10B981" }} />
             <h2 className="text-2xl font-bold mb-2" style={{ color: "#FFFFFF" }}>Thank You! 🎉</h2>
             <p className="text-sm mb-6" style={{ color: "hsl(226, 35%, 65%)" }}>
               Your feedback helps us make Arduino AI better for everyone.
@@ -95,7 +95,7 @@ export default function FeedbackPage() {
               }}
               className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105"
               style={{
-                background: "linear-gradient(135deg, #00F5FF, #0099FF)",
+                background: "linear-gradient(135deg, #3B82F6, #2563EB)",
                 color: "#0A0E27",
               }}
             >
@@ -113,8 +113,8 @@ export default function FeedbackPage() {
         {/* Header */}
         <FadeInView>
           <div className="flex items-center gap-2 mb-1">
-            <MessageSquareHeart size={16} style={{ color: "#B744FF" }} />
-            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#B744FF" }}>
+            <MessageSquareHeart size={16} style={{ color: "#8B5CF6" }} />
+            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#8B5CF6" }}>
               Share Your Thoughts
             </span>
           </div>
@@ -182,16 +182,16 @@ export default function FeedbackPage() {
                 >
                   <Star
                     size={28}
-                    fill={(hoveredStar || rating) >= star ? "#FFD700" : "transparent"}
+                    fill={(hoveredStar || rating) >= star ? "#F59E0B" : "transparent"}
                     style={{
-                      color: (hoveredStar || rating) >= star ? "#FFD700" : "hsl(232, 40%, 25%)",
+                      color: (hoveredStar || rating) >= star ? "#F59E0B" : "hsl(232, 40%, 25%)",
                       transition: "all 0.15s",
                     }}
                   />
                 </button>
               ))}
               {(hoveredStar || rating) > 0 && (
-                <span className="ml-2 text-xs font-medium" style={{ color: "#FFD700" }}>
+                <span className="ml-2 text-xs font-medium" style={{ color: "#F59E0B" }}>
                   {ratingLabels[hoveredStar || rating]}
                 </span>
               )}
@@ -211,9 +211,9 @@ export default function FeedbackPage() {
                   onClick={() => setCategory(cat.value)}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all hover:scale-105"
                   style={{
-                    background: category === cat.value ? "rgba(0,245,255,0.12)" : "rgba(255,255,255,0.04)",
-                    border: category === cat.value ? "1px solid rgba(0,245,255,0.4)" : "1px solid hsl(232, 40%, 20%)",
-                    color: category === cat.value ? "#00F5FF" : "#A0AED9",
+                    background: category === cat.value ? "rgba(59,130,246,0.12)" : "rgba(255,255,255,0.04)",
+                    border: category === cat.value ? "1px solid rgba(59,130,246,0.4)" : "1px solid hsl(232, 40%, 20%)",
+                    color: category === cat.value ? "#3B82F6" : "#A0AED9",
                   }}
                 >
                   <span>{cat.emoji}</span>
@@ -262,9 +262,9 @@ export default function FeedbackPage() {
             disabled={submitting}
             className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
             style={{
-              background: "linear-gradient(135deg, #B744FF, #FF1493)",
+              background: "linear-gradient(135deg, #8B5CF6, #EC4899)",
               color: "#FFFFFF",
-              boxShadow: "0 4px 20px rgba(183,68,255,0.3)",
+              boxShadow: "0 4px 20px rgba(139,92,246,0.3)",
             }}
           >
             <Send size={14} />

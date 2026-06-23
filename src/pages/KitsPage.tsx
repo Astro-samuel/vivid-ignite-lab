@@ -29,31 +29,31 @@ const kits = [
     id: 1, emoji: "🌱", name: "Basic Starter Kit", price: "$25",
     desc: "Perfect for absolute beginners. Learn the fundamentals of Arduino.",
     components: ["Arduino Uno", "Breadboard", "Jumper Wires", "LED (Red) ×5", "LED (Green) ×5", "LED (Blue) ×5", "Resistor (220Ω) ×10", "Resistor (1kΩ) ×10", "Push Button ×5", "Potentiometer ×2", "Buzzer"],
-    componentCount: 11, projects: "15+", color: "#00FF88", borderColor: "rgba(0,255,136,0.5)",
+    componentCount: 11, projects: "15+", color: "#10B981", borderColor: "rgba(16,185,129,0.5)",
   },
   {
     id: 2, emoji: "📊", name: "Sensor Explorer Kit", price: "$45",
     desc: "Dive into the world of sensors. Measure temperature, distance, light, and more.",
     components: ["Arduino Uno", "Breadboard", "Jumper Wires", "Temperature Sensor (DHT11)", "Ultrasonic Sensor (HC-SR04)", "PIR Motion Sensor", "Photoresistor (LDR) ×2", "IR Sensor ×2", "Soil Moisture Sensor", "BMP180 Pressure", "Sound Sensor", "Rain Sensor"],
-    componentCount: 12, projects: "25+", color: "#00F5FF", borderColor: "rgba(0,245,255,0.5)",
+    componentCount: 12, projects: "25+", color: "#3B82F6", borderColor: "rgba(59,130,246,0.5)",
   },
   {
     id: 3, emoji: "🤖", name: "Robotics Kit", price: "$65",
     desc: "Build moving robots! Includes motors, drivers, and chassis components.",
     components: ["Arduino Uno", "Motor Driver (L298N)", "DC Motor ×4", "Servo Motor (SG90) ×2", "Ultrasonic Sensor (HC-SR04) ×2", "IR Sensor ×3", "Battery Holder", "Breadboard", "Chassis Kit"],
-    componentCount: 9, projects: "20+", color: "#FFD700", borderColor: "rgba(255,215,0,0.5)",
+    componentCount: 9, projects: "20+", color: "#F59E0B", borderColor: "rgba(245,158,11,0.5)",
   },
   {
     id: 4, emoji: "🌐", name: "IoT & WiFi Kit", price: "$55",
     desc: "Connect your projects to the internet. Build smart home devices.",
     components: ["ESP32", "ESP8266", "Relay Module ×2", "Temperature Sensor (DHT22)", "PIR Motion Sensor", "OLED Display (0.96\")", "LED Strip (WS2812B)", "Buzzer", "Jumper Wires", "Breadboard"],
-    componentCount: 10, projects: "30+", color: "#B744FF", borderColor: "rgba(183,68,255,0.5)",
+    componentCount: 10, projects: "30+", color: "#8B5CF6", borderColor: "rgba(139,92,246,0.5)",
   },
   {
     id: 5, emoji: "⭐", name: "Complete Maker Kit", price: "$120",
     desc: "Everything you need! The ultimate kit for serious Arduino enthusiasts.",
     components: ["Arduino Uno", "Arduino Nano", "ESP32", "Breadboard ×2", "Jumper Wires", "LED (Red) ×10", "LED (Green) ×10", "RGB LED ×5", "Resistor (220Ω) ×20", "Resistor (10kΩ) ×10", "DHT22", "HC-SR04", "Servo Motor ×3", "DC Motor ×4", "L298N Motor Driver", "OLED Display", "16x2 LCD", "Buzzer", "Relay Module ×2", "Potentiometer ×3"],
-    componentCount: 20, projects: "50+", color: "#FF1493", borderColor: "rgba(255,20,147,0.5)", bestValue: true,
+    componentCount: 20, projects: "50+", color: "#EC4899", borderColor: "rgba(255,20,147,0.5)", bestValue: true,
   },
 ];
 
@@ -98,8 +98,8 @@ export default function KitsPage() {
       <div className="px-8 py-10 max-w-6xl mx-auto">
         <FadeInView className="mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <Package size={14} style={{ color: "#00FF88" }} />
-            <span className="text-xs font-semibold" style={{ color: "#00FF88" }}>Component Kits</span>
+            <Package size={14} style={{ color: "#10B981" }} />
+            <span className="text-xs font-semibold" style={{ color: "#10B981" }}>Component Kits</span>
           </div>
           <h1 className="text-3xl font-bold mb-2" style={{ color: "#FFFFFF" }}>Starter Kits</h1>
           <p style={{ color: "#A0AED9" }}>
@@ -122,7 +122,7 @@ export default function KitsPage() {
                   }}
                 >
                   {kit.bestValue && (
-                    <div className="absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-xl" style={{ background: "linear-gradient(135deg, #FFD700, #FFA500)", color: "#0A0E27" }}>
+                    <div className="absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-xl" style={{ background: "linear-gradient(135deg, #F59E0B, #FFA500)", color: "#0A0E27" }}>
                       BEST VALUE
                     </div>
                   )}
@@ -188,7 +188,7 @@ export default function KitsPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold z-50"
-            style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 20px rgba(0,255,136,0.4)" }}
+            style={{ background: "linear-gradient(135deg, #10B981, #059669)", color: "#0A0E27", boxShadow: "0 0 20px rgba(16,185,129,0.4)" }}
           >
             <CheckCircle size={16} /> {toast}
           </motion.div>

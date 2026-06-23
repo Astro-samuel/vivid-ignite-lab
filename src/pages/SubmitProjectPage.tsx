@@ -56,7 +56,7 @@ export default function SubmitProjectPage() {
           <button
             onClick={() => navigate("/catalog")}
             className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-105"
-            style={{ background: "linear-gradient(135deg, #00F5FF, #0099FF)", color: "#0A0E27" }}
+            style={{ background: "linear-gradient(135deg, #3B82F6, #2563EB)", color: "#0A0E27" }}
           >
             Back to Catalog
           </button>
@@ -71,14 +71,14 @@ export default function SubmitProjectPage() {
         <button
           onClick={() => navigate("/catalog")}
           className="flex items-center gap-2 text-sm font-medium mb-6 transition-all hover:gap-3"
-          style={{ color: "#00F5FF" }}
+          style={{ color: "#3B82F6" }}
         >
           <ArrowLeft size={16} /> Back to Catalog
         </button>
 
         <FadeInView className="mb-8">
           <h1 className="text-3xl font-bold mb-2" style={{ color: "#FFFFFF" }}>
-            Submit a <span style={{ color: "#00FF88" }}>Project</span>
+            Submit a <span style={{ color: "#10B981" }}>Project</span>
           </h1>
           <p className="text-sm" style={{ color: "#A0AED9" }}>
             Share your Arduino project with the community! It will be reviewed before appearing in the catalog.
@@ -122,7 +122,7 @@ export default function SubmitProjectPage() {
                   className="px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all"
                   style={
                     form.difficulty === d
-                      ? { background: "rgba(0,245,255,0.15)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.4)" }
+                      ? { background: "rgba(59,130,246,0.15)", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.4)" }
                       : { background: "hsl(229, 45%, 16%)", color: "#A0AED9", border: "1px solid hsl(229, 42%, 28%)" }
                   }
                 >
@@ -174,7 +174,7 @@ export default function SubmitProjectPage() {
             onClick={handleSubmit}
             disabled={loading || !form.title.trim() || !form.description.trim() || !form.components.trim() || !form.authorName.trim()}
             className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:scale-[1.02] disabled:opacity-50 flex items-center justify-center gap-2"
-            style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27", boxShadow: "0 0 15px rgba(0,255,136,0.3)" }}
+            style={{ background: "linear-gradient(135deg, #10B981, #059669)", color: "#0A0E27", boxShadow: "0 0 15px rgba(16,185,129,0.3)" }}
           >
             {loading ? "Submitting..." : <><Send size={14} /> Submit Project</>}
           </button>

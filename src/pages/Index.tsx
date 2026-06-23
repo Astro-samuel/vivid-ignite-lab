@@ -66,36 +66,36 @@ const quickActions = [
     title: "Generate Project",
     desc: "Let AI create a custom project based on your components",
     path: "/generate",
-    color: "#00F5FF",
-    bg: "rgba(0,245,255,0.06)",
-    border: "rgba(0,245,255,0.15)",
+    color: "#3B82F6",
+    bg: "rgba(59,130,246,0.06)",
+    border: "rgba(59,130,246,0.15)",
   },
   {
     icon: Lightbulb,
     title: "Think Bigger",
     desc: "Get innovative project ideas that push boundaries",
     path: "/think-bigger",
-    color: "#B744FF",
-    bg: "rgba(183,68,255,0.06)",
-    border: "rgba(183,68,255,0.15)",
+    color: "#8B5CF6",
+    bg: "rgba(139,92,246,0.06)",
+    border: "rgba(139,92,246,0.15)",
   },
   {
     icon: Trophy,
     title: "Achievements",
     desc: "Track your progress and earn badges",
     path: "/achievements",
-    color: "#FFD700",
-    bg: "rgba(255,215,0,0.06)",
-    border: "rgba(255,215,0,0.15)",
+    color: "#F59E0B",
+    bg: "rgba(245,158,11,0.06)",
+    border: "rgba(245,158,11,0.15)",
   },
   {
     icon: Package,
     title: "Starter Kits",
     desc: "Browse pre-configured component kits",
     path: "/kits",
-    color: "#00FF88",
-    bg: "rgba(0,255,136,0.06)",
-    border: "rgba(0,255,136,0.15)",
+    color: "#10B981",
+    bg: "rgba(16,185,129,0.06)",
+    border: "rgba(16,185,129,0.15)",
   },
 ];
 
@@ -105,28 +105,28 @@ const howItWorks = [
     icon: Cpu,
     title: "Add Components",
     desc: "Tell us what Arduino components you have in your toolkit.",
-    color: "#00F5FF",
+    color: "#3B82F6",
   },
   {
     step: "2",
     icon: Zap,
     title: "Generate Projects",
     desc: "AI creates custom projects tailored to your skill level.",
-    color: "#B744FF",
+    color: "#8B5CF6",
   },
   {
     step: "3",
     icon: Code,
     title: "Build & Learn",
     desc: "Follow step-by-step instructions with code and simulation.",
-    color: "#00FF88",
+    color: "#10B981",
   },
   {
     step: "4",
     icon: Rocket,
     title: "Level Up",
     desc: "Earn XP, unlock achievements, and tackle harder projects.",
-    color: "#FFD700",
+    color: "#F59E0B",
   },
 ];
 
@@ -134,20 +134,20 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
   const styles =
     difficulty === "beginner"
       ? {
-          background: "rgba(0,255,136,0.15)",
-          color: "#00FF88",
-          border: "1px solid rgba(0,255,136,0.3)",
+          background: "rgba(16,185,129,0.15)",
+          color: "#10B981",
+          border: "1px solid rgba(16,185,129,0.3)",
         }
       : difficulty === "intermediate"
         ? {
-            background: "rgba(255,165,0,0.15)",
-            color: "#FFA500",
-            border: "1px solid rgba(255,165,0,0.3)",
+            background: "rgba(245,158,11,0.15)",
+            color: "#F59E0B",
+            border: "1px solid rgba(245,158,11,0.3)",
           }
         : {
-            background: "rgba(183,68,255,0.15)",
-            color: "#B744FF",
-            border: "1px solid rgba(183,68,255,0.3)",
+            background: "rgba(139,92,246,0.15)",
+            color: "#8B5CF6",
+            border: "1px solid rgba(139,92,246,0.3)",
           };
   return (
     <span
@@ -208,9 +208,9 @@ export default function Index() {
               <div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border text-sm font-medium animate-float"
                 style={{
-                  background: "rgba(183,68,255,0.12)",
-                  borderColor: "rgba(183,68,255,0.3)",
-                  color: "#B744FF",
+                  background: "rgba(139,92,246,0.12)",
+                  borderColor: "rgba(139,92,246,0.3)",
+                  color: "#8B5CF6",
                   backdropFilter: "blur(4px)",
                 }}
               >
@@ -253,9 +253,9 @@ export default function Index() {
                   <button
                     className="px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
                     style={{
-                      background: "linear-gradient(135deg, #00F5FF, #0099FF)",
-                      color: "#0A0E27",
-                      boxShadow: "0 0 20px rgba(0,245,255,0.3)",
+                      background: "linear-gradient(135deg, #3B82F6, #1D4ED8)",
+                      color: "#FFFFFF",
+                      boxShadow: "0 0 20px rgba(59,130,246,0.25)",
                     }}
                   >
                     <Cpu size={16} /> Add My Components
@@ -265,7 +265,7 @@ export default function Index() {
                   <button
                     className="px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 border transition-all hover:scale-105 hover:bg-white/5"
                     style={{
-                      borderColor: "rgba(183,68,255,0.5)",
+                      borderColor: "rgba(139,92,246,0.4)",
                       color: "#FFFFFF",
                       background: "rgba(10, 14, 39, 0.4)",
                       backdropFilter: "blur(4px)",
@@ -279,11 +279,14 @@ export default function Index() {
 
             {/* Stats */}
             <FadeInView delay={0.4}>
-              <div className="flex gap-12 justify-center mt-16 bg-slate-950/40 backdrop-blur-md border border-white/5 rounded-2xl p-4 max-w-md mx-auto">
+              <div 
+                className="flex gap-12 justify-center mt-16 border border-white/10 rounded-2xl p-4 max-w-md mx-auto"
+                style={{ background: "rgba(10, 14, 39, 0.2)", backdropFilter: "blur(4px)" }}
+              >
                 {[
-                  { value: "50+", label: "Projects", color: "#00F5FF" },
-                  { value: "100+", label: "Components", color: "#B744FF" },
-                  { value: "AI", label: "Powered", color: "#FFD700" },
+                  { value: "50+", label: "Projects", color: "#3B82F6" },
+                  { value: "100+", label: "Components", color: "#8B5CF6" },
+                  { value: "AI", label: "Powered", color: "#F59E0B" },
                 ].map(({ value, label, color }) => (
                   <div key={label} className="text-center flex-1">
                     <p className="font-black text-3xl" style={{ color }}>
@@ -367,7 +370,7 @@ export default function Index() {
             <FadeInView className="text-center mb-10">
               <p
                 className="text-xs font-semibold mb-2"
-                style={{ color: "#B744FF" }}
+                style={{ color: "#8B5CF6" }}
               >
                 How It Works
               </p>
@@ -419,7 +422,7 @@ export default function Index() {
               <div>
                 <p
                   className="text-xs font-semibold mb-1"
-                  style={{ color: "#FFD700" }}
+                  style={{ color: "#F59E0B" }}
                 >
                   Featured
                 </p>
@@ -434,8 +437,8 @@ export default function Index() {
                 <button
                   className="px-4 py-2 rounded-lg text-xs font-semibold border transition-all hover:scale-105"
                   style={{
-                    borderColor: "rgba(0,245,255,0.3)",
-                    color: "#00F5FF",
+                    borderColor: "rgba(59,130,246,0.3)",
+                    color: "#3B82F6",
                   }}
                 >
                   View All
@@ -475,7 +478,7 @@ export default function Index() {
                         </span>
                         <span
                           className="font-bold"
-                          style={{ color: "#FFD700" }}
+                          style={{ color: "#F59E0B" }}
                         >
                           +{p.xp} XP
                         </span>
@@ -484,8 +487,8 @@ export default function Index() {
                         className="w-full py-2 rounded-lg text-xs font-bold text-center transition-all group-hover:scale-[1.02]"
                         style={{
                           background:
-                            "linear-gradient(135deg, #00F5FF, #0099FF)",
-                          color: "#0A0E27",
+                            "linear-gradient(135deg, #3B82F6, #1D4ED8)",
+                          color: "#FFFFFF",
                         }}
                       >
                         Start Project
@@ -517,9 +520,9 @@ export default function Index() {
               <button
                 className="px-8 py-3.5 rounded-xl text-sm font-bold flex items-center gap-2 mx-auto transition-all hover:scale-105"
                 style={{
-                  background: "linear-gradient(135deg, #B744FF, #FF1493)",
+                  background: "linear-gradient(135deg, #6366F1, #8B5CF6)",
                   color: "#FFFFFF",
-                  boxShadow: "0 0 25px rgba(183,68,255,0.3)",
+                  boxShadow: "0 0 25px rgba(99,102,241,0.25)",
                 }}
               >
                 <Zap size={16} /> Generate Your First Project

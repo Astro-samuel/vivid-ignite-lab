@@ -261,8 +261,8 @@ export default function ComponentsPage() {
         <div className="flex-1 px-8 py-10 overflow-y-auto">
           <FadeInView className="mb-6">
             <div className="flex items-center gap-2 mb-1">
-              <span style={{ color: "#00F5FF" }}>⚙️</span>
-              <span className="text-xs font-semibold" style={{ color: "#00F5FF" }}>Inventory Management</span>
+              <span style={{ color: "#3B82F6" }}>⚙️</span>
+              <span className="text-xs font-semibold" style={{ color: "#3B82F6" }}>Inventory Management</span>
             </div>
             <h1 className="text-3xl font-bold mb-1" style={{ color: "#FFFFFF" }}>My Components</h1>
             <p className="text-sm" style={{ color: "#A0AED9" }}>
@@ -276,9 +276,9 @@ export default function ComponentsPage() {
               onClick={() => setShowPastePanel(!showPastePanel)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
               style={{
-                background: "linear-gradient(135deg, rgba(183,68,255,0.15), rgba(255,20,147,0.15))",
-                color: "#B744FF",
-                border: "1px solid rgba(183,68,255,0.3)",
+                background: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(255,20,147,0.15))",
+                color: "#8B5CF6",
+                border: "1px solid rgba(139,92,246,0.3)",
               }}
             >
               <Brain size={15} />
@@ -289,9 +289,9 @@ export default function ComponentsPage() {
               onClick={() => { setShowVisualSearch(!showVisualSearch); setShowPastePanel(false); }}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
               style={{
-                background: "linear-gradient(135deg, rgba(0,245,255,0.15), rgba(0,153,255,0.15))",
-                color: "#00F5FF",
-                border: "1px solid rgba(0,245,255,0.3)",
+                background: "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(0,153,255,0.15))",
+                color: "#3B82F6",
+                border: "1px solid rgba(59,130,246,0.3)",
               }}
             >
               <Camera size={15} />
@@ -311,12 +311,12 @@ export default function ComponentsPage() {
               >
                 <div
                   className="rounded-2xl border p-5"
-                  style={{ background: "rgba(0,245,255,0.04)", borderColor: "rgba(0,245,255,0.2)" }}
+                  style={{ background: "rgba(59,130,246,0.04)", borderColor: "rgba(59,130,246,0.2)" }}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Camera size={16} style={{ color: "#00F5FF" }} />
-                      <span className="font-bold text-sm" style={{ color: "#00F5FF" }}>Visual Component Search</span>
+                      <Camera size={16} style={{ color: "#3B82F6" }} />
+                      <span className="font-bold text-sm" style={{ color: "#3B82F6" }}>Visual Component Search</span>
                     </div>
                     <button onClick={() => setShowVisualSearch(false)} style={{ color: "#A0AED9" }}>
                       <X size={14} />
@@ -339,7 +339,7 @@ export default function ComponentsPage() {
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       className="w-full py-8 rounded-xl border-2 border-dashed flex flex-col items-center gap-2 transition-all hover:scale-[1.01]"
-                      style={{ borderColor: "rgba(0,245,255,0.3)", color: "#00F5FF" }}
+                      style={{ borderColor: "rgba(59,130,246,0.3)", color: "#3B82F6" }}
                     >
                       <Camera size={28} />
                       <span className="text-sm font-semibold">Take Photo or Upload Image</span>
@@ -360,30 +360,30 @@ export default function ComponentsPage() {
 
                       {visualSearching && (
                         <div className="flex items-center gap-2 py-3 justify-center">
-                          <Loader2 size={16} className="animate-spin" style={{ color: "#00F5FF" }} />
-                          <span className="text-sm" style={{ color: "#00F5FF" }}>Analyzing image...</span>
+                          <Loader2 size={16} className="animate-spin" style={{ color: "#3B82F6" }} />
+                          <span className="text-sm" style={{ color: "#3B82F6" }}>Analyzing image...</span>
                         </div>
                       )}
 
                       {visualResults.length > 0 && (
-                        <div className="mt-3 p-4 rounded-xl" style={{ background: "rgba(0,255,136,0.06)", border: "1px solid rgba(0,255,136,0.2)" }}>
+                        <div className="mt-3 p-4 rounded-xl" style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.2)" }}>
                           <div className="flex items-center gap-2 mb-3">
-                            <Sparkles size={14} style={{ color: "#00FF88" }} />
-                            <span className="text-sm font-bold" style={{ color: "#00FF88" }}>
+                            <Sparkles size={14} style={{ color: "#10B981" }} />
+                            <span className="text-sm font-bold" style={{ color: "#10B981" }}>
                               Identified {visualResults.length} component{visualResults.length !== 1 ? "s" : ""}
                             </span>
                           </div>
                           <div className="space-y-1.5 mb-3">
                             {visualResults.map(item => (
                               <div key={item.name} className="flex items-center justify-between px-3 py-2 rounded-lg"
-                                style={{ background: "rgba(0,255,136,0.08)", border: "1px solid rgba(0,255,136,0.15)" }}>
+                                style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)" }}>
                                 <span className="text-xs font-medium" style={{ color: "#E0E7FF" }}>
                                   {ownedNames.includes(item.name) ? "✓ " : "+ "}{item.name}
                                 </span>
                                 <span className="text-xs px-2 py-0.5 rounded-full" style={{
-                                  background: item.confidence === "high" ? "rgba(0,255,136,0.15)" : item.confidence === "medium" ? "rgba(255,165,0,0.15)" : "rgba(255,80,80,0.15)",
-                                  color: item.confidence === "high" ? "#00FF88" : item.confidence === "medium" ? "#FFA500" : "#FF5050",
-                                  border: `1px solid ${item.confidence === "high" ? "rgba(0,255,136,0.3)" : item.confidence === "medium" ? "rgba(255,165,0,0.3)" : "rgba(255,80,80,0.3)"}`
+                                  background: item.confidence === "high" ? "rgba(16,185,129,0.15)" : item.confidence === "medium" ? "rgba(255,165,0,0.15)" : "rgba(255,80,80,0.15)",
+                                  color: item.confidence === "high" ? "#10B981" : item.confidence === "medium" ? "#FFA500" : "#FF5050",
+                                  border: `1px solid ${item.confidence === "high" ? "rgba(16,185,129,0.3)" : item.confidence === "medium" ? "rgba(255,165,0,0.3)" : "rgba(255,80,80,0.3)"}`
                                 }}>
                                   {item.confidence}
                                 </span>
@@ -393,7 +393,7 @@ export default function ComponentsPage() {
                           <button
                             onClick={addVisualResultsToInventory}
                             className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-                            style={{ background: "linear-gradient(135deg, #00FF88, #00C853)", color: "#0A0E27" }}
+                            style={{ background: "linear-gradient(135deg, #10B981, #059669)", color: "#0A0E27" }}
                           >
                             <Plus size={14} /> Add to Inventory
                           </button>
@@ -404,7 +404,7 @@ export default function ComponentsPage() {
                         <button
                           onClick={() => fileInputRef.current?.click()}
                           className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-                          style={{ background: "rgba(0,245,255,0.15)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.3)" }}
+                          style={{ background: "rgba(59,130,246,0.15)", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.3)" }}
                         >
                           <Camera size={14} /> Try Another Photo
                         </button>
@@ -426,12 +426,12 @@ export default function ComponentsPage() {
               >
                 <div
                   className="rounded-2xl border p-5"
-                  style={{ background: "rgba(183,68,255,0.06)", borderColor: "rgba(183,68,255,0.25)" }}
+                  style={{ background: "rgba(139,92,246,0.06)", borderColor: "rgba(139,92,246,0.25)" }}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Brain size={16} style={{ color: "#B744FF" }} />
-                      <span className="font-bold text-sm" style={{ color: "#B744FF" }}>Paste Your Component List</span>
+                      <Brain size={16} style={{ color: "#8B5CF6" }} />
+                      <span className="font-bold text-sm" style={{ color: "#8B5CF6" }}>Paste Your Component List</span>
                     </div>
                     <button onClick={() => setShowPastePanel(false)} style={{ color: "#A0AED9" }}>
                       <X size={14} />
@@ -447,7 +447,7 @@ export default function ComponentsPage() {
                     className="w-full h-28 px-4 py-3 rounded-xl text-sm resize-none focus:outline-none"
                     style={{
                       background: "hsl(229, 42%, 12%)",
-                      border: "1px solid rgba(183,68,255,0.2)",
+                      border: "1px solid rgba(139,92,246,0.2)",
                       color: "#FFFFFF",
                     }}
                   />
@@ -456,9 +456,9 @@ export default function ComponentsPage() {
                     disabled={recognizing || !pasteText.trim()}
                     className="mt-3 w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{
-                      background: "linear-gradient(135deg, #B744FF, #FF1493)",
+                      background: "linear-gradient(135deg, #8B5CF6, #EC4899)",
                       color: "#FFFFFF",
-                      boxShadow: "0 0 15px rgba(183,68,255,0.3)",
+                      boxShadow: "0 0 15px rgba(139,92,246,0.3)",
                     }}
                   >
                     {recognizing ? <><Loader2 size={14} className="animate-spin" /> Recognizing...</> : <><Brain size={14} /> Recognize Components</>}
@@ -472,11 +472,11 @@ export default function ComponentsPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         className="mt-4 p-4 rounded-xl"
-                        style={{ background: "rgba(0,255,136,0.06)", border: "1px solid rgba(0,255,136,0.2)" }}
+                        style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.2)" }}
                       >
                         <div className="flex items-center gap-2 mb-3">
-                          <Sparkles size={14} style={{ color: "#00FF88" }} />
-                          <span className="text-sm font-bold" style={{ color: "#00FF88" }}>
+                          <Sparkles size={14} style={{ color: "#10B981" }} />
+                          <span className="text-sm font-bold" style={{ color: "#10B981" }}>
                             Found {recognized.length} component{recognized.length !== 1 ? "s" : ""}!
                           </span>
                         </div>
@@ -486,9 +486,9 @@ export default function ComponentsPage() {
                               key={name}
                               className="text-xs px-2.5 py-1 rounded-lg font-medium"
                               style={{
-                                background: ownedNames.includes(name) ? "rgba(255,215,0,0.12)" : "rgba(0,255,136,0.12)",
-                                color: ownedNames.includes(name) ? "#FFD700" : "#00FF88",
-                                border: `1px solid ${ownedNames.includes(name) ? "rgba(255,215,0,0.3)" : "rgba(0,255,136,0.3)"}`,
+                                background: ownedNames.includes(name) ? "rgba(245,158,11,0.12)" : "rgba(16,185,129,0.12)",
+                                color: ownedNames.includes(name) ? "#F59E0B" : "#10B981",
+                                border: `1px solid ${ownedNames.includes(name) ? "rgba(245,158,11,0.3)" : "rgba(16,185,129,0.3)"}`,
                               }}
                             >
                               {ownedNames.includes(name) ? "✓ " : "+"} {name}
@@ -499,7 +499,7 @@ export default function ComponentsPage() {
                           onClick={addRecognizedToInventory}
                           className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
                           style={{
-                            background: "linear-gradient(135deg, #00FF88, #00C853)",
+                            background: "linear-gradient(135deg, #10B981, #059669)",
                             color: "#0A0E27",
                           }}
                         >
@@ -525,7 +525,7 @@ export default function ComponentsPage() {
               <span className="font-semibold" style={{ color: "#FFFFFF" }}>Component Library</span>
               <span
                 className="text-xs px-3 py-1 rounded-full font-semibold"
-                style={{ background: "rgba(0,245,255,0.12)", color: "#00F5FF", border: "1px solid rgba(0,245,255,0.25)" }}
+                style={{ background: "rgba(59,130,246,0.12)", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.25)" }}
               >
                 {totalSelected} components selected
               </span>
@@ -539,10 +539,10 @@ export default function ComponentsPage() {
                 className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-80 disabled:cursor-not-allowed"
                 style={{
                   background: saved
-                    ? "linear-gradient(135deg, #00FF88, #00C853)"
-                    : "linear-gradient(135deg, #00F5FF, #0099FF)",
+                    ? "linear-gradient(135deg, #10B981, #059669)"
+                    : "linear-gradient(135deg, #3B82F6, #2563EB)",
                   color: "#0A0E27",
-                  boxShadow: saved ? "0 0 20px rgba(0,255,136,0.4)" : "0 0 20px rgba(0,245,255,0.3)",
+                  boxShadow: saved ? "0 0 20px rgba(16,185,129,0.4)" : "0 0 20px rgba(59,130,246,0.3)",
                 }}
               >
                 {saving ? <><Loader2 size={15} className="animate-spin" /> Saving...</> : saved ? <><Save size={15} /> ✓ Inventory Saved!</> : <><Save size={15} /> Save Inventory</>}
@@ -558,7 +558,7 @@ export default function ComponentsPage() {
                   className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
                   style={
                     activeCategory === cat
-                      ? { background: "#00F5FF", color: "#0A0E27" }
+                      ? { background: "#3B82F6", color: "#0A0E27" }
                       : { color: "hsl(226, 35%, 65%)", background: "transparent" }
                   }
                 >
@@ -578,7 +578,7 @@ export default function ComponentsPage() {
                     className="flex items-center justify-between px-4 py-3 rounded-xl transition-all cursor-pointer"
                     style={
                       owned
-                        ? { background: "rgba(0,245,255,0.06)", border: "1px solid rgba(0,245,255,0.25)" }
+                        ? { background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.25)" }
                         : wishlisted
                         ? { background: "rgba(255,20,147,0.06)", border: "1px solid rgba(255,20,147,0.2)" }
                         : { background: "hsl(229, 42%, 18%)", border: "1px solid transparent" }
@@ -591,7 +591,7 @@ export default function ComponentsPage() {
                         className="w-5 h-5 rounded flex items-center justify-center cursor-pointer transition-all"
                         style={
                           owned
-                            ? { background: "#00F5FF", border: "1px solid #00F5FF" }
+                            ? { background: "#3B82F6", border: "1px solid #3B82F6" }
                             : { background: "transparent", border: "1px solid hsl(229, 42%, 35%)" }
                         }
                       >
@@ -619,10 +619,10 @@ export default function ComponentsPage() {
                           style={{
                             background: wishlisted ? "rgba(255,20,147,0.15)" : "transparent",
                             border: wishlisted ? "1px solid rgba(255,20,147,0.3)" : "1px solid hsl(229, 42%, 30%)",
-                            color: wishlisted ? "#FF1493" : "hsl(226, 35%, 55%)",
+                            color: wishlisted ? "#EC4899" : "hsl(226, 35%, 55%)",
                           }}
                         >
-                          <Heart size={11} fill={wishlisted ? "#FF1493" : "none"} />
+                          <Heart size={11} fill={wishlisted ? "#EC4899" : "none"} />
                         </button>
                       )}
 
@@ -667,11 +667,11 @@ export default function ComponentsPage() {
               onClick={() => setShowWishlist(!showWishlist)}
               className="flex items-center gap-2 w-full mb-2"
             >
-              <Heart size={16} style={{ color: "#FF1493" }} fill={wishlist.length > 0 ? "#FF1493" : "none"} />
-              <span className="font-bold text-sm" style={{ color: "#FF1493" }}>
+              <Heart size={16} style={{ color: "#EC4899" }} fill={wishlist.length > 0 ? "#EC4899" : "none"} />
+              <span className="font-bold text-sm" style={{ color: "#EC4899" }}>
                 Wishlist {wishlist.length > 0 && `(${wishlist.length})`}
               </span>
-              <ShoppingCart size={12} style={{ color: "#FF1493", marginLeft: "auto" }} />
+              <ShoppingCart size={12} style={{ color: "#EC4899", marginLeft: "auto" }} />
             </button>
             <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
               Components you want but don't have yet. Plan your next purchase!
@@ -702,7 +702,7 @@ export default function ComponentsPage() {
                               onClick={() => moveWishlistToInventory(name)}
                               className="p-1 rounded transition-all hover:scale-110"
                               title="Got it! Move to inventory"
-                              style={{ color: "#00FF88" }}
+                              style={{ color: "#10B981" }}
                             >
                               <Plus size={11} />
                             </button>
@@ -730,11 +730,11 @@ export default function ComponentsPage() {
           {/* Tips */}
           <div
             className="rounded-2xl p-5 border"
-            style={{ background: "rgba(255,215,0,0.05)", borderColor: "rgba(255,215,0,0.2)" }}
+            style={{ background: "rgba(245,158,11,0.05)", borderColor: "rgba(245,158,11,0.2)" }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <Lightbulb size={16} style={{ color: "#FFD700" }} />
-              <span className="font-bold text-sm" style={{ color: "#FFD700" }}>Tips for Better Projects</span>
+              <Lightbulb size={16} style={{ color: "#F59E0B" }} />
+              <span className="font-bold text-sm" style={{ color: "#F59E0B" }}>Tips for Better Projects</span>
             </div>
             <ul className="space-y-2">
               {[
@@ -755,11 +755,11 @@ export default function ComponentsPage() {
           {/* Need Components */}
           <div
             className="rounded-2xl p-5 border"
-            style={{ background: "rgba(0,255,136,0.05)", borderColor: "rgba(0,255,136,0.2)" }}
+            style={{ background: "rgba(16,185,129,0.05)", borderColor: "rgba(16,185,129,0.2)" }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Package size={16} style={{ color: "#00FF88" }} />
-              <span className="font-bold text-sm" style={{ color: "#00FF88" }}>Need Components?</span>
+              <Package size={16} style={{ color: "#10B981" }} />
+              <span className="font-bold text-sm" style={{ color: "#10B981" }}>Need Components?</span>
             </div>
             <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
               Check out our starter kits to quickly set up your inventory with common components.
@@ -768,9 +768,9 @@ export default function ComponentsPage() {
               onClick={() => navigate("/kits")}
               className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
               style={{
-                background: "linear-gradient(135deg, #00FF88, #00C853)",
+                background: "linear-gradient(135deg, #10B981, #059669)",
                 color: "#0A0E27",
-                boxShadow: "0 0 15px rgba(0,255,136,0.3)",
+                boxShadow: "0 0 15px rgba(16,185,129,0.3)",
               }}
             >
               <Package size={14} /> Browse Kits
@@ -780,11 +780,11 @@ export default function ComponentsPage() {
           {/* Ready to Build */}
           <div
             className="rounded-2xl p-5 border"
-            style={{ background: "rgba(0,245,255,0.05)", borderColor: "rgba(0,245,255,0.2)" }}
+            style={{ background: "rgba(59,130,246,0.05)", borderColor: "rgba(59,130,246,0.2)" }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Zap size={16} style={{ color: "#00F5FF" }} />
-              <span className="font-bold text-sm" style={{ color: "#00F5FF" }}>Ready to Build?</span>
+              <Zap size={16} style={{ color: "#3B82F6" }} />
+              <span className="font-bold text-sm" style={{ color: "#3B82F6" }}>Ready to Build?</span>
             </div>
             <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
               Once you've added your components, let AI generate custom projects just for you.
@@ -793,9 +793,9 @@ export default function ComponentsPage() {
               onClick={() => navigate("/generate")}
               className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
               style={{
-                background: "linear-gradient(135deg, #00F5FF, #0099FF)",
+                background: "linear-gradient(135deg, #3B82F6, #2563EB)",
                 color: "#0A0E27",
-                boxShadow: "0 0 15px rgba(0,245,255,0.3)",
+                boxShadow: "0 0 15px rgba(59,130,246,0.3)",
               }}
             >
               <Zap size={14} /> Generate Project

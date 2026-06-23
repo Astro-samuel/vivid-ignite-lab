@@ -12,11 +12,11 @@ export const SKILL_NAMES = [
 export type SkillName = (typeof SKILL_NAMES)[number];
 
 export const SKILL_COLORS: Record<SkillName, string> = {
-  "Electronics Basics": "#00F5FF",
-  "Programming": "#00FF88",
-  "Sensors & Actuators": "#FFD700",
-  "IoT & Connectivity": "#B744FF",
-  "Robotics": "#FF1493",
+  "Electronics Basics": "#3B82F6",
+  "Programming": "#10B981",
+  "Sensors & Actuators": "#F59E0B",
+  "IoT & Connectivity": "#8B5CF6",
+  "Robotics": "#EC4899",
 };
 
 // Each project maps to 1-3 skills it develops

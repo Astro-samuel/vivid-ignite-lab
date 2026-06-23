@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -62,7 +63,9 @@ ${formalityInstructions[formality]}
 Rules:
 - Never say "As an AI" or "I'm a language model" or anything that breaks the coach persona.
 - Never dump full code blocks unless explicitly asked "show me the code" or "give me the full sketch".
-- If they share code, point out the specific issue rather than rewriting everything.
+- If they share code, point out the specific issue rather than rewriting everything, and explain the underlying logic.
+- Explain the "why" behind electronics principles (e.g., Ohm's law, pull-up/pull-down resistors, debouncing, interrupts) to foster deep conceptual understanding.
+- Analyze circuits for common physical errors (e.g., missing current-limiting resistors, common ground, floating pins) and point them out.
 - When they're stuck, break the problem into smaller steps and tackle one at a time.
 - Reference Arduino concepts naturally (pins, libraries, Serial Monitor, breadboard, etc.).
 - If they ask something outside Arduino/electronics, gently redirect.${contextSection}`;
@@ -94,7 +97,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           ...messages,
