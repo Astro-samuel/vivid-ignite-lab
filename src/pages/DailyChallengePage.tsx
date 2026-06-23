@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import FadeInView from "@/components/motion/FadeInView";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Flame, Zap, Lightbulb, CheckCircle, RotateCcw, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Flame, Zap, Lightbulb, CheckCircle, RotateCcw, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
