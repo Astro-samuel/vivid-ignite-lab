@@ -24,7 +24,9 @@ export default function DailyChallengePage() {
     loadChallenge();
   }, [user]);
 
+  const loadChallenge = async () => {
     setLoading(true);
+
     const today = new Date().toISOString().split("T")[0];
     const { data } = await supabase
       .from("daily_challenges")
