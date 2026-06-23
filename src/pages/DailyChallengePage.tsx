@@ -17,6 +17,7 @@ export default function DailyChallengePage() {
   const [showHint, setShowHint] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
   const [consoleOutput, setConsoleOutput] = useState<string[]>([]);
   const [testStatus, setTestStatus] = useState<"idle" | "running" | "success" | "failed">("idle");
 
