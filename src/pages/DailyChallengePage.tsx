@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import FadeInView from "@/components/motion/FadeInView";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Flame, Zap, Lightbulb, CheckCircle, RotateCcw, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Flame, Zap, Lightbulb, CheckCircle, RotateCcw, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -17,92 +17,6 @@ export default function DailyChallengePage() {
   const [showHint, setShowHint] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    loadChallenge();
-  }, [user]);
-
-  const loadChallenge = async () => {
-    setLoading(true);
-    const today = new Date().toISOString().split("T")[0];
-    const { data } = await supabase
-      .from("daily_challenges")
-      .select("*")
-      .lte("active_date", today)
-      .order("active_date", { ascending: false })
-      .limit(1);
-
-    if (data?.[0]) {
-      setChallenge(data[0]);
-      setCode(data[0].starter_code || "");
-
-      if (user) {
-        const { data: comp } = await supabase
-          .from("user_challenge_completions")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("challenge_id", data[0].id)
-          .maybeSingle();
-        setCompleted(!!comp);
-      }
-    }
-    setLoading(false);
-  };
-
-  const handleComplete = async () => {
-    if (!user || !challenge) return;
-    setSubmitting(true);
-
-    await supabase.from("user_challenge_completions").upsert({
-      user_id: user.id,
-      challenge_id: challenge.id,
-      score: challenge.xp_reward,
-    }, { onConflict: "user_id,challenge_id" });
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("total_xp")
-      .eq("id", user.id)
-      .single();
-
-    if (profile) {
-      await supabase.from("profiles").update({
-        total_xp: (profile.total_xp || 0) + challenge.xp_reward,
-      }).eq("id", user.id);
-    }
-
-    setCompleted(true);
-    setSubmitting(false);
-  };
-
-  if (loading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-        </div>
-      </Layout>
-    );
-  }
-
-  if (!challenge) {
-    return (
-      <Layout>
-        <div className="px-6 py-12 text-center max-w-md mx-auto">
-          <div className="text-6xl mb-4">🎯</div>
-          <h2 className="text-2xl font-extrabold font-display text-indigo-950 mb-2">No active challenge today</h2>
-          <p className="text-sm font-semibold text-slate-400 mb-6">Come back tomorrow for a fresh daily build challenge!</p>
-          <button
-            onClick={() => navigate("/learn")}
-            className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white transition-all"
-          >
-            ← Back to Learn
-          </button>
-        </div>
-      </Layout>
-    );
-  }
-
   const [consoleOutput, setConsoleOutput] = useState<string[]>([]);
   const [testStatus, setTestStatus] = useState<"idle" | "running" | "success" | "failed">("idle");
 
@@ -112,6 +26,7 @@ export default function DailyChallengePage() {
 
   const loadChallenge = async () => {
     setLoading(true);
+
     const today = new Date().toISOString().split("T")[0];
     const { data } = await supabase
       .from("daily_challenges")
@@ -490,4 +405,4 @@ export default function DailyChallengePage() {
     </Layout>
   );
 }
-}
+
