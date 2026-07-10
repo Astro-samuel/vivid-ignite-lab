@@ -13,38 +13,38 @@ const navSections = [
   {
     label: "Learn",
     items: [
-      { icon: Home,            label: "Home",          path: "/" },
-      { icon: GraduationCap,  label: "Learn",         path: "/learn" },
-      { icon: LayoutDashboard, label: "Dashboard",    path: "/dashboard" },
-      { icon: Trophy,          label: "Achievements", path: "/achievements" },
+      { icon: Home,            label: "Home",          path: "/", color: "#10B981" },
+      { icon: GraduationCap,  label: "Learn",         path: "/learn", color: "#3B82F6" },
+      { icon: LayoutDashboard, label: "Dashboard",    path: "/dashboard", color: "#8B5CF6" },
+      { icon: Trophy,          label: "Achievements", path: "/achievements", color: "#F59E0B" },
     ],
   },
   {
     label: "Build",
     items: [
-      { icon: BookOpen, label: "Catalog",        path: "/catalog" },
-      { icon: Cpu,      label: "My Components",  path: "/components" },
-      { icon: Package,  label: "Kits",           path: "/kits" },
-      { icon: Zap,      label: "Generate",       path: "/generate" },
-      { icon: Code,     label: "IDE",            path: "/ide" },
+      { icon: BookOpen, label: "Catalog",        path: "/catalog", color: "#EC4899" },
+      { icon: Cpu,      label: "My Components",  path: "/components", color: "#14B8A6" },
+      { icon: Package,  label: "Kits",           path: "/kits", color: "#F97316" },
+      { icon: Zap,      label: "Generate",       path: "/generate", color: "#EAB308" },
+      { icon: Code,     label: "IDE",            path: "/ide", color: "#3B82F6" },
     ],
   },
   {
     label: "Resources",
     items: [
-      { icon: Code,           label: "Snippets",       path: "/snippets" },
-      { icon: AlertTriangle,  label: "Error DB",       path: "/errors" },
-      { icon: BarChart3,      label: "Insights",       path: "/insights" },
-      { icon: Lightbulb,      label: "Think Bigger",   path: "/think-bigger" },
-      { icon: BookOpen,       label: "Resources",      path: "/resources" },
+      { icon: Code,           label: "Snippets",       path: "/snippets", color: "#A855F7" },
+      { icon: AlertTriangle,  label: "Error DB",       path: "/errors", color: "#EF4444" },
+      { icon: BarChart3,      label: "Insights",       path: "/insights", color: "#06B6D4" },
+      { icon: Lightbulb,      label: "Think Bigger",   path: "/think-bigger", color: "#F59E0B" },
+      { icon: BookOpen,       label: "Resources",      path: "/resources", color: "#10B981" },
     ],
   },
   {
     label: "Settings",
     items: [
-      { icon: MessageSquareHeart, label: "Feedback",      path: "/feedback" },
-      { icon: PlusCircle,         label: "Submit Project", path: "/submit-project" },
-      { icon: Bot,                label: "AI Settings",    path: "/ai-settings" },
+      { icon: MessageSquareHeart, label: "Feedback",      path: "/feedback", color: "#EC4899" },
+      { icon: PlusCircle,         label: "Submit Project", path: "/submit-project", color: "#10B981" },
+      { icon: Bot,                label: "AI Settings",    path: "/ai-settings", color: "#6366F1" },
     ],
   },
 ];
@@ -163,7 +163,7 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
               {section.label}
             </p>
             <div className="space-y-0.5">
-              {section.items.map(({ icon: Icon, label, path }) => {
+              {section.items.map(({ icon: Icon, label, path, color }) => {
                 const isActive = location.pathname === path ||
                   (path !== "/" && location.pathname.startsWith(path));
                 return (
@@ -178,6 +178,7 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
                       size={18}
                       className="flex-shrink-0"
                       strokeWidth={isActive ? 2.5 : 2}
+                      style={{ color: isActive ? "hsl(var(--primary))" : color }}
                     />
                     <span className="flex-1 truncate">{label}</span>
                     {isActive && (
@@ -198,7 +199,11 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
           onClick={onClose}
           className={`duo-nav-item ${location.pathname === "/profile" ? "active" : ""}`}
         >
-          <User size={18} strokeWidth={location.pathname === "/profile" ? 2.5 : 2} />
+          <User
+            size={18}
+            strokeWidth={location.pathname === "/profile" ? 2.5 : 2}
+            style={{ color: location.pathname === "/profile" ? "hsl(var(--primary))" : "#8B5CF6" }}
+          />
           <span>Profile</span>
         </Link>
 
@@ -207,7 +212,7 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
             onClick={async () => { await signOut(); navigate("/auth"); onClose?.(); }}
             className="duo-nav-item w-full text-left sidebar-signout-btn"
           >
-            <LogOut size={18} />
+            <LogOut size={18} style={{ color: "hsl(0, 84%, 55%)" }} />
             <span>Sign Out</span>
           </button>
         ) : (

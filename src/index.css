@@ -376,19 +376,26 @@
     cursor: pointer;
     transition: all 150ms ease-out;
     text-decoration: none;
-    border: 2px solid transparent;
+    background: hsl(var(--card));
+    border: 2px solid hsl(var(--border));
+    box-shadow: 0 2px 0 0 hsl(var(--border));
+    margin-bottom: 6px;
   }
 
   .duo-nav-item:hover {
     background: hsl(var(--background-hover));
     color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 0 3px 0 0 hsl(var(--primary) / 0.2);
+    transform: translateY(-1px);
   }
 
   .duo-nav-item.active {
     background: hsl(var(--primary-light));
     color: hsl(var(--primary));
-    border-color: hsl(var(--primary) / 0.3);
-    box-shadow: 0 2px 0 0 hsl(var(--primary) / 0.2);
+    border-color: hsl(var(--primary) / 0.5);
+    box-shadow: 0 3px 0 0 hsl(var(--primary) / 0.4);
+    transform: translateY(0px);
   }
 
   /* ── Lesson Node (skill map) ── */

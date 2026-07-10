@@ -656,63 +656,7 @@ export default function LessonPage() {
                 exit={{ opacity: 0, y: -10 }}
                 className="bg-card border-2 border-b-4 border-border rounded-2xl p-6 shadow-sm"
               >
-                {/* Video Embed */}
-                {videoUrl && (
-                  <div className="mb-6 rounded-2xl overflow-hidden border-2 border-border shadow-sm aspect-video">
-                    <iframe
-                      width="100%"
-                      height="100%"
-                      src={videoUrl}
-                      title={`${lesson.title} Video Tutorial`}
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  </div>
-                )}
 
-                {/* Video Info & Transcript Toggle */}
-                {videoUrl && (
-                  <div className="mb-6 flex items-center justify-between p-3 bg-muted/20 rounded-2xl border-2 border-border">
-                    <span className="text-xs font-bold text-slate-400">⏱️ Length: ~10 mins</span>
-                    <button
-                      onClick={() => setShowTranscript(!showTranscript)}
-                      className="clay-btn clay-btn-ghost clay-btn-sm"
-                    >
-                      📖 {showTranscript ? "Hide Transcript" : "Show Transcript"}
-                    </button>
-                  </div>
-                )}
-
-                {/* Searchable Transcript */}
-                <AnimatePresence>
-                  {showTranscript && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="mb-6 p-4 bg-muted/20 border-2 border-border rounded-2xl"
-                    >
-                      <div className="relative mb-3">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input
-                          type="text"
-                          placeholder="Search transcript..."
-                          value={transcriptSearch}
-                          onChange={(e) => setTranscriptSearch(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2 bg-slate-950 border-2 border-border rounded-xl text-xs font-semibold focus:outline-none text-foreground"
-                        />
-                      </div>
-                      {showTranscriptBlock ? (
-                        <p className="text-xs text-slate-400 leading-relaxed font-semibold">
-                          "{transcript}"
-                        </p>
-                      ) : (
-                        <p className="text-xs text-slate-400 italic">No matches found.</p>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
 
                 {/* Core Concept Prose */}
                 <div className="prose max-w-none text-indigo-200 font-medium leading-relaxed mb-6">
