@@ -5,6 +5,7 @@ import ExplainCode from "@/components/ExplainCode";
 import CodeEditor from "@/components/CodeEditor";
 import RequiredLibraries from "@/components/RequiredLibraries";
 import ArduinoSetupGuide from "@/components/ArduinoSetupGuide";
+import { useArduinoFlasher } from "@/hooks/useArduinoFlasher";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
 
@@ -1326,131 +1327,19 @@ void loop() {
   const debugBottomRef = useRef<HTMLDivElement>(null);
   const [revertCount, setRevertCount] = useState(0);
 
-  // Web Serial API states
-  const [serialPort, setSerialPort] = useState<any>(null);
-  const [serialConnected, setSerialConnected] = useState(false);
-  const [serialLogs, setSerialLogs] = useState<string[]>([]);
-  const [showSerialConsole, setShowSerialConsole] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const {
+    serialConnected,
+    serialLogs,
+    showSerialConsole,
+    setShowSerialConsole,
+    uploading,
+    connectSerial,
+    disconnectSerial,
+    uploadToBoard: uploadCodeToBoard,
+    clearLogs,
+  } = useArduinoFlasher();
 
-  const connectSerial = async () => {
-    if (!("serial" in navigator)) {
-      sonnerToast.error("Web Serial API is not supported in this browser. Please use Chrome or Edge.");
-      return;
-    }
-    try {
-      const port = await (navigator as any).serial.requestPort();
-      await port.open({ baudRate: 9600 });
-      setSerialPort(port);
-      setSerialConnected(true);
-      setSerialLogs(prev => [...prev, "🔌 Connected to physical Arduino Uno board!", "🚀 Port opened successfully at 9600 baud."]);
-      sonnerToast.success("🔌 Connected to board!");
-      
-      // Start reading serial loop asynchronously
-      readSerialLoop(port);
-    } catch (err) {
-      console.error(err);
-      sonnerToast.error("Failed to open connection.");
-    }
-  };
-
-  const readSerialLoop = async (port: any) => {
-    const decoder = new TextDecoder();
-    while (port.readable) {
-      const reader = port.readable.getReader();
-      try {
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          if (value) {
-            const decoded = decoder.decode(value);
-            setSerialLogs(prev => [...prev, ...decoded.split("\n").filter(line => line.trim() !== "")]);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        break;
-      } finally {
-        reader.releaseLock();
-      }
-    }
-    setSerialConnected(false);
-    setSerialPort(null);
-  };
-
-  const uploadToBoard = async () => {
-    if (!serialPort) return;
-    setUploading(true);
-    
-    // Stage 1: Compiler logs
-    setSerialLogs(prev => [...prev, "⚡ Starting compilation...", "Compiling sketch..."]);
-    await new Promise(r => setTimeout(r, 600));
-    setSerialLogs(prev => [...prev, 
-      "Archiving built core...",
-      "Sketch uses 1424 bytes (4%) of program storage space. Maximum is 32256 bytes.",
-      "Global variables use 18 bytes (0%) of dynamic memory, leaving 2030 bytes for local variables. Maximum is 2048 bytes.",
-      "⚡ Compilation successful. Starting upload..."
-    ]);
-    
-    // Stage 2: Resetting board via DTR/RTS toggle
-    await new Promise(r => setTimeout(r, 600));
-    setSerialLogs(prev => [...prev, "Forcing reset using 1200bps open/close on port COM3..."]);
-    
-    // Stage 3: avrdude init
-    await new Promise(r => setTimeout(r, 600));
-    setSerialLogs(prev => [...prev, 
-      "avrdude: Version 6.3-20190619",
-      "         Copyright (c) 2000-2005 Brian Dean, http://www.bd.info/",
-      "         Copyright (c) 2007-2014 Joerg Wunsch",
-      "         System wide configuration file is \"C:\\Program Files (x86)\\Arduino\\hardware\\tools\\avr/etc/avrdude.conf\"",
-      "         Using Port                    : COM3",
-      "         Using Programmer              : arduino",
-      "         Overriding Baud Rate          : 115200",
-      "avrdude: AVR device initialized and ready to accept instructions",
-      "avrdude: Device signature = 0x1e950f (probably m328p)",
-      "avrdude: reading input file \"sketch.ino.hex\""
-    ]);
-    
-    // Stage 4: avrdude write
-    await new Promise(r => setTimeout(r, 800));
-    setSerialLogs(prev => [...prev, 
-      "avrdude: writing flash (1424 bytes):",
-      "Writing | ################################################## | 100% 0.24s",
-      "avrdude: 1424 bytes of flash written"
-    ]);
-    
-    // Stage 5: avrdude verify
-    await new Promise(r => setTimeout(r, 600));
-    setSerialLogs(prev => [...prev, 
-      "avrdude: verifying flash memory against sketch.ino.hex:",
-      "Reading | ################################################## | 100% 0.18s",
-      "avrdude: 1424 bytes of flash verified",
-      "avrdude done.  Thank you.",
-      "",
-      "⚠️ NOTE: Browser-based flashing is simulated due to browser sandbox security constraints.",
-      "⚠️ To run this code on your physical board, please use the Arduino IDE.",
-      "ℹ️ Click the '.ino' button above to download, then follow the 'Setup Guide' below.",
-      "🔌 Active Serial connection listening..."
-    ]);
-
-    setUploading(false);
-    sonnerToast.warning("⚠️ Direct upload is simulated", {
-      description: "Direct browser-based uploading is simulated. Download the .ino file and use the Arduino IDE to flash your physical board.",
-      duration: 10000,
-    });
-  };
-
-  const disconnectSerial = async () => {
-    if (serialPort) {
-      try {
-        await serialPort.close();
-      } catch (e) {}
-      setSerialPort(null);
-      setSerialConnected(false);
-      setSerialLogs(prev => [...prev, "🔌 Disconnected from board."]);
-      sonnerToast.info("🔌 Disconnected from board");
-    }
-  };
+  const uploadToBoard = () => uploadCodeToBoard(currentCode);
 
   // ---- Version History ----
   interface CodeSnapshot { code: string; label: string; timestamp: string; }
@@ -2195,7 +2084,7 @@ void loop() {
                       <div className="flex items-center justify-between px-4 py-1.5 border-b text-[10px] font-mono" style={{ borderColor: "hsl(229, 42%, 22%)", color: "hsl(228, 25%, 60%)" }}>
                         <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
                         <div className="flex gap-2">
-                          <button onClick={() => setSerialLogs([])} className="hover:text-white transition-all">Clear Logs</button>
+                          <button onClick={clearLogs} className="hover:text-white transition-all">Clear Logs</button>
                           <button onClick={() => setShowSerialConsole(false)} className="hover:text-white transition-all">✕</button>
                         </div>
                       </div>

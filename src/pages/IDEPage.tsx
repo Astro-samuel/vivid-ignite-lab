@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import CodeEditor from "@/components/CodeEditor";
 import ArduinoSetupGuide from "@/components/ArduinoSetupGuide";
+import { useArduinoFlasher } from "@/hooks/useArduinoFlasher";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast as sonnerToast } from "sonner";
@@ -284,78 +285,19 @@ export default function IDEPage() {
     sonnerToast.success("Test code loaded into editor!");
   };
 
-  // Web Serial API states
-  const [serialPort, setSerialPort] = useState<any>(null);
-  const [serialConnected, setSerialConnected] = useState(false);
-  const [serialLogs, setSerialLogs] = useState<string[]>([]);
-  const [showSerialConsole, setShowSerialConsole] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const {
+    serialConnected,
+    serialLogs,
+    showSerialConsole,
+    setShowSerialConsole,
+    uploading,
+    connectSerial,
+    disconnectSerial,
+    uploadToBoard: uploadCodeToBoard,
+    clearLogs,
+  } = useArduinoFlasher();
 
-  const connectSerial = async () => {
-    if (!("serial" in navigator)) {
-      sonnerToast.error("Web Serial API is not supported in this browser. Please use Chrome or Edge.");
-      return;
-    }
-    try {
-      const port = await (navigator as any).serial.requestPort();
-      await port.open({ baudRate: 9600 });
-      setSerialPort(port);
-      setSerialConnected(true);
-      setSerialLogs(prev => [...prev, "🔌 Connected to physical Arduino Uno board!", "🚀 Port opened successfully at 9600 baud."]);
-      sonnerToast.success("🔌 Connected to board!");
-      
-      // Start reading serial loop asynchronously
-      readSerialLoop(port);
-    } catch (err) {
-      console.error(err);
-      sonnerToast.error("Failed to open connection.");
-    }
-  };
-
-  const readSerialLoop = async (port: any) => {
-    const decoder = new TextDecoder();
-    while (port.readable) {
-      const reader = port.readable.getReader();
-      try {
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          if (value) {
-            const decoded = decoder.decode(value);
-            setSerialLogs(prev => [...prev, ...decoded.split("\n").filter(line => line.trim() !== "")]);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        break;
-      } finally {
-        reader.releaseLock();
-      }
-    }
-    setSerialConnected(false);
-    setSerialPort(null);
-  };
-
-  const uploadToBoard = async () => {
-    if (!serialPort) return;
-    setUploading(true);
-    setSerialLogs(prev => [...prev, "⚡ Starting direct board upload...", "📦 Compiling AVR Sketch for ATMega328P..."]);
-    await new Promise(r => setTimeout(r, 1000));
-    setSerialLogs(prev => [...prev, "🔌 Handshaking with STK500 bootloader...", "📤 Uploading HEX blocks..."]);
-    await new Promise(r => setTimeout(r, 1200));
-    setSerialLogs(prev => [
-      ...prev,
-      "⚠️ NOTE: Browser-based flashing is simulated due to browser sandbox security constraints.",
-      "⚠️ To run this code on your physical board, please use the Arduino IDE.",
-      "ℹ️ Click 'Download .ino' above, then follow the Setup Guide.",
-      "✓ Simulated upload sequence finished."
-    ]);
-    setUploading(false);
-    sonnerToast.warning("⚠️ Direct upload is simulated", {
-      description: "Direct browser-based uploading is simulated. Download the .ino file and use the Arduino IDE to flash your physical board.",
-      duration: 10000,
-    });
-  };
+  const uploadToBoard = () => uploadCodeToBoard(code);
 
   const downloadIno = () => {
     const blob = new Blob([code], { type: "text/plain" });
@@ -366,18 +308,6 @@ export default function IDEPage() {
     a.click();
     URL.revokeObjectURL(url);
     sonnerToast.success("Downloaded sketch.ino");
-  };
-
-  const disconnectSerial = async () => {
-    if (serialPort) {
-      try {
-        await serialPort.close();
-      } catch (e) {}
-      setSerialPort(null);
-      setSerialConnected(false);
-      setSerialLogs(prev => [...prev, "🔌 Disconnected from board."]);
-      sonnerToast.info("🔌 Disconnected from board");
-    }
   };
 
   // Auto-save countdown
@@ -800,7 +730,7 @@ export default function IDEPage() {
                     <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => setSerialLogs([])}
+                        onClick={clearLogs}
                         className="hover:text-white transition-all text-[10px]"
                       >
                         Clear Logs
