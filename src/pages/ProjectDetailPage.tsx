@@ -1385,9 +1385,18 @@ void loop() {
     await new Promise(r => setTimeout(r, 1000));
     setSerialLogs(prev => [...prev, "🔌 Handshaking with STK500 bootloader...", "📤 Uploading HEX blocks..."]);
     await new Promise(r => setTimeout(r, 1200));
-    setSerialLogs(prev => [...prev, "✓ Verification OK. 1424 bytes written.", "🔄 Resetting board...", "🔌 Active Serial connection listening..."]);
+    setSerialLogs(prev => [
+      ...prev,
+      "⚠️ NOTE: Browser-based flashing is simulated due to browser sandbox security constraints.",
+      "⚠️ To run this code on your physical board, please use the Arduino IDE.",
+      "ℹ️ Click the '.ino' button above to download, then follow the 'Setup Guide' below.",
+      "✓ Simulated upload sequence finished."
+    ]);
     setUploading(false);
-    sonnerToast.success("🚀 Upload complete!");
+    sonnerToast.warning("⚠️ Direct upload is simulated", {
+      description: "Direct browser-based uploading is simulated. Download the .ino file and use the Arduino IDE to flash your physical board.",
+      duration: 10000,
+    });
   };
 
   const disconnectSerial = async () => {

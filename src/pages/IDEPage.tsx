@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, Bug, RefreshCw, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Package } from "lucide-react";
+import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, Bug, RefreshCw, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Package, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import CodeEditor from "@/components/CodeEditor";
+import ArduinoSetupGuide from "@/components/ArduinoSetupGuide";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast as sonnerToast } from "sonner";
@@ -342,9 +343,29 @@ export default function IDEPage() {
     await new Promise(r => setTimeout(r, 1000));
     setSerialLogs(prev => [...prev, "🔌 Handshaking with STK500 bootloader...", "📤 Uploading HEX blocks..."]);
     await new Promise(r => setTimeout(r, 1200));
-    setSerialLogs(prev => [...prev, "✓ Verification OK. 1424 bytes written.", "🔄 Resetting board...", "🔌 Active Serial connection listening..."]);
+    setSerialLogs(prev => [
+      ...prev,
+      "⚠️ NOTE: Browser-based flashing is simulated due to browser sandbox security constraints.",
+      "⚠️ To run this code on your physical board, please use the Arduino IDE.",
+      "ℹ️ Click 'Download .ino' above, then follow the Setup Guide.",
+      "✓ Simulated upload sequence finished."
+    ]);
     setUploading(false);
-    sonnerToast.success("🚀 Upload complete!");
+    sonnerToast.warning("⚠️ Direct upload is simulated", {
+      description: "Direct browser-based uploading is simulated. Download the .ino file and use the Arduino IDE to flash your physical board.",
+      duration: 10000,
+    });
+  };
+
+  const downloadIno = () => {
+    const blob = new Blob([code], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sketch.ino";
+    a.click();
+    URL.revokeObjectURL(url);
+    sonnerToast.success("Downloaded sketch.ino");
   };
 
   const disconnectSerial = async () => {
@@ -723,6 +744,9 @@ export default function IDEPage() {
                   </div>
                 ))}
               </div>
+              <div className="p-3 pt-0">
+                <ArduinoSetupGuide />
+              </div>
             </div>
           )}
 
@@ -735,6 +759,12 @@ export default function IDEPage() {
               <span>•</span>
               <span>Arduino Uno</span>
               <span className="ml-2">|</span>
+              <button
+                onClick={downloadIno}
+                className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-700 text-slate-300 hover:bg-slate-800 transition-all cursor-pointer flex items-center gap-1"
+              >
+                <Download size={10} /> Download .ino
+              </button>
               <button
                 onClick={serialConnected ? disconnectSerial : connectSerial}
                 className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-all cursor-pointer ${
