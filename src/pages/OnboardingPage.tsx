@@ -54,10 +54,10 @@ export default function OnboardingPage() {
 
     await supabase
       .from("profiles")
-      .update({
+      .upsert({
+        id: user.id,
         display_name: fullName.trim() || null,
-      })
-      .eq("id", user.id);
+      });
 
     localStorage.setItem(`experience_${user.id}`, experience);
 
