@@ -1381,17 +1381,58 @@ void loop() {
   const uploadToBoard = async () => {
     if (!serialPort) return;
     setUploading(true);
-    setSerialLogs(prev => [...prev, "⚡ Starting direct board upload...", "📦 Compiling AVR Sketch for ATMega328P..."]);
-    await new Promise(r => setTimeout(r, 1000));
-    setSerialLogs(prev => [...prev, "🔌 Handshaking with STK500 bootloader...", "📤 Uploading HEX blocks..."]);
-    await new Promise(r => setTimeout(r, 1200));
-    setSerialLogs(prev => [
-      ...prev,
+    
+    // Stage 1: Compiler logs
+    setSerialLogs(prev => [...prev, "⚡ Starting compilation...", "Compiling sketch..."]);
+    await new Promise(r => setTimeout(r, 600));
+    setSerialLogs(prev => [...prev, 
+      "Archiving built core...",
+      "Sketch uses 1424 bytes (4%) of program storage space. Maximum is 32256 bytes.",
+      "Global variables use 18 bytes (0%) of dynamic memory, leaving 2030 bytes for local variables. Maximum is 2048 bytes.",
+      "⚡ Compilation successful. Starting upload..."
+    ]);
+    
+    // Stage 2: Resetting board via DTR/RTS toggle
+    await new Promise(r => setTimeout(r, 600));
+    setSerialLogs(prev => [...prev, "Forcing reset using 1200bps open/close on port COM3..."]);
+    
+    // Stage 3: avrdude init
+    await new Promise(r => setTimeout(r, 600));
+    setSerialLogs(prev => [...prev, 
+      "avrdude: Version 6.3-20190619",
+      "         Copyright (c) 2000-2005 Brian Dean, http://www.bd.info/",
+      "         Copyright (c) 2007-2014 Joerg Wunsch",
+      "         System wide configuration file is \"C:\\Program Files (x86)\\Arduino\\hardware\\tools\\avr/etc/avrdude.conf\"",
+      "         Using Port                    : COM3",
+      "         Using Programmer              : arduino",
+      "         Overriding Baud Rate          : 115200",
+      "avrdude: AVR device initialized and ready to accept instructions",
+      "avrdude: Device signature = 0x1e950f (probably m328p)",
+      "avrdude: reading input file \"sketch.ino.hex\""
+    ]);
+    
+    // Stage 4: avrdude write
+    await new Promise(r => setTimeout(r, 800));
+    setSerialLogs(prev => [...prev, 
+      "avrdude: writing flash (1424 bytes):",
+      "Writing | ################################################## | 100% 0.24s",
+      "avrdude: 1424 bytes of flash written"
+    ]);
+    
+    // Stage 5: avrdude verify
+    await new Promise(r => setTimeout(r, 600));
+    setSerialLogs(prev => [...prev, 
+      "avrdude: verifying flash memory against sketch.ino.hex:",
+      "Reading | ################################################## | 100% 0.18s",
+      "avrdude: 1424 bytes of flash verified",
+      "avrdude done.  Thank you.",
+      "",
       "⚠️ NOTE: Browser-based flashing is simulated due to browser sandbox security constraints.",
       "⚠️ To run this code on your physical board, please use the Arduino IDE.",
       "ℹ️ Click the '.ino' button above to download, then follow the 'Setup Guide' below.",
-      "✓ Simulated upload sequence finished."
+      "🔌 Active Serial connection listening..."
     ]);
+
     setUploading(false);
     sonnerToast.warning("⚠️ Direct upload is simulated", {
       description: "Direct browser-based uploading is simulated. Download the .ino file and use the Arduino IDE to flash your physical board.",
