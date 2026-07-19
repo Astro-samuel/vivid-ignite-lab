@@ -1535,10 +1535,10 @@ void loop() {
 
   const diffBadgeStyle =
     project.difficulty === "beginner"
-      ? { background: "rgba(16,185,129,0.15)", color: "#10B981", border: "1px solid rgba(16,185,129,0.3)" }
+      ? { background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }
       : project.difficulty === "intermediate"
-      ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
-      : { background: "rgba(139,92,246,0.15)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.3)" };
+      ? { background: "hsl(var(--secondary) / 0.15)", color: "hsl(var(--secondary))", border: "1px solid hsl(var(--secondary) / 0.3)" }
+      : { background: "hsl(var(--purple) / 0.15)", color: "hsl(var(--purple))", border: "1px solid hsl(var(--purple) / 0.3)" };
 
   // Completion status checklist
   const completionChecks = [
@@ -1601,7 +1601,7 @@ void loop() {
             }
           }}
           className="flex items-center gap-2 text-sm font-medium mb-6 transition-all hover:gap-3"
-          style={{ color: "#3B82F6" }}
+          style={{ color: "hsl(var(--primary))" }}
         >
           <ArrowLeft size={16} /> {generatedProject?.source === "think-bigger" ? "Back to Think Bigger" : generatedProject?.source === "dashboard" ? "Back to Dashboard" : generatedProject?.source === "catalog" ? "Back to Catalog" : generatedProject ? "Back to Generate" : "Back to Catalog"}
         </button>
@@ -1610,23 +1610,23 @@ void loop() {
         <div className="flex items-start gap-5 mb-8">
           <div
             className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0"
-            style={{ background: "hsl(229, 45%, 16%)", border: "1px solid hsl(229, 42%, 28%)" }}
+            style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
           >
             {project.emoji}
           </div>
           <div className="flex-1">
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-3xl font-bold mb-2" style={{ color: "#FFFFFF" }}>{project.title}</h1>
-                <p className="text-sm leading-relaxed mb-4" style={{ color: "#A0AED9" }}>{project.desc}</p>
+                <h1 className="text-3xl font-bold mb-2" style={{ color: "hsl(var(--foreground))" }}>{project.title}</h1>
+                <p className="text-sm leading-relaxed mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>{project.desc}</p>
                 <div className="flex items-center gap-4 flex-wrap">
                   <span className="text-xs px-3 py-1 rounded-full font-semibold capitalize" style={diffBadgeStyle}>
                     {project.difficulty}
                   </span>
-                  <span className="flex items-center gap-1 text-sm" style={{ color: "#A0AED9" }}>
+                  <span className="flex items-center gap-1 text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <Clock size={14} /> {project.time}
                   </span>
-                  <span className="flex items-center gap-1 text-sm font-bold" style={{ color: "#F59E0B" }}>
+                  <span className="flex items-center gap-1 text-sm font-bold" style={{ color: "hsl(var(--primary))" }}>
                     <Zap size={14} /> +{project.xp} XP
                   </span>
                 </div>
@@ -1635,7 +1635,7 @@ void loop() {
                 {completed ? (
                   <div
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold"
-                    style={{ background: "rgba(16,185,129,0.1)", color: "#10B981", border: "1px solid rgba(16,185,129,0.3)" }}
+                    style={{ background: "hsl(var(--success) / 0.1)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }}
                   >
                     <CheckCircle size={16} /> Completed
                   </div>
@@ -1654,7 +1654,7 @@ void loop() {
                       style={{ background: "hsl(var(--success) / 0.1)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)", opacity: unsaving ? 0.7 : 1 }}
                       title="Click to unsave"
                     >
-                      {unsaving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />} 
+                      {unsaving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                       {unsaving ? "Removing..." : <><span className="group-hover:hidden">Saved</span><span className="hidden group-hover:inline" style={{ color: "hsl(var(--destructive))" }}>Unsave</span></>}
                     </button>
                   ) : (
@@ -1662,7 +1662,7 @@ void loop() {
                       onClick={handleSaveToProfile}
                       disabled={saving}
                       className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
-                      style={{ background: "rgba(59,130,246,0.1)", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.3)", opacity: saving ? 0.7 : 1 }}
+                      style={{ background: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)", opacity: saving ? 0.7 : 1 }}
                     >
                       {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} {saving ? "Saving..." : "Save Project"}
                     </button>
@@ -1676,11 +1676,11 @@ void loop() {
         {/* Learning Concepts */}
         <div
           className="rounded-2xl p-5 border mb-6"
-          style={{ background: "linear-gradient(135deg, hsl(229, 45%, 14%), hsl(260, 40%, 16%))", borderColor: "hsl(260, 42%, 28%)" }}
+          style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
         >
           <div className="flex items-center gap-2 mb-4">
-            <Lightbulb size={16} style={{ color: "#F59E0B" }} />
-            <span className="font-bold text-sm" style={{ color: "#F59E0B" }}>What You'll Learn</span>
+            <Lightbulb size={16} style={{ color: "hsl(var(--muted-foreground))" }} />
+            <span className="font-bold text-sm" style={{ color: "hsl(var(--foreground))" }}>What You'll Learn</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {learningConcepts.map((concept) => (
@@ -1689,9 +1689,9 @@ void loop() {
                 onClick={() => setShowConceptDetails(showConceptDetails === concept ? null : concept)}
                 className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-105 cursor-pointer"
                 style={{
-                  background: showConceptDetails === concept ? "rgba(245,158,11,0.2)" : "hsl(260, 35%, 20%)",
-                  color: showConceptDetails === concept ? "#F59E0B" : "#E0E7FF",
-                  border: `1px solid ${showConceptDetails === concept ? "rgba(245,158,11,0.4)" : "hsl(260, 35%, 30%)"}`,
+                  background: showConceptDetails === concept ? "hsl(var(--primary) / 0.2)" : "hsl(var(--muted))",
+                  color: showConceptDetails === concept ? "hsl(var(--primary))" : "hsl(var(--foreground))",
+                  border: `1px solid ${showConceptDetails === concept ? "hsl(var(--primary) / 0.4)" : "hsl(var(--border))"}`,
                 }}
               >
                 <BookOpen size={12} className="inline mr-1.5" />
@@ -1700,8 +1700,8 @@ void loop() {
             ))}
           </div>
           {showConceptDetails && (
-            <div className="mt-3 p-3 rounded-xl text-xs leading-relaxed animate-fade-in" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", color: "#E0E7FF" }}>
-              <strong style={{ color: "#F59E0B" }}>{showConceptDetails}</strong>
+            <div className="mt-3 p-3 rounded-xl text-xs leading-relaxed animate-fade-in" style={{ background: "hsl(var(--primary) / 0.08)", border: "1px solid hsl(var(--primary) / 0.2)", color: "hsl(var(--foreground))" }}>
+              <strong style={{ color: "hsl(var(--primary))" }}>{showConceptDetails}</strong>
               <p className="mt-1">This concept is covered in the code. Look for related functions and experiment with different values to deepen your understanding.</p>
             </div>
           )}
@@ -1710,12 +1710,12 @@ void loop() {
         {/* Components Required - Interactive */}
         <div
           className="rounded-2xl p-5 border mb-6"
-          style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
+          style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
         >
           <div className="flex items-center gap-2 mb-4">
-            <Settings size={16} style={{ color: "#3B82F6" }} />
-            <span className="font-bold text-sm" style={{ color: "#3B82F6" }}>Components Required</span>
-            <span className="text-xs px-2 py-0.5 rounded-full ml-auto" style={{ background: "rgba(59,130,246,0.1)", color: "#3B82F6" }}>
+            <Settings size={16} style={{ color: "hsl(var(--primary))" }} />
+            <span className="font-bold text-sm" style={{ color: "hsl(var(--primary))" }}>Components Required</span>
+            <span className="text-xs px-2 py-0.5 rounded-full ml-auto" style={{ background: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))" }}>
               {project.components.length} parts
             </span>
           </div>
@@ -1729,24 +1729,24 @@ void loop() {
                     onClick={() => toggleComponentExpand(c)}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:scale-[1.01]"
                     style={{
-                      background: isExpanded ? "hsl(229, 42%, 22%)" : "hsl(229, 42%, 18%)",
-                      color: "#E0E7FF",
-                      border: `1px solid ${isExpanded ? "rgba(59,130,246,0.3)" : "hsl(229, 42%, 28%)"}`,
+                      background: isExpanded ? "hsl(var(--muted))" : "hsl(var(--card))",
+                      color: "hsl(var(--foreground))",
+                      border: `1px solid ${isExpanded ? "hsl(var(--primary) / 0.3)" : "hsl(var(--border))"}`,
                     }}
                   >
                     <span className="text-lg">{info?.tipIcon || "🔧"}</span>
                     <span className="flex-1 text-left">{c}</span>
                     {info && (
-                      <Info size={14} style={{ color: isExpanded ? "#3B82F6" : "#A0AED9" }} />
+                      <Info size={14} style={{ color: isExpanded ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }} />
                     )}
-                    {info && (isExpanded ? <ChevronUp size={14} style={{ color: "#A0AED9" }} /> : <ChevronDown size={14} style={{ color: "#A0AED9" }} />)}
+                    {info && (isExpanded ? <ChevronUp size={14} style={{ color: "hsl(var(--muted-foreground))" }} /> : <ChevronDown size={14} style={{ color: "hsl(var(--muted-foreground))" }} />)}
                   </button>
                   {isExpanded && info && (
-                    <div className="ml-4 mt-1 mb-2 p-3 rounded-xl text-xs space-y-2 animate-fade-in" style={{ background: "hsl(229, 42%, 15%)", border: "1px solid hsl(229, 42%, 25%)" }}>
-                      <p style={{ color: "#E0E7FF" }}>{info.description}</p>
+                    <div className="ml-4 mt-1 mb-2 p-3 rounded-xl text-xs space-y-2 animate-fade-in" style={{ background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))" }}>
+                      <p style={{ color: "hsl(var(--foreground))" }}>{info.description}</p>
                       <div className="flex items-start gap-2">
-                        <span className="font-bold flex-shrink-0" style={{ color: "#3B82F6" }}>Pins:</span>
-                        <span style={{ color: "#A0AED9" }}>{info.pins}</span>
+                        <span className="font-bold flex-shrink-0" style={{ color: "hsl(var(--primary))" }}>Pins:</span>
+                        <span style={{ color: "hsl(var(--muted-foreground))" }}>{info.pins}</span>
                       </div>
                     </div>
                   )}
@@ -1768,9 +1768,9 @@ void loop() {
             onClick={() => { setLiked(!liked); setLikeCount(prev => liked ? prev - 1 : prev + 1); }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
             style={{
-              background: liked ? "rgba(255,69,0,0.15)" : "hsl(229, 42%, 18%)",
-              color: liked ? "#FF4500" : "#A0AED9",
-              border: `1px solid ${liked ? "rgba(255,69,0,0.3)" : "hsl(229, 42%, 28%)"}`,
+              background: liked ? "hsl(var(--destructive) / 0.15)" : "hsl(var(--muted))",
+              color: liked ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))",
+              border: `1px solid ${liked ? "hsl(var(--destructive) / 0.3)" : "hsl(var(--border))"}`,
             }}
           >
             <ThumbsUp size={14} fill={liked ? "currentColor" : "none"} /> {likeCount}
@@ -1778,7 +1778,7 @@ void loop() {
           <button
             onClick={handleShare}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105"
-            style={{ background: "hsl(229, 42%, 18%)", color: "#A0AED9", border: "1px solid hsl(229, 42%, 28%)" }}
+            style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}
           >
             <Share2 size={14} /> Share
           </button>
@@ -1788,7 +1788,7 @@ void loop() {
         <div className="flex items-center justify-between mb-4">
           <div
             className="flex items-center rounded-xl overflow-hidden border"
-            style={{ borderColor: "hsl(229, 42%, 26%)" }}
+            style={{ borderColor: "hsl(var(--border))" }}
           >
             {([
               { id: "instructions" as ActiveTab, label: "Instructions", icon: "≡" },
@@ -1801,8 +1801,8 @@ void loop() {
                 className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold transition-all"
                 style={
                   activeTab === tab.id
-                    ? { background: "#3B82F6", color: "#0A0E27" }
-                    : { background: "transparent", color: "#A0AED9" }
+                    ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }
+                    : { background: "transparent", color: "hsl(var(--muted-foreground))" }
                 }
               >
                 <span>{tab.icon}</span> {tab.label}
@@ -1813,7 +1813,7 @@ void loop() {
           <button
             onClick={() => navigate("/ide")}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-105"
-            style={{ color: "#3B82F6", border: "1px solid rgba(59,130,246,0.4)" }}
+            style={{ color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.4)" }}
           >
             <Code size={14} /> Open in IDE
           </button>
@@ -1823,16 +1823,16 @@ void loop() {
         {activeTab === "instructions" && (
           <div
             className="rounded-2xl p-6 border"
-            style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
+            style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
           >
             {/* Progress bar */}
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold" style={{ color: "#FFFFFF" }}>Step-by-Step Instructions</h3>
+              <h3 className="font-bold" style={{ color: "hsl(var(--foreground))" }}>Step-by-Step Instructions</h3>
               <div className="flex items-center gap-3">
-                <div className="w-32 h-2 rounded-full overflow-hidden" style={{ background: "hsl(229, 42%, 22%)" }}>
-                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progressPercent}%`, background: progressPercent === 100 ? "linear-gradient(90deg, #10B981, #059669)" : "linear-gradient(90deg, #3B82F6, #2563EB)" }} />
+                <div className="w-32 h-2 rounded-full overflow-hidden" style={{ background: "hsl(var(--muted))" }}>
+                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progressPercent}%`, background: progressPercent === 100 ? "hsl(var(--success))" : "hsl(var(--primary))" }} />
                 </div>
-                <span className="text-xs font-bold" style={{ color: progressPercent === 100 ? "#10B981" : "#3B82F6" }}>
+                <span className="text-xs font-bold" style={{ color: progressPercent === 100 ? "hsl(var(--success))" : "hsl(var(--primary))" }}>
                   {stepProgress}/{totalSteps}
                 </span>
               </div>
@@ -1840,17 +1840,17 @@ void loop() {
 
             {/* Completion Checklist */}
             {(allStepsCompleted || codePassed || simulatorPassed) && (
-              <div className="mb-4 p-4 rounded-xl space-y-2" style={{ background: completed ? "rgba(16,185,129,0.06)" : "hsl(var(--muted) / 0.5)", border: `1px solid ${completed ? "rgba(16,185,129,0.3)" : "hsl(var(--border))"}` }}>
-                <p className="text-xs font-bold mb-2" style={{ color: completed ? "#10B981" : "hsl(var(--foreground))" }}>
+              <div className="mb-4 p-4 rounded-xl space-y-2" style={{ background: completed ? "hsl(var(--success) / 0.06)" : "hsl(var(--muted) / 0.5)", border: `1px solid ${completed ? "hsl(var(--success) / 0.3)" : "hsl(var(--border))"}` }}>
+                <p className="text-xs font-bold mb-2" style={{ color: completed ? "hsl(var(--success))" : "hsl(var(--foreground))" }}>
                   {completed ? "🎉 Project Complete!" : "📋 Completion Requirements"}
                 </p>
                 {completionChecks.map((check, i) => (
                   <div key={i} className="flex items-center gap-2">
                     {check.done
-                      ? <CheckCircle size={14} style={{ color: "#10B981" }} />
+                      ? <CheckCircle size={14} style={{ color: "hsl(var(--success))" }} />
                       : <div className="w-3.5 h-3.5 rounded-full border" style={{ borderColor: "hsl(var(--muted-foreground))" }} />
                     }
-                    <span className="text-xs" style={{ color: check.done ? "#10B981" : "hsl(var(--muted-foreground))" }}>{check.label}</span>
+                    <span className="text-xs" style={{ color: check.done ? "hsl(var(--success))" : "hsl(var(--muted-foreground))" }}>{check.label}</span>
                   </div>
                 ))}
               </div>
@@ -1862,20 +1862,20 @@ void loop() {
                   key={i}
                   className="flex items-start gap-3 p-3 rounded-xl transition-all cursor-pointer group"
                   style={{
-                    background: checkedSteps[i] ? "rgba(16,185,129,0.06)" : "transparent",
-                    border: `1px solid ${checkedSteps[i] ? "rgba(16,185,129,0.2)" : "transparent"}`,
+                    background: checkedSteps[i] ? "hsl(var(--success) / 0.06)" : "transparent",
+                    border: `1px solid ${checkedSteps[i] ? "hsl(var(--success) / 0.2)" : "transparent"}`,
                   }}
                   onClick={() => toggleStep(i)}
                 >
                   <div className="flex-shrink-0 mt-0.5 transition-all group-hover:scale-110">
                     {checkedSteps[i] ? (
-                      <CheckSquare size={20} style={{ color: "#10B981" }} />
+                      <CheckSquare size={20} style={{ color: "hsl(var(--success))" }} />
                     ) : (
-                      <Square size={20} style={{ color: "#A0AED9" }} />
+                      <Square size={20} style={{ color: "hsl(var(--muted-foreground))" }} />
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className={`text-sm transition-all ${checkedSteps[i] ? "line-through opacity-60" : ""}`} style={{ color: "#E0E7FF" }}>{inst}</p>
+                    <p className={`text-sm transition-all ${checkedSteps[i] ? "line-through opacity-60" : ""}`} style={{ color: "hsl(var(--foreground))" }}>{inst}</p>
                     {/* Step note input */}
                     <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <input
@@ -1887,11 +1887,11 @@ void loop() {
                         onClick={(e) => e.stopPropagation()}
                         placeholder="Add a note..."
                         className="w-full bg-transparent text-xs focus:outline-none px-2 py-1 rounded-lg"
-                        style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 25%)" }}
+                        style={{ color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}
                       />
                     </div>
                     {activeNote[i] && (
-                      <p className="mt-1 text-xs italic flex items-center gap-1" style={{ color: "#A0AED9" }}>
+                      <p className="mt-1 text-xs italic flex items-center gap-1" style={{ color: "hsl(var(--muted-foreground))" }}>
                         <MessageCircle size={10} /> {activeNote[i]}
                       </p>
                     )}
@@ -1899,8 +1899,8 @@ void loop() {
                   <span
                     className="text-xs font-bold flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
                     style={{
-                      background: checkedSteps[i] ? "rgba(16,185,129,0.15)" : "rgba(59,130,246,0.15)",
-                      color: checkedSteps[i] ? "#10B981" : "#3B82F6",
+                      background: checkedSteps[i] ? "hsl(var(--success) / 0.15)" : "hsl(var(--primary) / 0.15)",
+                      color: checkedSteps[i] ? "hsl(var(--success))" : "hsl(var(--primary))",
                     }}
                   >
                     {i + 1}
@@ -1916,7 +1916,7 @@ void loop() {
           <div className="space-y-4">
             {/* Run workflow indicator */}
             {runStep !== "idle" && (
-              <div className="rounded-xl px-5 py-3 flex items-center gap-6 border" style={{ background: "hsl(232, 42%, 11%)", borderColor: "hsl(232, 40%, 16%)" }}>
+              <div className="rounded-xl px-5 py-3 flex items-center gap-6 border" style={{ background: "hsl(var(--background))", borderColor: "hsl(var(--border))" }}>
                 {(["compiling", "simulating"] as const).map((step, i) => {
                   const labels = ["Compiling", "Simulating"];
                   const stepOrder = ["compiling", "simulating"];
@@ -1926,20 +1926,20 @@ void loop() {
                   const isActive = step === runStep;
                   return (
                     <div key={step} className="flex items-center gap-2">
-                      {isDone ? <CheckCircle size={16} style={{ color: "#10B981" }} /> : isActive ? <Loader2 size={16} className="animate-spin" style={{ color: "#3B82F6" }} /> : <div className="w-4 h-4 rounded-full" style={{ background: "hsl(228, 25%, 30%)" }} />}
-                      <span className="text-sm font-medium" style={{ color: isDone ? "#10B981" : isActive ? "#3B82F6" : "hsl(228, 25%, 50%)" }}>{labels[i]}</span>
+                      {isDone ? <CheckCircle size={16} style={{ color: "hsl(var(--success))" }} /> : isActive ? <Loader2 size={16} className="animate-spin" style={{ color: "hsl(var(--primary))" }} /> : <div className="w-4 h-4 rounded-full" style={{ background: "hsl(var(--muted))" }} />}
+                      <span className="text-sm font-medium" style={{ color: isDone ? "hsl(var(--success))" : isActive ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}>{labels[i]}</span>
                     </div>
                   );
                 })}
                 {runStep === "success" && (
-                  <span className="font-bold text-sm animate-fade-in-up flex items-center gap-2" style={{ color: "#10B981" }}>
+                  <span className="font-bold text-sm animate-fade-in-up flex items-center gap-2" style={{ color: "hsl(var(--success))" }}>
                     <CheckCircle size={16} /> ✓ Compilation Successful! +{project.xp} XP
                   </span>
                 )}
                 {runStep === "error" && (
                   <div className="flex items-center gap-2">
-                    <XCircle size={16} style={{ color: "#FF4500" }} />
-                    <span className="font-bold text-sm" style={{ color: "#FF4500" }}>{errors.length} Error{errors.length !== 1 ? "s" : ""}</span>
+                    <XCircle size={16} style={{ color: "hsl(var(--destructive))" }} />
+                    <span className="font-bold text-sm" style={{ color: "hsl(var(--destructive))" }}>{errors.length} Error{errors.length !== 1 ? "s" : ""}</span>
                     <button
                       onClick={() => {
                         setShowDebugPanel(true);
@@ -1948,7 +1948,7 @@ void loop() {
                         }
                       }}
                       className="ml-2 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1"
-                      style={{ background: "rgba(139,92,246,0.2)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.4)" }}
+                      style={{ background: "hsl(var(--purple) / 0.2)", color: "hsl(var(--purple))", border: "1px solid hsl(var(--purple) / 0.4)" }}
                     >
                       <Brain size={12} /> Debug with AI
                     </button>
@@ -1959,21 +1959,21 @@ void loop() {
 
             <div className="flex gap-4">
               {/* Main code editor */}
-              <div className="flex-1 rounded-2xl border overflow-hidden" style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}>
+              <div className="flex-1 rounded-2xl border overflow-hidden" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
                 {/* Code toolbar */}
-                <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
+                <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: "hsl(var(--border))" }}>
                   <div className="flex items-center gap-2">
                     {showSolution ? (
                       <>
-                        <button onClick={() => setCodeMode("basic")} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all" style={codeMode === "basic" ? { background: "transparent", color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" } : { background: "transparent", color: "hsl(226, 35%, 50%)" }}>
+                        <button onClick={() => setCodeMode("basic")} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all" style={codeMode === "basic" ? { background: "transparent", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" } : { background: "transparent", color: "hsl(var(--muted-foreground) / 0.6)" }}>
                           <Code size={13} /> Basic
                         </button>
-                        <button onClick={() => setCodeMode("optimized")} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all" style={codeMode === "optimized" ? { background: "linear-gradient(135deg, #10B981, #059669)", color: "#0A0E27" } : { background: "transparent", color: "hsl(226, 35%, 50%)" }}>
+                        <button onClick={() => setCodeMode("optimized")} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all" style={codeMode === "optimized" ? { background: "hsl(var(--success))", color: "white" } : { background: "transparent", color: "hsl(var(--muted-foreground) / 0.6)" }}>
                           <Sparkles size={13} /> Optimized
                         </button>
                       </>
                     ) : (
-                      <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: "#F59E0B" }}>
+                      <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: "hsl(var(--warning))" }}>
                         <Sparkles size={14} /> Starter Template — Try it yourself first!
                       </span>
                     )}
@@ -1981,25 +1981,25 @@ void loop() {
                   <div className="flex items-center gap-2">
                     {!showSolution && (
                       <>
-                        <button onClick={() => saveSnapshot()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ color: "#3B82F6", border: "1px solid rgba(59,130,246,0.3)" }}>
+                        <button onClick={() => saveSnapshot()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}>
                           <Save size={12} /> Save Snapshot
                         </button>
-                        <button onClick={() => setShowVersionPanel(!showVersionPanel)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ background: showVersionPanel ? "rgba(245,158,11,0.15)" : "transparent", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.3)" }}>
+                        <button onClick={() => setShowVersionPanel(!showVersionPanel)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ background: showVersionPanel ? "hsl(var(--primary) / 0.15)" : "transparent", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}>
                           <History size={12} /> History{codeVersions.length > 0 ? ` (${codeVersions.length})` : ""}
                         </button>
-                        <button onClick={() => { setUserCode(starterTemplate); setRunStep("idle"); setErrors([]); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" }}>
+                        <button onClick={() => { setUserCode(starterTemplate); setRunStep("idle"); setErrors([]); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={{ color: "hsl(var(--destructive))", border: "1px solid hsl(var(--destructive) / 0.3)" }}>
                           <RefreshCw size={12} /> Reset
                         </button>
                       </>
                     )}
-                    <button onClick={handleRevealSolution} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={showSolution ? { background: "rgba(255,69,0,0.15)", color: "#FF4500", border: "1px solid rgba(255,69,0,0.3)" } : { background: "rgba(139,92,246,0.15)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.3)" }}>
+                    <button onClick={handleRevealSolution} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105" style={showSolution ? { background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))", border: "1px solid hsl(var(--destructive) / 0.3)" } : { background: "hsl(var(--purple) / 0.15)", color: "hsl(var(--purple))", border: "1px solid hsl(var(--purple) / 0.3)" }}>
                       {showSolution ? "Hide Solution" : "🔓 Reveal Solution"}
                     </button>
                     <ExplainCode code={currentCode} />
-                    <button onClick={handleCopy} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105" style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}>
+                    <button onClick={handleCopy} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105" style={{ color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}>
                       <Copy size={12} /> Copy
                     </button>
-                    <button onClick={handleDownload} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105" style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}>
+                    <button onClick={handleDownload} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105" style={{ color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}>
                       <Download size={12} /> .ino
                     </button>
                   </div>
@@ -2007,26 +2007,26 @@ void loop() {
 
                 {/* Version History Panel */}
                 {showVersionPanel && !showSolution && (
-                  <div className="border-b px-5 py-3 space-y-2 animate-fade-in" style={{ background: "rgba(245,158,11,0.04)", borderColor: "rgba(245,158,11,0.2)" }}>
+                  <div className="border-b px-5 py-3 space-y-2 animate-fade-in" style={{ background: "hsl(var(--primary) / 0.04)", borderColor: "hsl(var(--primary) / 0.2)" }}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold flex items-center gap-1.5" style={{ color: "#F59E0B" }}><History size={12} /> Version History</span>
-                      <button onClick={() => setShowVersionPanel(false)} className="text-xs" style={{ color: "#A0AED9" }}>✕</button>
+                      <span className="text-xs font-bold flex items-center gap-1.5" style={{ color: "hsl(var(--primary))" }}><History size={12} /> Version History</span>
+                      <button onClick={() => setShowVersionPanel(false)} className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>✕</button>
                     </div>
                     {codeVersions.length === 0 ? (
-                      <p className="text-xs" style={{ color: "#A0AED9" }}>No snapshots yet. Click "Save Snapshot" to create one.</p>
+                      <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>No snapshots yet. Click "Save Snapshot" to create one.</p>
                     ) : (
                       <div className="max-h-40 overflow-y-auto space-y-1.5">
                         {codeVersions.map((v, i) => (
-                          <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: "hsl(229, 42%, 15%)", border: "1px solid hsl(229, 42%, 22%)" }}>
+                          <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg" style={{ background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))" }}>
                             <div>
-                              <p className="text-xs font-semibold" style={{ color: "#E0E7FF" }}>{v.label}</p>
-                              <p className="text-xs" style={{ color: "#A0AED9" }}>{new Date(v.timestamp).toLocaleString()}</p>
+                              <p className="text-xs font-semibold" style={{ color: "hsl(var(--foreground))" }}>{v.label}</p>
+                              <p className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{new Date(v.timestamp).toLocaleString()}</p>
                             </div>
                             <div className="flex gap-1.5">
-                              <button onClick={() => revertToVersion(i)} className="px-2 py-1 rounded text-xs font-bold transition-all hover:scale-105 text-[#3B82F6] border border-blue-500/30">
+                              <button onClick={() => revertToVersion(i)} className="px-2 py-1 rounded text-xs font-bold transition-all hover:scale-105 text-primary border border-primary/30">
                                 <RotateCcw size={10} className="inline mr-1" />Revert
                               </button>
-                              <button onClick={() => deleteVersion(i)} className="px-2 py-1 rounded text-xs transition-all hover:scale-105 text-[#FF4500]" title="Delete version" aria-label="Delete version">
+                              <button onClick={() => deleteVersion(i)} className="px-2 py-1 rounded text-xs transition-all hover:scale-105 text-destructive" title="Delete version" aria-label="Delete version">
                                 <Trash2 size={10} />
                               </button>
                             </div>
@@ -2038,8 +2038,8 @@ void loop() {
                 )}
 
                 {/* File tab */}
-                <div className="flex items-center gap-2 px-4 py-1.5 border-b text-xs" style={{ borderColor: "hsl(229, 42%, 22%)", background: "hsl(232, 48%, 6%)", color: "hsl(228, 25%, 60%)" }}>
-                  <span style={{ color: "#3B82F6" }}>sketch.ino</span>
+                <div className="flex items-center gap-2 px-4 py-1.5 border-b text-xs" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--muted-foreground))" }}>
+                  <span style={{ color: "hsl(var(--primary))" }}>sketch.ino</span>
                   <span>•</span>
                   <span>Arduino Uno</span>
                   <span className="ml-2">|</span>
@@ -2047,9 +2047,9 @@ void loop() {
                     onClick={serialConnected ? disconnectSerial : connectSerial}
                     className="text-[9px] font-bold px-1.5 py-0.5 rounded border transition-all cursor-pointer"
                     style={{
-                      background: serialConnected ? "rgba(16,185,129,0.15)" : "transparent",
-                      color: serialConnected ? "#10B981" : "hsl(228, 25%, 60%)",
-                      borderColor: serialConnected ? "#10B981/30" : "hsl(232, 40%, 20%)"
+                      background: serialConnected ? "hsl(var(--success) / 0.15)" : "transparent",
+                      color: serialConnected ? "hsl(var(--success))" : "hsl(var(--muted-foreground))",
+                      borderColor: serialConnected ? "hsl(var(--success) / 0.3)" : "hsl(var(--border))"
                     }}
                   >
                     {serialConnected ? "🔌 Connected" : "🔌 Connect Board"}
@@ -2058,18 +2058,18 @@ void loop() {
                     <button
                       onClick={uploadToBoard}
                       disabled={uploading}
-                      className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-cyan-500/30 text-cyan-400 hover:bg-cyan-950/20 transition-all cursor-pointer ml-1"
+                      className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-border text-muted-foreground hover:bg-muted transition-all cursor-pointer ml-1"
                     >
                       {uploading ? "Uploading..." : "📤 Upload"}
                     </button>
                   )}
                   <button
                     onClick={() => setShowSerialConsole(!showSerialConsole)}
-                    className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-indigo-500/30 text-indigo-400 hover:bg-indigo-950/20 transition-all cursor-pointer ml-1"
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-border text-muted-foreground hover:bg-muted transition-all cursor-pointer ml-1"
                   >
                     📟 Serial {serialLogs.length > 0 && `(${serialLogs.length})`}
                   </button>
-                  {!showSolution && <span className="ml-auto" style={{ color: "#10B981" }}>✎ Editable</span>}
+                  {!showSolution && <span className="ml-auto" style={{ color: "hsl(var(--success))" }}>✎ Editable</span>}
                 </div>
 
                 {/* Code area - editable or read-only */}
@@ -2080,17 +2080,17 @@ void loop() {
                     <CodeEditor key={`user-v${revertCount}`} code={userCode} onChange={setUserCode} maxHeight="500px" minHeight="400px" />
                   )}
                   {showSerialConsole && (
-                    <div className="h-36 border-t flex flex-col overflow-hidden bg-slate-950" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
-                      <div className="flex items-center justify-between px-4 py-1.5 border-b text-[10px] font-mono" style={{ borderColor: "hsl(229, 42%, 22%)", color: "hsl(228, 25%, 60%)" }}>
-                        <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
+                    <div className="h-36 border-t flex flex-col overflow-hidden bg-background" style={{ borderColor: "hsl(var(--border))" }}>
+                      <div className="flex items-center justify-between px-4 py-1.5 border-b text-[10px] font-mono" style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
+                        <span className="text-foreground font-bold">📟 Serial Monitor (9600 baud)</span>
                         <div className="flex gap-2">
-                          <button onClick={clearLogs} className="hover:text-white transition-all">Clear Logs</button>
-                          <button onClick={() => setShowSerialConsole(false)} className="hover:text-white transition-all">✕</button>
+                          <button onClick={clearLogs} className="hover:text-foreground transition-all">Clear Logs</button>
+                          <button onClick={() => setShowSerialConsole(false)} className="hover:text-foreground transition-all">✕</button>
                         </div>
                       </div>
-                      <div className="flex-1 p-3 overflow-y-auto font-mono text-[9px] space-y-1 text-emerald-400">
+                      <div className="flex-1 p-3 overflow-y-auto font-mono text-[9px] space-y-1 text-success">
                         {serialLogs.length === 0 ? (
-                          <span className="text-slate-500 italic">No output. Verify connection and upload code.</span>
+                          <span className="text-muted-foreground italic">No output. Verify connection and upload code.</span>
                         ) : (
                           serialLogs.map((log, idx) => (
                             <div key={idx} className="whitespace-pre-wrap">{log}</div>
@@ -2103,13 +2103,13 @@ void loop() {
 
                 {/* Error panel */}
                 {errors.length > 0 && (
-                  <div className="border-t p-4 animate-fade-in" style={{ background: "rgba(255,69,0,0.08)", borderColor: "rgba(255,69,0,0.3)" }}>
+                  <div className="border-t p-4 animate-fade-in" style={{ background: "hsl(var(--destructive) / 0.08)", borderColor: "hsl(var(--destructive) / 0.3)" }}>
                     <div className="flex items-center gap-2 mb-2">
-                      <AlertTriangle size={14} style={{ color: "#FF4500" }} />
-                      <span className="font-bold text-sm" style={{ color: "#FF4500" }}>Errors</span>
+                      <AlertTriangle size={14} style={{ color: "hsl(var(--destructive))" }} />
+                      <span className="font-bold text-sm" style={{ color: "hsl(var(--destructive))" }}>Errors</span>
                     </div>
                     {errors.map((err, i) => (
-                      <div key={i} className="flex items-start gap-2 text-xs font-mono p-2 rounded-lg mb-1" style={{ background: "rgba(255,69,0,0.1)", color: "#FF6B35" }}>
+                      <div key={i} className="flex items-start gap-2 text-xs font-mono p-2 rounded-lg mb-1" style={{ background: "hsl(var(--destructive) / 0.1)", color: "hsl(var(--destructive))" }}>
                         <XCircle size={12} className="flex-shrink-0 mt-0.5" /> {err}
                       </div>
                     ))}
@@ -2117,12 +2117,12 @@ void loop() {
                 )}
 
                 {/* Run & action bar */}
-                <div className="flex items-center gap-3 px-5 py-3 border-t" style={{ borderColor: "hsl(229, 42%, 22%)", background: "hsl(232, 42%, 11%)" }}>
+                <div className="flex items-center gap-3 px-5 py-3 border-t" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background))" }}>
                   <button
                     onClick={runAndCheck}
                     disabled={runStep === "compiling" || runStep === "simulating"}
                     className="px-5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 disabled:opacity-60"
-                    style={{ background: "linear-gradient(135deg, #10B981, #059669)", color: "#0A0E27", boxShadow: "0 0 15px rgba(16,185,129,0.3)" }}
+                    style={{ background: "hsl(var(--success))", color: "white", boxShadow: "0 0 15px hsl(var(--success) / 0.3)" }}
                   >
                     {runStep === "compiling" || runStep === "simulating" ? <><Loader2 size={14} className="animate-spin" /> Running...</> : <><Play size={14} /> ▶ Run & Check</>}
                   </button>
@@ -2134,7 +2134,7 @@ void loop() {
                       }
                     }}
                     className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
-                    style={{ background: "rgba(139,92,246,0.15)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.3)" }}
+                    style={{ background: "hsl(var(--purple) / 0.15)", color: "hsl(var(--purple))", border: "1px solid hsl(var(--purple) / 0.3)" }}
                   >
                     <Brain size={14} /> AI Debug
                   </button>
@@ -2149,7 +2149,7 @@ void loop() {
                       }, 1000);
                     }}
                     className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
-                    style={{ color: "#3B82F6", border: "1px solid rgba(59,130,246,0.3)" }}
+                    style={{ color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}
                   >
                     <Eye size={14} /> AI Review
                   </button>
@@ -2158,33 +2158,33 @@ void loop() {
 
               {/* AI Debug Side Panel */}
               {showDebugPanel && (
-                <div className="w-72 rounded-2xl border flex flex-col overflow-hidden animate-fade-in flex-shrink-0" style={{ background: "hsl(232, 42%, 11%)", borderColor: "rgba(139,92,246,0.3)", maxHeight: "620px" }}>
-                  <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "rgba(139,92,246,0.2)", background: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(255,20,147,0.05))" }}>
+                <div className="w-72 rounded-2xl border flex flex-col overflow-hidden animate-fade-in flex-shrink-0" style={{ background: "hsl(var(--background))", borderColor: "hsl(var(--purple) / 0.3)", maxHeight: "620px" }}>
+                  <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "hsl(var(--purple) / 0.2)", background: "hsl(var(--purple) / 0.1)" }}>
                     <div className="flex items-center gap-2">
-                      <Brain size={14} style={{ color: "#8B5CF6" }} />
-                      <span className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Assistant</span>
+                      <Brain size={14} style={{ color: "hsl(var(--purple))" }} />
+                      <span className="font-bold text-sm" style={{ color: "hsl(var(--foreground))" }}>AI Assistant</span>
                     </div>
-                    <button onClick={() => setShowDebugPanel(false)} className="text-xs px-2 py-0.5 rounded" style={{ color: "#A0AED9" }}>✕</button>
+                    <button onClick={() => setShowDebugPanel(false)} className="text-xs px-2 py-0.5 rounded" style={{ color: "hsl(var(--muted-foreground))" }}>✕</button>
                   </div>
                   <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ minHeight: 0 }}>
                     {debugMessages.map((msg, i) => (
-                      <div key={i} className={`p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${msg.role === "user" ? "ml-4" : ""}`} style={{ background: msg.role === "ai" ? "rgba(139,92,246,0.1)" : "rgba(59,130,246,0.1)", border: `1px solid ${msg.role === "ai" ? "rgba(139,92,246,0.25)" : "rgba(59,130,246,0.25)"}`, color: msg.role === "ai" ? "#E0E7FF" : "#3B82F6" }}>
-                        {msg.role === "ai" && <span className="text-xs font-bold block mb-1" style={{ color: "#8B5CF6" }}>🧠 AI</span>}
+                      <div key={i} className={`p-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-wrap ${msg.role === "user" ? "ml-4" : ""}`} style={{ background: msg.role === "ai" ? "hsl(var(--purple) / 0.1)" : "hsl(var(--primary) / 0.1)", border: `1px solid ${msg.role === "ai" ? "hsl(var(--purple) / 0.25)" : "hsl(var(--primary) / 0.25)"}`, color: msg.role === "ai" ? "hsl(var(--foreground))" : "hsl(var(--primary))" }}>
+                        {msg.role === "ai" && <span className="text-xs font-bold block mb-1" style={{ color: "hsl(var(--purple))" }}>🧠 AI</span>}
                         {msg.content}
                       </div>
                     ))}
                     {aiTyping && (
-                      <div className="p-2.5 rounded-xl flex items-center gap-1 bg-purple-500/10 border border-purple-500/25">
-                        <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-[#8B5CF6]" />
-                        <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-[#8B5CF6] [animation-delay:0.15s]" />
-                        <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-[#8B5CF6] [animation-delay:0.3s]" />
+                      <div className="p-2.5 rounded-xl flex items-center gap-1 bg-brand-purple/10 border border-brand-purple/25">
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-brand-purple" />
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-brand-purple [animation-delay:0.15s]" />
+                        <span className="w-1.5 h-1.5 rounded-full animate-bounce bg-brand-purple [animation-delay:0.3s]" />
                       </div>
                     )}
                     <div ref={debugBottomRef} />
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-2.5 border-t border-purple-500/20 bg-[hsl(229,48%,10%)]">
-                    <input value={debugInput} onChange={(e) => setDebugInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendDebugMessage()} placeholder="Ask about your code..." className="flex-1 bg-transparent text-xs focus:outline-none text-white" />
-                    <button onClick={sendDebugMessage} disabled={!debugInput.trim()} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110 disabled:opacity-40 bg-gradient-to-br from-[#8B5CF6] to-[#EC4899]" title="Send message" aria-label="Send message">
+                  <div className="flex items-center gap-2 px-3 py-2.5 border-t border-brand-purple/20 bg-background">
+                    <input value={debugInput} onChange={(e) => setDebugInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendDebugMessage()} placeholder="Ask about your code..." className="flex-1 bg-transparent text-xs focus:outline-none text-foreground" />
+                    <button onClick={sendDebugMessage} disabled={!debugInput.trim()} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110 disabled:opacity-40 bg-brand-purple" title="Send message" aria-label="Send message">
                       <Sparkles size={10} color="#fff" />
                     </button>
                   </div>
@@ -2197,14 +2197,14 @@ void loop() {
         {activeTab === "simulate" && (
           <div
             className={`rounded-2xl border overflow-hidden transition-all duration-300 ${simExpanded ? "fixed inset-4 z-50" : ""}`}
-            style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
+            style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
           >
-            <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
-              <span className="text-sm font-semibold" style={{ color: "#3B82F6" }}>Wokwi Simulator</span>
+            <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: "hsl(var(--border))" }}>
+              <span className="text-sm font-semibold" style={{ color: "hsl(var(--primary))" }}>Wokwi Simulator</span>
               <button
                 onClick={() => setSimExpanded(!simExpanded)}
                 className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105"
-                style={{ color: "#A0AED9", border: "1px solid hsl(229, 42%, 30%)" }}
+                style={{ color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}
               >
                 {simExpanded ? "Minimize" : "Expand"}
               </button>
@@ -2227,7 +2227,7 @@ void loop() {
       {copyToast && (
         <div
           className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in z-50"
-          style={{ background: "linear-gradient(135deg, #3B82F6, #2563EB)", color: "#0A0E27", boxShadow: "0 0 20px rgba(59,130,246,0.4)" }}
+          style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 20px hsl(var(--primary) / 0.4)" }}
         >
           <Copy size={16} /> Code copied to clipboard!
         </div>
@@ -2235,7 +2235,7 @@ void loop() {
       {shareToast && (
         <div
           className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in z-50"
-          style={{ background: "linear-gradient(135deg, #8B5CF6, #EC4899)", color: "#FFFFFF", boxShadow: "0 0 20px rgba(139,92,246,0.4)" }}
+          style={{ background: "hsl(var(--purple))", color: "white", boxShadow: "0 0 20px hsl(var(--purple) / 0.4)" }}
         >
           <Share2 size={16} /> Link copied to clipboard!
         </div>

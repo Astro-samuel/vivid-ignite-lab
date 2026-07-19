@@ -112,15 +112,15 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "hsl(var(--background))" }}>
+    <div className="min-h-screen flex items-center justify-center px-4 bg-background">
       <FadeInView className="w-full max-w-md">
-        <div className="bg-white border-2 border-b-4 border-slate-100 rounded-3xl p-8 shadow-sm">
+        <div className="bg-card border-2 border-b-4 border-border rounded-3xl p-8 shadow-sm">
           {/* Logo */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-extrabold font-display text-indigo-950 flex items-center justify-center gap-1.5">
-              <span>⚡</span> Ignite<span className="text-indigo-600 font-extrabold font-display">Lab</span>
+            <h1 className="text-3xl font-extrabold font-display text-foreground flex items-center justify-center gap-1.5">
+              <span>⚡</span> Ignite<span className="text-primary font-extrabold font-display">Lab</span>
             </h1>
-            <p className="text-sm font-bold text-slate-400 mt-2">
+            <p className="text-sm font-bold text-muted-foreground mt-2">
               {mode === "login" ? "Welcome back, maker!" : "Join the maker community"}
             </p>
           </div>
@@ -129,10 +129,10 @@ export default function AuthPage() {
           <button
             onClick={handleGoogleSignIn}
             disabled={googleLoading}
-            className="w-full py-3 bg-white hover:bg-slate-50 border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold flex items-center justify-center gap-3 transition-all text-slate-600 mb-6"
+            className="w-full py-3 bg-card hover:bg-[hsl(var(--background-hover))] border-2 border-b-4 border-border active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold flex items-center justify-center gap-3 transition-all text-foreground mb-6"
           >
             {googleLoading ? (
-              <Loader2 size={16} className="animate-spin text-slate-500" />
+              <Loader2 size={16} className="animate-spin text-muted-foreground" />
             ) : (
               <>
                 <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
@@ -147,13 +147,13 @@ export default function AuthPage() {
           </button>
 
           <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1 h-0.5 bg-slate-100" />
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">or</span>
-            <div className="flex-1 h-0.5 bg-slate-100" />
+            <div className="flex-1 h-0.5 bg-border" />
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">or</span>
+            <div className="flex-1 h-0.5 bg-border" />
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div className="flex bg-slate-100 p-1 rounded-2xl mb-6">
+          <div className="flex bg-[hsl(var(--background-hover))] p-1 rounded-2xl mb-6">
             {(["login", "signup"] as const).map((m) => {
               const active = mode === m;
               return (
@@ -166,8 +166,8 @@ export default function AuthPage() {
                   }}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all border-2 border-b-4 ${
                     active
-                      ? "bg-white border-slate-200 text-indigo-600 shadow-sm"
-                      : "bg-transparent border-transparent text-slate-500 hover:text-slate-600"
+                      ? "bg-card border-border text-primary shadow-sm"
+                      : "bg-transparent border-transparent text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {m === "login" ? "Log In" : "Sign Up"}
@@ -179,7 +179,7 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
               <div className="relative">
-                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Username"
@@ -188,23 +188,23 @@ export default function AuthPage() {
                   maxLength={30}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 hover:bg-slate-100/50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 placeholder:font-bold"
+                  className="w-full pl-11 pr-4 py-3 bg-background hover:bg-[hsl(var(--background-hover))]/50 border-2 border-input rounded-xl text-sm font-semibold focus:outline-none focus:border-primary focus:bg-card text-foreground transition-all placeholder:text-muted-foreground placeholder:font-bold"
                 />
               </div>
             )}
             <div className="relative">
-              <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="email"
                 placeholder="Email address"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 hover:bg-slate-100/50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 placeholder:font-bold"
+                className="w-full pl-11 pr-4 py-3 bg-background hover:bg-[hsl(var(--background-hover))]/50 border-2 border-input rounded-xl text-sm font-semibold focus:outline-none focus:border-primary focus:bg-card text-foreground transition-all placeholder:text-muted-foreground placeholder:font-bold"
               />
             </div>
             <div className="relative">
-              <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="password"
                 placeholder="Password"
@@ -212,25 +212,25 @@ export default function AuthPage() {
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 hover:bg-slate-100/50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 placeholder:font-bold"
+                className="w-full pl-11 pr-4 py-3 bg-background hover:bg-[hsl(var(--background-hover))]/50 border-2 border-input rounded-xl text-sm font-semibold focus:outline-none focus:border-primary focus:bg-card text-foreground transition-all placeholder:text-muted-foreground placeholder:font-bold"
               />
             </div>
 
             {mode === "login" && (
               <div className="text-right">
-                <Link to="/forgot-password" className="text-xs font-bold text-indigo-500 hover:text-indigo-600 hover:underline">
+                <Link to="/forgot-password" className="text-xs font-bold text-primary hover:text-primary/80 hover:underline">
                   Forgot password?
                 </Link>
               </div>
             )}
 
             {error && (
-              <p className="text-xs font-bold px-4 py-3 bg-rose-50 border border-rose-100 text-rose-600 rounded-xl">
+              <p className="text-xs font-bold px-4 py-3 bg-destructive/10 border border-destructive/30 text-destructive rounded-xl">
                 {error}
               </p>
             )}
             {confirmMsg && (
-              <p className="text-xs font-bold px-4 py-3 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-xl">
+              <p className="text-xs font-bold px-4 py-3 bg-success/10 border border-success/30 text-success rounded-xl">
                 {confirmMsg}
               </p>
             )}
@@ -238,10 +238,10 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full py-3 bg-primary hover:bg-primary/90 border-2 border-b-4 border-[hsl(var(--primary-dark))] active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-primary-foreground flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-50 disabled:pointer-events-none"
             >
               {loading ? (
-                <Loader2 size={16} className="animate-spin text-white" />
+                <Loader2 size={16} className="animate-spin text-primary-foreground" />
               ) : (
                 <>
                   {mode === "login" ? "Log In" : "Create Account"}

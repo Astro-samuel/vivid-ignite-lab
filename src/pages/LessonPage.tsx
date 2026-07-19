@@ -15,6 +15,8 @@ import CodeEditor from "@/components/CodeEditor";
 import { toast as sonnerToast } from "sonner";
 import { useArduinoFlasher } from "@/hooks/useArduinoFlasher";
 import { levelForXp } from "@/lib/xp";
+import Confetti from "@/components/Confetti";
+import { useLevelUp } from "@/contexts/LevelUpContext";
 
 const PathBadge = ({ path }: { path: any }) => {
   const ref = useRef<HTMLSpanElement>(null);
@@ -143,53 +145,11 @@ const getValidationRules = (title: string) => {
   ];
 };
 
-const Confetti = () => {
-  const colors = ["#6366F1", "#10B981", "#F59E0B", "#EF4444", "#EC4899", "#8B5CF6"];
-  const particles = Array.from({ length: 80 }).map((_, i) => ({
-    id: i,
-    x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1000),
-    y: -20,
-    size: Math.random() * 8 + 6,
-    color: colors[Math.floor(Math.random() * colors.length)],
-    delay: Math.random() * 3,
-    duration: Math.random() * 2 + 2,
-    angle: Math.random() * 360,
-  }));
-
-  return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-[9999]">
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          initial={{ x: p.x, y: p.y, opacity: 1, rotate: 0 }}
-          animate={{
-            y: (typeof window !== "undefined" ? window.innerHeight : 800) + 20,
-            x: p.x + (Math.random() * 200 - 100),
-            rotate: p.angle + 720,
-            opacity: 0
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            ease: "easeOut"
-          }}
-          style={{
-            position: "absolute",
-            width: p.size,
-            height: p.size,
-            backgroundColor: p.color,
-            borderRadius: Math.random() > 0.5 ? "50%" : "3px",
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
 export default function LessonPage() {
   const { lessonId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { announceLevelUp } = useLevelUp();
   const [lesson, setLesson] = useState<any>(null);
   const [path, setPath] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -382,16 +342,18 @@ export default function LessonPage() {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("total_xp")
+      .select("total_xp, level")
       .eq("id", user.id)
       .single();
 
     if (profile) {
       const newXp = (profile.total_xp || 0) + lesson.xp_reward;
+      const newLevel = levelForXp(newXp);
       await supabase.from("profiles").update({
         total_xp: newXp,
-        level: levelForXp(newXp),
+        level: newLevel,
       }).eq("id", user.id);
+      if (newLevel > (profile.level || 1)) announceLevelUp(newLevel);
     }
 
     setCompleted(true);
@@ -504,7 +466,7 @@ export default function LessonPage() {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
         </div>
       </Layout>
     );
@@ -514,10 +476,10 @@ export default function LessonPage() {
     return (
       <Layout>
         <div className="px-6 py-12 text-center max-w-md mx-auto">
-          <p className="text-sm font-semibold text-slate-400 mb-4">Lesson not found</p>
+          <p className="text-sm font-semibold text-muted-foreground mb-4">Lesson not found</p>
           <button
             onClick={() => navigate("/learn")}
-            className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white transition-all"
+            className="px-6 py-3 bg-primary hover:bg-primary/90 border-2 border-b-4 border-primary/60 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-primary-foreground transition-all"
           >
             ← Back to Learn
           </button>
@@ -549,7 +511,7 @@ export default function LessonPage() {
           <FadeInView className="mb-6">
             <button
               onClick={() => navigate("/learn")}
-              className="flex items-center gap-2 text-sm font-bold mb-4 transition-all text-indigo-500 hover:text-indigo-600"
+              className="flex items-center gap-2 text-sm font-bold mb-4 transition-all text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft size={14} /> Back to Learn
             </button>
@@ -558,14 +520,14 @@ export default function LessonPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   {path && <PathBadge path={path} />}
-                  <span className="text-xs font-bold text-slate-400">Lesson {lesson.lesson_order}</span>
+                  <span className="text-xs font-bold text-muted-foreground">Lesson {lesson.lesson_order}</span>
                 </div>
-                <h1 className="text-2xl font-extrabold font-display text-indigo-100">{lesson.title}</h1>
-                <p className="text-sm font-medium text-slate-400">{lesson.description}</p>
+                <h1 className="text-2xl font-extrabold font-display text-foreground">{lesson.title}</h1>
+                <p className="text-sm font-medium text-muted-foreground">{lesson.description}</p>
               </div>
-              <div className="flex items-center gap-2 bg-indigo-950/40 border-2 border-indigo-900/60 px-4 py-2 rounded-2xl self-start md:self-auto shadow-sm">
-                <Zap size={14} className="text-indigo-400 fill-indigo-400" />
-                <span className="text-sm font-extrabold font-display text-indigo-400">+{lesson.xp_reward} XP</span>
+              <div className="flex items-center gap-2 bg-primary/10 border-2 border-primary/30 px-4 py-2 rounded-2xl self-start md:self-auto shadow-sm">
+                <Zap size={14} className="text-primary fill-primary" />
+                <span className="text-sm font-extrabold font-display text-primary">+{lesson.xp_reward} XP</span>
               </div>
             </div>
           </FadeInView>
@@ -580,8 +542,8 @@ export default function LessonPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-extrabold transition-all border-2 border-b-4 ${
                     isActive
-                      ? "bg-card border-border text-indigo-400 shadow-sm"
-                      : "bg-transparent border-transparent text-slate-400 hover:bg-muted/30"
+                      ? "bg-card border-border text-primary shadow-sm"
+                      : "bg-transparent border-transparent text-muted-foreground hover:bg-muted/30"
                   }`}
                 >
                   {tab.label}
@@ -603,18 +565,18 @@ export default function LessonPage() {
 
 
                 {/* Core Concept Prose */}
-                <div className="prose max-w-none text-indigo-200 font-medium leading-relaxed mb-6">
+                <div className="prose max-w-none text-foreground font-medium leading-relaxed mb-6">
                   {lesson.concept_content.replace(/\\n/g, "\n").split("\n").map((line: string, i: number) => {
                     if (line.startsWith("# ")) {
                       return (
-                        <h2 key={i} className="text-xl font-extrabold font-display text-indigo-200 mb-3 mt-2">
+                        <h2 key={i} className="text-xl font-extrabold font-display text-foreground mb-3 mt-2">
                           {line.slice(2)}
                         </h2>
                       );
                     }
                     if (line.startsWith("## ")) {
                       return (
-                        <h3 key={i} className="text-lg font-extrabold font-display text-indigo-400 mb-2 mt-4">
+                        <h3 key={i} className="text-lg font-extrabold font-display text-foreground mb-2 mt-4">
                           {line.slice(3)}
                         </h3>
                       );
@@ -625,10 +587,10 @@ export default function LessonPage() {
                       if (match) {
                         return (
                           <div key={i} className="flex items-start gap-2 mb-2 pl-2">
-                            <span className="text-indigo-400 font-extrabold mt-0.5">•</span>
+                            <span className="text-muted-foreground font-extrabold mt-0.5">•</span>
                             <p className="text-sm">
-                              <span className="font-extrabold text-indigo-200">{match[1]}</span>{" "}
-                              <span className="text-slate-400">— {match[2]}</span>
+                              <span className="font-extrabold text-foreground">{match[1]}</span>{" "}
+                              <span className="text-muted-foreground">— {match[2]}</span>
                             </p>
                           </div>
                         );
@@ -637,8 +599,8 @@ export default function LessonPage() {
                     if (line.startsWith("- ")) {
                       return (
                         <div key={i} className="flex items-start gap-2 mb-1 pl-2">
-                          <span className="text-indigo-400 font-extrabold mt-0.5">•</span>
-                          <p className="text-sm text-slate-400">{line.slice(2)}</p>
+                          <span className="text-muted-foreground font-extrabold mt-0.5">•</span>
+                          <p className="text-sm text-muted-foreground">{line.slice(2)}</p>
                         </div>
                       );
                     }
@@ -646,12 +608,12 @@ export default function LessonPage() {
 
                     const rendered = line.replace(
                       /`([^`]+)`/g,
-                      '<code class="px-1.5 py-0.5 rounded text-xs font-mono bg-indigo-950/40 text-indigo-300 border border-indigo-900/60 font-bold">$1</code>'
+                      '<code class="px-1.5 py-0.5 rounded text-xs font-mono bg-muted text-foreground border border-border font-bold">$1</code>'
                     );
                     return (
                       <p
                         key={i}
-                        className="text-sm mb-2 text-slate-400 font-medium"
+                        className="text-sm mb-2 text-muted-foreground font-medium"
                         dangerouslySetInnerHTML={{ __html: rendered }}
                       />
                     );
@@ -660,27 +622,27 @@ export default function LessonPage() {
 
                 {/* Concept diagram comparisons */}
                 <div className="mb-6 border-2 border-border rounded-2xl p-5 bg-muted/20">
-                  <h4 className="font-black text-sm text-indigo-200 font-display mb-3">Signal Comparison Breakdown</h4>
+                  <h4 className="font-black text-sm text-foreground font-display mb-3">Signal Comparison Breakdown</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-3 bg-slate-950 border-2 border-border rounded-xl">
-                      <h5 className="font-extrabold text-xs text-indigo-400 mb-1">Digital Pins</h5>
-                      <p className="text-[11px] text-slate-400 leading-tight">States: HIGH (5V) or LOW (0V). Ideal for simple switches, button inputs, and standard LEDs.</p>
+                    <div className="p-3 bg-background border-2 border-border rounded-xl">
+                      <h5 className="font-extrabold text-xs text-foreground mb-1">Digital Pins</h5>
+                      <p className="text-[11px] text-muted-foreground leading-tight">States: HIGH (5V) or LOW (0V). Ideal for simple switches, button inputs, and standard LEDs.</p>
                     </div>
-                    <div className="p-3 bg-slate-950 border-2 border-border rounded-xl">
-                      <h5 className="font-extrabold text-xs text-indigo-400 mb-1">Analog Input</h5>
-                      <p className="text-[11px] text-slate-400 leading-tight">States: Reads range of voltages (0V to 5V) returning 0 to 1023. Perfect for potentiometers and environmental sensors.</p>
+                    <div className="p-3 bg-background border-2 border-border rounded-xl">
+                      <h5 className="font-extrabold text-xs text-foreground mb-1">Analog Input</h5>
+                      <p className="text-[11px] text-muted-foreground leading-tight">States: Reads range of voltages (0V to 5V) returning 0 to 1023. Perfect for potentiometers and environmental sensors.</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Line-by-line syntax explanation */}
                 <div className="mb-6 border-2 border-border rounded-2xl p-5 bg-muted/20">
-                  <h4 className="font-black text-sm text-indigo-200 font-display mb-3">How the Code Works:</h4>
+                  <h4 className="font-black text-sm text-foreground font-display mb-3">How the Code Works:</h4>
                   <div className="space-y-2">
                     {getLineExplanations(lesson.title).map((item, idx) => (
-                      <div key={idx} className="flex flex-col sm:flex-row justify-between gap-1 p-2.5 bg-slate-950 border-2 border-border rounded-xl font-semibold">
-                        <code className="text-xs font-mono text-indigo-400">{item.line}</code>
-                        <span className="text-[11px] text-slate-400 sm:text-right">{item.desc}</span>
+                      <div key={idx} className="flex flex-col sm:flex-row justify-between gap-1 p-2.5 bg-background border-2 border-border rounded-xl font-semibold">
+                        <code className="text-xs font-mono text-foreground">{item.line}</code>
+                        <span className="text-[11px] text-muted-foreground sm:text-right">{item.desc}</span>
                       </div>
                     ))}
                   </div>
@@ -689,7 +651,7 @@ export default function LessonPage() {
                 <div className="mt-6 flex justify-end">
                   <button
                     onClick={() => setActiveTab("challenge")}
-                    className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center gap-2 transition-all shadow-sm"
+                    className="px-6 py-3 bg-primary hover:bg-primary/90 border-2 border-b-4 border-primary/60 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-primary-foreground flex items-center gap-2 transition-all shadow-sm"
                   >
                     Start Challenge <ChevronRight size={14} />
                   </button>
@@ -705,19 +667,19 @@ export default function LessonPage() {
                 exit={{ opacity: 0, y: -10 }}
               >
                 {/* Challenge Prompt */}
-                <div className="rounded-2xl border-2 border-b-4 border-indigo-900/50 p-5 mb-6 bg-indigo-950/20">
-                  <div className="flex items-center gap-2 mb-2 text-indigo-400">
-                    <Lightbulb size={16} className="fill-indigo-900/60" />
+                <div className="rounded-2xl border-2 border-b-4 border-primary/30 p-5 mb-6 bg-primary/5">
+                  <div className="flex items-center gap-2 mb-2 text-primary">
+                    <Lightbulb size={16} className="fill-primary/20" />
                     <span className="text-sm font-extrabold uppercase tracking-wider">Challenge Task</span>
                   </div>
-                  <p className="text-sm font-semibold text-indigo-200 leading-relaxed">
+                  <p className="text-sm font-semibold text-foreground leading-relaxed">
                     {lesson.challenge_prompt}
                   </p>
                 </div>
 
                 {/* Code Requirements Checklist */}
-                <div className="rounded-2xl border-2 border-border p-5 mb-6 bg-slate-950/40">
-                  <h4 className="font-extrabold text-xs text-indigo-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <div className="rounded-2xl border-2 border-border p-5 mb-6 bg-background/40">
+                  <h4 className="font-extrabold text-xs text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
                     <CheckCircle size={14} /> Challenge Requirements
                   </h4>
                   <div className="space-y-2">
@@ -726,13 +688,13 @@ export default function LessonPage() {
                         <div
                           className={`w-4 h-4 rounded-full flex items-center justify-center border text-[9px] font-black ${
                             check.passed
-                              ? "bg-emerald-950/40 border-emerald-500/50 text-emerald-400"
-                              : "bg-slate-900 border-border text-slate-500"
+                              ? "bg-success/10 border-success/50 text-success"
+                              : "bg-card border-border text-muted-foreground"
                           }`}
                         >
                           {check.passed ? "✓" : "○"}
                         </div>
-                        <span className={check.passed ? "text-emerald-400 line-through decoration-emerald-500/30" : "text-slate-300"}>
+                        <span className={check.passed ? "text-success line-through decoration-success/30" : "text-foreground"}>
                           {check.label}
                         </span>
                       </div>
@@ -742,7 +704,7 @@ export default function LessonPage() {
 
                 {/* Run workflow indicator */}
                 {runStep !== "idle" && (
-                  <div className="rounded-xl px-5 py-3 flex items-center gap-6 border mb-4 bg-[hsl(232,42%,11%)] border-[hsl(232,40%,16%)]">
+                  <div className="rounded-xl px-5 py-3 flex items-center gap-6 border mb-4 bg-card border-border">
                     {(["compiling", "simulating"] as const).map((step, i) => {
                       const labels = ["Compiling", "Simulating"];
                       const stepOrder = ["compiling", "simulating"];
@@ -753,15 +715,15 @@ export default function LessonPage() {
                       return (
                         <div key={step} className="flex items-center gap-2">
                           {isDone ? (
-                            <CheckCircle size={16} className="text-[#10B981]" />
+                            <CheckCircle size={16} className="text-success" />
                           ) : isActive ? (
-                            <Loader2 size={16} className="animate-spin text-[#3B82F6]" />
+                            <Loader2 size={16} className="animate-spin text-primary" />
                           ) : (
-                            <div className="w-4 h-4 rounded-full bg-[hsl(228,25%,30%)]" />
+                            <div className="w-4 h-4 rounded-full bg-muted" />
                           )}
                           <span
                             className={`text-sm font-medium ${
-                              isDone ? "text-[#10B981]" : isActive ? "text-[#3B82F6]" : "text-[hsl(228,25%,50%)]"
+                              isDone ? "text-success" : isActive ? "text-primary" : "text-muted-foreground"
                             }`}
                           >
                             {labels[i]}
@@ -770,19 +732,19 @@ export default function LessonPage() {
                       );
                     })}
                     {runStep === "success" && (
-                      <span className="font-bold text-sm animate-fade-in-up flex items-center gap-2 text-[#10B981]">
+                      <span className="font-bold text-sm animate-fade-in-up flex items-center gap-2 text-success">
                         <CheckCircle size={16} /> ✓ Compilation Successful!
                       </span>
                     )}
                     {runStep === "error" && (
                       <div className="flex items-center gap-2">
-                        <XCircle size={16} className="text-[#FF4500]" />
-                        <span className="font-bold text-sm text-[#FF4500]">{errors.length} Error{errors.length !== 1 ? "s" : ""}</span>
+                        <XCircle size={16} className="text-destructive" />
+                        <span className="font-bold text-sm text-destructive">{errors.length} Error{errors.length !== 1 ? "s" : ""}</span>
                         <button
                           onClick={() => {
                             handleSendQuestion(`I encountered ${errors.length} error(s) during compilation: \n\n${errors.join("\n")}\n\nHere is my code:\n\n\`\`\`cpp\n${code}\n\`\`\`\n\nPlease help me debug this!`);
                           }}
-                          className="ml-2 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 bg-purple-950/50 text-purple-400 border border-purple-800/40"
+                          className="ml-2 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 bg-card text-foreground border border-border"
                         >
                           <Bot size={12} /> Debug with AI
                         </button>
@@ -792,17 +754,17 @@ export default function LessonPage() {
                 )}
 
                 {/* Code Editor */}
-                <div className="rounded-2xl border-2 border-b-4 border-border overflow-hidden bg-slate-900 shadow-md mb-6">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-slate-950">
+                <div className="rounded-2xl border-2 border-b-4 border-border overflow-hidden bg-card shadow-md mb-6">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-extrabold text-indigo-400">sketch.ino</span>
-                      <span className="text-slate-700">|</span>
+                      <span className="text-xs font-mono font-extrabold text-muted-foreground">sketch.ino</span>
+                      <span className="text-border">|</span>
                       <button
                         onClick={serialConnected ? disconnectSerial : connectSerial}
                         className={`text-[9px] font-bold px-1.5 py-0.5 rounded border transition-all cursor-pointer ${
                           serialConnected
-                            ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/30"
-                            : "bg-transparent text-[hsl(228,25%,60%)] border-[hsl(232,40%,20%)]"
+                            ? "bg-success/15 text-success border-success/30"
+                            : "bg-transparent text-muted-foreground border-border"
                         }`}
                       >
                         {serialConnected ? "🔌 Connected" : "🔌 Connect Board"}
@@ -811,19 +773,19 @@ export default function LessonPage() {
                         <button
                           onClick={uploadToBoard}
                           disabled={uploading}
-                          className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-cyan-500/30 text-cyan-400 hover:bg-cyan-950/20 transition-all cursor-pointer"
+                          className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-border text-foreground hover:bg-muted transition-all cursor-pointer"
                         >
                           {uploading ? "Uploading..." : "📤 Upload"}
                         </button>
                       )}
                       <button
                         onClick={() => setShowSerialConsole(!showSerialConsole)}
-                        className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-indigo-500/30 text-indigo-400 hover:bg-indigo-950/20 transition-all cursor-pointer"
+                        className="text-[9px] font-bold px-1.5 py-0.5 rounded border border-border text-foreground hover:bg-muted transition-all cursor-pointer"
                       >
                         📟 Serial
                       </button>
                       {showSolution && (
-                        <span className="text-[10px] bg-emerald-950/40 text-emerald-400 border border-emerald-900/60 px-2 py-0.5 rounded-full font-bold">
+                        <span className="text-[10px] bg-card text-foreground border border-border px-2 py-0.5 rounded-full font-bold">
                           Viewing Solution
                         </span>
                       )}
@@ -833,13 +795,13 @@ export default function LessonPage() {
                         <>
                           <button
                             onClick={() => saveSnapshot()}
-                            className="flex items-center gap-1 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-bold text-slate-300 transition-all cursor-pointer"
+                            className="flex items-center gap-1 px-3 py-1 bg-card hover:bg-muted border border-border rounded-lg text-xs font-bold text-foreground transition-all cursor-pointer"
                           >
                             <Save size={10} /> Snapshot
                           </button>
                           <button
                             onClick={() => setShowVersionPanel(!showVersionPanel)}
-                            className="flex items-center gap-1 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-bold text-slate-300 transition-all cursor-pointer"
+                            className="flex items-center gap-1 px-3 py-1 bg-card hover:bg-muted border border-border rounded-lg text-xs font-bold text-foreground transition-all cursor-pointer"
                           >
                             <History size={10} /> History ({codeVersions.length})
                           </button>
@@ -854,13 +816,13 @@ export default function LessonPage() {
                           }
                         }}
                         disabled={showSolution}
-                        className="flex items-center gap-1 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-bold text-slate-300 transition-all cursor-pointer disabled:opacity-40"
+                        className="flex items-center gap-1 px-3 py-1 bg-card hover:bg-muted border border-border rounded-lg text-xs font-bold text-foreground transition-all cursor-pointer disabled:opacity-40"
                       >
                         <RotateCcw size={10} /> Reset
                       </button>
                       <button
                         onClick={() => setShowSolution(!showSolution)}
-                        className="flex items-center gap-1 px-3 py-1 bg-indigo-950 hover:bg-indigo-900 border border-indigo-800 rounded-lg text-xs font-bold text-indigo-300 transition-all cursor-pointer"
+                        className="flex items-center gap-1 px-3 py-1 bg-card hover:bg-muted border border-border rounded-lg text-xs font-bold text-foreground transition-all cursor-pointer"
                       >
                         {showSolution ? "Hide" : "Reveal"} Solution
                       </button>
@@ -870,22 +832,22 @@ export default function LessonPage() {
 
                   {/* Version History Panel */}
                   {showVersionPanel && !showSolution && (
-                    <div className="border-b px-5 py-3 space-y-2 animate-fade-in bg-amber-950/20 border-amber-900/40">
+                    <div className="border-b px-5 py-3 space-y-2 animate-fade-in bg-muted/30 border-border">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold flex items-center gap-1.5 text-amber-400">
+                        <span className="text-xs font-bold flex items-center gap-1.5 text-foreground">
                           <History size={12} /> Version History
                         </span>
-                        <button onClick={() => setShowVersionPanel(false)} className="text-xs text-slate-400">✕</button>
+                        <button onClick={() => setShowVersionPanel(false)} className="text-xs text-muted-foreground">✕</button>
                       </div>
                       {codeVersions.length === 0 ? (
-                        <p className="text-xs text-slate-400">No snapshots yet. Click "Snapshot" to save current code.</p>
+                        <p className="text-xs text-muted-foreground">No snapshots yet. Click "Snapshot" to save current code.</p>
                       ) : (
                         <div className="max-h-40 overflow-y-auto space-y-1.5">
                           {codeVersions.map((v, i) => (
-                            <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-950 border border-border">
+                            <div key={i} className="flex items-center justify-between px-3 py-2 rounded-lg bg-background border border-border">
                               <div>
-                                <p className="text-xs font-semibold text-indigo-200">{v.label}</p>
-                                <p className="text-[10px] text-slate-400">{new Date(v.timestamp).toLocaleString()}</p>
+                                <p className="text-xs font-semibold text-foreground">{v.label}</p>
+                                <p className="text-[10px] text-muted-foreground">{new Date(v.timestamp).toLocaleString()}</p>
                               </div>
                               <div className="flex gap-1.5">
                                 <button
@@ -894,7 +856,7 @@ export default function LessonPage() {
                                     setRevertCount(prev => prev + 1);
                                     sonnerToast.success(`↩️ Reverted to "${v.label}"`);
                                   }}
-                                  className="px-2 py-1 rounded text-xs font-bold transition-all hover:scale-105 text-cyan-400 border border-cyan-900/60"
+                                  className="px-2 py-1 rounded text-xs font-bold transition-all hover:scale-105 text-foreground border border-border"
                                 >
                                   Revert
                                 </button>
@@ -906,7 +868,7 @@ export default function LessonPage() {
                                   }}
                                   title="Delete version"
                                   aria-label="Delete version"
-                                  className="px-2 py-1 rounded text-xs transition-all hover:scale-105 text-rose-500"
+                                  className="px-2 py-1 rounded text-xs transition-all hover:scale-105 text-destructive"
                                 >
                                   <Trash2 size={10} />
                                 </button>
@@ -925,17 +887,17 @@ export default function LessonPage() {
                     <div className="relative flex flex-col overflow-hidden">
                       <CodeEditor key={`user-v${revertCount}`} code={code} onChange={(newCode) => { setCode(newCode); setCodeUploaded(false); }} maxHeight="500px" minHeight="400px" />
                       {showSerialConsole && (
-                        <div className="h-36 border-t flex flex-col overflow-hidden bg-slate-950 border-border">
-                          <div className="flex items-center justify-between px-4 py-1.5 border-b text-[10px] font-mono border-border text-[hsl(228,25%,60%)]">
-                            <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
+                        <div className="h-36 border-t flex flex-col overflow-hidden bg-background border-border">
+                          <div className="flex items-center justify-between px-4 py-1.5 border-b text-[10px] font-mono border-border text-muted-foreground">
+                            <span className="text-muted-foreground font-bold">📟 Serial Monitor (9600 baud)</span>
                             <div className="flex gap-2">
                               <button onClick={clearLogs} className="hover:text-white transition-all">Clear Logs</button>
                               <button onClick={() => setShowSerialConsole(false)} className="hover:text-white transition-all">✕</button>
                             </div>
                           </div>
-                          <div className="flex-1 p-3 overflow-y-auto font-mono text-[9px] space-y-1 text-emerald-400">
+                          <div className="flex-1 p-3 overflow-y-auto font-mono text-[9px] space-y-1 text-foreground">
                             {serialLogs.length === 0 ? (
-                              <span className="text-slate-500 italic">No output. Verify connection and upload code.</span>
+                              <span className="text-muted-foreground italic">No output. Verify connection and upload code.</span>
                             ) : (
                               serialLogs.map((log, idx) => (
                                 <div key={idx} className="whitespace-pre-wrap">{log}</div>
@@ -949,13 +911,13 @@ export default function LessonPage() {
 
                   {/* Error Panel */}
                   {errors.length > 0 && (
-                    <div className="border-t p-4 animate-fade-in bg-rose-950/20 border-rose-900/40">
-                      <div className="flex items-center gap-2 mb-2 text-rose-400">
+                    <div className="border-t p-4 animate-fade-in bg-destructive/10 border-destructive/30">
+                      <div className="flex items-center gap-2 mb-2 text-destructive">
                         <AlertTriangle size={14} />
                         <span className="font-bold text-sm">Compilation Errors</span>
                       </div>
                       {errors.map((err, i) => (
-                        <div key={i} className="flex items-start gap-2 text-xs font-mono p-2 rounded-lg mb-1 bg-rose-950/40 text-rose-300">
+                        <div key={i} className="flex items-start gap-2 text-xs font-mono p-2 rounded-lg mb-1 bg-destructive/15 text-destructive">
                           <XCircle size={12} className="flex-shrink-0 mt-0.5" /> {err}
                         </div>
                       ))}
@@ -969,7 +931,7 @@ export default function LessonPage() {
                     onClick={handleCopy}
                     className="clay-btn clay-btn-ghost clay-btn-sm"
                   >
-                    {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                    {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
                     {copied ? "Copied!" : "Copy to My Editor"}
                   </button>
                   <button
@@ -982,13 +944,13 @@ export default function LessonPage() {
                     onClick={handleSaveAsTemplate}
                     className="clay-btn clay-btn-ghost clay-btn-sm"
                   >
-                    {savedAsTemplate ? <Check size={14} className="text-emerald-500" /> : <Save size={14} />}
+                    {savedAsTemplate ? <Check size={14} className="text-success" /> : <Save size={14} />}
                     {savedAsTemplate ? "Saved!" : "Save as Template"}
                   </button>
                   <button
                     onClick={runAndCheck}
                     disabled={runStep === "compiling" || runStep === "simulating"}
-                    className="px-5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all hover:scale-105 disabled:opacity-60 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-display shadow-lg shadow-emerald-500/20"
+                    className="px-5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all hover:scale-105 disabled:opacity-60 bg-primary text-primary-foreground font-display shadow-lg shadow-primary/20"
                   >
                     {runStep === "compiling" || runStep === "simulating" ? (
                       <><Loader2 size={14} className="animate-spin" /> Running...</>
@@ -1001,13 +963,13 @@ export default function LessonPage() {
                 <div className="flex justify-between mt-6">
                   <button
                     onClick={() => setActiveTab("concept")}
-                    className="px-5 py-3 rounded-xl text-sm font-extrabold flex items-center gap-2 transition-all border-2 border-b-4 border-border bg-card hover:bg-muted/10 text-slate-300 active:border-b-2 active:translate-y-[2px]"
+                    className="px-5 py-3 rounded-xl text-sm font-extrabold flex items-center gap-2 transition-all border-2 border-b-4 border-border bg-card hover:bg-muted/10 text-foreground active:border-b-2 active:translate-y-[2px]"
                   >
                     <ArrowLeft size={14} /> Back to Concept
                   </button>
                   <button
                     onClick={() => setActiveTab("simulate")}
-                    className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center gap-2 transition-all shadow-sm"
+                    className="px-6 py-3 bg-primary hover:bg-primary/90 border-2 border-b-4 border-primary/60 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-primary-foreground flex items-center gap-2 transition-all shadow-sm"
                   >
                     Go to Simulation <Zap size={14} />
                   </button>
@@ -1024,18 +986,18 @@ export default function LessonPage() {
                 className="space-y-4"
               >
                 <div
-                  className={`rounded-2xl border overflow-hidden transition-all duration-300 bg-[hsl(229,45%,14%)] border-[hsl(229,42%,26%)] ${simExpanded ? "fixed inset-4 z-50" : "relative"}`}
+                  className={`rounded-2xl border overflow-hidden transition-all duration-300 bg-card border-border ${simExpanded ? "fixed inset-4 z-50" : "relative"}`}
                 >
-                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-[hsl(229,42%,22%)]">
-                    <span className="text-sm font-semibold text-cyan-400">Wokwi Simulator</span>
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
+                    <span className="text-sm font-semibold text-foreground">Wokwi Simulator</span>
                     <button
                       onClick={() => setSimExpanded(!simExpanded)}
-                      className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105 text-[#A0AED9] border border-[hsl(229,42%,30%)]"
+                      className="px-3 py-1 rounded-lg text-xs font-bold transition-all hover:scale-105 text-muted-foreground border border-border"
                     >
                       {simExpanded ? "Minimize" : "Expand"}
                     </button>
                   </div>
-                  <div className={simExpanded ? "relative bg-slate-950 w-full h-[calc(100%-44px)]" : "relative bg-slate-950 w-full h-[450px]"}>
+                  <div className={simExpanded ? "relative bg-background w-full h-[calc(100%-44px)]" : "relative bg-background w-full h-[450px]"}>
                     <iframe
                       src="https://wokwi.com/projects/new/arduino-uno"
                       className={simExpanded ? "w-full h-full border-none" : "absolute inset-0 w-full h-full border-none"}
@@ -1049,13 +1011,13 @@ export default function LessonPage() {
                 <div className="flex justify-between mt-6">
                   <button
                     onClick={() => setActiveTab("challenge")}
-                    className="px-5 py-3 rounded-xl text-sm font-extrabold flex items-center gap-2 transition-all border-2 border-b-4 border-border bg-card hover:bg-muted/10 text-slate-300 active:border-b-2 active:translate-y-[2px]"
+                    className="px-5 py-3 rounded-xl text-sm font-extrabold flex items-center gap-2 transition-all border-2 border-b-4 border-border bg-card hover:bg-muted/10 text-foreground active:border-b-2 active:translate-y-[2px]"
                   >
                     <ArrowLeft size={14} /> Back to Code
                   </button>
                   <button
                     onClick={() => setActiveTab("build")}
-                    className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center gap-2 transition-all shadow-sm"
+                    className="px-6 py-3 bg-primary hover:bg-primary/90 border-2 border-b-4 border-primary/60 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-primary-foreground flex items-center gap-2 transition-all shadow-sm"
                   >
                     Go to Build <Wrench size={14} />
                   </button>
@@ -1072,27 +1034,27 @@ export default function LessonPage() {
                 className="bg-card border-2 border-b-4 border-border rounded-2xl p-6 shadow-sm"
               >
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-950/40 border-2 border-b-4 border-indigo-900/60 flex items-center justify-center text-2xl shadow-sm">
+                  <div className="w-12 h-12 rounded-2xl bg-card border-2 border-b-4 border-border flex items-center justify-center text-2xl shadow-sm">
                     🔨
                   </div>
                   <div>
-                    <h3 className="font-extrabold font-display text-indigo-200 text-base">Build Task</h3>
-                    <p className="text-xs font-bold text-slate-400">Time to wires and solder! Connect up the hardware.</p>
+                    <h3 className="font-extrabold font-display text-foreground text-base">Build Task</h3>
+                    <p className="text-xs font-bold text-muted-foreground">Time to wires and solder! Connect up the hardware.</p>
                   </div>
                 </div>
 
                 <div className="rounded-2xl p-5 mb-6 bg-muted/20 border-2 border-dashed border-border">
-                  <p className="text-sm font-semibold text-slate-400 leading-relaxed">
+                  <p className="text-sm font-semibold text-muted-foreground leading-relaxed">
                     {lesson.build_task}
                   </p>
                 </div>
 
                 {/* Direct Board Upload Card */}
-                <div className="rounded-2xl p-5 mb-6 border-2 border-indigo-900/40 bg-indigo-950/10 space-y-4">
-                  <h4 className="font-black text-sm text-indigo-200 font-display flex items-center gap-2">
-                    <Zap size={16} className="text-indigo-400" /> Physical Arduino Upload
+                <div className="rounded-2xl p-5 mb-6 border-2 border-primary/30 bg-primary/5 space-y-4">
+                  <h4 className="font-black text-sm text-foreground font-display flex items-center gap-2">
+                    <Zap size={16} className="text-primary" /> Physical Arduino Upload
                   </h4>
-                  <p className="text-xs font-bold text-slate-400">
+                  <p className="text-xs font-bold text-muted-foreground">
                     Before you can mark this lesson as complete, you must connect your physical Arduino board and upload your working code.
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
@@ -1100,8 +1062,8 @@ export default function LessonPage() {
                       onClick={serialConnected ? disconnectSerial : connectSerial}
                       className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all hover:scale-105 border ${
                         serialConnected
-                          ? "bg-emerald-500/15 text-[#10B981] border-emerald-500/30"
-                          : "bg-white/5 text-[hsl(228,25%,70%)] border-[hsl(232,40%,20%)]"
+                          ? "bg-success/15 text-success border-success/30"
+                          : "bg-muted/10 text-muted-foreground border-border"
                       }`}
                     >
                       {serialConnected ? "🔌 Connected" : "🔌 Connect Arduino"}
@@ -1110,7 +1072,7 @@ export default function LessonPage() {
                       <button
                         onClick={uploadToBoard}
                         disabled={uploading}
-                        className="px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all hover:scale-105 bg-cyan-950/20 text-cyan-400 border border-cyan-500/30"
+                        className="px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all hover:scale-105 bg-primary text-primary-foreground border border-primary/60 hover:bg-primary/90"
                       >
                         {uploading ? (
                           <><Loader2 size={12} className="animate-spin" /> Uploading...</>
@@ -1121,7 +1083,7 @@ export default function LessonPage() {
                     )}
                     <button
                       onClick={() => setShowSerialConsole(!showSerialConsole)}
-                      className="px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all hover:scale-105 bg-indigo-950/20 text-indigo-400 border border-indigo-500/30"
+                      className="px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all hover:scale-105 bg-card text-foreground border border-border"
                     >
                       📟 {showSerialConsole ? "Hide Serial Monitor" : "Open Serial Monitor"}
                     </button>
@@ -1129,14 +1091,14 @@ export default function LessonPage() {
 
                   {/* Serial Monitor Inline */}
                   {showSerialConsole && (
-                    <div className="border border-border rounded-xl overflow-hidden bg-slate-950">
-                      <div className="flex items-center justify-between px-3 py-1.5 border-b text-[10px] font-mono border-border text-slate-400">
-                        <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
+                    <div className="border border-border rounded-xl overflow-hidden bg-background">
+                      <div className="flex items-center justify-between px-3 py-1.5 border-b text-[10px] font-mono border-border text-muted-foreground">
+                        <span className="text-muted-foreground font-bold">📟 Serial Monitor (9600 baud)</span>
                         <button onClick={clearLogs} className="hover:text-white transition-all text-[9px]">Clear</button>
                       </div>
-                      <div className="p-3 max-h-36 overflow-y-auto font-mono text-[9px] text-emerald-400 space-y-1 bg-slate-950">
+                      <div className="p-3 max-h-36 overflow-y-auto font-mono text-[9px] text-foreground space-y-1 bg-background">
                         {serialLogs.length === 0 ? (
-                          <span className="text-slate-500 italic text-[9px]">No output. Verify connection and upload code.</span>
+                          <span className="text-muted-foreground italic text-[9px]">No output. Verify connection and upload code.</span>
                         ) : (
                           serialLogs.map((log, idx) => (
                             <div key={idx} className="whitespace-pre-wrap">{log}</div>
@@ -1147,13 +1109,13 @@ export default function LessonPage() {
                   )}
 
                   <div className="flex items-center gap-2 text-xs font-bold">
-                    <span className="text-slate-400">Upload Status:</span>
+                    <span className="text-muted-foreground">Upload Status:</span>
                     {codeUploaded ? (
-                      <span className="text-emerald-400 flex items-center gap-1">
+                      <span className="text-success flex items-center gap-1">
                         <CheckCircle size={12} /> Sketch successfully uploaded!
                       </span>
                     ) : (
-                      <span className="text-amber-400 flex items-center gap-1">
+                      <span className="text-warning flex items-center gap-1">
                         <AlertTriangle size={12} /> Pending upload to physical Arduino
                       </span>
                     )}
@@ -1164,14 +1126,14 @@ export default function LessonPage() {
                   <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="rounded-2xl p-6 text-center bg-emerald-950/20 border-2 border-b-4 border-emerald-900/40 shadow-sm"
+                    className="rounded-2xl p-6 text-center bg-success/10 border-2 border-b-4 border-success/30 shadow-sm"
                   >
                     <div className="text-5xl mb-3">🎉</div>
-                    <h3 className="text-xl font-extrabold font-display text-emerald-400 mb-1">Lesson Complete!</h3>
-                    <p className="text-sm font-semibold text-slate-400 mb-4">You earned {lesson.xp_reward} XP. Keep pushing forward!</p>
+                    <h3 className="text-xl font-extrabold font-display text-success mb-1">Lesson Complete!</h3>
+                    <p className="text-sm font-semibold text-muted-foreground mb-4">You earned {lesson.xp_reward} XP. Keep pushing forward!</p>
                     <button
                       onClick={() => navigate("/learn")}
-                      className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white transition-all shadow-sm"
+                      className="px-6 py-3 bg-primary hover:bg-primary/90 border-2 border-b-4 border-primary/60 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-primary-foreground transition-all shadow-sm"
                     >
                       Continue Learning →
                     </button>
@@ -1180,7 +1142,7 @@ export default function LessonPage() {
                   <button
                     onClick={handleComplete}
                     disabled={submitting || !codeUploaded}
-                    className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 border-2 border-b-4 border-emerald-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:pointer-events-none"
+                    className="w-full py-4 bg-success hover:bg-success/90 border-2 border-b-4 border-success/70 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:pointer-events-none"
                   >
                     <CheckCircle size={16} />
                     {submitting ? "Completing..." : !codeUploaded ? "Upload Code to Board to Complete" : "Mark as Complete"}
@@ -1195,24 +1157,24 @@ export default function LessonPage() {
         <div className="lg:col-span-4 flex flex-col">
           <div className="bg-card border-2 border-b-4 border-border rounded-3xl p-5 flex flex-col h-full shadow-sm">
             <div className="flex items-center gap-2.5 mb-4 pb-3 border-b-2 border-border flex-shrink-0">
-              <div className="w-9 h-9 rounded-2xl flex items-center justify-center bg-indigo-950/40 border-2 border-indigo-900/60 text-indigo-400">
+              <div className="w-9 h-9 rounded-2xl flex items-center justify-center bg-primary/10 border-2 border-primary/30 text-primary">
                 <Bot size={18} />
               </div>
               <div>
-                <h3 className="font-black text-sm text-indigo-200 font-display leading-none">AI Assistant</h3>
-                <span className="text-[10px] font-bold text-slate-400 mt-1 block">Your personal Arduino mentor</span>
+                <h3 className="font-black text-sm text-foreground font-display leading-none">AI Assistant</h3>
+                <span className="text-[10px] font-bold text-muted-foreground mt-1 block">Your personal Arduino mentor</span>
               </div>
             </div>
 
             {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto max-h-[360px] lg:max-h-[420px] mb-4 space-y-3 p-3 bg-slate-950 rounded-2xl border-2 border-border">
+            <div className="flex-1 overflow-y-auto max-h-[360px] lg:max-h-[420px] mb-4 space-y-3 p-3 bg-background rounded-2xl border-2 border-border">
               {chatHistory.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div
                     className={`rounded-2xl px-3.5 py-2 text-xs leading-relaxed max-w-[85%] font-semibold ${
                       msg.role === 'user'
-                        ? 'bg-indigo-500 text-white border-b-2 border-indigo-600'
-                        : 'bg-slate-900 text-slate-200 border-2 border-border'
+                        ? 'bg-primary text-primary-foreground border-b-2 border-primary/60'
+                        : 'bg-card text-foreground border-2 border-border'
                     }`}
                   >
                     {msg.content}
@@ -1221,7 +1183,7 @@ export default function LessonPage() {
               ))}
               {aiLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-slate-900 text-slate-200 border-2 border-border rounded-2xl px-3.5 py-2 text-xs font-semibold animate-pulse">
+                  <div className="bg-card text-foreground border-2 border-border rounded-2xl px-3.5 py-2 text-xs font-semibold animate-pulse">
                     Thinking...
                   </div>
                 </div>
@@ -1235,7 +1197,7 @@ export default function LessonPage() {
                 <button
                   key={q}
                   onClick={() => handleSendQuestion(q)}
-                  className="text-[10px] font-black text-left p-2.5 bg-indigo-950/40 hover:bg-indigo-900/40 border-2 border-indigo-900/60 rounded-xl text-indigo-400 transition-all leading-tight cursor-pointer"
+                  className="text-[10px] font-black text-left p-2.5 bg-primary/10 hover:bg-primary/20 border-2 border-primary/30 rounded-xl text-primary transition-all leading-tight cursor-pointer"
                 >
                   "{q}"
                 </button>
@@ -1249,7 +1211,7 @@ export default function LessonPage() {
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 placeholder="Ask a question..."
-                className="flex-1 px-3.5 py-2.5 bg-slate-950 hover:bg-slate-900/50 border-2 border-border focus:border-indigo-500 rounded-xl text-xs font-semibold focus:outline-none text-slate-200 transition-all"
+                className="flex-1 px-3.5 py-2.5 bg-background hover:bg-muted/50 border-2 border-border focus:border-primary rounded-xl text-xs font-semibold focus:outline-none text-foreground transition-all"
               />
               <button
                 type="submit"

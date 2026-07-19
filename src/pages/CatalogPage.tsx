@@ -15,7 +15,7 @@ const SkillBadge = ({ skill }: { skill: string }) => {
   const ref = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     if (ref.current) {
-      const color = SKILL_COLORS[skill] || "#6366f1";
+      const color = SKILL_COLORS[skill] || "hsl(var(--primary))";
       ref.current.style.background = `${color}18`;
       ref.current.style.color = color;
       ref.current.style.borderColor = `${color}33`;
@@ -107,7 +107,7 @@ function DifficultyBadge({ difficulty }: { difficulty: string }) {
       ? "bg-success/15 text-success border border-success/30"
       : difficulty === "intermediate"
       ? "bg-secondary/15 text-secondary border border-secondary/30"
-      : "bg-purple-500/15 text-purple-400 border border-purple-500/30";
+      : "bg-brand-purple/15 text-brand-purple border border-brand-purple/30";
   return <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold capitalize ${badgeClasses}`}>{difficulty}</span>;
 }
 
@@ -545,7 +545,7 @@ export default function CatalogPage() {
                             {!locked && (
                               <button
                                 onClick={(e) => { e.stopPropagation(); handleRemove(p.id); }}
-                                className="absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 bg-red-500/15 text-red-500 border border-red-500/30"
+                                className="absolute top-2 right-2 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110 bg-destructive/15 text-destructive border border-destructive/30"
                                 title="Remove project"
                               >
                                 <X size={12} />
@@ -566,7 +566,7 @@ export default function CatalogPage() {
                               <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
-                                className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold bg-amber-500/15 text-amber-500 border border-amber-500/30"
+                                className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold bg-warning/15 text-warning border border-warning/30"
                               >
                                 ⚡ 1 Part Away
                               </motion.div>
@@ -588,7 +588,7 @@ export default function CatalogPage() {
                               {p.tags.map((tag) => (
                                 <span
                                   key={tag}
-                                  className="text-xs px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                  className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border"
                                 >
                                   {tag}
                                 </span>
@@ -607,15 +607,15 @@ export default function CatalogPage() {
                               return (
                                 <div className="mt-3 mb-3 p-2 rounded-xl text-xs" style={{ background: "hsl(var(--muted) / 0.4)", border: "1px solid hsl(var(--border) / 0.5)" }}>
                                   {buildable ? (
-                                    <span className="font-semibold text-emerald-400">Ready to build! All parts owned.</span>
+                                    <span className="font-semibold text-success">Ready to build! All parts owned.</span>
                                   ) : (
                                     <div className="space-y-1">
-                                      <span className="text-[10px] block text-slate-400 font-bold uppercase tracking-wider">Missing parts ({missing.length}):</span>
+                                      <span className="text-[10px] block text-muted-foreground font-bold uppercase tracking-wider">Missing parts ({missing.length}):</span>
                                       <div className="flex flex-col gap-1 max-h-20 overflow-y-auto">
                                         {missing.map(m => {
                                           const isWishlisted = wishlist.includes(m);
                                           return (
-                                            <div key={m} className="flex items-center justify-between text-[10px] font-medium text-slate-300 bg-slate-900/40 px-2 py-1 rounded gap-1.5">
+                                            <div key={m} className="flex items-center justify-between text-[10px] font-medium text-foreground bg-muted/40 px-2 py-1 rounded gap-1.5">
                                               <span className="truncate flex-1" title={m}>{m}</span>
                                               <div className="flex items-center gap-1 flex-shrink-0">
                                                 <button
@@ -623,8 +623,8 @@ export default function CatalogPage() {
                                                   disabled={isWishlisted}
                                                   className={`text-[9px] px-1.5 py-0.5 rounded transition-all hover:scale-105 ${
                                                     isWishlisted
-                                                      ? "bg-pink-500/10 text-pink-500"
-                                                      : "bg-blue-500/15 text-blue-400"
+                                                      ? "bg-success/10 text-success"
+                                                      : "bg-muted text-muted-foreground"
                                                   }`}
                                                 >
                                                   {isWishlisted ? "✓ Wishlisted" : "+ Wishlist"}
@@ -634,7 +634,7 @@ export default function CatalogPage() {
                                                   target="_blank"
                                                   rel="noopener noreferrer"
                                                   onClick={(e) => e.stopPropagation()}
-                                                  className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 hover:scale-105 transition-all text-center"
+                                                  className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-muted/70 hover:scale-105 transition-all text-center"
                                                 >
                                                   Buy 🛒
                                                 </a>

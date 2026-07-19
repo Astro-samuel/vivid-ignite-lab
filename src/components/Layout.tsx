@@ -128,44 +128,44 @@ export default function Layout({ children }: LayoutProps) {
               {/* 🔥 Streak */}
               <motion.div
                 className="stat-pill"
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 title={`${streak}-day streak`}
               >
                 <Flame
                   size={16}
-                  style={{ color: streak > 0 ? "#F59E0B" : "#94A3B8" }}
+                  style={{ color: streak > 0 ? "hsl(var(--primary))" : "hsl(var(--foreground-muted))" }}
                   className={streak > 0 ? "animate-heart-beat" : ""}
                 />
-                <span style={{ color: streak > 0 ? "hsl(38, 92%, 38%)" : "hsl(240, 14%, 60%)" }}>
+                <span style={{ color: streak > 0 ? "hsl(var(--primary))" : "hsl(var(--foreground-muted))" }}>
                   {streak}
                 </span>
               </motion.div>
 
-              {/* 💎 XP Gems */}
+              {/* 💎 XP */}
               <motion.div
                 className="stat-pill"
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 title={`${xp} total XP`}
               >
-                <Gem size={16} style={{ color: "#A855F7" }} />
-                <span style={{ color: "hsl(265, 89%, 45%)" }}>{xp.toLocaleString()}</span>
+                <Gem size={16} style={{ color: "hsl(var(--primary))" }} />
+                <span style={{ color: "hsl(var(--foreground))" }}>{xp.toLocaleString()}</span>
               </motion.div>
 
               {/* ❤️ Hearts */}
               <motion.div
                 className="stat-pill"
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 title={`${hearts}/5 hearts`}
               >
                 <Heart
                   size={16}
-                  fill="#EF4444"
-                  style={{ color: "#EF4444" }}
+                  fill="hsl(var(--destructive))"
+                  style={{ color: "hsl(var(--destructive))" }}
                 />
-                <span style={{ color: "hsl(0, 84%, 45%)" }}>{hearts}</span>
+                <span style={{ color: "hsl(var(--foreground))" }}>{hearts}</span>
               </motion.div>
             </div>
           )}

@@ -32,13 +32,9 @@ const allBigIdeas = [
   { id: 10, iconKey: "mesh", title: "Mesh Network Communicator", desc: "Build a decentralized mesh network using LoRa modules for off-grid text communication.", tags: ["LoRa", "OLED", "Battery", "ESP32"], level: "Advanced", impact: "Sustainable" },
 ];
 
-const impactColors: Record<string, string> = {
-  Revolutionary: "hsl(var(--destructive))", 
-  "Life-Changing": "hsl(var(--purple))", 
-  Environmental: "hsl(var(--success))", 
-  "Future Tech": "hsl(var(--primary))", 
-  Sustainable: "hsl(var(--success))",
-};
+// Impact is flavor metadata, not a functional state — per the "No Rainbow Rule" it no longer
+// gets a different hue per sibling badge. It reads as neutral text; "level" carries the one
+// accent this card needs.
 
 export default function ThinkBiggerPage() {
   const navigate = useNavigate();
@@ -63,13 +59,13 @@ export default function ThinkBiggerPage() {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border text-sm font-medium" style={{ background: "hsl(var(--primary-light))", borderColor: "hsl(var(--primary) / 0.3)", color: "hsl(var(--primary))" }}>
             <Lightbulb size={14} /> Think Bigger
           </div>
-          <h1 className="text-4xl font-bold mb-4" style={{ color: "#FFFFFF" }}>
+          <h1 className="text-4xl font-bold mb-4 text-foreground">
             Push The <span className="shimmer-text">Boundaries</span>
           </h1>
-          <p className="text-lg max-w-xl mx-auto" style={{ color: "hsl(226, 35%, 72%)" }}>
+          <p className="text-lg max-w-xl mx-auto text-muted-foreground">
             Ambitious projects that challenge your skills and could actually change the world.
           </p>
-          <button onClick={regenerate} disabled={loading} className="mt-6 btn-neon-outline-teal px-6 py-3 text-sm font-bold flex items-center gap-2 mx-auto">
+          <button onClick={regenerate} disabled={loading} className="mt-6 rounded-lg border border-primary/30 text-primary hover:bg-primary/10 px-6 py-3 text-sm font-bold flex items-center gap-2 mx-auto transition-all">
             {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
             {loading ? "Generating..." : "New Ideas"}
           </button>
@@ -78,27 +74,26 @@ export default function ThinkBiggerPage() {
         <div className="space-y-5">
           {ideas.map((idea) => {
             const IconComponent = iconMap[idea.iconKey] || Lightbulb;
-            const impactColor = impactColors[idea.impact] || "hsl(var(--primary))";
             return (
               <motion.div key={idea.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
                 <MotionCard className="card-neon p-6 cursor-pointer group">
                   <div className="flex gap-5">
-                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 self-start group-hover:text-white transition-colors">
+                    <div className="p-3 rounded-xl bg-[hsl(var(--background-hover))] border border-border text-muted-foreground self-start group-hover:text-foreground transition-colors">
                       <IconComponent size={24} />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
-                        <h3 className="font-bold text-lg" style={{ color: "#FFFFFF" }}>{idea.title}</h3>
+                        <h3 className="font-bold text-lg text-foreground">{idea.title}</h3>
                         <div className="flex gap-2 flex-wrap">
                           <span className="text-xs px-2.5 py-1 rounded-full font-bold" style={{ background: "hsl(var(--primary-light))", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}>{idea.level}</span>
-                          <span className="text-xs px-2.5 py-1 rounded-full font-bold" style={{ background: `${impactColor}15`, color: impactColor, border: `1px solid ${impactColor}` }}>{idea.impact}</span>
+                          <span className="text-xs px-2.5 py-1 rounded-full font-bold bg-card text-muted-foreground border border-border">{idea.impact}</span>
                         </div>
                       </div>
-                      <p className="text-sm mb-4" style={{ color: "hsl(226, 35%, 72%)" }}>{idea.desc}</p>
+                      <p className="text-sm mb-4 text-muted-foreground">{idea.desc}</p>
                       <div className="flex items-center justify-between flex-wrap gap-3">
                         <div className="flex flex-wrap gap-1.5">
                           {idea.tags.map((tag) => (
-                            <span key={tag} className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "rgba(59,130,246,0.08)", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.2)" }}>{tag}</span>
+                            <span key={tag} className="text-xs px-2 py-0.5 rounded-lg bg-[hsl(var(--background-hover))] text-muted-foreground border border-border">{tag}</span>
                           ))}
                         </div>
                         <button
@@ -107,7 +102,7 @@ export default function ThinkBiggerPage() {
                             navigate(`/project/${100 + idea.id}`);
                           }}
                           className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 group-hover:gap-3"
-                          style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 12px rgba(99, 102, 241, 0.2)" }}
+                          style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", boxShadow: "0 0 12px hsl(var(--primary) / 0.25)" }}
                         >
                           <Zap size={14} /> Start Building <ArrowRight size={14} />
                         </button>

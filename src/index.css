@@ -10,72 +10,73 @@
   :root {
     /* ===== PREMIUM DARK DESIGN SYSTEM ===== */
 
-    /* Backgrounds */
-    --background: 232 47% 7%;            /* Deep dark slate */
-    --background-card: 232 42% 11%;       /* Dark card */
-    --background-hover: 232 40% 16%;
+    /* Backgrounds — deep cool slate, intentionally tinted (not flat gray) */
+    --background: 228 32% 8%;
+    --background-card: 228 28% 12%;
+    --background-hover: 228 24% 18%;
 
     /* Text */
-    --foreground: 210 40% 98%;           /* Light gray text */
-    --foreground-secondary: 243 75% 75%; /* Soft indigo text */
-    --foreground-muted: 240 10% 70%;     /* Muted text */
+    --foreground: 220 24% 97%;           /* Near-white, subtle cool tint */
+    --foreground-secondary: 228 20% 78%;
+    --foreground-muted: 228 14% 62%;     /* Tinted slate, not flat gray */
 
-    /* Primary — Cyber-Teal */
-    --primary: 172 80% 50%;              /* Vibrant cyber-teal */
-    --primary-dark: 172 80% 40%;
-    --primary-light: 172 80% 12%;
+    /* Primary — Amber (solder / copper / warning-LED: the maker-tool accent) */
+    --primary: 38 92% 50%;
+    --primary-dark: 32 88% 42%;
+    --primary-light: 38 85% 13%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary — Cyan */
-    --secondary: 189 94% 43%;            /* Cyber-cyan */
-    --secondary-light: 189 94% 10%;
+    /* Secondary — Cyan (functional, used sparingly) */
+    --secondary: 189 70% 40%;
+    --secondary-light: 189 60% 12%;
     --secondary-foreground: 210 40% 98%;
 
     /* Success */
-    --success: 142 71% 45%;
-    --success-dark: 142 72% 37%;
-    --success-light: 142 70% 15%;
+    --success: 142 60% 42%;
+    --success-dark: 142 62% 34%;
+    --success-light: 142 50% 14%;
 
-    /* Warning */
-    --warning: 38 92% 50%;
-    --warning-light: 38 90% 15%;
+    /* Warning — distinct golden-yellow, kept apart from primary's amber */
+    --warning: 48 88% 52%;
+    --warning-dark: 42 80% 42%;
+    --warning-light: 48 80% 13%;
 
     /* Danger */
-    --destructive: 0 84% 60%;
-    --destructive-light: 0 80% 15%;
+    --destructive: 0 72% 56%;
+    --destructive-dark: 0 65% 46%;
+    --destructive-light: 0 65% 15%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Accent/Cyan */
-    --purple: 180 100% 45%;
-    --purple-light: 180 100% 10%;
-
+    /* Accent/Purple — used sparingly (e.g. clay-card-purple, clay-badge-purple) */
+    --purple: 262 45% 58%;
+    --purple-light: 262 40% 14%;
 
     /* Shadcn Aliases */
-    --card: 232 42% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 232 42% 11%;
-    --popover-foreground: 210 40% 98%;
-    --muted: 232 40% 16%;
-    --muted-foreground: 240 10% 70%;
-    --accent: 232 40% 16%;
-    --accent-foreground: 210 40% 98%;
-    --border: 232 30% 20%;               /* Dark border */
-    --input: 232 40% 16%;
-    --ring: 243 75% 64%;
-    --radius: 1rem;
+    --card: 228 28% 12%;
+    --card-foreground: 220 24% 97%;
+    --popover: 228 28% 12%;
+    --popover-foreground: 220 24% 97%;
+    --muted: 228 24% 18%;
+    --muted-foreground: 228 14% 62%;
+    --accent: 228 24% 18%;
+    --accent-foreground: 220 24% 97%;
+    --border: 228 20% 22%;
+    --input: 228 24% 18%;
+    --ring: 38 92% 50%;
+    --radius: 0.75rem;
 
     /* Sidebar */
-    --sidebar-background: 232 45% 9%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 243 75% 64%;
+    --sidebar-background: 228 30% 9%;
+    --sidebar-foreground: 220 24% 97%;
+    --sidebar-primary: 38 92% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 232 40% 16%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 232 30% 18%;
-    --sidebar-ring: 243 75% 64%;
+    --sidebar-accent: 228 24% 18%;
+    --sidebar-accent-foreground: 220 24% 97%;
+    --sidebar-border: 228 20% 20%;
+    --sidebar-ring: 38 92% 50%;
 
     /* Clay shadow colors */
-    --clay-indigo: 13, 148, 136;
+    --clay-indigo: 217, 119, 6;
     --clay-green: 34, 197, 94;
     --clay-violet: 6, 182, 212;
     --clay-orange: 245, 158, 11;
@@ -345,58 +346,49 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 14px;
-    background: hsl(var(--card));
-    border-radius: 100px;
-    border: 2px solid hsl(var(--border));
-    box-shadow: 0 2px 0 0 hsl(var(--border));
+    padding: 6px 12px;
+    background: hsl(var(--background-hover) / 0.6);
+    border-radius: 10px;
     font-family: 'Baloo 2', sans-serif;
     font-weight: 700;
     font-size: 0.85rem;
     color: hsl(var(--foreground));
     cursor: default;
-    transition: transform 150ms ease-out;
+    transition: background-color 150ms ease-out;
   }
 
   .stat-pill:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 0 0 hsl(var(--border));
+    background: hsl(var(--background-hover));
   }
 
-  /* ── Nav Items ── */
+  /* ── Nav Items — flat rows, no bubble chrome. Hierarchy via fill + weight. ── */
   .duo-nav-item {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 16px;
-    border-radius: 12px;
+    padding: 9px 12px;
+    border-radius: 10px;
     font-family: 'Baloo 2', sans-serif;
     font-weight: 600;
     font-size: 0.9rem;
     color: hsl(var(--foreground-muted));
     cursor: pointer;
-    transition: all 150ms ease-out;
+    transition: background-color 120ms ease-out, color 120ms ease-out;
     text-decoration: none;
-    background: hsl(var(--card));
-    border: 2px solid hsl(var(--border));
-    box-shadow: 0 2px 0 0 hsl(var(--border));
-    margin-bottom: 6px;
+    background: transparent;
+    border: none;
+    margin-bottom: 2px;
   }
 
   .duo-nav-item:hover {
     background: hsl(var(--background-hover));
-    color: hsl(var(--primary));
-    border-color: hsl(var(--primary) / 0.3);
-    box-shadow: 0 3px 0 0 hsl(var(--primary) / 0.2);
-    transform: translateY(-1px);
+    color: hsl(var(--foreground));
   }
 
   .duo-nav-item.active {
     background: hsl(var(--primary-light));
     color: hsl(var(--primary));
-    border-color: hsl(var(--primary) / 0.5);
-    box-shadow: 0 3px 0 0 hsl(var(--primary) / 0.4);
-    transform: translateY(0px);
+    font-weight: 700;
   }
 
   /* ── Lesson Node (skill map) ── */
@@ -658,14 +650,11 @@ main {
   font-family: 'Baloo 2', sans-serif !important;
 }
 .sidebar-section-label {
-  color: hsl(240, 14%, 72%) !important;
+  color: hsl(var(--foreground-muted)) !important;
   font-family: 'Baloo 2', sans-serif !important;
 }
-.sidebar-footer {
-  border-top: 2px solid var(--sidebar-border) !important;
-}
 .sidebar-signout-btn {
-  color: hsl(0, 84%, 55%) !important;
+  color: hsl(var(--destructive)) !important;
 }
 .sidebar-signin-btn {
   border-radius: 12px !important;

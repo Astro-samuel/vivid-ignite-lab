@@ -85,7 +85,7 @@ export default function AchievementsPage() {
         title: "First Spark",
         desc: "Complete your first Arduino project",
         xp: 50,
-        color: "#06B6D4", // Cyan
+        color: "#379966",
         progress: Math.min(completedCount, 1),
         total: 1,
         unlocked: completedCount >= 1,
@@ -96,7 +96,7 @@ export default function AchievementsPage() {
         title: "On Fire",
         desc: "Complete 3 projects",
         xp: 100,
-        color: "#EF4444", // Red/Orange
+        color: "#379966",
         progress: Math.min(completedCount, 3),
         total: 3,
         unlocked: completedCount >= 3,
@@ -107,7 +107,7 @@ export default function AchievementsPage() {
         title: "Color Wizard",
         desc: "Complete 5 projects",
         xp: 75,
-        color: "#8B5CF6", // Purple
+        color: "#379966",
         progress: Math.min(completedCount, 5),
         total: 5,
         unlocked: completedCount >= 5,
@@ -118,7 +118,7 @@ export default function AchievementsPage() {
         title: "Robotics Pioneer",
         desc: "Reach Level 2",
         xp: 200,
-        color: "#3B82F6", // Blue
+        color: "#379966",
         progress: Math.min(profile?.level ?? 1, 2),
         total: 2,
         unlocked: (profile?.level ?? 1) >= 2,
@@ -129,7 +129,7 @@ export default function AchievementsPage() {
         title: "Champion Builder",
         desc: "Complete 10 projects",
         xp: 500,
-        color: "#F59E0B", // Amber
+        color: "#379966",
         progress: Math.min(completedCount, 10),
         total: 10,
         unlocked: completedCount >= 10,
@@ -140,7 +140,7 @@ export default function AchievementsPage() {
         title: "XP Hunter",
         desc: "Earn 500+ XP total",
         xp: 150,
-        color: "#EC4899", // Pink
+        color: "#379966",
         progress: Math.min(totalXP, 500),
         total: 500,
         unlocked: totalXP >= 500,
@@ -151,7 +151,7 @@ export default function AchievementsPage() {
         title: "Star Maker",
         desc: "Earn 1000+ XP total",
         xp: 300,
-        color: "#F59E0B",
+        color: "#379966",
         progress: Math.min(totalXP, 1000),
         total: 1000,
         unlocked: totalXP >= 1000,
@@ -162,7 +162,7 @@ export default function AchievementsPage() {
         title: "Component Master",
         desc: "Add 20+ components to your inventory",
         xp: 125,
-        color: "#10B981", // Emerald
+        color: "#379966",
         progress: Math.min(inventoryCount, 20),
         total: 20,
         unlocked: inventoryCount >= 20,
@@ -173,7 +173,7 @@ export default function AchievementsPage() {
         title: "Streak Starter",
         desc: "Maintain a 3-day streak",
         xp: 75,
-        color: "#EF4444",
+        color: "#379966",
         progress: Math.min(streakDays, 3),
         total: 3,
         unlocked: streakDays >= 3,
@@ -184,7 +184,7 @@ export default function AchievementsPage() {
         title: "Week Warrior",
         desc: "Maintain a 7-day streak",
         xp: 200,
-        color: "#EF4444",
+        color: "#379966",
         progress: Math.min(streakDays, 7),
         total: 7,
         unlocked: streakDays >= 7,
@@ -207,14 +207,14 @@ export default function AchievementsPage() {
         {/* Title */}
         <FadeInView className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-amber-950/35 border-2 border-b-4 border-amber-900/50 flex items-center justify-center text-2xl shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 border-2 border-b-4 border-primary/30 flex items-center justify-center text-2xl shadow-sm">
               🏆
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold font-display text-slate-100">
+              <h1 className="text-3xl font-extrabold font-display text-foreground">
                 Achievements
               </h1>
-              <p className="text-sm font-medium text-slate-400">
+              <p className="text-sm font-medium text-muted-foreground">
                 Level up your skills and unlock legendary build badges
               </p>
             </div>
@@ -228,39 +228,39 @@ export default function AchievementsPage() {
               icon: Trophy,
               label: "Unlocked",
               value: `${unlockedCount}/${achievements.length}`,
-              bg: "bg-amber-950/30",
-              border: "border-amber-900/50",
-              textColor: "text-amber-400",
+              bg: "bg-card",
+              border: "border-border",
+              textColor: "text-foreground",
             },
             {
               icon: Zap,
               label: "Total XP",
               value: `${totalXP}`,
-              bg: "bg-indigo-950/30",
-              border: "border-indigo-900/50",
-              textColor: "text-indigo-400",
+              bg: "bg-primary/10",
+              border: "border-primary/30",
+              textColor: "text-primary",
             },
             {
               icon: Star,
               label: "Completed",
               value: `${completedCount}`,
-              bg: "bg-emerald-950/30",
-              border: "border-emerald-900/50",
-              textColor: "text-emerald-400",
+              bg: "bg-card",
+              border: "border-border",
+              textColor: "text-foreground",
             },
           ].map(({ icon: Icon, label, value, bg, border, textColor }) => (
             <motion.div
               key={label}
               variants={staggerItem}
-              className={`bg-slate-900 border-2 border-b-4 ${border} rounded-2xl p-5 text-center shadow-sm hover:translate-y-[-2px] transition-all`}
+              className={`bg-card border-2 border-b-4 ${border} rounded-2xl p-5 text-center shadow-sm hover:translate-y-[-2px] transition-all`}
             >
               <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mx-auto mb-2`}>
                 <Icon className={`w-5 h-5 ${textColor}`} />
               </div>
-              <p className="text-2xl font-extrabold font-display text-slate-100">
+              <p className="text-2xl font-extrabold font-display text-foreground">
                 {value}
               </p>
-              <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">
+              <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">
                 {label}
               </p>
             </motion.div>
@@ -269,19 +269,19 @@ export default function AchievementsPage() {
 
         {/* Weekly Progress Tracker */}
         <FadeInView>
-          <div className="bg-slate-900 border-2 border-b-4 border-slate-800 rounded-2xl p-6 mb-8 shadow-sm">
+          <div className="bg-card border-2 border-b-4 border-border rounded-2xl p-6 mb-8 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="font-extrabold font-display text-slate-100 text-lg flex items-center gap-2">
+                <h3 className="font-extrabold font-display text-foreground text-lg flex items-center gap-2">
                   <span>🔥</span> Daily Streak Tracker
                 </h3>
-                <p className="text-xs font-semibold text-slate-400">
+                <p className="text-xs font-semibold text-muted-foreground">
                   Earn XP daily to protect your streak!
                 </p>
               </div>
               <button
                 onClick={() => navigate("/dashboard")}
-                className="text-xs font-bold px-4 py-2 bg-rose-950/40 hover:bg-rose-900/30 border-2 border-b-4 border-rose-900/50 active:border-b-2 active:translate-y-[2px] text-rose-400 rounded-xl transition-all"
+                className="text-xs font-bold px-4 py-2 bg-card hover:bg-muted border-2 border-b-4 border-border active:border-b-2 active:translate-y-[2px] text-foreground rounded-xl transition-all"
               >
                 View Challenges →
               </button>
@@ -297,25 +297,25 @@ export default function AchievementsPage() {
                     <div
                       className={`w-full aspect-square rounded-xl flex items-center justify-center mb-1 transition-all ${
                         active
-                          ? "bg-rose-500 border-2 border-b-4 border-rose-700 text-white"
+                          ? "bg-primary border-2 border-b-4 border-primary/70 text-primary-foreground"
                           : isToday
-                          ? "bg-slate-800 border-2 border-dashed border-slate-700"
-                          : "bg-slate-950 border-2 border-slate-900"
+                          ? "bg-muted border-2 border-dashed border-border"
+                          : "bg-background border-2 border-border"
                       }`}
                     >
                       {active ? (
-                        <CheckCircle size={14} className="text-white" />
+                        <CheckCircle size={14} className="text-primary-foreground" />
                       ) : (
-                        <div className="w-2 h-2 rounded-full bg-slate-300" />
+                        <div className="w-2 h-2 rounded-full bg-muted-foreground" />
                       )}
                     </div>
                     <span
                       className={`text-xs font-bold ${
                         isToday
-                          ? "text-indigo-600 font-extrabold"
+                          ? "text-foreground font-extrabold"
                           : active
-                          ? "text-rose-600 font-extrabold"
-                          : "text-slate-400"
+                          ? "text-primary font-extrabold"
+                          : "text-muted-foreground"
                       }`}
                     >
                       {day}
@@ -336,8 +336,8 @@ export default function AchievementsPage() {
                 onClick={() => setFilter(f)}
                 className={`px-5 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all border-2 border-b-4 ${
                   filter === f
-                    ? "bg-indigo-500 border-indigo-700 text-white"
-                    : "bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-850 hover:text-slate-300"
+                    ? "bg-primary border-primary/70 text-primary-foreground"
+                    : "bg-card border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
                 {f}
@@ -351,7 +351,7 @@ export default function AchievementsPage() {
           {filtered.map((ach) => (
             <motion.div key={ach.id} variants={staggerItem}>
               <MotionCard
-                className={`rounded-2xl border-2 border-b-4 bg-slate-900 p-5 shadow-sm transition-all hover:translate-y-[-2px]`}
+                className={`rounded-2xl border-2 border-b-4 bg-card p-5 shadow-sm transition-all hover:translate-y-[-2px]`}
                 style={{
                   borderColor: ach.unlocked ? `${ach.color}44` : "hsl(var(--border))",
                 }}
@@ -360,14 +360,14 @@ export default function AchievementsPage() {
                   <div
                     className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 border-2 border-b-4 shadow-sm"
                     style={{
-                      background: ach.unlocked ? `${ach.color}15` : "hsl(240, 10%, 15%)",
-                      borderColor: ach.unlocked ? ach.color : "hsl(240, 10%, 25%)",
+                      background: ach.unlocked ? `${ach.color}15` : "hsl(var(--card))",
+                      borderColor: ach.unlocked ? ach.color : "hsl(var(--border))",
                     }}
                   >
                     {ach.unlocked ? (
                       ach.emoji
                     ) : (
-                      <Lock size={18} className="text-slate-400" />
+                      <Lock size={18} className="text-muted-foreground" />
                     )}
                   </div>
                   <div className="flex-1">
@@ -381,35 +381,27 @@ export default function AchievementsPage() {
                         >
                           {ach.title}
                         </h3>
-                        <p className="text-xs font-semibold text-slate-400 mt-0.5">
+                        <p className="text-xs font-semibold text-muted-foreground mt-0.5">
                           {ach.desc}
                         </p>
                       </div>
-                      <span
-                        className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 border"
-                        style={{
-                          background: `${ach.color}15`,
-                          color: ach.color,
-                          borderColor: `${ach.color}40`,
-                        }}
-                      >
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 border bg-muted text-foreground border-border">
                         +{ach.xp} XP
                       </span>
                     </div>
                     {!ach.unlocked && (
                       <div className="mt-3">
-                        <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                        <div className="flex items-center justify-between text-xs font-bold text-muted-foreground mb-1">
                           <span>Progress</span>
                           <span>
                             {ach.progress}/{ach.total}
                           </span>
                         </div>
-                        <div className="h-2.5 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
+                        <div className="h-2.5 rounded-full bg-background overflow-hidden border border-border">
                           <div
-                            className="h-full rounded-full transition-all duration-700"
+                            className="h-full rounded-full transition-all duration-700 bg-muted-foreground"
                             style={{
                               width: `${(ach.progress / ach.total) * 100}%`,
-                              background: ach.color,
                             }}
                           />
                         </div>
@@ -417,8 +409,8 @@ export default function AchievementsPage() {
                     )}
                     {ach.unlocked && (
                       <div className="flex items-center gap-1 mt-2">
-                        <CheckCircle size={12} className="text-emerald-500" />
-                        <span className="text-xs font-bold text-emerald-500">
+                        <CheckCircle size={12} className="text-success" />
+                        <span className="text-xs font-bold text-success">
                           Unlocked!
                         </span>
                       </div>

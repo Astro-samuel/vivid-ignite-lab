@@ -42,13 +42,13 @@ const errors: ArduinoError[] = [
   { id: 20, title: "I2C Device Not Found", errorMessage: "No I2C devices found at any address", category: "wiring", cause: "SDA/SCL wires are swapped, missing pull-up resistors, or wrong address.", fix: "1. SDA → A4, SCL → A5 on Uno\n2. Add 4.7kΩ pull-up resistors on SDA and SCL\n3. Run an I2C scanner sketch\n4. Check if the device needs 3.3V instead of 5V", tags: ["I2C", "wiring"] },
 ];
 
-const categories: { value: ErrorCategory; label: string; emoji: string; color: string; border: string; bg: string }[] = [
-  { value: "all", label: "All Errors", emoji: "📋", color: "#6366F1", border: "border-indigo-200", bg: "bg-indigo-50" },
-  { value: "compile", label: "Compile", emoji: "🔴", color: "#EF4444", border: "border-rose-200", bg: "bg-rose-50" },
-  { value: "upload", label: "Upload", emoji: "🟠", color: "#F97316", border: "border-orange-200", bg: "bg-orange-50" },
-  { value: "runtime", label: "Runtime", emoji: "🟡", color: "#EAB308", border: "border-yellow-200", bg: "bg-yellow-50" },
-  { value: "library", label: "Library", emoji: "📦", color: "#8B5CF6", border: "border-violet-200", bg: "bg-violet-50" },
-  { value: "wiring", label: "Wiring", emoji: "🔧", color: "#06B6D4", border: "border-cyan-200", bg: "bg-cyan-50" },
+const categories: { value: ErrorCategory; label: string; emoji: string }[] = [
+  { value: "all", label: "All Errors", emoji: "📋" },
+  { value: "compile", label: "Compile", emoji: "🔴" },
+  { value: "upload", label: "Upload", emoji: "🟠" },
+  { value: "runtime", label: "Runtime", emoji: "🟡" },
+  { value: "library", label: "Library", emoji: "📦" },
+  { value: "wiring", label: "Wiring", emoji: "🔧" },
 ];
 
 export default function ErrorDatabasePage() {
@@ -81,14 +81,14 @@ export default function ErrorDatabasePage() {
       <div className="px-6 py-8 max-w-5xl mx-auto">
         <FadeInView className="mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 border-2 border-b-4 border-amber-200 flex items-center justify-center text-2xl shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-warning/10 border-2 border-b-4 border-warning/30 flex items-center justify-center text-2xl shadow-sm">
               🚨
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold font-display text-indigo-950">
+              <h1 className="text-3xl font-extrabold font-display text-foreground">
                 Error Database
               </h1>
-              <p className="text-sm font-semibold text-slate-400">
+              <p className="text-sm font-semibold text-muted-foreground">
                 Instantly debug compiler messages, upload fails, and wiring issues.
               </p>
             </div>
@@ -98,13 +98,13 @@ export default function ErrorDatabasePage() {
         {/* Search & Filters */}
         <FadeInView delay={0.1} className="mb-6">
           <div className="relative mb-4">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Paste error logs here or search keywords..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3.5 bg-white border-2 border-b-4 border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-indigo-500 text-slate-800 transition-all placeholder:text-slate-400 placeholder:font-bold shadow-sm"
+              className="w-full pl-11 pr-4 py-3.5 bg-card border-2 border-b-4 border-border rounded-2xl text-sm font-semibold focus:outline-none focus:border-primary text-foreground transition-all placeholder:text-muted-foreground placeholder:font-bold shadow-sm"
             />
           </div>
 
@@ -117,8 +117,8 @@ export default function ErrorDatabasePage() {
                   onClick={() => setCategory(c.value)}
                   className={`px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all border-2 border-b-4 ${
                     active
-                      ? "bg-indigo-500 border-indigo-700 text-white"
-                      : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : "bg-card border-border text-muted-foreground hover:bg-muted"
                   }`}
                 >
                   {c.emoji} {c.label}
@@ -129,7 +129,7 @@ export default function ErrorDatabasePage() {
         </FadeInView>
 
         {/* Count */}
-        <p className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider">
+        <p className="text-xs font-bold text-muted-foreground mb-4 uppercase tracking-wider">
           {filtered.length} error{filtered.length !== 1 ? "s" : ""} found
         </p>
 
@@ -141,7 +141,7 @@ export default function ErrorDatabasePage() {
             return (
               <motion.div key={error.id} variants={staggerItem}>
                 <MotionCard
-                  className="bg-white border-2 border-b-4 border-slate-100 rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:translate-y-[-1px] transition-all"
+                  className="bg-card border-2 border-b-4 border-border rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:translate-y-[-1px] transition-all"
                   onClick={() => setExpandedId(isExpanded ? null : error.id)}
                 >
                   <div className="p-5">
@@ -149,34 +149,29 @@ export default function ErrorDatabasePage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <span
-                            className="text-[10px] px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider border"
-                            style={{
-                              background: `${catInfo?.color}15`,
-                              color: catInfo?.color,
-                              borderColor: `${catInfo?.color}30`,
-                            }}
+                            className="text-[10px] px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider border bg-muted text-muted-foreground border-border"
                           >
                             {catInfo?.emoji} {catInfo?.label}
                           </span>
                           {error.tags.map((t) => (
                             <span
                               key={t}
-                              className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-50 border border-slate-100 text-slate-400 uppercase tracking-wider"
+                              className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-muted border border-border text-muted-foreground uppercase tracking-wider"
                             >
                               {t}
                             </span>
                           ))}
                         </div>
-                        <h3 className="font-extrabold text-sm text-indigo-950">{error.title}</h3>
-                        <code className="text-xs font-mono font-bold block mt-1.5 truncate text-rose-500 bg-rose-50/50 border border-rose-100 px-2 py-1 rounded-lg max-w-fit">
+                        <h3 className="font-extrabold text-sm text-foreground">{error.title}</h3>
+                        <code className="text-xs font-mono font-bold block mt-1.5 truncate text-destructive bg-destructive/10 border border-destructive/30 px-2 py-1 rounded-lg max-w-fit">
                           {error.errorMessage}
                         </code>
                       </div>
-                      <div className="p-1 rounded-lg hover:bg-slate-50">
+                      <div className="p-1 rounded-lg hover:bg-muted">
                         {isExpanded ? (
-                          <ChevronUp size={16} className="text-slate-400" />
+                          <ChevronUp size={16} className="text-muted-foreground" />
                         ) : (
-                          <ChevronDown size={16} className="text-slate-400" />
+                          <ChevronDown size={16} className="text-muted-foreground" />
                         )}
                       </div>
                     </div>
@@ -187,38 +182,38 @@ export default function ErrorDatabasePage() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="mt-4 space-y-4 pt-4 border-t border-slate-100"
+                          className="mt-4 space-y-4 pt-4 border-t border-border"
                         >
-                          <div className="p-4 rounded-2xl bg-amber-50/30 border border-amber-100">
-                            <p className="text-xs font-extrabold text-amber-700 uppercase tracking-wider mb-1">
+                          <div className="p-4 rounded-2xl bg-warning/10 border border-warning/30">
+                            <p className="text-xs font-extrabold text-warning uppercase tracking-wider mb-1">
                               ⚡ Cause
                             </p>
-                            <p className="text-sm font-semibold text-indigo-950">{error.cause}</p>
+                            <p className="text-sm font-semibold text-foreground">{error.cause}</p>
                           </div>
-                          <div className="p-4 rounded-2xl bg-emerald-50/30 border border-emerald-100">
-                            <p className="text-xs font-extrabold text-emerald-700 uppercase tracking-wider mb-1">
+                          <div className="p-4 rounded-2xl bg-success/10 border border-success/30">
+                            <p className="text-xs font-extrabold text-success uppercase tracking-wider mb-1">
                               ✓ Fix
                             </p>
-                            <p className="text-sm font-semibold text-indigo-950 whitespace-pre-line">
+                            <p className="text-sm font-semibold text-foreground whitespace-pre-line">
                               {error.fix}
                             </p>
                           </div>
                           {error.example && (
-                            <div className="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-800">
+                            <div className="relative rounded-2xl overflow-hidden bg-background border border-border">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleCopy(error.id, error.example!);
                                 }}
-                                className="absolute top-3 right-3 p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-all"
+                                className="absolute top-3 right-3 p-1.5 bg-muted hover:bg-muted/70 text-muted-foreground hover:text-foreground rounded-lg transition-all"
                               >
                                 {copiedId === error.id ? (
-                                  <Check size={14} className="text-emerald-400" />
+                                  <Check size={14} className="text-success" />
                                 ) : (
                                   <Copy size={14} />
                                 )}
                               </button>
-                              <pre className="text-xs font-mono p-4 overflow-x-auto text-slate-300">
+                              <pre className="text-xs font-mono p-4 overflow-x-auto text-foreground">
                                 <code>{error.example}</code>
                               </pre>
                             </div>
@@ -235,9 +230,9 @@ export default function ErrorDatabasePage() {
 
         {filtered.length === 0 && (
           <div className="text-center py-16">
-            <AlertTriangle size={48} className="mx-auto mb-3 text-slate-300" />
-            <h3 className="text-lg font-extrabold text-indigo-950 mb-1">No errors matched</h3>
-            <p className="text-sm font-semibold text-slate-400">
+            <AlertTriangle size={48} className="mx-auto mb-3 text-muted-foreground" />
+            <h3 className="text-lg font-extrabold text-foreground mb-1">No errors matched</h3>
+            <p className="text-sm font-semibold text-muted-foreground">
               Try typing a different keyword or error signature.
             </p>
           </div>

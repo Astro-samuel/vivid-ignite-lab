@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LevelUpProvider } from "@/contexts/LevelUpContext";
 import PageTransition from "@/components/PageTransition";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -101,9 +102,11 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <AuthProvider>
-          <ErrorBoundary fallbackTitle="Application Error">
-            <AnimatedRoutes />
-          </ErrorBoundary>
+          <LevelUpProvider>
+            <ErrorBoundary fallbackTitle="Application Error">
+              <AnimatedRoutes />
+            </ErrorBoundary>
+          </LevelUpProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

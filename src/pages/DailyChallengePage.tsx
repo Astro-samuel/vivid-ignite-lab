@@ -86,7 +86,7 @@ export default function DailyChallengePage() {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
         </div>
       </Layout>
     );
@@ -97,11 +97,11 @@ export default function DailyChallengePage() {
       <Layout>
         <div className="px-6 py-12 text-center max-w-md mx-auto">
           <div className="text-6xl mb-4">🎯</div>
-          <h2 className="text-2xl font-extrabold font-display text-indigo-950 mb-2">No active challenge today</h2>
-          <p className="text-sm font-semibold text-slate-400 mb-6">Come back tomorrow for a fresh daily build challenge!</p>
+          <h2 className="text-2xl font-extrabold font-display text-foreground mb-2">No active challenge today</h2>
+          <p className="text-sm font-semibold text-muted-foreground mb-6">Come back tomorrow for a fresh daily build challenge!</p>
           <button
             onClick={() => navigate("/learn")}
-            className="px-6 py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white transition-all"
+            className="px-6 py-3 bg-primary hover:bg-primary/90 border-2 border-b-4 border-primary/60 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-primary-foreground transition-all"
           >
             ← Back to Learn
           </button>
@@ -229,14 +229,14 @@ export default function DailyChallengePage() {
         <div className="flex items-center justify-between mb-4 flex-shrink-0">
           <button
             onClick={() => navigate("/learn")}
-            className="flex items-center gap-2 text-sm font-bold transition-all text-indigo-500 hover:text-indigo-600"
+            className="flex items-center gap-2 text-sm font-bold transition-all text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft size={14} /> Back to Learn
           </button>
-          
-          <div className="flex items-center gap-2 bg-indigo-50/10 border border-indigo-500/20 px-3 py-1.5 rounded-xl">
-            <Zap size={14} className="text-indigo-400 fill-indigo-400" />
-            <span className="text-sm font-bold text-indigo-400">+{challenge.xp_reward} XP</span>
+
+          <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 px-3 py-1.5 rounded-xl">
+            <Zap size={14} className="text-primary fill-primary" />
+            <span className="text-sm font-bold text-primary">+{challenge.xp_reward} XP</span>
           </div>
         </div>
 
@@ -245,29 +245,29 @@ export default function DailyChallengePage() {
           
           {/* Left panel: Instructions & Details */}
           <div className="lg:col-span-4 flex flex-col space-y-4 min-h-0 overflow-y-auto pr-2">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <Flame size={16} className="text-rose-500 fill-rose-500 animate-pulse" />
-                <span className="text-xs font-bold uppercase tracking-wider text-rose-500">Debugging Arena</span>
+                <Flame size={16} className="text-muted-foreground fill-muted-foreground animate-pulse" />
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Debugging Arena</span>
               </div>
               <h1 className="text-xl font-bold text-white mb-3">{challenge.title}</h1>
-              <p className="text-sm text-slate-300 leading-relaxed mb-4">{challenge.description}</p>
+              <p className="text-sm text-foreground leading-relaxed mb-4">{challenge.description}</p>
               
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">Task Objective:</span>
-                <p className="text-xs text-slate-400 leading-relaxed">
+              <div className="p-3.5 rounded-xl bg-background border border-border space-y-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Task Objective:</span>
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   Identify and fix syntax, logic, or structure errors in the Arduino code. Use non-blocking strategies and correct function definitions where appropriate.
                 </p>
               </div>
             </div>
 
             {challenge.hint && (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+              <div className="bg-card border border-border rounded-2xl p-4">
                 <button
                   onClick={() => setShowHint(!showHint)}
-                  className="flex items-center gap-2 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-all"
+                  className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-all"
                 >
-                  <Lightbulb size={13} className="fill-indigo-950" />
+                  <Lightbulb size={13} className="fill-muted" />
                   {showHint ? "Hide Interactive Hint" : "Reveal Hint"}
                 </button>
                 <AnimatePresence>
@@ -276,7 +276,7 @@ export default function DailyChallengePage() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="mt-2 text-xs text-indigo-300 leading-relaxed bg-indigo-950/20 border border-indigo-900/40 p-3 rounded-xl"
+                      className="mt-2 text-xs text-foreground leading-relaxed bg-muted/20 border border-border p-3 rounded-xl"
                     >
                       {challenge.hint}
                     </motion.div>
@@ -289,11 +289,11 @@ export default function DailyChallengePage() {
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5 text-center shadow-sm"
+                className="bg-success/10 border border-success/30 rounded-2xl p-5 text-center shadow-sm"
               >
                 <div className="text-4xl mb-2">🏆</div>
-                <h3 className="text-base font-bold text-emerald-400 mb-1">Challenge Completed!</h3>
-                <p className="text-xs text-slate-400 mb-3">Your code solution was successfully verified.</p>
+                <h3 className="text-base font-bold text-success mb-1">Challenge Completed!</h3>
+                <p className="text-xs text-muted-foreground mb-3">Your code solution was successfully verified.</p>
                 <button
                   onClick={() => navigate("/learn")}
                   className="clay-btn clay-btn-success clay-btn-sm w-full"
@@ -305,24 +305,24 @@ export default function DailyChallengePage() {
           </div>
 
           {/* Right panel: Editor & Console Terminal */}
-          <div className="lg:col-span-8 flex flex-col min-h-0 border border-slate-800 rounded-2xl bg-slate-950 overflow-hidden shadow-lg">
+          <div className="lg:col-span-8 flex flex-col min-h-0 border border-border rounded-2xl bg-background overflow-hidden shadow-lg">
             
             {/* Header bar */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-800 bg-slate-900">
-              <span className="text-xs font-mono font-bold text-slate-400 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#3b82f6] animate-pulse" />
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-card">
+              <span className="text-xs font-mono font-bold text-muted-foreground flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse" />
                 sketch.ino
               </span>
               <div className="flex gap-2">
                 <button
                   onClick={() => setCode(challenge.starter_code || "")}
-                  className="flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs font-bold text-slate-300 transition-all"
+                  className="flex items-center gap-1 px-2.5 py-1 bg-card hover:bg-muted border border-border rounded-lg text-xs font-bold text-foreground transition-all"
                 >
                   <RotateCcw size={10} /> Reset
                 </button>
                 <button
                   onClick={() => setShowSolution(!showSolution)}
-                  className="flex items-center gap-1 px-2.5 py-1 bg-indigo-950 hover:bg-indigo-900 border border-indigo-800 rounded-lg text-xs font-bold text-indigo-300 transition-all"
+                  className="flex items-center gap-1 px-2.5 py-1 bg-card hover:bg-muted border border-border rounded-lg text-xs font-bold text-foreground transition-all"
                 >
                   {showSolution ? <EyeOff size={10} /> : <Eye size={10} />}
                   {showSolution ? "Hide Solution" : "View Solution"}
@@ -336,26 +336,26 @@ export default function DailyChallengePage() {
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="Write your Arduino code here..."
-                className="w-full h-full p-4 font-mono text-xs outline-none resize-none bg-slate-950 text-[#E2E8F0] caret-indigo-500 leading-relaxed overflow-y-auto"
+                className="w-full h-full p-4 font-mono text-xs outline-none resize-none bg-background text-foreground caret-primary leading-relaxed overflow-y-auto"
                 spellCheck={false}
               />
             </div>
 
             {/* Simulated Live Console Terminal */}
-            <div className="h-44 border-t border-slate-800 bg-[#060814] flex flex-col">
-              <div className="flex items-center justify-between px-4 py-1.5 bg-[#0b0f19] border-b border-slate-800 text-[10px] font-mono text-slate-500 font-bold">
+            <div className="h-44 border-t border-border bg-background flex flex-col">
+              <div className="flex items-center justify-between px-4 py-1.5 bg-background border-b border-border text-[10px] font-mono text-muted-foreground font-bold">
                 <span>SIMULATOR CONSOLE</span>
-                {testStatus === "running" && <span className="text-indigo-400 animate-pulse">RUNNING TESTS...</span>}
-                {testStatus === "success" && <span className="text-emerald-400">PASSED</span>}
-                {testStatus === "failed" && <span className="text-rose-400">FAILED</span>}
+                {testStatus === "running" && <span className="text-primary animate-pulse">RUNNING TESTS...</span>}
+                {testStatus === "success" && <span className="text-success">PASSED</span>}
+                {testStatus === "failed" && <span className="text-destructive">FAILED</span>}
               </div>
-              <div className="flex-1 p-3 font-mono text-[10px] text-slate-400 overflow-y-auto space-y-1 select-text">
+              <div className="flex-1 p-3 font-mono text-[10px] text-muted-foreground overflow-y-auto space-y-1 select-text">
                 {consoleOutput.map((out, idx) => (
                   <div key={idx} className={
-                    out.includes("[SUCCESS]") ? "text-emerald-400 font-bold" :
-                    out.includes("❌") || out.includes("Error:") ? "text-rose-400" :
-                    out.includes("✓") ? "text-emerald-400" :
-                    out.includes("[SYSTEM]") ? "text-indigo-400" : "text-slate-500"
+                    out.includes("[SUCCESS]") ? "text-success font-bold" :
+                    out.includes("❌") || out.includes("Error:") ? "text-destructive" :
+                    out.includes("✓") ? "text-success" :
+                    out.includes("[SYSTEM]") ? "text-muted-foreground" : "text-muted-foreground"
                   }>
                     {out}
                   </div>
@@ -364,11 +364,11 @@ export default function DailyChallengePage() {
             </div>
 
             {/* Action Bar */}
-            <div className="p-3 border-t border-slate-800 bg-slate-900 flex justify-end">
+            <div className="p-3 border-t border-border bg-card flex justify-end">
               <button
                 onClick={runVerification}
                 disabled={testStatus === "running" || completed}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-500 hover:bg-indigo-400 text-white transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1.5 shadow"
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1.5 shadow"
               >
                 {testStatus === "running" ? (
                   <>
@@ -389,16 +389,15 @@ export default function DailyChallengePage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowSolution(false)}>
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
             <div
-              className="relative w-full max-w-2xl max-h-[85vh] rounded-2xl border border-emerald-500/20 overflow-hidden flex flex-col"
-              style={{ background: "hsl(var(--background-card))" }}
+              className="relative w-full max-w-2xl max-h-[85vh] rounded-2xl border border-border overflow-hidden flex flex-col bg-card"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-5 py-3 border-b border-emerald-500/20 bg-emerald-500/5">
-                <span className="font-bold text-sm text-emerald-400">Challenge Solution Code</span>
-                <button onClick={() => setShowSolution(false)} className="text-slate-400 hover:text-white text-xs font-bold">Close</button>
+              <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-card">
+                <span className="font-bold text-sm text-foreground">Challenge Solution Code</span>
+                <button onClick={() => setShowSolution(false)} className="text-muted-foreground hover:text-foreground text-xs font-bold">Close</button>
               </div>
-              <div className="flex-1 overflow-y-auto p-5 bg-slate-950">
-                <pre className="text-xs font-mono text-emerald-400 overflow-x-auto whitespace-pre-wrap leading-relaxed">
+              <div className="flex-1 overflow-y-auto p-5 bg-background">
+                <pre className="text-xs font-mono text-foreground overflow-x-auto whitespace-pre-wrap leading-relaxed">
                   {challenge.solution_code}
                 </pre>
               </div>

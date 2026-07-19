@@ -72,23 +72,23 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: "hsl(var(--background))" }}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-background">
       <FadeInView className="w-full max-w-lg">
-        <div className="bg-white border-2 border-b-4 border-slate-100 rounded-3xl p-8 shadow-sm">
+        <div className="bg-card border-2 border-b-4 border-border rounded-3xl p-8 shadow-sm">
           {/* Logo */}
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-extrabold font-display text-indigo-950 flex items-center justify-center gap-1.5">
-              <span>⚡</span> Ignite<span className="text-indigo-600 font-extrabold font-display">Lab</span>
+            <h1 className="text-3xl font-extrabold font-display text-foreground flex items-center justify-center gap-1.5">
+              <span>⚡</span> Ignite<span className="text-primary font-extrabold font-display">Lab</span>
             </h1>
           </div>
 
           {/* Progress Bar */}
-          <div className="flex gap-2 mb-8 bg-slate-100 p-1 rounded-full">
+          <div className="flex gap-2 mb-8 bg-[hsl(var(--background-hover))] p-1 rounded-full">
             {[1, 2, 3].map((s) => (
               <div
                 key={s}
                 className={`flex-1 h-2 rounded-full transition-all duration-350 ${
-                  s <= step ? "bg-indigo-500" : "bg-transparent"
+                  s <= step ? "bg-primary" : "bg-transparent"
                 }`}
               />
             ))}
@@ -97,10 +97,10 @@ export default function OnboardingPage() {
           {/* Step 1: Name */}
           {step === 1 && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-              <h2 className="text-2xl font-extrabold font-display text-indigo-950 mb-2">
+              <h2 className="text-2xl font-extrabold font-display text-foreground mb-2">
                 Welcome! What's your name?
               </h2>
-              <p className="text-sm font-semibold text-slate-400 mb-6">
+              <p className="text-sm font-semibold text-muted-foreground mb-6">
                 Tell us what we should call you as you build.
               </p>
 
@@ -110,13 +110,13 @@ export default function OnboardingPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 maxLength={50}
-                className="w-full px-4 py-3 bg-slate-50 hover:bg-slate-100/50 border-2 border-slate-100 rounded-xl text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:bg-white text-slate-800 transition-all placeholder:text-slate-400 placeholder:font-bold mb-6"
+                className="w-full px-4 py-3 bg-background hover:bg-[hsl(var(--background-hover))]/50 border-2 border-input rounded-xl text-sm font-semibold focus:outline-none focus:border-primary focus:bg-card text-foreground transition-all placeholder:text-muted-foreground placeholder:font-bold mb-6"
               />
 
               <button
                 onClick={() => setStep(2)}
                 disabled={!fullName.trim()}
-                className="w-full py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-40 disabled:pointer-events-none"
+                className="w-full py-3 bg-primary hover:bg-primary/90 border-2 border-b-4 border-[hsl(var(--primary-dark))] active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-primary-foreground flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-40 disabled:pointer-events-none"
               >
                 Continue <ArrowRight size={16} />
               </button>
@@ -126,10 +126,10 @@ export default function OnboardingPage() {
           {/* Step 2: Experience Level */}
           {step === 2 && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-              <h2 className="text-2xl font-extrabold font-display text-indigo-950 mb-2">
+              <h2 className="text-2xl font-extrabold font-display text-foreground mb-2">
                 What's your Arduino experience?
               </h2>
-              <p className="text-sm font-semibold text-slate-400 mb-6">
+              <p className="text-sm font-semibold text-muted-foreground mb-6">
                 We'll tailor the recommended learning path to your starting point.
               </p>
 
@@ -142,17 +142,17 @@ export default function OnboardingPage() {
                       onClick={() => setExperience(level.id)}
                       className={`w-full flex items-center gap-4 p-4 rounded-2xl text-left border-2 border-b-4 transition-all hover:translate-y-[-1px] ${
                         active
-                          ? "bg-white border-indigo-500"
-                          : "bg-slate-50 border-slate-100"
+                          ? "bg-card border-primary"
+                          : "bg-background border-border"
                       }`}
                     >
                       <span className="text-3xl">{level.icon}</span>
                       <div className="flex-1">
-                        <p className="font-extrabold text-indigo-950 text-sm">{level.label}</p>
-                        <p className="text-xs font-semibold text-slate-400 mt-0.5">{level.desc}</p>
+                        <p className="font-extrabold text-foreground text-sm">{level.label}</p>
+                        <p className="text-xs font-semibold text-muted-foreground mt-0.5">{level.desc}</p>
                       </div>
                       {active && (
-                        <CheckCircle size={18} className="text-indigo-500 flex-shrink-0" />
+                        <CheckCircle size={18} className="text-primary flex-shrink-0" />
                       )}
                     </button>
                   );
@@ -163,14 +163,14 @@ export default function OnboardingPage() {
                 <button
                   onClick={() => setStep(3)}
                   disabled={!experience}
-                  className="w-full py-3 bg-indigo-500 hover:bg-indigo-400 border-2 border-b-4 border-indigo-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-40 disabled:pointer-events-none"
+                  className="w-full py-3 bg-primary hover:bg-primary/90 border-2 border-b-4 border-[hsl(var(--primary-dark))] active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-primary-foreground flex items-center justify-center gap-2 transition-all shadow-sm disabled:opacity-40 disabled:pointer-events-none"
                 >
                   Continue <ArrowRight size={16} />
                 </button>
 
                 <button
                   onClick={() => setStep(1)}
-                  className="w-full py-2 bg-slate-50 hover:bg-slate-100 border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-[2px] rounded-xl text-xs font-extrabold text-slate-500 flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-2 bg-background hover:bg-[hsl(var(--background-hover))] border-2 border-b-4 border-border active:border-b-2 active:translate-y-[2px] rounded-xl text-xs font-extrabold text-muted-foreground flex items-center justify-center gap-2 transition-all"
                 >
                   ← Back
                 </button>
@@ -181,10 +181,10 @@ export default function OnboardingPage() {
           {/* Step 3: Component Inventory */}
           {step === 3 && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-              <h2 className="text-2xl font-extrabold font-display text-indigo-950 mb-2">
+              <h2 className="text-2xl font-extrabold font-display text-foreground mb-2">
                 What components do you have?
               </h2>
-              <p className="text-sm font-semibold text-slate-400 mb-6">
+              <p className="text-sm font-semibold text-muted-foreground mb-6">
                 Select your starter kit so we can automatically match lessons.
               </p>
 
@@ -197,39 +197,39 @@ export default function OnboardingPage() {
                       onClick={() => handleSelectKit(kit.id)}
                       className={`w-full flex items-center gap-4 p-4 rounded-2xl text-left border-2 border-b-4 transition-all hover:translate-y-[-1px] ${
                         active
-                          ? "bg-white border-indigo-500"
-                          : "bg-slate-50 border-slate-100"
+                          ? "bg-card border-primary"
+                          : "bg-background border-border"
                       }`}
                     >
                       <div
                         className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 border-b-4 ${
                           active
-                            ? "bg-indigo-50 border-indigo-200 text-indigo-600"
-                            : "bg-white border-slate-200 text-slate-400"
+                            ? "bg-primary/10 border-primary/30 text-primary"
+                            : "bg-card border-border text-muted-foreground"
                         }`}
                       >
                         <Package size={20} />
                       </div>
                       <div className="flex-1">
-                        <p className="font-extrabold text-indigo-950 text-sm">{kit.name}</p>
-                        <p className="text-xs font-bold text-slate-400 mt-0.5">
+                        <p className="font-extrabold text-foreground text-sm">{kit.name}</p>
+                        <p className="text-xs font-bold text-muted-foreground mt-0.5">
                           {kit.components.length} components
                         </p>
                       </div>
-                      {active && <CheckCircle size={18} className="text-indigo-500" />}
+                      {active && <CheckCircle size={18} className="text-primary" />}
                     </button>
                   );
                 })}
               </div>
 
               {selectedKit && (
-                <div className="mb-6 p-4 rounded-2xl bg-indigo-50/50 border-2 border-indigo-100">
-                  <p className="text-xs font-bold text-indigo-600 mb-2">Included components:</p>
+                <div className="mb-6 p-4 rounded-2xl bg-primary/10 border-2 border-primary/30">
+                  <p className="text-xs font-bold text-primary mb-2">Included components:</p>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedComponents.map((c) => (
                       <span
                         key={c}
-                        className="text-xs px-2.5 py-1 rounded-xl bg-white text-indigo-950 border border-indigo-100 font-semibold"
+                        className="text-xs px-2.5 py-1 rounded-xl bg-card text-foreground border border-border font-semibold"
                       >
                         {c}
                       </span>
@@ -242,7 +242,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={handleComplete}
                   disabled={loading}
-                  className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 border-2 border-b-4 border-emerald-700 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-sm"
+                  className="w-full py-3 bg-success hover:bg-success/90 border-2 border-b-4 border-[hsl(var(--success-dark))] active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-primary-foreground flex items-center justify-center gap-2 transition-all shadow-sm"
                 >
                   {loading
                     ? "Setting up..."
@@ -258,14 +258,14 @@ export default function OnboardingPage() {
                     setSelectedComponents([]);
                     handleComplete();
                   }}
-                  className="w-full py-2.5 bg-slate-50 hover:bg-slate-100 border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-[2px] rounded-xl text-xs font-extrabold text-slate-500 flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-2.5 bg-background hover:bg-[hsl(var(--background-hover))] border-2 border-b-4 border-border active:border-b-2 active:translate-y-[2px] rounded-xl text-xs font-extrabold text-muted-foreground flex items-center justify-center gap-2 transition-all"
                 >
                   Skip — I'll add components later
                 </button>
 
                 <button
                   onClick={() => setStep(2)}
-                  className="w-full py-2 text-xs font-bold text-slate-400 hover:text-slate-500 flex items-center justify-center gap-2"
+                  className="w-full py-2 text-xs font-bold text-muted-foreground hover:text-foreground flex items-center justify-center gap-2"
                 >
                   ← Back
                 </button>

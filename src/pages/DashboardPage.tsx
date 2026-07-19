@@ -43,10 +43,10 @@ const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
   const badgeClasses =
     difficulty === "beginner"
-      ? "bg-green-500/15 text-green-400 border-2 border-green-500/30"
+      ? "bg-success/15 text-success border-2 border-success/30"
       : difficulty === "intermediate"
-      ? "bg-amber-500/15 text-amber-400 border-2 border-amber-500/30"
-      : "bg-purple-500/15 text-purple-400 border-2 border-purple-500/30";
+      ? "bg-secondary/15 text-secondary border-2 border-secondary/30"
+      : "bg-brand-purple/15 text-brand-purple border-2 border-brand-purple/30";
   return (
     <span
       className={`text-xs px-2.5 py-0.5 rounded-full font-bold capitalize font-display ${badgeClasses}`}
@@ -83,12 +83,12 @@ function WhatCanIMakeWidget({
         transition={{ delay: 0.2 }}
       >
         <div className="flex items-center gap-2 mb-2">
-          <Zap size={18} style={{ color: "#6366F1" }} />
-          <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+          <Zap size={18} style={{ color: "hsl(var(--foreground))" }} />
+          <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
             What Can I Make?
           </span>
         </div>
-        <p className="text-sm font-semibold mb-3" style={{ color: "hsl(240, 14%, 60%)" }}>
+        <p className="text-sm font-semibold mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
           Add components to your inventory to see projects you can build right now!
         </p>
         <button
@@ -111,13 +111,13 @@ function WhatCanIMakeWidget({
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Zap size={18} style={{ color: "#6366F1" }} />
-          <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+          <Zap size={18} style={{ color: "hsl(var(--foreground))" }} />
+          <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
             What Can I Make?
           </span>
           <span
             className="text-xs px-2.5 py-0.5 rounded-full font-black"
-            style={{ background: "rgba(34, 197, 94, 0.15)", color: "#4ADE80", border: "2px solid rgba(34, 197, 94, 0.3)", fontFamily: "'Baloo 2', sans-serif" }}
+            style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "2px solid hsl(var(--success) / 0.3)", fontFamily: "'Baloo 2', sans-serif" }}
           >
             {buildable.length} ready
           </span>
@@ -125,7 +125,7 @@ function WhatCanIMakeWidget({
         <button
           onClick={() => navigate("/generate")}
           className="text-xs font-black"
-          style={{ color: "#6366F1" }}
+          style={{ color: "hsl(var(--primary))" }}
           id="see-all-projects-btn"
         >
           See all →
@@ -134,7 +134,7 @@ function WhatCanIMakeWidget({
 
       {buildable.length === 0 ? (
         <div>
-          <p className="text-sm font-semibold mb-3" style={{ color: "hsl(240, 14%, 60%)" }}>
+          <p className="text-sm font-semibold mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
             No fully buildable projects found. Try adding more components!
           </p>
           <button
@@ -161,7 +161,7 @@ function WhatCanIMakeWidget({
               style={{
                 background: "hsl(var(--card))",
                 border: "2px solid hsl(var(--border))",
-                boxShadow: "0 3px 0 0 hsl(240, 15%, 12%)",
+                boxShadow: "0 3px 0 0 hsl(var(--background))",
               }}
             >
               <div className="text-xl mb-1">{p.emoji}</div>
@@ -169,8 +169,8 @@ function WhatCanIMakeWidget({
                 {p.title}
               </p>
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-[10px] font-semibold" style={{ color: "hsl(240, 14%, 60%)" }}>{p.time}</span>
-                <span className="text-[10px] font-black" style={{ color: "#A855F7" }}>+{p.xp}</span>
+                <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>{p.time}</span>
+                <span className="text-[10px] font-black" style={{ color: "hsl(var(--primary))" }}>+{p.xp}</span>
               </div>
             </button>
           ))}
@@ -308,14 +308,14 @@ export default function DashboardPage() {
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
             <div
               className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mx-auto mb-6"
-              style={{ background: "hsl(var(--card))", border: "3px solid hsl(var(--border))", boxShadow: "0 5px 0 0 hsl(240, 15%, 12%)" }}
+              style={{ background: "hsl(var(--card))", border: "3px solid hsl(var(--border))", boxShadow: "0 5px 0 0 hsl(var(--background))" }}
             >
               🔒
             </div>
             <h1 className="text-3xl font-black mb-2" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
               Sign in to continue
             </h1>
-            <p className="text-sm font-semibold mb-6" style={{ color: "hsl(240, 14%, 60%)" }}>
+            <p className="text-sm font-semibold mb-6" style={{ color: "hsl(var(--muted-foreground))" }}>
               Save projects, track progress, and earn XP
             </p>
             <button
@@ -347,7 +347,7 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-black mb-0.5" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
             Dashboard
           </h1>
-          <p className="text-sm font-semibold" style={{ color: "hsl(240, 14%, 60%)" }}>
+          <p className="text-sm font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>
             Track your progress and keep the streak alive 🔥
           </p>
         </motion.div>
@@ -355,10 +355,10 @@ export default function DashboardPage() {
         {/* ── Stats Grid ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {[
-            { label: "In Progress", value: inProgressProjects.length, bg: "rgba(79, 70, 229, 0.1)", border: "rgba(79, 70, 229, 0.3)", shadow: "rgba(79, 70, 229, 0.15)", text: "#818CF8", emoji: "▶️" },
-            { label: "Completed",   value: completedProjects.length,  bg: "rgba(34, 197, 94, 0.1)", border: "rgba(34, 197, 94, 0.3)", shadow: "rgba(34, 197, 94, 0.15)", text: "#4ADE80", emoji: "✅" },
-            { label: "Saved",       value: savedProjects.length,      bg: "rgba(124, 58, 237, 0.1)", border: "rgba(124, 58, 237, 0.3)", shadow: "rgba(124, 58, 237, 0.15)", text: "#A78BFA", emoji: "🔖" },
-            { label: "Total XP",    value: dbXp,                      bg: "rgba(217, 119, 6, 0.1)", border: "rgba(217, 119, 6, 0.3)", shadow: "rgba(217, 119, 6, 0.15)", text: "#FBBF24", emoji: "💎" },
+            { label: "In Progress", value: inProgressProjects.length, bg: "hsl(var(--muted))", border: "hsl(var(--border))", shadow: "hsl(var(--background))", text: "hsl(var(--foreground))", emoji: "▶️" },
+            { label: "Completed",   value: completedProjects.length,  bg: "hsl(var(--success) / 0.1)", border: "hsl(var(--success) / 0.3)", shadow: "hsl(var(--success) / 0.15)", text: "hsl(var(--success))", emoji: "✅" },
+            { label: "Saved",       value: savedProjects.length,      bg: "hsl(var(--purple) / 0.1)", border: "hsl(var(--purple) / 0.3)", shadow: "hsl(var(--purple) / 0.15)", text: "hsl(var(--purple))", emoji: "🔖" },
+            { label: "Total XP",    value: dbXp,                      bg: "hsl(var(--primary) / 0.1)", border: "hsl(var(--primary) / 0.3)", shadow: "hsl(var(--primary) / 0.15)", text: "hsl(var(--primary))", emoji: "💎" },
           ].map(({ label, value, bg, border, shadow, text, emoji }, i) => (
             <motion.div
               key={label}
@@ -377,7 +377,7 @@ export default function DashboardPage() {
               <p className="text-3xl font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: text }}>
                 {value.toLocaleString()}
               </p>
-              <p className="text-xs font-bold mt-0.5" style={{ color: "hsl(240, 14%, 60%)" }}>{label}</p>
+              <p className="text-xs font-bold mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>{label}</p>
             </motion.div>
           ))}
         </div>
@@ -393,12 +393,12 @@ export default function DashboardPage() {
             {/* Decorative bubble */}
             <div
               className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20"
-              style={{ background: "#6366F1" }}
+              style={{ background: "hsl(var(--muted-foreground))" }}
             />
             <div className="relative z-10 flex flex-col sm:flex-row gap-5 items-center">
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
-                style={{ background: "hsl(var(--card))", border: "2.5px solid hsl(var(--border))", boxShadow: "0 4px 0 0 hsl(240, 15%, 12%)" }}
+                style={{ background: "hsl(var(--card))", border: "2.5px solid hsl(var(--border))", boxShadow: "0 4px 0 0 hsl(var(--background))" }}
               >
                 🚀
               </div>
@@ -406,7 +406,7 @@ export default function DashboardPage() {
                 <h2 className="text-xl font-black mb-1" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
                   Welcome to ArduinoLab!
                 </h2>
-                <p className="text-sm font-semibold mb-4" style={{ color: "hsl(240, 14%, 60%)" }}>
+                <p className="text-sm font-semibold mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>
                   Your workspace is ready. Let's build your first project!
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
@@ -444,18 +444,18 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <motion.div animate={streakAnimating ? { rotate: [0, -15, 15, 0], scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.6 }}>
-                  <Flame size={18} style={{ color: streakDays > 0 ? "#F59E0B" : "#94A3B8" }} />
+                  <Flame size={18} style={{ color: streakDays > 0 ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }} />
                 </motion.div>
-                <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+                <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
                   Daily Streak
                 </span>
               </div>
               <motion.span
                 className="font-black text-sm px-3 py-1 rounded-full"
                 style={{
-                  background: streakDays > 0 ? "rgba(245, 158, 11, 0.15)" : "rgba(255,255,255,0.03)",
-                  color: streakDays > 0 ? "#F59E0B" : "#64748B",
-                  border: `2px solid ${streakDays > 0 ? "rgba(245, 158, 11, 0.3)" : "rgba(255,255,255,0.1)"}`,
+                  background: streakDays > 0 ? "hsl(var(--primary) / 0.15)" : "hsl(var(--muted) / 0.5)",
+                  color: streakDays > 0 ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+                  border: `2px solid ${streakDays > 0 ? "hsl(var(--primary) / 0.3)" : "hsl(var(--border) / 0.5)"}`,
                   fontFamily: "'Baloo 2', sans-serif",
                 }}
                 animate={streakAnimating ? { scale: [1, 1.2, 1] } : {}}
@@ -480,8 +480,8 @@ export default function DashboardPage() {
                         className="w-9 h-9 rounded-full flex items-center justify-center font-black text-sm"
                         style={
                           active
-                            ? { background: "#22C55E", color: "white", border: "2.5px solid #16A34A", boxShadow: "0 3px 0 0 #15803D" }
-                            : { background: "hsl(240, 10%, 15%)", color: "hsl(240, 5%, 55%)", border: "2px solid hsl(240, 10%, 25%)" }
+                            ? { background: "hsl(var(--success))", color: "white", border: "2.5px solid hsl(var(--success-dark))", boxShadow: "0 3px 0 0 hsl(var(--success-dark))" }
+                            : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "2px solid hsl(var(--border))" }
                         }
                         initial={false}
                         animate={active && streakAnimating ? { scale: [1, 1.2, 1] } : {}}
@@ -491,7 +491,7 @@ export default function DashboardPage() {
                       </motion.div>
                       <span
                         className="text-[10px] font-bold"
-                        style={{ color: isToday ? "#6366F1" : active ? "#16A34A" : "hsl(240, 14%, 65%)" }}
+                        style={{ color: isToday ? "hsl(var(--primary))" : active ? "hsl(var(--success))" : "hsl(var(--muted-foreground))" }}
                       >
                         {d}
                       </span>
@@ -509,8 +509,8 @@ export default function DashboardPage() {
             whileInView={{ opacity: 1, x: 0 }}
           >
             <div className="flex items-center gap-2 mb-4">
-              <Star size={18} style={{ color: "#F59E0B" }} />
-              <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(244, 61%, 33%)" }}>
+              <Star size={18} style={{ color: "hsl(var(--foreground))" }} />
+              <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
                 Daily Challenges
               </span>
             </div>
@@ -521,8 +521,8 @@ export default function DashboardPage() {
                   key={i}
                   className="flex items-center justify-between rounded-xl p-3"
                   style={{
-                    background: c.done ? "rgba(34, 197, 94, 0.1)" : "hsl(240, 10%, 15%)",
-                    border: `2px solid ${c.done ? "rgba(34, 197, 94, 0.3)" : "hsl(240, 10%, 25%)"}`,
+                    background: c.done ? "hsl(var(--success) / 0.1)" : "hsl(var(--muted))",
+                    border: `2px solid ${c.done ? "hsl(var(--success) / 0.3)" : "hsl(var(--border))"}`,
                   }}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -532,8 +532,8 @@ export default function DashboardPage() {
                     <div
                       className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
                       style={{
-                        background: c.done ? "#22C55E" : "white",
-                        border: `2px solid ${c.done ? "#16A34A" : "hsl(238, 45%, 82%)"}`,
+                        background: c.done ? "hsl(var(--success))" : "hsl(var(--muted))",
+                        border: `2px solid ${c.done ? "hsl(var(--success-dark))" : "hsl(var(--border))"}`,
                       }}
                     >
                       {c.done && <CheckCircle size={14} color="white" strokeWidth={3} />}
@@ -542,19 +542,19 @@ export default function DashboardPage() {
                       <p
                         className="text-xs font-black"
                         style={{
-                          color: c.done ? "#4ADE80" : "hsl(var(--foreground))",
+                          color: c.done ? "hsl(var(--success))" : "hsl(var(--foreground))",
                           textDecoration: c.done ? "line-through" : "none",
                           fontFamily: "'Baloo 2', sans-serif",
                         }}
                       >
                         {c.title}
                       </p>
-                      <p className="text-[10px] font-semibold" style={{ color: "hsl(240, 14%, 60%)" }}>{c.desc}</p>
+                      <p className="text-[10px] font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>{c.desc}</p>
                     </div>
                   </div>
                   <span
                     className="text-xs font-black px-2 py-0.5 rounded-full flex-shrink-0"
-                    style={{ background: "rgba(124, 58, 237, 0.15)", color: "#A78BFA", border: "2px solid rgba(124, 58, 237, 0.3)", fontFamily: "'Baloo 2', sans-serif" }}
+                    style={{ background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "2px solid hsl(var(--primary) / 0.3)", fontFamily: "'Baloo 2', sans-serif" }}
                   >
                     +{c.xp} XP
                   </span>
@@ -581,7 +581,7 @@ export default function DashboardPage() {
         >
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <BookOpen size={18} style={{ color: "#6366F1" }} />
+              <BookOpen size={18} style={{ color: "hsl(var(--foreground))" }} />
               <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
                 Learning Pathway
               </span>
@@ -616,15 +616,15 @@ export default function DashboardPage() {
                     className="w-12 h-12 rounded-full flex items-center justify-center text-xl"
                     style={
                       s.done
-                        ? { background: "rgba(34, 197, 94, 0.15)", border: "2.5px solid rgba(34, 197, 94, 0.3)", boxShadow: "0 3px 0 0 rgba(34, 197, 94, 0.15)" }
-                        : { background: "hsl(240, 10%, 15%)", border: "2px solid hsl(240, 10%, 25%)", boxShadow: "0 3px 0 0 hsl(240, 10%, 10%)" }
+                        ? { background: "hsl(var(--success) / 0.15)", border: "2.5px solid hsl(var(--success) / 0.3)", boxShadow: "0 3px 0 0 hsl(var(--success) / 0.15)" }
+                        : { background: "hsl(var(--muted))", border: "2px solid hsl(var(--border))", boxShadow: "0 3px 0 0 hsl(var(--background))" }
                     }
                   >
                     {s.done ? "✅" : s.emoji}
                   </div>
                   <p
                     className="text-[10px] font-black text-center"
-                    style={{ color: s.done ? "#4ADE80" : "hsl(var(--foreground))", fontFamily: "'Baloo 2', sans-serif" }}
+                    style={{ color: s.done ? "hsl(var(--success))" : "hsl(var(--foreground))", fontFamily: "'Baloo 2', sans-serif" }}
                   >
                     {s.label}
                   </p>
@@ -634,7 +634,7 @@ export default function DashboardPage() {
                     style={{
                       width: 24,
                       height: 3,
-                      borderTop: `3px dashed ${s.done ? "#22C55E" : "hsl(240, 10%, 25%)"}`,
+                      borderTop: `3px dashed ${s.done ? "hsl(var(--success))" : "hsl(var(--border))"}`,
                     }}
                   />
                 )}
@@ -659,10 +659,10 @@ export default function DashboardPage() {
                 style={
                   isActive
                     ? {
-                        background: "hsl(240, 10%, 15%)",
+                        background: "hsl(var(--muted))",
                         color: "hsl(var(--primary))",
                         border: "2.5px solid hsl(var(--border))",
-                        boxShadow: "0 3px 0 0 hsl(240, 10%, 10%)",
+                        boxShadow: "0 3px 0 0 hsl(var(--background))",
                         fontFamily: "'Baloo 2', sans-serif",
                       }
                     : {
@@ -686,9 +686,9 @@ export default function DashboardPage() {
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               className="w-12 h-12 rounded-full border-4 mx-auto mb-3"
-              style={{ borderColor: "#E0E7FF", borderTopColor: "#6366F1" }}
+              style={{ borderColor: "hsl(var(--border))", borderTopColor: "hsl(var(--primary))" }}
             />
-            <p className="font-bold text-sm" style={{ color: "hsl(240, 14%, 60%)", fontFamily: "'Baloo 2', sans-serif" }}>
+            <p className="font-bold text-sm" style={{ color: "hsl(var(--muted-foreground))", fontFamily: "'Baloo 2', sans-serif" }}>
               Loading projects...
             </p>
           </div>
@@ -712,7 +712,7 @@ export default function DashboardPage() {
                   <div className="flex items-start gap-4">
                     <div
                       className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                      style={{ background: "hsl(240, 10%, 15%)", border: "2px solid hsl(240, 10%, 25%)" }}
+                      style={{ background: "hsl(var(--muted))", border: "2px solid hsl(var(--border))" }}
                     >
                       {p.emoji}
                     </div>
@@ -722,7 +722,7 @@ export default function DashboardPage() {
                           <h3 className="font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
                             {p.title}
                           </h3>
-                          <p className="text-xs font-semibold mt-0.5 line-clamp-1" style={{ color: "hsl(240, 14%, 60%)" }}>
+                          <p className="text-xs font-semibold mt-0.5 line-clamp-1" style={{ color: "hsl(var(--muted-foreground))" }}>
                             {p.description || ""}
                           </p>
                         </div>
@@ -751,7 +751,7 @@ export default function DashboardPage() {
 
                       <div className="flex items-center gap-3 mb-3">
                         <DifficultyBadge difficulty={p.difficulty || "beginner"} />
-                        <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: "hsl(240, 14%, 60%)" }}>
+                        <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>
                           <Clock size={11} /> {p.time}
                         </span>
                       </div>
@@ -766,7 +766,7 @@ export default function DashboardPage() {
                           transition={{ duration: 0.8, delay: 0.1 }}
                         />
                       </div>
-                      <p className="text-right text-xs font-black mt-1" style={{ color: "#16A34A", fontFamily: "'Baloo 2', sans-serif" }}>
+                      <p className="text-right text-xs font-black mt-1" style={{ color: "hsl(var(--success))", fontFamily: "'Baloo 2', sans-serif" }}>
                         {p.progress || 0}%
                       </p>
                     </div>
@@ -786,7 +786,7 @@ export default function DashboardPage() {
                 <div
                   key={p.id}
                   className="rounded-2xl p-5"
-                  style={{ background: "rgba(34, 197, 94, 0.05)", border: "2.5px solid rgba(34, 197, 94, 0.3)", boxShadow: "0 4px 0 0 rgba(34, 197, 94, 0.15)" }}
+                  style={{ background: "hsl(var(--success) / 0.05)", border: "2.5px solid hsl(var(--success) / 0.3)", boxShadow: "0 4px 0 0 hsl(var(--success) / 0.15)" }}
                 >
                   <div className="flex items-center gap-4">
                     <div className="text-3xl">{p.emoji}</div>
@@ -795,11 +795,11 @@ export default function DashboardPage() {
                         <div>
                           <div className="flex items-center gap-2">
                             <h3 className="font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>{p.title}</h3>
-                            <CheckCircle size={16} style={{ color: "#16A34A" }} />
+                            <CheckCircle size={16} style={{ color: "hsl(var(--success))" }} />
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             <DifficultyBadge difficulty={p.difficulty || "beginner"} />
-                            <span className="text-xs font-black" style={{ color: "#16A34A", fontFamily: "'Baloo 2', sans-serif" }}>
+                            <span className="text-xs font-black" style={{ color: "hsl(var(--primary))", fontFamily: "'Baloo 2', sans-serif" }}>
                               +{p.xp} XP
                             </span>
                           </div>
@@ -830,7 +830,7 @@ export default function DashboardPage() {
                 <div
                   key={p.id}
                   className="rounded-2xl p-5"
-                  style={{ background: "rgba(124, 58, 237, 0.05)", border: "2.5px solid rgba(124, 58, 237, 0.3)", boxShadow: "0 4px 0 0 rgba(124, 58, 237, 0.15)" }}
+                  style={{ background: "hsl(var(--purple) / 0.05)", border: "2.5px solid hsl(var(--purple) / 0.3)", boxShadow: "0 4px 0 0 hsl(var(--purple) / 0.15)" }}
                 >
                   <div className="flex items-center gap-4">
                     <div className="text-3xl">{p.emoji}</div>
@@ -840,10 +840,10 @@ export default function DashboardPage() {
                           <h3 className="font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>{p.title}</h3>
                           <div className="flex items-center gap-2 mt-1">
                             <DifficultyBadge difficulty={p.difficulty || "beginner"} />
-                            <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: "hsl(240, 14%, 60%)" }}>
+                            <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>
                               <Clock size={10} /> {p.time}
                             </span>
-                            <span className="text-xs font-black" style={{ color: "#7C3AED", fontFamily: "'Baloo 2', sans-serif" }}>+{p.xp} XP</span>
+                            <span className="text-xs font-black" style={{ color: "hsl(var(--primary))", fontFamily: "'Baloo 2', sans-serif" }}>+{p.xp} XP</span>
                           </div>
                         </div>
                         <button
@@ -873,10 +873,10 @@ export default function DashboardPage() {
           <motion.div
             className="fixed bottom-24 md:bottom-6 right-6 px-5 py-3 rounded-2xl flex items-center gap-2 font-black z-50"
             style={{
-              background: "#22C55E",
+              background: "hsl(var(--success))",
               color: "white",
-              border: "2.5px solid #16A34A",
-              boxShadow: "0 5px 0 0 #15803D",
+              border: "2.5px solid hsl(var(--success-dark))",
+              boxShadow: "0 5px 0 0 hsl(var(--success-dark))",
               fontFamily: "'Baloo 2', sans-serif",
             }}
             initial={{ y: 40, opacity: 0, scale: 0.9 }}
@@ -908,11 +908,11 @@ function EmptyState({
     >
       <div
         className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4"
-        style={{ background: "hsl(240, 10%, 15%)", border: "3px solid hsl(240, 10%, 25%)", boxShadow: "0 5px 0 0 hsl(240, 10%, 10%)" }}
+        style={{ background: "hsl(var(--muted))", border: "3px solid hsl(var(--border))", boxShadow: "0 5px 0 0 hsl(var(--background))" }}
       >
         {emoji}
       </div>
-      <p className="font-bold text-sm mb-4" style={{ color: "hsl(240, 14%, 60%)", fontFamily: "'Baloo 2', sans-serif" }}>
+      <p className="font-bold text-sm mb-4" style={{ color: "hsl(var(--muted-foreground))", fontFamily: "'Baloo 2', sans-serif" }}>
         {message}
       </p>
       <button onClick={action} className="clay-btn clay-btn-primary clay-btn-sm mx-auto">

@@ -5,3 +5,10 @@ export function levelForXp(xp: number): number {
   if (xp >= 200) return 2;
   return 1;
 }
+
+// XP needed to reach the level above `level`. Shared by every progress bar.
+export function maxXpForLevel(level: number): number {
+  if (level >= 3) return 1000;
+  if (level >= 2) return 500;
+  return 200;
+}

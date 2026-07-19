@@ -34,6 +34,17 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          dark: "hsl(var(--success-dark))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          dark: "hsl(var(--warning-dark))",
+        },
+        "brand-purple": {
+          DEFAULT: "hsl(var(--purple))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
@@ -60,20 +71,6 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Muted neon palette
-        neon: {
-          teal: "hsl(182, 45%, 45%)",
-          gold: "hsl(45, 40%, 50%)",
-          green: "hsl(150, 40%, 45%)",
-          pink: "hsl(328, 40%, 50%)",
-          purple: "hsl(284, 35%, 55%)",
-          orange: "hsl(16, 55%, 48%)",
-        },
-        surface: {
-          DEFAULT: "hsl(232, 42%, 13%)",
-          hover: "hsl(232, 40%, 18%)",
-          deep: "hsl(232, 45%, 8%)",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -88,10 +85,6 @@ export default {
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
-        },
-        "neon-pulse": {
-          "0%, 100%": { boxShadow: "0 0 8px rgba(80, 180, 190, 0.2)" },
-          "50%": { boxShadow: "0 0 16px rgba(80, 180, 190, 0.35), 0 0 32px rgba(80, 180, 190, 0.15)" },
         },
         "float": {
           "0%, 100%": { transform: "translateY(0px)" },
@@ -117,27 +110,14 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "neon-pulse": "neon-pulse 2s ease-in-out infinite",
         "float": "float 3s ease-in-out infinite",
         "shimmer": "shimmer 4s linear infinite",
         "fade-in-up": "fade-in-up 0.5s ease-out forwards",
         "spin-slow": "spin-slow 8s linear infinite",
         "progress-bar": "progress-bar 2s ease-out forwards",
       },
-      backgroundImage: {
-        "gradient-teal": "linear-gradient(135deg, hsl(182,45%,45%), hsl(197,40%,40%), hsl(210,40%,45%))",
-        "gradient-gold": "linear-gradient(135deg, hsl(48,35%,55%), hsl(45,40%,50%), hsl(35,40%,48%))",
-        "gradient-green": "linear-gradient(135deg, hsl(150,40%,45%), hsl(143,38%,42%), hsl(144,38%,38%))",
-        "gradient-hero": "linear-gradient(135deg, rgba(80,180,190,0.08) 0%, rgba(150,90,200,0.08) 50%, rgba(190,170,80,0.04) 100%)",
-        "gradient-card": "linear-gradient(135deg, hsl(232,42%,13%), hsl(232,40%,18%))",
-      },
       boxShadow: {
-        "neon-teal": "0 0 12px rgba(80, 180, 190, 0.25), 0 0 24px rgba(80, 180, 190, 0.1)",
-        "neon-gold": "0 0 12px rgba(190, 170, 80, 0.25), 0 0 24px rgba(190, 170, 80, 0.1)",
-        "neon-green": "0 0 12px rgba(80, 180, 120, 0.25), 0 0 24px rgba(80, 180, 120, 0.1)",
-        "neon-pink": "0 0 12px rgba(190, 80, 130, 0.25), 0 0 24px rgba(190, 80, 130, 0.1)",
-        "neon-purple": "0 0 12px rgba(150, 90, 200, 0.25), 0 0 24px rgba(150, 90, 200, 0.1)",
-        "card-elevated": "0 4px 24px rgba(0, 0, 0, 0.4), 0 0 1px rgba(80, 180, 190, 0.08)",
+        "card-elevated": "0 4px 24px rgba(0, 0, 0, 0.4)",
       },
     },
   },

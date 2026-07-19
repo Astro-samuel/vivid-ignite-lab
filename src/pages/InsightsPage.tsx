@@ -113,19 +113,19 @@ export default function InsightsPage() {
   }, [totalXP]);
 
   const diffColors = {
-    beginner: { color: "#14B8A6", bg: "bg-teal-500/10", border: "border-teal-500/30", text: "text-teal-400" },
-    intermediate: { color: "#F59E0B", bg: "bg-amber-500/10", border: "border-amber-500/30", text: "text-amber-400" },
-    advanced: { color: "#06B6D4", bg: "bg-cyan-500/10", border: "border-cyan-500/30", text: "text-cyan-400" },
+    beginner: { color: "hsl(142, 60%, 42%)", bg: "bg-success/10", border: "border-success/30", text: "text-success" },
+    intermediate: { color: "hsl(189, 70%, 40%)", bg: "bg-secondary/10", border: "border-secondary/30", text: "text-secondary" },
+    advanced: { color: "hsl(262, 45%, 58%)", bg: "bg-brand-purple/10", border: "border-brand-purple/30", text: "text-brand-purple" },
   };
 
   const customTooltipStyle = {
     contentStyle: {
-      backgroundColor: "rgb(15 23 42)",
-      border: "1px solid rgb(30 41 59)",
+      backgroundColor: "hsl(228, 28%, 12%)",
+      border: "1px solid hsl(228, 20%, 22%)",
       borderRadius: "12px",
-      color: "white"
+      color: "hsl(220, 24%, 97%)"
     },
-    itemStyle: { color: "white" }
+    itemStyle: { color: "hsl(220, 24%, 97%)" }
   };
 
   return (
@@ -134,14 +134,14 @@ export default function InsightsPage() {
         {/* Header */}
         <FadeInView className="mb-2">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border-2 border-b-4 border-teal-500/20 flex items-center justify-center shadow-sm text-teal-400">
+            <div className="w-12 h-12 rounded-2xl bg-muted border-2 border-b-4 border-border flex items-center justify-center shadow-sm text-muted-foreground">
               <BarChart3 size={22} />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold font-display text-white">
+              <h1 className="text-3xl font-extrabold font-display text-foreground">
                 Progress Insights
               </h1>
-              <p className="text-sm font-semibold text-slate-400">
+              <p className="text-sm font-semibold text-muted-foreground">
                 Deep-dive metrics and analysis on your learning journey, skills, and speed.
               </p>
             </div>
@@ -151,28 +151,28 @@ export default function InsightsPage() {
         {/* Overview Stats */}
         <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Completion Rate", value: `${completionRate}%`, icon: Target, border: "border-teal-500/20", bg: "bg-teal-500/10", text: "text-teal-400" },
-            { label: "Total XP", value: totalXP.toLocaleString(), icon: Zap, border: "border-cyan-500/20", bg: "bg-cyan-500/10", text: "text-cyan-400" },
-            { label: "Streak", value: `${streakDays} days`, icon: Flame, border: "border-amber-500/20", bg: "bg-amber-500/10", text: "text-amber-400" },
+            { label: "Completion Rate", value: `${completionRate}%`, icon: Target, border: "border-border", bg: "bg-muted", text: "text-muted-foreground" },
+            { label: "Total XP", value: totalXP.toLocaleString(), icon: Zap, border: "border-primary/20", bg: "bg-primary/10", text: "text-primary" },
+            { label: "Streak", value: `${streakDays} days`, icon: Flame, border: "border-primary/20", bg: "bg-primary/10", text: "text-primary" },
             {
               label: "Time Invested",
               value: timeStats.totalMins > 60 ? `${Math.round(timeStats.totalMins / 60)}h` : `${timeStats.totalMins}m`,
               icon: Clock,
-              border: "border-teal-500/20",
-              bg: "bg-teal-500/10",
-              text: "text-teal-400",
+              border: "border-border",
+              bg: "bg-muted",
+              text: "text-muted-foreground",
             },
           ].map(({ label, value, icon: Icon, border, bg, text }) => (
             <motion.div
               key={label}
               variants={staggerItem}
-              className={`bg-slate-900/40 border-2 border-b-4 ${border} rounded-2xl p-5 shadow-md hover:translate-y-[-1px] transition-all`}
+              className={`bg-card/40 border-2 border-b-4 ${border} rounded-2xl p-5 shadow-md hover:translate-y-[-1px] transition-all`}
             >
               <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center mb-2`}>
                 <Icon size={16} className={text} />
               </div>
-              <p className="text-2xl font-extrabold font-display text-white">{value}</p>
-              <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">{label}</p>
+              <p className="text-2xl font-extrabold font-display text-foreground">{value}</p>
+              <p className="text-xs font-bold text-muted-foreground mt-1 uppercase tracking-wider">{label}</p>
             </motion.div>
           ))}
         </StaggerContainer>
@@ -181,13 +181,13 @@ export default function InsightsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Hardware Skills Mastery (Radar) */}
           <FadeInView delay={0.2}>
-            <div className="bg-slate-900/40 border-2 border-b-4 border-slate-800 rounded-3xl p-6 shadow-md h-full flex flex-col justify-between">
+            <div className="bg-card/40 border-2 border-b-4 border-border rounded-3xl p-6 shadow-md h-full flex flex-col justify-between">
               <div>
-                <h2 className="text-base font-extrabold font-display text-white mb-1.5 flex items-center gap-2">
-                  <Trophy size={18} className="text-teal-400 fill-teal-400/10" />
+                <h2 className="text-base font-extrabold font-display text-foreground mb-1.5 flex items-center gap-2">
+                  <Trophy size={18} className="text-muted-foreground" />
                   Hardware Skills Mastery
                 </h2>
-                <p className="text-xs text-slate-400 mb-4">
+                <p className="text-xs text-muted-foreground mb-4">
                   Visual assessment of your experience across core electronics topics.
                 </p>
               </div>
@@ -195,25 +195,25 @@ export default function InsightsPage() {
               <div className="h-64 w-full flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart cx="50%" cy="50%" radius="80%" data={radarData}>
-                    <PolarGrid stroke="rgba(255, 255, 255, 0.08)" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: "rgba(255, 255, 255, 0.6)", fontSize: 10 }} />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "rgba(255, 255, 255, 0.4)", fontSize: 8 }} />
+                    <PolarGrid stroke="hsl(228, 20%, 22%)" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: "hsl(228, 14%, 62%)", fontSize: 10 }} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "hsl(228, 14%, 62%)", fontSize: 8 }} />
                     <Radar
                       name="Skills"
                       dataKey="value"
-                      stroke="#06B6D4"
-                      fill="#0D9488"
+                      stroke="hsl(38, 92%, 50%)"
+                      fill="hsl(38, 92%, 50%)"
                       fillOpacity={0.25}
                     />
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
 
-              <div className="space-y-2 mt-4 pt-4 border-t border-slate-800">
+              <div className="space-y-2 mt-4 pt-4 border-t border-border">
                 {skills.map((skill) => (
                   <div key={skill.name} className="flex justify-between items-center text-xs">
-                    <span className="font-semibold text-slate-300">{skill.name}</span>
-                    <span className="font-mono text-cyan-400 font-bold">{skill.percent}%</span>
+                    <span className="font-semibold text-foreground">{skill.name}</span>
+                    <span className="font-mono text-primary font-bold">{skill.percent}%</span>
                   </div>
                 ))}
               </div>
@@ -222,13 +222,13 @@ export default function InsightsPage() {
 
           {/* Difficulty Breakdown & Progress */}
           <FadeInView delay={0.3}>
-            <div className="bg-slate-900/40 border-2 border-b-4 border-slate-800 rounded-3xl p-6 shadow-md h-full flex flex-col justify-between">
+            <div className="bg-card/40 border-2 border-b-4 border-border rounded-3xl p-6 shadow-md h-full flex flex-col justify-between">
               <div>
-                <h2 className="text-base font-extrabold font-display text-white mb-1.5 flex items-center gap-2">
-                  <TrendingUp size={18} className="text-cyan-400" />
+                <h2 className="text-base font-extrabold font-display text-foreground mb-1.5 flex items-center gap-2">
+                  <TrendingUp size={18} className="text-muted-foreground" />
                   Difficulty Level Breakdown
                 </h2>
-                <p className="text-xs text-slate-400 mb-4">
+                <p className="text-xs text-muted-foreground mb-4">
                   Completion stats and volumes divided by complexity.
                 </p>
               </div>
@@ -236,9 +236,9 @@ export default function InsightsPage() {
               <div className="h-56 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={difficultyData} barSize={28}>
-                    <XAxis dataKey="name" tick={{ fill: "rgba(255, 255, 255, 0.5)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: "rgba(255, 255, 255, 0.5)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <Tooltip {...customTooltipStyle} cursor={{ fill: "rgba(255, 255, 255, 0.04)", radius: 6 }} />
+                    <XAxis dataKey="name" tick={{ fill: "hsl(228, 14%, 62%)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: "hsl(228, 14%, 62%)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <Tooltip {...customTooltipStyle} cursor={{ fill: "hsl(228, 24%, 18%)", radius: 6 }} />
                     <Bar dataKey="completed" radius={[6, 6, 0, 0]}>
                       {difficultyData.map((entry, index) => {
                         const colors = [diffColors.beginner.color, diffColors.intermediate.color, diffColors.advanced.color];
@@ -263,13 +263,13 @@ export default function InsightsPage() {
                           >
                             {d}
                           </span>
-                          <span className="text-xs font-bold text-slate-400">
+                          <span className="text-xs font-bold text-muted-foreground">
                             {s.completed}/{s.total} completed
                           </span>
                         </div>
                         <span className={`text-xs font-extrabold ${styling.text}`}>{pct}%</span>
                       </div>
-                      <div className="h-2 rounded-full bg-slate-800 overflow-hidden border border-slate-700/50">
+                      <div className="h-2 rounded-full bg-muted overflow-hidden border border-border/50">
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${pct}%` }}
@@ -288,12 +288,12 @@ export default function InsightsPage() {
 
         {/* Weekly Activity Area Chart */}
         <FadeInView delay={0.4}>
-          <div className="bg-slate-900/40 border-2 border-b-4 border-slate-800 rounded-3xl p-6 shadow-md">
-            <h2 className="text-base font-extrabold font-display text-white mb-1.5 flex items-center gap-2">
-              <Zap size={18} className="text-teal-400 fill-teal-400/10" />
+          <div className="bg-card/40 border-2 border-b-4 border-border rounded-3xl p-6 shadow-md">
+            <h2 className="text-base font-extrabold font-display text-foreground mb-1.5 flex items-center gap-2">
+              <Zap size={18} className="text-muted-foreground" />
               XP Cumulative Growth
             </h2>
-            <p className="text-xs text-slate-400 mb-6">
+            <p className="text-xs text-muted-foreground mb-6">
               Track your cumulative experience gain and progression rate over the week.
             </p>
 
@@ -302,14 +302,14 @@ export default function InsightsPage() {
                 <AreaChart data={timelineData}>
                   <defs>
                     <linearGradient id="xpGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0D9488" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#0D9488" stopOpacity={0} />
+                      <stop offset="5%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(38, 92%, 50%)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="name" tick={{ fill: "rgba(255, 255, 255, 0.5)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: "rgba(255, 255, 255, 0.5)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="name" tick={{ fill: "hsl(228, 14%, 62%)", fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: "hsl(228, 14%, 62%)", fontSize: 11 }} axisLine={false} tickLine={false} />
                   <Tooltip {...customTooltipStyle} />
-                  <Area type="monotone" dataKey="XP" stroke="#14B8A6" strokeWidth={3} fillOpacity={1} fill="url(#xpGradient)" />
+                  <Area type="monotone" dataKey="XP" stroke="hsl(38, 92%, 50%)" strokeWidth={3} fillOpacity={1} fill="url(#xpGradient)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -319,22 +319,22 @@ export default function InsightsPage() {
         {/* Average Speed Insights */}
         <FadeInView delay={0.5}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-slate-900/40 border-2 border-b-4 border-slate-800 rounded-2xl p-5 shadow-md">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Avg XP per Project</p>
-              <p className="text-2xl font-extrabold font-display text-white mt-1 flex items-center gap-1.5">
-                <Gem size={20} className="text-teal-400" /> {avgXP}
+            <div className="bg-card/40 border-2 border-b-4 border-border rounded-2xl p-5 shadow-md">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Avg XP per Project</p>
+              <p className="text-2xl font-extrabold font-display text-foreground mt-1 flex items-center gap-1.5">
+                <Gem size={20} className="text-primary" /> {avgXP}
               </p>
             </div>
-            <div className="bg-slate-900/40 border-2 border-b-4 border-slate-800 rounded-2xl p-5 shadow-md">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Avg Time per Project</p>
-              <p className="text-2xl font-extrabold font-display text-white mt-1 flex items-center gap-1.5">
-                <Clock size={20} className="text-cyan-400" /> {timeStats.avgMins} min
+            <div className="bg-card/40 border-2 border-b-4 border-border rounded-2xl p-5 shadow-md">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Avg Time per Project</p>
+              <p className="text-2xl font-extrabold font-display text-foreground mt-1 flex items-center gap-1.5">
+                <Clock size={20} className="text-muted-foreground" /> {timeStats.avgMins} min
               </p>
             </div>
-            <div className="bg-slate-900/40 border-2 border-b-4 border-slate-800 rounded-2xl p-5 shadow-md">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Progress</p>
-              <p className="text-2xl font-extrabold font-display text-white mt-1 flex items-center gap-1.5">
-                <Rocket size={20} className="text-amber-400" /> {avgProgress}%
+            <div className="bg-card/40 border-2 border-b-4 border-border rounded-2xl p-5 shadow-md">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Active Progress</p>
+              <p className="text-2xl font-extrabold font-display text-foreground mt-1 flex items-center gap-1.5">
+                <Rocket size={20} className="text-muted-foreground" /> {avgProgress}%
               </p>
             </div>
           </div>

@@ -479,9 +479,9 @@ const categories: { value: Category; label: string; emoji: string }[] = [
 ];
 
 const diffColors = {
-  beginner: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-600" },
-  intermediate: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-600" },
-  advanced: { bg: "bg-violet-50", border: "border-violet-200", text: "text-violet-600" },
+  beginner: { bg: "bg-success/10", border: "border-success/30", text: "text-success" },
+  intermediate: { bg: "bg-secondary/10", border: "border-secondary/30", text: "text-secondary" },
+  advanced: { bg: "bg-brand-purple/10", border: "border-brand-purple/30", text: "text-brand-purple" },
 };
 
 export default function SnippetsPage() {
@@ -512,14 +512,14 @@ export default function SnippetsPage() {
       <div className="px-6 py-8 max-w-5xl mx-auto">
         <FadeInView className="mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 border-2 border-b-4 border-indigo-200 flex items-center justify-center text-2xl shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-muted border-2 border-b-4 border-border flex items-center justify-center text-2xl shadow-sm">
               📚
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold font-display text-indigo-950">
+              <h1 className="text-3xl font-extrabold font-display text-foreground">
                 Code Snippet Library
               </h1>
-              <p className="text-sm font-semibold text-slate-400">
+              <p className="text-sm font-semibold text-muted-foreground">
                 Reusable Arduino code patterns — copy, paste, and build faster.
               </p>
             </div>
@@ -529,13 +529,13 @@ export default function SnippetsPage() {
         {/* Search & Filters */}
         <FadeInView delay={0.1} className="mb-6">
           <div className="relative mb-4">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search code patterns or keywords..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3.5 bg-white border-2 border-b-4 border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-indigo-500 text-slate-800 transition-all placeholder:text-slate-400 placeholder:font-bold shadow-sm"
+              className="w-full pl-11 pr-4 py-3.5 bg-card border-2 border-b-4 border-border rounded-2xl text-sm font-semibold focus:outline-none focus:border-primary text-foreground transition-all placeholder:text-muted-foreground placeholder:font-bold shadow-sm"
             />
           </div>
 
@@ -548,8 +548,8 @@ export default function SnippetsPage() {
                   onClick={() => setCategory(c.value)}
                   className={`px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all border-2 border-b-4 ${
                     active
-                      ? "bg-indigo-500 border-indigo-700 text-white"
-                      : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : "bg-card border-border text-muted-foreground hover:bg-muted"
                   }`}
                 >
                   {c.emoji} {c.label}
@@ -567,25 +567,25 @@ export default function SnippetsPage() {
             return (
               <motion.div key={snippet.id} variants={staggerItem}>
                 <MotionCard
-                  className="bg-white border-2 border-b-4 border-slate-100 rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:translate-y-[-1px] transition-all"
+                  className="bg-card border-2 border-b-4 border-border rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:translate-y-[-1px] transition-all"
                   onClick={() => setExpandedId(isExpanded ? null : snippet.id)}
                 >
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="flex-1">
-                        <h3 className="font-extrabold text-sm text-indigo-950">{snippet.title}</h3>
-                        <p className="text-xs font-semibold text-slate-400 mt-0.5">{snippet.desc}</p>
+                        <h3 className="font-extrabold text-sm text-foreground">{snippet.title}</h3>
+                        <p className="text-xs font-semibold text-muted-foreground mt-0.5">{snippet.desc}</p>
                       </div>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCopy(snippet.id, snippet.code);
                         }}
-                        className="p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-500 rounded-xl transition-all"
+                        className="p-2 bg-muted hover:bg-muted/70 border border-border text-muted-foreground rounded-xl transition-all"
                         title="Copy code"
                       >
                         {copiedId === snippet.id ? (
-                          <Check size={14} className="text-emerald-500" />
+                          <Check size={14} className="text-success" />
                         ) : (
                           <Copy size={14} />
                         )}
@@ -596,7 +596,7 @@ export default function SnippetsPage() {
                       {snippet.tags.map((t) => (
                         <span
                           key={t}
-                          className="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-slate-50 border border-slate-100 text-slate-400 uppercase tracking-wider"
+                          className="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-muted border border-border text-muted-foreground uppercase tracking-wider"
                         >
                           {t}
                         </span>
@@ -614,10 +614,10 @@ export default function SnippetsPage() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="mt-4 pt-4 border-t border-slate-100"
+                          className="mt-4 pt-4 border-t border-border"
                         >
-                          <div className="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-800">
-                            <pre className="text-xs font-mono p-4 overflow-x-auto text-slate-300">
+                          <div className="relative rounded-2xl overflow-hidden bg-background border border-border">
+                            <pre className="text-xs font-mono p-4 overflow-x-auto text-foreground">
                               <code>{snippet.code}</code>
                             </pre>
                           </div>
@@ -633,9 +633,9 @@ export default function SnippetsPage() {
 
         {filtered.length === 0 && (
           <div className="text-center py-16">
-            <Code size={48} className="mx-auto mb-3 text-slate-300 animate-pulse" />
-            <h3 className="text-lg font-extrabold text-indigo-950 mb-1">No snippets found</h3>
-            <p className="text-sm font-semibold text-slate-400">
+            <Code size={48} className="mx-auto mb-3 text-muted-foreground animate-pulse" />
+            <h3 className="text-lg font-extrabold text-foreground mb-1">No snippets found</h3>
+            <p className="text-sm font-semibold text-muted-foreground">
               Try searching with general keywords like 'led', 'analog', or 'button'.
             </p>
           </div>
