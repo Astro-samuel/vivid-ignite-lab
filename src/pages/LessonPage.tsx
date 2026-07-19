@@ -234,6 +234,7 @@ export default function LessonPage() {
     connectSerial,
     disconnectSerial,
     uploadToBoard: uploadCodeToBoard,
+    clearLogs,
   } = useArduinoFlasher();
   const [codeUploaded, setCodeUploaded] = useState(false);
 
@@ -925,7 +926,7 @@ export default function LessonPage() {
                           <div className="flex items-center justify-between px-4 py-1.5 border-b text-[10px] font-mono border-border text-[hsl(228,25%,60%)]">
                             <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
                             <div className="flex gap-2">
-                              <button onClick={() => setSerialLogs([])} className="hover:text-white transition-all">Clear Logs</button>
+                              <button onClick={clearLogs} className="hover:text-white transition-all">Clear Logs</button>
                               <button onClick={() => setShowSerialConsole(false)} className="hover:text-white transition-all">✕</button>
                             </div>
                           </div>
@@ -1128,7 +1129,7 @@ export default function LessonPage() {
                     <div className="border border-border rounded-xl overflow-hidden bg-slate-950">
                       <div className="flex items-center justify-between px-3 py-1.5 border-b text-[10px] font-mono border-border text-slate-400">
                         <span className="text-cyan-400 font-bold">📟 Serial Monitor (9600 baud)</span>
-                        <button onClick={() => setSerialLogs([])} className="hover:text-white transition-all text-[9px]">Clear</button>
+                        <button onClick={clearLogs} className="hover:text-white transition-all text-[9px]">Clear</button>
                       </div>
                       <div className="p-3 max-h-36 overflow-y-auto font-mono text-[9px] text-emerald-400 space-y-1 bg-slate-950">
                         {serialLogs.length === 0 ? (
