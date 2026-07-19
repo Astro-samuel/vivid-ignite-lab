@@ -132,6 +132,11 @@ export function useArduinoFlasher() {
       } catch {
         // no active reader
       }
+      try {
+        await serialPort.close();
+      } catch {
+        // already closed
+      }
       await new Promise((r) => setTimeout(r, 50));
 
       await flashViaStk500(serialPort, bytes, { profile, onLog: appendLog });
