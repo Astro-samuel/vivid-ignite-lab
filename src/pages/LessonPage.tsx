@@ -14,6 +14,7 @@ import ExplainCode from "@/components/ExplainCode";
 import CodeEditor from "@/components/CodeEditor";
 import { toast as sonnerToast } from "sonner";
 import { useArduinoFlasher } from "@/hooks/useArduinoFlasher";
+import { levelForXp } from "@/lib/xp";
 
 const PathBadge = ({ path }: { path: any }) => {
   const ref = useRef<HTMLSpanElement>(null);
@@ -386,8 +387,10 @@ export default function LessonPage() {
       .single();
 
     if (profile) {
+      const newXp = (profile.total_xp || 0) + lesson.xp_reward;
       await supabase.from("profiles").update({
-        total_xp: (profile.total_xp || 0) + lesson.xp_reward,
+        total_xp: newXp,
+        level: levelForXp(newXp),
       }).eq("id", user.id);
     }
 

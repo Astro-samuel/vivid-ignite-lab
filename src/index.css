@@ -20,15 +20,15 @@
     --foreground-secondary: 243 75% 75%; /* Soft indigo text */
     --foreground-muted: 240 10% 70%;     /* Muted text */
 
-    /* Primary — Indigo */
-    --primary: 243 75% 64%;              /* Brighter indigo for dark background */
-    --primary-dark: 244 61% 55%;
-    --primary-light: 243 75% 20%;
+    /* Primary — Cyber-Teal */
+    --primary: 172 80% 50%;              /* Vibrant cyber-teal */
+    --primary-dark: 172 80% 40%;
+    --primary-light: 172 80% 12%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary — Violet */
-    --secondary: 238 84% 73%;
-    --secondary-light: 232 42% 14%;
+    /* Secondary — Cyan */
+    --secondary: 189 94% 43%;            /* Cyber-cyan */
+    --secondary-light: 189 94% 10%;
     --secondary-foreground: 210 40% 98%;
 
     /* Success */
@@ -45,9 +45,10 @@
     --destructive-light: 0 80% 15%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Purple */
-    --purple: 265 89% 66%;
-    --purple-light: 265 80% 15%;
+    /* Accent/Cyan */
+    --purple: 180 100% 45%;
+    --purple-light: 180 100% 10%;
+
 
     /* Shadcn Aliases */
     --card: 232 42% 11%;
@@ -74,9 +75,9 @@
     --sidebar-ring: 243 75% 64%;
 
     /* Clay shadow colors */
-    --clay-indigo: 99, 102, 241;
+    --clay-indigo: 13, 148, 136;
     --clay-green: 34, 197, 94;
-    --clay-violet: 168, 85, 247;
+    --clay-violet: 6, 182, 212;
     --clay-orange: 245, 158, 11;
   }
 }

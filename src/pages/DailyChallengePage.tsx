@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Flame, Zap, Lightbulb, CheckCircle, RotateCcw, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { levelForXp } from "@/lib/xp";
 
 export default function DailyChallengePage() {
   const navigate = useNavigate();
@@ -70,8 +71,10 @@ export default function DailyChallengePage() {
       .single();
 
     if (profile) {
+      const newXp = (profile.total_xp || 0) + challenge.xp_reward;
       await supabase.from("profiles").update({
-        total_xp: (profile.total_xp || 0) + challenge.xp_reward,
+        total_xp: newXp,
+        level: levelForXp(newXp),
       }).eq("id", user.id);
     }
 

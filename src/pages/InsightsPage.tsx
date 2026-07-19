@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { TrendingUp, Target, Clock, Zap, Trophy, Flame } from "lucide-react";
+import { TrendingUp, Target, Clock, Zap, Trophy, Flame, BarChart3, Gem, Rocket } from "lucide-react";
 import Layout from "@/components/Layout";
 import FadeInView from "@/components/motion/FadeInView";
 import StaggerContainer, { staggerItem } from "@/components/motion/StaggerContainer";
@@ -134,8 +134,8 @@ export default function InsightsPage() {
         {/* Header */}
         <FadeInView className="mb-2">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border-2 border-b-4 border-teal-500/20 flex items-center justify-center text-2xl shadow-sm text-teal-400">
-              📊
+            <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border-2 border-b-4 border-teal-500/20 flex items-center justify-center shadow-sm text-teal-400">
+              <BarChart3 size={22} />
             </div>
             <div>
               <h1 className="text-3xl font-extrabold font-display text-white">
@@ -322,19 +322,19 @@ export default function InsightsPage() {
             <div className="bg-slate-900/40 border-2 border-b-4 border-slate-800 rounded-2xl p-5 shadow-md">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Avg XP per Project</p>
               <p className="text-2xl font-extrabold font-display text-white mt-1 flex items-center gap-1.5">
-                <span className="text-teal-400">💎</span> {avgXP}
+                <Gem size={20} className="text-teal-400" /> {avgXP}
               </p>
             </div>
             <div className="bg-slate-900/40 border-2 border-b-4 border-slate-800 rounded-2xl p-5 shadow-md">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Avg Time per Project</p>
               <p className="text-2xl font-extrabold font-display text-white mt-1 flex items-center gap-1.5">
-                <span className="text-cyan-400">⏱️</span> {timeStats.avgMins} min
+                <Clock size={20} className="text-cyan-400" /> {timeStats.avgMins} min
               </p>
             </div>
             <div className="bg-slate-900/40 border-2 border-b-4 border-slate-800 rounded-2xl p-5 shadow-md">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Progress</p>
               <p className="text-2xl font-extrabold font-display text-white mt-1 flex items-center gap-1.5">
-                <span className="text-amber-400">🚀</span> {avgProgress}%
+                <Rocket size={20} className="text-amber-400" /> {avgProgress}%
               </p>
             </div>
           </div>

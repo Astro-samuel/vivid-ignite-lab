@@ -9,6 +9,7 @@ import { useArduinoFlasher } from "@/hooks/useArduinoFlasher";
 import { useIdeSketches, type IdeSketch } from "@/hooks/useIdeSketches";
 import { compileSketch } from "@/lib/compileSketch";
 import { BOARD_PROFILES } from "@/lib/stk500";
+import { levelForXp } from "@/lib/xp";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast as sonnerToast } from "sonner";
@@ -422,9 +423,10 @@ export default function IDEPage() {
           .eq("id", user.id)
           .single();
         if (profile !== null) {
+          const newXp = (profile.total_xp || 0) + 75;
           await supabase
             .from("profiles")
-            .update({ total_xp: (profile.total_xp || 0) + 75 })
+            .update({ total_xp: newXp, level: levelForXp(newXp) })
             .eq("id", user.id);
         }
       } catch {

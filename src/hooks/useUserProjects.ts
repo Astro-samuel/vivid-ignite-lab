@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { levelForXp } from "@/lib/xp";
 
 export interface UserProject {
   id: string;
@@ -116,10 +117,7 @@ export function useUserProjects() {
     if (profile) {
       const newXp = (profile.total_xp || 0) + xpAmount;
       const newCompleted = (profile.projects_completed || 0) + 1;
-      // Level up: Level 2 at 200 XP, Level 3 at 500 XP
-      let newLevel = 1;
-      if (newXp >= 500) newLevel = 3;
-      else if (newXp >= 200) newLevel = 2;
+      const newLevel = levelForXp(newXp);
 
       await supabase.from("profiles").update({
         total_xp: newXp,
