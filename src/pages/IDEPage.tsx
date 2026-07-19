@@ -1,10 +1,14 @@
 import { useState, useRef, useEffect } from "react";
-import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, Bug, RefreshCw, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Package, Download } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Package, Download, Save, FolderOpen, Trash2, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import CodeEditor from "@/components/CodeEditor";
 import ArduinoSetupGuide from "@/components/ArduinoSetupGuide";
 import { useArduinoFlasher } from "@/hooks/useArduinoFlasher";
+import { useIdeSketches, type IdeSketch } from "@/hooks/useIdeSketches";
+import { compileSketch } from "@/lib/compileSketch";
+import { BOARD_PROFILES } from "@/lib/stk500";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast as sonnerToast } from "sonner";
@@ -12,91 +16,87 @@ import { toast as sonnerToast } from "sonner";
 const DEBUG_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/debug-code`;
 
 type RunStep = "idle" | "compiling" | "simulating" | "safety" | "success" | "error";
+type SaveState = "idle" | "saving" | "saved" | "unsaved" | "error";
 
-const starterCode = `/*
-  🎯 Project: Smart LED Mood Lamp
-  
-  Goal: Control LED brightness based on ambient light.
-  
-  📦 Components: LED (pin 9), Photoresistor (A0)
-  
-  🧩 Hints:
-     1. Use pinMode() to set LED_PIN as OUTPUT
-     2. Use analogRead() to get light sensor value (0-1023)
-     3. Use map() to convert sensor range to LED brightness (0-255)
-     4. Use analogWrite() to set LED brightness
-     5. Add Serial.print() to debug your values
-  
-  💡 Try writing it yourself first!
-     Use "Debug with AI" if you get stuck.
-*/
+const BOARD_LABELS: Record<string, string> = {
+  "arduino:avr:uno": "Arduino Uno",
+  "arduino:avr:nano": "Arduino Nano",
+  "arduino:avr:mega": "Arduino Mega",
+  "arduino:avr:leonardo": "Arduino Leonardo",
+};
 
-const int LED_PIN = 9;
-const int SENSOR_PIN = A0;
+const BLANK_CODE = `void setup() {
+
+}
+
+void loop() {
+
+}`;
+
+interface StarterTemplate {
+  id: string;
+  name: string;
+  description: string;
+  code: string;
+}
+
+const STARTER_TEMPLATES: StarterTemplate[] = [
+  {
+    id: "blink",
+    name: "Blink",
+    description: "Toggle an LED on pin 13 every half second.",
+    code: `const int LED_PIN = 13;
 
 void setup() {
-  // TODO: Set LED_PIN as OUTPUT
-  // TODO: Start Serial at 9600 baud
+  pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
-  // TODO: Read the sensor value with analogRead()
-  // TODO: Map sensor value (0-1023) to brightness (0-255)
-  //       Hint: brighter room = dimmer LED, so invert the range
-  // TODO: Write brightness to LED with analogWrite()
-  // TODO: Print values to Serial for debugging
-  
-  delay(100);
-}`;
+  digitalWrite(LED_PIN, HIGH);
+  delay(500);
+  digitalWrite(LED_PIN, LOW);
+  delay(500);
+}`,
+  },
+  {
+    id: "sensor",
+    name: "Read Sensor",
+    description: "Read an analog sensor on A0 and print it to Serial.",
+    code: `const int SENSOR_PIN = A0;
 
-const errorCode = `void setup() {
-  Serial.begin(9600)
-  pinMod(13, OUTPUT);  // Error: typo in function name
+void setup() {
+  Serial.begin(9600);
 }
 
 void loop() {
-  digitalWrite(13, HIGH)
-  delay(1000;           // Error: missing closing parenthesis
-  digitalWrite(13, LOW);
-  delay(1000);
-}`;
+  int value = analogRead(SENSOR_PIN);
+  Serial.println(value);
+  delay(200);
+}`,
+  },
+  {
+    id: "servo",
+    name: "Servo Sweep",
+    description: "Sweep a servo on pin 9 back and forth.",
+    code: `#include <Servo.h>
 
-const projectSteps = [
-  {
-    id: 1, title: "Gather Components", done: true,
-    instructions: [
-      "Get an Arduino Uno and USB cable",
-      "Find a photoresistor (LDR) and LED",
-      "Grab two 220Ω resistors",
-      "Get a breadboard and jumper wires",
-    ],
-  },
-  {
-    id: 2, title: "Wire the Circuit", done: true,
-    instructions: [
-      "Connect LED anode (long leg) → 220Ω resistor → Pin 9",
-      "Connect LED cathode (short leg) → GND",
-      "Connect LDR between 5V and A0",
-      "Connect 10kΩ resistor between A0 and GND",
-    ],
-  },
-  {
-    id: 3, title: "Write the Code", done: false, active: true,
-    instructions: [
-      "Open the code editor on the left",
-      "Read the code — note the map() function",
-      "Understand how analogRead() works (returns 0-1023)",
-      "See how we map sensor to LED brightness",
-    ],
-  },
-  {
-    id: 4, title: "Run & Verify", done: false,
-    instructions: [
-      "Click '▶ Run & Check' button",
-      "Watch the compilation and simulation steps",
-      "If errors appear, use 'Debug with AI'",
-      "Success = +75 XP!",
-    ],
+Servo myServo;
+int pos = 0;
+
+void setup() {
+  myServo.attach(9);
+}
+
+void loop() {
+  for (pos = 0; pos <= 180; pos++) {
+    myServo.write(pos);
+    delay(15);
+  }
+  for (pos = 180; pos >= 0; pos--) {
+    myServo.write(pos);
+    delay(15);
+  }
+}`,
   },
 ];
 
@@ -104,13 +104,6 @@ interface DebugMessage {
   role: "ai" | "user";
   content: string;
 }
-
-const aiHints = [
-  "I can see you have a missing semicolon on line 2. In C++, every statement must end with `;`. Try adding it after `Serial.begin(9600)`.",
-  "There's a typo on line 3 – `pinMod` should be `pinMode`. Arduino's API is case-sensitive, so these exact function names matter.",
-  "Good catch! Now look at line 7 – can you spot where the closing parenthesis `)` is missing in the delay call?",
-  "You're almost there! Once you fix the syntax errors, think about what `delay(1000)` does. How long will the LED stay on vs off?",
-];
 
 interface LibraryItem {
   name: string;
@@ -230,7 +223,14 @@ void loop() {}`
 export default function IDEPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [code, setCode] = useState(starterCode);
+  const { sketches, loading: sketchesLoading, createSketch, saveSketch, deleteSketch } = useIdeSketches();
+
+  const [activeSketchId, setActiveSketchId] = useState<string | null>(null);
+  const [sketchTitle, setSketchTitle] = useState("Untitled Sketch");
+  const [fqbn, setFqbn] = useState("arduino:avr:uno");
+  const [code, setCode] = useState(BLANK_CODE);
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+
   const [runStep, setRunStep] = useState<RunStep>("idle");
   const [errors, setErrors] = useState<string[]>([]);
   const [showDebug, setShowDebug] = useState(false);
@@ -239,15 +239,14 @@ export default function IDEPage() {
   const [debugStreaming, setDebugStreaming] = useState(false);
   const [debugError, setDebugError] = useState("");
   const [xpAwarded, setXpAwarded] = useState(false);
-  const [autoSaveCountdown, setAutoSaveCountdown] = useState(30);
-  const [activeStep, setActiveStep] = useState(3);
   const [showInstructions, setShowInstructions] = useState(true);
   const [showSimulator, setShowSimulator] = useState(true);
   const [showLibrariesPanel, setShowLibrariesPanel] = useState(false);
+  const [showSketchesPanel, setShowSketchesPanel] = useState(false);
   const [librarySearch, setLibrarySearch] = useState("");
   const [installedLibraries, setInstalledLibraries] = useState<string[]>([]);
-  const codeRef = useRef<HTMLTextAreaElement>(null);
   const debugBottomRef = useRef<HTMLDivElement>(null);
+  const skipAutosaveRef = useRef(true);
 
   // Parse code to find active includes on load/edit
   useEffect(() => {
@@ -266,15 +265,33 @@ export default function IDEPage() {
     }
   }, [debugMessages, showDebug]);
 
+  // Debounced autosave: only for sketches that already have a saved row —
+  // fresh/untitled work needs one explicit Save to create that row first.
+  useEffect(() => {
+    if (skipAutosaveRef.current) {
+      skipAutosaveRef.current = false;
+      return;
+    }
+    if (!activeSketchId) {
+      setSaveState("unsaved");
+      return;
+    }
+    setSaveState("saving");
+    const timeout = setTimeout(async () => {
+      const { error } = await saveSketch(activeSketchId, { title: sketchTitle, code, fqbn });
+      setSaveState(error ? "error" : "saved");
+    }, 1500);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, fqbn, sketchTitle]);
+
   const toggleInstallLibrary = (lib: LibraryItem) => {
     const isInstalled = installedLibraries.includes(lib.includeName);
     if (isInstalled) {
-      // Remove include line
       const regex = new RegExp(`#include\\s*[<"]${lib.includeName}[>"]\\n?`, "g");
       setCode(prev => prev.replace(regex, ""));
       sonnerToast.info(`Uninstalled ${lib.name}`);
     } else {
-      // Add include line at the top of the code
       setCode(prev => `#include <${lib.includeName}>\n` + prev);
       sonnerToast.success(`Installed ${lib.name}`);
     }
@@ -283,6 +300,11 @@ export default function IDEPage() {
   const injectBoilerplate = (sample: string) => {
     setCode(sample);
     sonnerToast.success("Test code loaded into editor!");
+  };
+
+  const loadTemplate = (tpl: StarterTemplate) => {
+    setCode(tpl.code);
+    sonnerToast.success(`${tpl.name} template loaded!`);
   };
 
   const {
@@ -297,7 +319,7 @@ export default function IDEPage() {
     clearLogs,
   } = useArduinoFlasher();
 
-  const uploadToBoard = () => uploadCodeToBoard(code);
+  const uploadToBoard = () => uploadCodeToBoard(code, fqbn);
 
   const downloadIno = () => {
     const blob = new Blob([code], { type: "text/plain" });
@@ -310,37 +332,84 @@ export default function IDEPage() {
     sonnerToast.success("Downloaded sketch.ino");
   };
 
-  // Auto-save countdown
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAutoSaveCountdown((prev) => (prev <= 1 ? 30 : prev - 1));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const newSketch = () => {
+    skipAutosaveRef.current = true;
+    setActiveSketchId(null);
+    setSketchTitle("Untitled Sketch");
+    setFqbn("arduino:avr:uno");
+    setCode(BLANK_CODE);
+    setRunStep("idle");
+    setErrors([]);
+    setXpAwarded(false);
+    setShowDebug(false);
+    setSaveState("idle");
+    setShowSketchesPanel(false);
+  };
+
+  const loadSketch = (sketch: IdeSketch) => {
+    skipAutosaveRef.current = true;
+    setActiveSketchId(sketch.id);
+    setSketchTitle(sketch.title);
+    setFqbn(sketch.fqbn);
+    setCode(sketch.code);
+    setRunStep("idle");
+    setErrors([]);
+    setXpAwarded(false);
+    setShowDebug(false);
+    setSaveState("saved");
+    setShowSketchesPanel(false);
+  };
+
+  const saveNow = async () => {
+    if (!user) {
+      sonnerToast.error("Log in to save your sketch.");
+      return;
+    }
+    setSaveState("saving");
+    if (activeSketchId) {
+      const { error } = await saveSketch(activeSketchId, { title: sketchTitle, code, fqbn });
+      setSaveState(error ? "error" : "saved");
+      if (error) sonnerToast.error(error);
+      else sonnerToast.success("Sketch saved!");
+    } else {
+      const { sketch, error } = await createSketch(sketchTitle, code, fqbn);
+      if (error || !sketch) {
+        setSaveState("error");
+        sonnerToast.error(error || "Failed to save sketch.");
+        return;
+      }
+      skipAutosaveRef.current = true;
+      setActiveSketchId(sketch.id);
+      setSaveState("saved");
+      sonnerToast.success("Sketch saved!");
+    }
+  };
+
+  const removeSketch = async (id: string) => {
+    await deleteSketch(id);
+    if (id === activeSketchId) newSketch();
+    sonnerToast.info("Sketch deleted");
+  };
 
   const runAndCheck = async () => {
     setErrors([]);
     setXpAwarded(false);
-
     setRunStep("compiling");
-    await delay(1200);
 
-    const hasErrors = code.includes("pinMod(") || code.includes("delay(1000;");
-    const foundErrors: string[] = [];
-    if (code.includes("pinMod(")) foundErrors.push("Line 3: 'pinMod' is not defined. Did you mean 'pinMode'?");
-    if (code.includes("delay(1000;")) foundErrors.push("Line 7: Syntax error – missing closing parenthesis ')'");
-    if (!code.includes(";") && code.length > 50) foundErrors.push("Line 2: Missing semicolon ';'");
-
-    if (hasErrors) {
-      setErrors(foundErrors);
+    const result = await compileSketch(code, fqbn);
+    if (!result.ok) {
+      const lines = result.log
+        ? result.log.split("\n").filter(l => l.trim()).slice(0, 20)
+        : [result.error || "Compilation failed."];
+      setErrors(lines);
       setRunStep("error");
       return;
     }
 
     setRunStep("simulating");
-    await delay(1500);
+    await delay(600);
     setRunStep("safety");
-    await delay(1000);
+    await delay(500);
     setRunStep("success");
     setXpAwarded(true);
 
@@ -408,7 +477,6 @@ export default function IDEPage() {
       let buffer = "";
       let aiText = "";
 
-      // Append empty assistant message that we'll stream into
       setDebugMessages(prev => [...prev, { role: "ai", content: "" }]);
 
       while (true) {
@@ -488,24 +556,12 @@ export default function IDEPage() {
     runDebugRequest(updatedMessages);
   };
 
-  const loadErrorCode = () => {
-    // In a real app, this would be project-specific
-    const projectSpecificError = code.includes("const int LED_PIN")
-      ? errorCode
-      : errorCode.replace("pinMod(13", "pinMod(9");
-
-    setCode(projectSpecificError);
-    setRunStep("idle");
-    setErrors([]);
-    setXpAwarded(false);
-  };
-
-  const resetCode = () => {
-    setCode(starterCode);
-    setRunStep("idle");
-    setErrors([]);
-    setXpAwarded(false);
-    setShowDebug(false);
+  const saveStateLabel: Record<SaveState, string> = {
+    idle: "Not saved yet",
+    saving: "Saving…",
+    saved: "Saved",
+    unsaved: "Unsaved changes",
+    error: "Save failed",
   };
 
   return (
@@ -523,9 +579,14 @@ export default function IDEPage() {
               <ArrowLeft size={14} />
             </button>
             <div>
-              <h1 className="font-bold text-sm ide-title-text">Smart LED Mood Lamp</h1>
+              <input
+                value={sketchTitle}
+                onChange={(e) => setSketchTitle(e.target.value)}
+                aria-label="Sketch title"
+                className="font-bold text-sm bg-transparent border-none outline-none focus:underline ide-title-text w-44"
+              />
               <p className="text-xs ide-subtitle-text">
-                Step {activeStep} of {projectSteps.length} • Auto-save in {autoSaveCountdown}s
+                {BOARD_LABELS[fqbn]} • {saveStateLabel[saveState]}
               </p>
             </div>
           </div>
@@ -547,6 +608,13 @@ export default function IDEPage() {
               <Package size={14} />
             </button>
             <button
+              onClick={() => setShowSketchesPanel(!showSketchesPanel)}
+              className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showSketchesPanel ? "bg-amber-500/15 text-amber-400 border border-amber-500/30" : "bg-white/5 text-slate-400 border border-transparent"}`}
+              title={showSketchesPanel ? "Hide My Sketches" : "Show My Sketches"}
+            >
+              <FolderOpen size={14} />
+            </button>
+            <button
               onClick={() => setShowSimulator(!showSimulator)}
               className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showSimulator ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30" : "bg-white/5 text-slate-400 border border-transparent"}`}
               title={showSimulator ? "Hide Simulator" : "Show Simulator"}
@@ -556,11 +624,11 @@ export default function IDEPage() {
 
             <div className="w-px h-5 mx-1 ide-top-btn-divider" />
 
-            <button onClick={loadErrorCode} className="btn-neon-outline-teal px-2.5 py-1.5 text-xs flex items-center gap-1.5">
-              <Bug size={11} /> Load Errors
+            <button onClick={newSketch} className="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105 ide-btn-reset">
+              <Plus size={11} /> New
             </button>
-            <button onClick={resetCode} className="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105 ide-btn-reset">
-              <RefreshCw size={11} /> Reset
+            <button onClick={saveNow} disabled={saveState === "saving"} className="btn-neon-outline-teal px-2.5 py-1.5 text-xs flex items-center gap-1.5 disabled:opacity-60">
+              <Save size={11} /> {saveState === "saving" ? "Saving..." : "Save"}
             </button>
             <button
               onClick={runAndCheck}
@@ -627,51 +695,21 @@ export default function IDEPage() {
             <div className="w-64 flex-shrink-0 border-r flex flex-col overflow-y-auto glass-card transition-all duration-300 animate-fade-in-up ide-instructions-panel">
               <div className="flex items-center gap-2 px-4 py-3 border-b ide-instructions-panel-title">
                 <BookOpen size={15} className="text-purple-500" />
-                <span className="font-bold text-sm text-white">Instructions</span>
+                <span className="font-bold text-sm text-white">Start Building</span>
               </div>
               <div className="p-3 space-y-2">
-                {projectSteps.map((step) => (
-                  <div
-                    key={step.id}
-                    className={`rounded-xl overflow-hidden border cursor-pointer transition-all duration-200 ${
-                      step.id === activeStep
-                        ? "border-blue-500/45 bg-blue-500/5"
-                        : step.done
-                          ? "border-emerald-500/20 bg-transparent"
-                          : "border-slate-800 bg-transparent"
-                    }`}
-                    onClick={() => setActiveStep(step.id)}
+                <p className="text-xs text-slate-400 px-1 pb-1">
+                  Blank sketch by default — or drop in a starter template:
+                </p>
+                {STARTER_TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl.id}
+                    onClick={() => loadTemplate(tpl)}
+                    className="w-full text-left rounded-xl border border-slate-800 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all p-3"
                   >
-                    <div className="flex items-center gap-2.5 px-3 py-2.5">
-                      <div
-                        className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
-                          step.done
-                            ? "bg-emerald-500 text-slate-950"
-                            : step.id === activeStep
-                              ? "bg-blue-500 text-slate-950"
-                              : "bg-slate-800 text-slate-400"
-                        }`}
-                      >
-                        {step.done ? "✓" : step.id}
-                      </div>
-                      <span className={`text-xs font-semibold ${step.done ? "text-emerald-500" : step.id === activeStep ? "text-white" : "text-slate-400"}`}>
-                        {step.title}
-                      </span>
-                    </div>
-
-                    {step.id === activeStep && (
-                      <div className="px-3 pb-3 animate-fade-in">
-                        <ul className="space-y-1.5">
-                          {step.instructions.map((inst, i) => (
-                            <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
-                              <span className="mt-0.5 flex-shrink-0 text-blue-500">→</span>
-                              <span>{inst}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
+                    <span className="text-xs font-semibold text-white block">{tpl.name}</span>
+                    <span className="text-[11px] text-slate-400">{tpl.description}</span>
+                  </button>
                 ))}
               </div>
               <div className="p-3 pt-0">
@@ -687,7 +725,16 @@ export default function IDEPage() {
             >
               <span className="text-[#3B82F6]">sketch.ino</span>
               <span>•</span>
-              <span>Arduino Uno</span>
+              <select
+                value={fqbn}
+                onChange={(e) => setFqbn(e.target.value)}
+                aria-label="Board"
+                className="bg-transparent border-none text-[hsl(228,25%,60%)] text-xs focus:outline-none cursor-pointer"
+              >
+                {Object.keys(BOARD_PROFILES).map((key) => (
+                  <option key={key} value={key} className="bg-slate-900 text-white">{BOARD_LABELS[key] ?? key}</option>
+                ))}
+              </select>
               <span className="ml-2">|</span>
               <button
                 onClick={downloadIno}
@@ -793,6 +840,64 @@ export default function IDEPage() {
             </div>
           )}
 
+          {/* My Sketches Panel */}
+          {showSketchesPanel && (
+            <div className="w-80 flex-shrink-0 border-l flex flex-col transition-all duration-300 animate-slide-in-right bg-slate-950 ide-library-manager-panel">
+              <div className="flex items-center justify-between px-4 py-3 border-b ide-library-manager-header">
+                <div className="flex items-center gap-2">
+                  <FolderOpen size={15} className="text-amber-400" />
+                  <span className="font-bold text-sm text-white">My Sketches</span>
+                </div>
+                <button
+                  onClick={() => setShowSketchesPanel(false)}
+                  className="text-slate-400 hover:text-white text-xs transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-3 border-b ide-library-manager-search">
+                <button
+                  onClick={newSketch}
+                  className="w-full py-1.5 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500/25 transition-all"
+                >
+                  <Plus size={12} /> New Sketch
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                {sketchesLoading ? (
+                  <p className="text-xs text-slate-500 text-center py-4">Loading...</p>
+                ) : sketches.length === 0 ? (
+                  <p className="text-xs text-slate-500 text-center py-4">No saved sketches yet — hit Save to keep this one.</p>
+                ) : (
+                  sketches.map((s) => (
+                    <div
+                      key={s.id}
+                      className={`p-3 rounded-xl border transition-all ${
+                        s.id === activeSketchId ? "bg-blue-500/5 border-blue-500/25" : "bg-white/5 border-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <button onClick={() => loadSketch(s)} className="text-left flex-1 min-w-0">
+                          <h4 className="font-bold text-xs text-white truncate">{s.title}</h4>
+                          <p className="text-[10px] text-slate-500 mt-0.5">{formatDistanceToNow(new Date(s.updated_at), { addSuffix: true })}</p>
+                        </button>
+                        <button
+                          onClick={() => removeSketch(s.id)}
+                          className="text-slate-500 hover:text-rose-500 transition-colors flex-shrink-0"
+                          title="Delete sketch"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Library Manager Panel */}
           {showLibrariesPanel && (
             <div className="w-80 flex-shrink-0 border-l flex flex-col transition-all duration-300 animate-slide-in-right bg-slate-950 ide-library-manager-panel">
@@ -849,7 +954,7 @@ export default function IDEPage() {
                         </button>
                       </div>
                       <p className="text-[11px] text-slate-400 leading-normal">{lib.description}</p>
-                      
+
                       {/* Inject sample button */}
                       {isInstalled && (
                         <button
@@ -917,7 +1022,7 @@ export default function IDEPage() {
                     Send
                   </button>
                 </div>
-                
+
                 <button
                   onClick={askNextHint}
                   disabled={debugStreaming}

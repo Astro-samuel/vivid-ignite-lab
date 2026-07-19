@@ -163,6 +163,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ide_sketches: {
+        Row: {
+          code: string
+          created_at: string
+          fqbn: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code?: string
+          created_at?: string
+          fqbn?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          fqbn?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       learning_paths: {
         Row: {
           color: string

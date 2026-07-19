@@ -1,10 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 import { toast as sonnerToast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { parseIntelHex } from "@/lib/intelHex";
 import { flashViaStk500, BOARD_PROFILES } from "@/lib/stk500";
-
-const COMPILE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/compile-sketch`;
+import { compileSketch } from "@/lib/compileSketch";
 
 // Shared Web Serial + real STK500 flashing logic for pages with an Arduino IDE panel.
 // Handles: connecting to a board, live Serial Monitor output, and a real
@@ -101,26 +99,18 @@ export function useArduinoFlasher() {
 
     try {
       appendLog("📦 Compiling sketch on remote build server...");
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      if (!token) throw new Error("Please log in to upload code.");
+      const result = await compileSketch(code, fqbn);
 
-      const response = await fetch(COMPILE_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ code, fqbn }),
-      });
-      const result = await response.json().catch(() => ({}));
-
-      if (!response.ok || result.ok === false) {
-        const log: string = result.log || result.error || "Unknown compile error";
-        appendLog("❌ Compile failed:");
-        log.split("\n").slice(0, 25).forEach((l: string) => appendLog(`   ${l}`));
+      if (!result.ok) {
+        if (result.log) {
+          appendLog("❌ Compile failed:");
+          result.log.split("\n").slice(0, 25).forEach((l: string) => appendLog(`   ${l}`));
+        }
         throw new Error(result.error || "Compilation failed. See log above.");
       }
       appendLog("✓ Compiled successfully.");
 
-      const { bytes } = parseIntelHex(result.hex);
+      const { bytes } = parseIntelHex(result.hex!);
       appendLog(`📤 Flashing ${bytes.length} bytes to board via STK500...`);
 
       // Hand the port over to the flasher: pause the monitor's read loop and
