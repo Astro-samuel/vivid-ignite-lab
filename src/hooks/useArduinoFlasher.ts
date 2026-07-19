@@ -93,9 +93,10 @@ export function useArduinoFlasher() {
     }
   }, [serialPort, appendLog]);
 
-  const uploadToBoard = useCallback(async (code: string, fqbn = "arduino:avr:uno") => {
-    if (!serialPort) return;
+  const uploadToBoard = useCallback(async (code: string, fqbn = "arduino:avr:uno"): Promise<boolean> => {
+    if (!serialPort) return false;
     setUploading(true);
+    let success = false;
     const profile = BOARD_PROFILES[fqbn] ?? BOARD_PROFILES["arduino:avr:uno"];
 
     try {
@@ -137,6 +138,7 @@ export function useArduinoFlasher() {
 
       appendLog("✅ Upload complete — board is now running your code.");
       sonnerToast.success("🚀 Upload complete!");
+      success = true;
     } catch (err: any) {
       appendLog(`❌ Upload failed: ${err.message || err}`);
       sonnerToast.error(err.message || "Upload failed");
@@ -156,6 +158,7 @@ export function useArduinoFlasher() {
       }
       setUploading(false);
     }
+    return success;
   }, [serialPort, appendLog, readSerialLoop]);
 
   return {

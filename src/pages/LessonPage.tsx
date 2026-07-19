@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import ExplainCode from "@/components/ExplainCode";
 import CodeEditor from "@/components/CodeEditor";
 import { toast as sonnerToast } from "sonner";
+import { useArduinoFlasher } from "@/hooks/useArduinoFlasher";
 
 const PathBadge = ({ path }: { path: any }) => {
   const ref = useRef<HTMLSpanElement>(null);
@@ -224,82 +225,21 @@ export default function LessonPage() {
   const [validationChecks, setValidationChecks] = useState<Array<{ label: string; passed: boolean }>>([]);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Web Serial API states
-  const [serialPort, setSerialPort] = useState<any>(null);
-  const [serialConnected, setSerialConnected] = useState(false);
-  const [serialLogs, setSerialLogs] = useState<string[]>([]);
-  const [showSerialConsole, setShowSerialConsole] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const {
+    serialConnected,
+    serialLogs,
+    showSerialConsole,
+    setShowSerialConsole,
+    uploading,
+    connectSerial,
+    disconnectSerial,
+    uploadToBoard: uploadCodeToBoard,
+  } = useArduinoFlasher();
   const [codeUploaded, setCodeUploaded] = useState(false);
 
-  const connectSerial = async () => {
-    if (!("serial" in navigator)) {
-      sonnerToast.error("Web Serial API is not supported in this browser. Please use Chrome or Edge.");
-      return;
-    }
-    try {
-      const port = await (navigator as any).serial.requestPort();
-      await port.open({ baudRate: 9600 });
-      setSerialPort(port);
-      setSerialConnected(true);
-      setSerialLogs(prev => [...prev, "🔌 Connected to physical Arduino board!", "🚀 Port opened successfully at 9600 baud."]);
-      sonnerToast.success("🔌 Connected to board!");
-      
-      // Start reading serial loop asynchronously
-      readSerialLoop(port);
-    } catch (err) {
-      console.error(err);
-      sonnerToast.error("Failed to open connection.");
-    }
-  };
-
-  const readSerialLoop = async (port: any) => {
-    const decoder = new TextDecoder();
-    while (port.readable) {
-      const reader = port.readable.getReader();
-      try {
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          if (value) {
-            const decoded = decoder.decode(value);
-            setSerialLogs(prev => [...prev, ...decoded.split("\n").filter(line => line.trim() !== "")]);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        break;
-      } finally {
-        reader.releaseLock();
-      }
-    }
-    setSerialConnected(false);
-    setSerialPort(null);
-  };
-
   const uploadToBoard = async () => {
-    if (!serialPort) return;
-    setUploading(true);
-    setSerialLogs(prev => [...prev, "⚡ Starting direct board upload...", "📦 Compiling AVR Sketch for ATMega328P..."]);
-    await new Promise(r => setTimeout(r, 1000));
-    setSerialLogs(prev => [...prev, "🔌 Handshaking with STK500 bootloader...", "📤 Uploading HEX blocks..."]);
-    await new Promise(r => setTimeout(r, 1200));
-    setSerialLogs(prev => [...prev, "✓ Verification OK. 1424 bytes written.", "🔄 Resetting board...", "🔌 Active Serial connection listening..."]);
-    setUploading(false);
-    setCodeUploaded(true);
-    sonnerToast.success("🚀 Upload complete!");
-  };
-
-  const disconnectSerial = async () => {
-    if (serialPort) {
-      try {
-        await serialPort.close();
-      } catch (e) {}
-      setSerialPort(null);
-      setSerialConnected(false);
-      setSerialLogs(prev => [...prev, "🔌 Disconnected from board."]);
-      sonnerToast.info("🔌 Disconnected from board");
-    }
+    const success = await uploadCodeToBoard(code);
+    if (success) setCodeUploaded(true);
   };
 
   const chatEndRef = useRef<HTMLDivElement>(null);
