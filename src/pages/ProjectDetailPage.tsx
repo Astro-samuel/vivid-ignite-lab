@@ -1020,6 +1020,4747 @@ void loop() {
   delay(150);
 }`,
   },
+  {
+    id: 13, emoji: "🚦", title: "Traffic Light Simulator",
+    desc: "Build a realistic traffic light sequence with LEDs.",
+    difficulty: "beginner", time: "20 mins", xp: 55,
+    components: ["LED (Red)", "LED (Green)", "Arduino Uno", "Resistor (220Ω)"],
+    instructions: [
+      "Gather: Arduino Uno, red LED, green LED, 220Ω resistor ×2, breadboard, jumper wires",
+      "Connect red LED anode → 220Ω resistor → pin 8, cathode → GND",
+      "Connect green LED anode → 220Ω resistor → pin 9, cathode → GND",
+      "Upload the code via Arduino IDE",
+      "LEDs alternate red/green every 3 seconds — watch Serial Monitor for state changes",
+      "🧪 Try adding a yellow LED and a 3-phase sequence",
+      "⚠️ No light? Check LED polarity and resistor placement",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Sequence multiple outputs with delay()
+  2. Understand basic state timing
+  3. Two-LED traffic light logic
+*/
+
+const int redPin = 8;
+const int greenPin = 9;
+
+void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Traffic Light Starting...");
+}
+
+void loop() {
+  // Red = Stop
+  digitalWrite(redPin, HIGH);
+  digitalWrite(greenPin, LOW);
+  Serial.println("RED - Stop");
+  delay(3000);
+
+  // Green = Go
+  digitalWrite(redPin, LOW);
+  digitalWrite(greenPin, HIGH);
+  Serial.println("GREEN - Go");
+  delay(3000);
+}`,
+    optimizedCode: `// Optimized with a non-blocking millis() state machine
+const int redPin = 8;
+const int greenPin = 9;
+
+enum LightState { RED, GREEN };
+LightState state = RED;
+unsigned long previousMillis = 0;
+const long redDuration = 3000;
+const long greenDuration = 3000;
+
+void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  Serial.begin(9600);
+  digitalWrite(redPin, HIGH);
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  long duration = (state == RED) ? redDuration : greenDuration;
+
+  if (currentMillis - previousMillis >= duration) {
+    previousMillis = currentMillis;
+    if (state == RED) {
+      state = GREEN;
+      digitalWrite(redPin, LOW);
+      digitalWrite(greenPin, HIGH);
+      Serial.println("GREEN - Go");
+    } else {
+      state = RED;
+      digitalWrite(greenPin, LOW);
+      digitalWrite(redPin, HIGH);
+      Serial.println("RED - Stop");
+    }
+  }
+}`,
+  },
+  {
+    id: 14, emoji: "🎹", title: "Piano Keys",
+    desc: "Make a mini piano with push buttons and a buzzer.",
+    difficulty: "beginner", time: "25 mins", xp: 65,
+    components: ["Push Button", "Buzzer", "Arduino Uno", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, 4× push buttons, piezo buzzer, breadboard, jumper wires",
+      "Wire each button between pins 2-5 and GND — internal pull-ups handle the rest",
+      "Connect buzzer positive lead to pin 8, negative lead to GND",
+      "Upload the code via Arduino IDE",
+      "Press each button to hear a different note (C4-F4)",
+      "🧪 Add more buttons and notes to build a full octave",
+      "⚠️ No sound? Confirm it's a passive (not active) buzzer",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read multiple digital inputs
+  2. Generate tones with tone()
+  3. Map buttons to musical notes
+*/
+
+const int buttonPins[4] = {2, 3, 4, 5};
+const int notes[4] = {262, 294, 330, 349}; // C4, D4, E4, F4
+const int buzzerPin = 8;
+
+void setup() {
+  for (int i = 0; i < 4; i++) {
+    pinMode(buttonPins[i], INPUT_PULLUP);
+  }
+  pinMode(buzzerPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Piano Keys Ready!");
+}
+
+void loop() {
+  bool anyPressed = false;
+  for (int i = 0; i < 4; i++) {
+    if (digitalRead(buttonPins[i]) == LOW) {
+      tone(buzzerPin, notes[i]);
+      anyPressed = true;
+    }
+  }
+  if (!anyPressed) {
+    noTone(buzzerPin);
+  }
+}`,
+    optimizedCode: `// Optimized: avoids redundant tone() calls, prints note names
+const int buttonPins[4] = {2, 3, 4, 5};
+const int notes[4] = {262, 294, 330, 349};
+const char* noteNames[4] = {"C4", "D4", "E4", "F4"};
+const int buzzerPin = 8;
+int lastPlayed = -1;
+
+void setup() {
+  for (int i = 0; i < 4; i++) pinMode(buttonPins[i], INPUT_PULLUP);
+  pinMode(buzzerPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int pressed = -1;
+  for (int i = 0; i < 4; i++) {
+    if (digitalRead(buttonPins[i]) == LOW) {
+      pressed = i;
+      break;
+    }
+  }
+
+  if (pressed != lastPlayed) {
+    if (pressed == -1) {
+      noTone(buzzerPin);
+    } else {
+      tone(buzzerPin, notes[pressed]);
+      Serial.println(noteNames[pressed]);
+    }
+    lastPlayed = pressed;
+  }
+}`,
+  },
+  {
+    id: 15, emoji: "🌙", title: "Night Light",
+    desc: "Auto-on LED when it gets dark using a photoresistor.",
+    difficulty: "beginner", time: "20 mins", xp: 55,
+    components: ["LED (Red)", "Photoresistor (LDR)", "Arduino Uno", "Resistor (10kΩ)"],
+    instructions: [
+      "Gather: Arduino Uno, red LED, photoresistor (LDR), 10kΩ resistor, breadboard, wires",
+      "Wire LDR between 5V and A0, then a 10kΩ resistor from A0 to GND (voltage divider)",
+      "Connect LED anode → pin 9 (PWM), cathode → GND",
+      "Upload the code via Arduino IDE",
+      "Cover the LDR to simulate darkness — the LED should turn on smoothly",
+      "🧪 Adjust the thresholds in the optimized version to match your room's lighting",
+      "⚠️ LED flickering at dusk? Increase the hysteresis gap between thresholds",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read analog values from a photoresistor (LDR)
+  2. Use a voltage divider circuit
+  3. Threshold-based digital output
+*/
+
+const int ldrPin = A0;
+const int ledPin = 9;
+const int darkThreshold = 500; // Adjust based on your environment
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Night Light Starting...");
+}
+
+void loop() {
+  int lightLevel = analogRead(ldrPin);
+  Serial.print("Light Level: ");
+  Serial.println(lightLevel);
+
+  if (lightLevel < darkThreshold) {
+    digitalWrite(ledPin, HIGH); // Dark — turn LED on
+  } else {
+    digitalWrite(ledPin, LOW);  // Bright — turn LED off
+  }
+
+  delay(200);
+}`,
+    optimizedCode: `// Optimized with averaging and hysteresis to prevent flicker
+const int ldrPin = A0;
+const int ledPin = 9;
+const int onThreshold = 450;
+const int offThreshold = 550; // Hysteresis gap avoids rapid on/off toggling
+bool lightOn = false;
+
+int readAverageLight() {
+  long total = 0;
+  for (int i = 0; i < 8; i++) {
+    total += analogRead(ldrPin);
+    delay(5);
+  }
+  return total / 8;
+}
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int lightLevel = readAverageLight();
+
+  if (!lightOn && lightLevel < onThreshold) {
+    lightOn = true;
+  } else if (lightOn && lightLevel > offThreshold) {
+    lightOn = false;
+  }
+
+  // Smooth fade instead of a hard on/off
+  int brightness = lightOn ? map(constrain(lightLevel, 0, onThreshold), 0, onThreshold, 255, 80) : 0;
+  analogWrite(ledPin, brightness);
+
+  Serial.print("Light: ");
+  Serial.print(lightLevel);
+  Serial.print(" | LED: ");
+  Serial.println(lightOn ? "ON" : "OFF");
+}`,
+  },
+  {
+    id: 16, emoji: "⏱️", title: "Reaction Timer Game",
+    desc: "Measure your reaction speed with LEDs and a button.",
+    difficulty: "intermediate", time: "40 mins", xp: 90,
+    components: ["LED (Red)", "Push Button", "16x2 LCD", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, 16x2 I2C LCD, red LED, push button, breadboard, wires",
+      "Wire LCD: SDA→A4, SCL→A5, VCC→5V, GND→GND",
+      "Connect LED to pin 9 (with resistor), button between pin 8 and GND",
+      "Upload the code via Arduino IDE",
+      "Wait for 'GO!', then press the button as fast as you can",
+      "🧪 The optimized version tracks your best time and flags false starts",
+      "⚠️ LCD showing boxes? Adjust the contrast pot on the I2C backpack",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Use an I2C 16x2 LCD
+  2. Measure elapsed time with millis()
+  3. Random delays with random()
+*/
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const int ledPin = 9;
+const int buttonPin = 8;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  lcd.init();
+  lcd.backlight();
+  lcd.print("Reaction Timer");
+  Serial.begin(9600);
+  randomSeed(analogRead(A0));
+  delay(1500);
+}
+
+void loop() {
+  lcd.clear();
+  lcd.print("Get Ready...");
+  digitalWrite(ledPin, LOW);
+  delay(random(2000, 5000));
+
+  lcd.clear();
+  lcd.print("GO!");
+  digitalWrite(ledPin, HIGH);
+  unsigned long startTime = millis();
+
+  while (digitalRead(buttonPin) == HIGH) {
+    // Wait for button press
+  }
+
+  unsigned long reactionTime = millis() - startTime;
+  digitalWrite(ledPin, LOW);
+
+  lcd.clear();
+  lcd.print("Time: ");
+  lcd.print(reactionTime);
+  lcd.print("ms");
+  Serial.print("Reaction time: ");
+  Serial.println(reactionTime);
+
+  delay(3000);
+}`,
+    optimizedCode: `// Optimized with false-start detection and best-score tracking
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const int ledPin = 9;
+const int buttonPin = 8;
+unsigned long bestTime = 999999;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  lcd.init();
+  lcd.backlight();
+  Serial.begin(9600);
+  randomSeed(analogRead(A0));
+}
+
+void loop() {
+  lcd.clear();
+  lcd.print("Get Ready...");
+  digitalWrite(ledPin, LOW);
+  unsigned long waitTime = random(2000, 5000);
+  unsigned long waitStart = millis();
+
+  // Detect a false start during the wait period
+  while (millis() - waitStart < waitTime) {
+    if (digitalRead(buttonPin) == LOW) {
+      lcd.clear();
+      lcd.print("Too Soon!");
+      delay(2000);
+      return;
+    }
+  }
+
+  lcd.clear();
+  lcd.print("GO!");
+  digitalWrite(ledPin, HIGH);
+  unsigned long startTime = millis();
+
+  while (digitalRead(buttonPin) == HIGH) {
+    // Wait for button press
+  }
+
+  unsigned long reactionTime = millis() - startTime;
+  digitalWrite(ledPin, LOW);
+  if (reactionTime < bestTime) bestTime = reactionTime;
+
+  lcd.setCursor(0, 0);
+  lcd.print("Time: ");
+  lcd.print(reactionTime);
+  lcd.print("ms");
+  lcd.setCursor(0, 1);
+  lcd.print("Best: ");
+  lcd.print(bestTime);
+  lcd.print("ms");
+
+  delay(3000);
+}`,
+  },
+  {
+    id: 17, emoji: "🧭", title: "Digital Compass",
+    desc: "Build a compass using an I2C magnetometer module.",
+    difficulty: "intermediate", time: "50 mins", xp: 110,
+    components: ["OLED Display (0.96\")", "Arduino Uno", "Breadboard", "Jumper Wires"],
+    instructions: [
+      "Gather: Arduino Uno, HMC5883L/QMC5883L magnetometer, 0.96\" OLED, breadboard, wires",
+      "Wire both I2C devices: SDA→A4, SCL→A5, VCC→5V, GND→GND (shared bus)",
+      "Upload the code via Arduino IDE",
+      "Rotate the sensor flat and level — the heading should update in real time",
+      "🧪 Run the calibration routine in the optimized version for better accuracy",
+      "⚠️ Heading jumps around? Keep the sensor away from motors, speakers, and metal",
+      "⚠️ Nothing on I2C? Run an I2C scanner sketch to confirm the sensor's address",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. I2C communication with a magnetometer (HMC5883L)
+  2. Convert raw magnetic field readings to a heading angle
+  3. Display real-time data on an OLED
+*/
+
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+#define HMC5883L_ADDR 0x1E
+
+void setup() {
+  Serial.begin(9600);
+  Wire.begin();
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+
+  // Configure HMC5883L: continuous measurement mode
+  Wire.beginTransmission(HMC5883L_ADDR);
+  Wire.write(0x02);
+  Wire.write(0x00);
+  Wire.endTransmission();
+}
+
+void loop() {
+  int16_t x, y, z;
+  Wire.beginTransmission(HMC5883L_ADDR);
+  Wire.write(0x03); // Start at register 3 (X MSB)
+  Wire.endTransmission();
+  Wire.requestFrom(HMC5883L_ADDR, 6);
+
+  if (Wire.available() >= 6) {
+    x = Wire.read() << 8 | Wire.read();
+    z = Wire.read() << 8 | Wire.read();
+    y = Wire.read() << 8 | Wire.read();
+
+    float heading = atan2(y, x);
+    if (heading < 0) heading += 2 * PI;
+    float headingDeg = heading * 180 / PI;
+
+    Serial.print("Heading: ");
+    Serial.println(headingDeg);
+
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 20);
+    display.print(headingDeg, 0);
+    display.println(" deg");
+    display.display();
+  }
+
+  delay(200);
+}`,
+    optimizedCode: `// Optimized with calibration offsets and cardinal direction labels
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+#define HMC5883L_ADDR 0x1E
+
+// Calibrate these by rotating the sensor 360° and recording min/max
+float xOffset = 0, yOffset = 0;
+
+const char* directionFromHeading(float deg) {
+  const char* dirs[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+  int index = (int)((deg + 22.5) / 45) % 8;
+  return dirs[index];
+}
+
+void setup() {
+  Serial.begin(9600);
+  Wire.begin();
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+
+  Wire.beginTransmission(HMC5883L_ADDR);
+  Wire.write(0x02);
+  Wire.write(0x00);
+  Wire.endTransmission();
+}
+
+void loop() {
+  int16_t x, y, z;
+  Wire.beginTransmission(HMC5883L_ADDR);
+  Wire.write(0x03);
+  Wire.endTransmission();
+  Wire.requestFrom(HMC5883L_ADDR, 6);
+
+  if (Wire.available() >= 6) {
+    x = Wire.read() << 8 | Wire.read();
+    z = Wire.read() << 8 | Wire.read();
+    y = Wire.read() << 8 | Wire.read();
+
+    float heading = atan2(y - yOffset, x - xOffset);
+    if (heading < 0) heading += 2 * PI;
+    float headingDeg = heading * 180 / PI;
+
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 10);
+    display.print(headingDeg, 0);
+    display.println(" deg");
+    display.setTextSize(3);
+    display.setCursor(30, 35);
+    display.println(directionFromHeading(headingDeg));
+    display.display();
+
+    Serial.print(headingDeg);
+    Serial.print(" deg - ");
+    Serial.println(directionFromHeading(headingDeg));
+  }
+
+  delay(200);
+}`,
+  },
+  {
+    id: 18, emoji: "📻", title: "IR Remote Decoder",
+    desc: "Capture and decode signals from any IR remote control.",
+    difficulty: "intermediate", time: "35 mins", xp: 85,
+    components: ["IR Sensor", "Arduino Uno", "Breadboard", "Jumper Wires"],
+    instructions: [
+      "Gather: Arduino Uno, IR receiver module (e.g. VS1838B), breadboard, jumper wires",
+      "Wire IR receiver: OUT→pin 11, VCC→5V, GND→GND",
+      "Install the 'IRremote' library from Library Manager",
+      "Upload the code via Arduino IDE and open Serial Monitor at 9600 baud",
+      "Point any remote at the sensor and press buttons — codes print to Serial",
+      "🧪 Copy the printed hex codes into handleCommand() to map real buttons",
+      "⚠️ No signal? Most receivers need the flat side facing the remote",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Receive and decode infrared signals
+  2. Use the IRremote library
+  3. Map remote codes to actions
+*/
+
+#include <IRremote.hpp>
+
+const int irPin = 11;
+
+void setup() {
+  Serial.begin(9600);
+  IrReceiver.begin(irPin, ENABLE_LED_FEEDBACK);
+  Serial.println("IR Receiver Ready. Point a remote and press a button.");
+}
+
+void loop() {
+  if (IrReceiver.decode()) {
+    Serial.print("Code received: 0x");
+    Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX);
+    IrReceiver.resume();
+  }
+}`,
+    optimizedCode: `// Optimized with named button mapping and repeat filtering
+#include <IRremote.hpp>
+
+const int irPin = 11;
+unsigned long lastCode = 0;
+unsigned long lastReceiveTime = 0;
+
+void handleCommand(unsigned long code) {
+  // Replace these with the actual codes printed by your remote
+  switch (code) {
+    case 0xFF18E7: Serial.println("Button: UP"); break;
+    case 0xFF4AB5: Serial.println("Button: DOWN"); break;
+    case 0xFF10EF: Serial.println("Button: LEFT"); break;
+    case 0xFF5AA5: Serial.println("Button: RIGHT"); break;
+    case 0xFF38C7: Serial.println("Button: OK"); break;
+    default:
+      Serial.print("Unknown code: 0x");
+      Serial.println(code, HEX);
+  }
+}
+
+void setup() {
+  Serial.begin(9600);
+  IrReceiver.begin(irPin, ENABLE_LED_FEEDBACK);
+}
+
+void loop() {
+  if (IrReceiver.decode()) {
+    unsigned long code = IrReceiver.decodedIRData.decodedRawData;
+    // Ignore repeat codes fired faster than 200ms (held button)
+    if (code != 0 && millis() - lastReceiveTime > 200) {
+      handleCommand(code);
+      lastCode = code;
+      lastReceiveTime = millis();
+    }
+    IrReceiver.resume();
+  }
+}`,
+  },
+  {
+    id: 19, emoji: "🏠", title: "Smart Home Hub",
+    desc: "Control lights and fans via WiFi with an ESP8266 shield.",
+    difficulty: "advanced", time: "100 mins", xp: 220,
+    components: ["ESP8266", "Relay Module", "LED (Red)", "Arduino Uno"],
+    instructions: [
+      "Gather: ESP8266 module (e.g. NodeMCU), relay module, red LED, breadboard, jumper wires",
+      "This sketch runs directly on the ESP8266 — select 'NodeMCU 1.0' as your board",
+      "Wire relay IN→D1, LED→D2 (with resistor), VCC/GND to the ESP8266's 3.3V/GND",
+      "Set your WiFi ssid/password at the top of the sketch, then upload",
+      "Open Serial Monitor to find the ESP8266's IP address once connected",
+      "🧪 Visit the printed IP in a browser to control the relay and LED remotely",
+      "⚠️ Won't connect? ESP8266 only supports 2.4GHz WiFi networks",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Run a simple WiFi web server on ESP8266
+  2. Control a relay and LED remotely via HTTP
+  3. Basic home automation concepts
+
+  Note: This sketch runs directly on the ESP8266 module
+  (select "Generic ESP8266" or "NodeMCU" as your board).
+*/
+
+#include <ESP8266WiFi.h>
+
+const char* ssid = "YOUR_WIFI_NAME";
+const char* password = "YOUR_WIFI_PASSWORD";
+
+const int relayPin = 5;  // D1 on NodeMCU
+const int ledPin = 4;    // D2 on NodeMCU
+
+WiFiServer server(80);
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(relayPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("Connected! IP address: ");
+  Serial.println(WiFi.localIP());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+
+  String request = client.readStringUntil('\\r');
+  client.flush();
+
+  if (request.indexOf("/relay/on") != -1) digitalWrite(relayPin, HIGH);
+  if (request.indexOf("/relay/off") != -1) digitalWrite(relayPin, LOW);
+  if (request.indexOf("/led/on") != -1) digitalWrite(ledPin, HIGH);
+  if (request.indexOf("/led/off") != -1) digitalWrite(ledPin, LOW);
+
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: text/plain");
+  client.println();
+  client.println("OK");
+  client.stop();
+}`,
+    optimizedCode: `// Optimized: serves an HTML control page instead of raw text responses
+#include <ESP8266WiFi.h>
+
+const char* ssid = "YOUR_WIFI_NAME";
+const char* password = "YOUR_WIFI_PASSWORD";
+
+const int relayPin = 5;
+const int ledPin = 4;
+bool relayState = false;
+bool ledState = false;
+
+WiFiServer server(80);
+
+void handleRequest(String request) {
+  if (request.indexOf("/relay/on") != -1) { relayState = true; digitalWrite(relayPin, HIGH); }
+  if (request.indexOf("/relay/off") != -1) { relayState = false; digitalWrite(relayPin, LOW); }
+  if (request.indexOf("/led/on") != -1) { ledState = true; digitalWrite(ledPin, HIGH); }
+  if (request.indexOf("/led/off") != -1) { ledState = false; digitalWrite(ledPin, LOW); }
+}
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(relayPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) delay(500);
+  Serial.println(WiFi.localIP());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+
+  String request = client.readStringUntil('\\r');
+  client.flush();
+  handleRequest(request);
+
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: text/html");
+  client.println();
+  client.println("<html><body style='font-family:sans-serif'>");
+  client.println("<h2>Smart Home Hub</h2>");
+  client.print("<p>Relay: "); client.print(relayState ? "ON" : "OFF"); client.println("</p>");
+  client.println("<a href='/relay/on'><button>Relay ON</button></a> ");
+  client.println("<a href='/relay/off'><button>Relay OFF</button></a><br><br>");
+  client.print("<p>LED: "); client.print(ledState ? "ON" : "OFF"); client.println("</p>");
+  client.println("<a href='/led/on'><button>LED ON</button></a> ");
+  client.println("<a href='/led/off'><button>LED OFF</button></a>");
+  client.println("</body></html>");
+  client.stop();
+}`,
+  },
+  {
+    id: 20, emoji: "🤖", title: "Line Following Robot",
+    desc: "Build a robot that follows a black line on the floor.",
+    difficulty: "advanced", time: "110 mins", xp: 230,
+    components: ["IR Sensor", "Motor Driver (L298N)", "DC Motor", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, 2× IR line sensors, L298N motor driver, 2× DC motors + wheels, chassis",
+      "Wire both IR sensors' outputs to pins 2 and 3",
+      "Wire L298N: IN1-IN4→pins 8-11, ENA/ENB→pins 5/6, motors to OUT1-OUT4",
+      "Power the L298N from a separate battery pack (not through the Arduino)",
+      "Upload the code and place the robot on a black line on a light surface",
+      "🧪 Tune baseSpeed/turnSpeed in the optimized version for smoother tracking",
+      "⚠️ Robot jerky or stalling? Check the L298N has its own adequate power supply",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read IR line sensors for line detection
+  2. Control 2 DC motors via L298N H-bridge
+  3. Basic differential steering logic
+*/
+
+const int leftSensor = 2;
+const int rightSensor = 3;
+
+const int leftMotorIN1 = 8;
+const int leftMotorIN2 = 9;
+const int rightMotorIN1 = 10;
+const int rightMotorIN2 = 11;
+
+void setup() {
+  pinMode(leftSensor, INPUT);
+  pinMode(rightSensor, INPUT);
+  pinMode(leftMotorIN1, OUTPUT);
+  pinMode(leftMotorIN2, OUTPUT);
+  pinMode(rightMotorIN1, OUTPUT);
+  pinMode(rightMotorIN2, OUTPUT);
+  Serial.begin(9600);
+}
+
+void forward() {
+  digitalWrite(leftMotorIN1, HIGH); digitalWrite(leftMotorIN2, LOW);
+  digitalWrite(rightMotorIN1, HIGH); digitalWrite(rightMotorIN2, LOW);
+}
+
+void turnLeft() {
+  digitalWrite(leftMotorIN1, LOW); digitalWrite(leftMotorIN2, LOW);
+  digitalWrite(rightMotorIN1, HIGH); digitalWrite(rightMotorIN2, LOW);
+}
+
+void turnRight() {
+  digitalWrite(leftMotorIN1, HIGH); digitalWrite(leftMotorIN2, LOW);
+  digitalWrite(rightMotorIN1, LOW); digitalWrite(rightMotorIN2, LOW);
+}
+
+void stopMotors() {
+  digitalWrite(leftMotorIN1, LOW); digitalWrite(leftMotorIN2, LOW);
+  digitalWrite(rightMotorIN1, LOW); digitalWrite(rightMotorIN2, LOW);
+}
+
+void loop() {
+  // Sensors read HIGH over the black line, LOW over the light surface
+  bool onLineLeft = digitalRead(leftSensor);
+  bool onLineRight = digitalRead(rightSensor);
+
+  if (onLineLeft && onLineRight) {
+    forward();
+  } else if (onLineLeft && !onLineRight) {
+    turnLeft();
+  } else if (!onLineLeft && onLineRight) {
+    turnRight();
+  } else {
+    stopMotors();
+  }
+}`,
+    optimizedCode: `// Optimized with PWM speed control for smoother turns
+const int leftSensor = 2;
+const int rightSensor = 3;
+
+const int leftMotorIN1 = 8;
+const int leftMotorIN2 = 9;
+const int leftEnable = 5;   // PWM
+const int rightMotorIN1 = 10;
+const int rightMotorIN2 = 11;
+const int rightEnable = 6;  // PWM
+
+const int baseSpeed = 180;
+const int turnSpeed = 100;
+
+void setup() {
+  pinMode(leftSensor, INPUT);
+  pinMode(rightSensor, INPUT);
+  pinMode(leftMotorIN1, OUTPUT);
+  pinMode(leftMotorIN2, OUTPUT);
+  pinMode(rightMotorIN1, OUTPUT);
+  pinMode(rightMotorIN2, OUTPUT);
+  pinMode(leftEnable, OUTPUT);
+  pinMode(rightEnable, OUTPUT);
+  Serial.begin(9600);
+}
+
+void drive(int leftSpeed, int rightSpeed) {
+  digitalWrite(leftMotorIN1, HIGH); digitalWrite(leftMotorIN2, LOW);
+  digitalWrite(rightMotorIN1, HIGH); digitalWrite(rightMotorIN2, LOW);
+  analogWrite(leftEnable, leftSpeed);
+  analogWrite(rightEnable, rightSpeed);
+}
+
+void loop() {
+  bool onLineLeft = digitalRead(leftSensor);
+  bool onLineRight = digitalRead(rightSensor);
+
+  if (onLineLeft && onLineRight) {
+    drive(baseSpeed, baseSpeed);
+  } else if (onLineLeft && !onLineRight) {
+    drive(turnSpeed, baseSpeed);
+  } else if (!onLineLeft && onLineRight) {
+    drive(baseSpeed, turnSpeed);
+  } else {
+    drive(0, 0);
+  }
+}`,
+  },
+  {
+    id: 21, emoji: "📡", title: "Weather Station",
+    desc: "Log temperature, humidity, and pressure to an SD card.",
+    difficulty: "advanced", time: "95 mins", xp: 210,
+    components: ["BMP180 (Pressure)", "SD Card Module", "Arduino Uno", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, BMP180 sensor, SD card module, SD card, breadboard, wires",
+      "Wire BMP180: SDA→A4, SCL→A5, VCC→5V, GND→GND",
+      "Wire SD module: CS→pin 10, MOSI→11, MISO→12, SCK→13, VCC→5V, GND→GND",
+      "Install 'Adafruit BMP085' and 'SD' libraries, then upload",
+      "Open Serial Monitor to see live readings — data also logs to weather.csv",
+      "🧪 Pull the SD card and open the CSV in a spreadsheet to graph trends",
+      "⚠️ 'SD card init failed'? Reformat the card as FAT16/FAT32",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read temperature and pressure from a BMP180 sensor (I2C)
+  2. Log data to an SD card
+  3. Combine multiple I2C/SPI peripherals
+*/
+
+#include <Wire.h>
+#include <Adafruit_BMP085.h>
+#include <SPI.h>
+#include <SD.h>
+
+Adafruit_BMP085 bmp;
+const int chipSelect = 10;
+
+void setup() {
+  Serial.begin(9600);
+
+  if (!bmp.begin()) {
+    Serial.println("BMP180 not found!");
+    while (1);
+  }
+
+  if (!SD.begin(chipSelect)) {
+    Serial.println("SD card init failed!");
+    while (1);
+  }
+  Serial.println("Weather Station Ready!");
+}
+
+void loop() {
+  float temperature = bmp.readTemperature();
+  float pressure = bmp.readPressure() / 100.0F; // Convert to hPa
+
+  Serial.print("Temp: "); Serial.print(temperature); Serial.print(" C, ");
+  Serial.print("Pressure: "); Serial.print(pressure); Serial.println(" hPa");
+
+  File dataFile = SD.open("weather.csv", FILE_WRITE);
+  if (dataFile) {
+    dataFile.print(millis());
+    dataFile.print(",");
+    dataFile.print(temperature);
+    dataFile.print(",");
+    dataFile.println(pressure);
+    dataFile.close();
+  }
+
+  delay(5000);
+}`,
+    optimizedCode: `// Optimized with altitude calculation and logging error recovery
+#include <Wire.h>
+#include <Adafruit_BMP085.h>
+#include <SPI.h>
+#include <SD.h>
+
+Adafruit_BMP085 bmp;
+const int chipSelect = 10;
+const float seaLevelPressure = 1013.25; // hPa, adjust for your location
+bool sdReady = false;
+
+void setup() {
+  Serial.begin(9600);
+
+  if (!bmp.begin()) {
+    Serial.println("BMP180 not found!");
+    while (1);
+  }
+
+  sdReady = SD.begin(chipSelect);
+  if (!sdReady) Serial.println("SD card unavailable — logging to Serial only.");
+  Serial.println("timestamp_ms,temp_C,pressure_hPa,altitude_m");
+}
+
+void loop() {
+  float temperature = bmp.readTemperature();
+  float pressure = bmp.readPressure() / 100.0F;
+  float altitude = 44330.0 * (1.0 - pow(pressure / seaLevelPressure, 0.1903));
+
+  String row = String(millis()) + "," + String(temperature) + "," + String(pressure) + "," + String(altitude);
+  Serial.println(row);
+
+  if (sdReady) {
+    File dataFile = SD.open("weather.csv", FILE_WRITE);
+    if (dataFile) {
+      dataFile.println(row);
+      dataFile.close();
+    } else {
+      Serial.println("Warning: could not write to SD card.");
+    }
+  }
+
+  delay(5000);
+}`,
+  },
+  {
+    id: 22, emoji: "🦾", title: "Robotic Arm Controller",
+    desc: "Control a 4-DOF robotic arm with potentiometers.",
+    difficulty: "advanced", time: "130 mins", xp: 260,
+    components: ["Servo Motor (SG90)", "Potentiometer", "Arduino Mega", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Mega, 4× SG90 servos, 4× potentiometers, breadboard, jumper wires",
+      "Wire servos to pins 3, 5, 6, 9 (all PWM-capable on the Mega)",
+      "Wire each potentiometer's wiper to A0-A3, outer legs to 5V and GND",
+      "Power servos from a separate 5V supply if using more than 2 simultaneously",
+      "Upload the code — each pot now directly controls one joint",
+      "🧪 Try the smoothed version so movements ease instead of snapping",
+      "⚠️ Servos twitching? Add a large capacitor across the servo power rails",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Control multiple servos simultaneously
+  2. Map potentiometer input to servo angle
+  3. Basic 4-DOF robotic arm kinematics (direct joint control)
+*/
+
+#include <Servo.h>
+
+Servo baseServo, shoulderServo, elbowServo, gripperServo;
+
+const int basePot = A0;
+const int shoulderPot = A1;
+const int elbowPot = A2;
+const int gripperPot = A3;
+
+void setup() {
+  baseServo.attach(3);
+  shoulderServo.attach(5);
+  elbowServo.attach(6);
+  gripperServo.attach(9);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int baseAngle = map(analogRead(basePot), 0, 1023, 0, 180);
+  int shoulderAngle = map(analogRead(shoulderPot), 0, 1023, 0, 180);
+  int elbowAngle = map(analogRead(elbowPot), 0, 1023, 0, 180);
+  int gripperAngle = map(analogRead(gripperPot), 0, 1023, 0, 180);
+
+  baseServo.write(baseAngle);
+  shoulderServo.write(shoulderAngle);
+  elbowServo.write(elbowAngle);
+  gripperServo.write(gripperAngle);
+
+  Serial.print("Base:"); Serial.print(baseAngle);
+  Serial.print(" Shoulder:"); Serial.print(shoulderAngle);
+  Serial.print(" Elbow:"); Serial.print(elbowAngle);
+  Serial.print(" Gripper:"); Serial.println(gripperAngle);
+
+  delay(50);
+}`,
+    optimizedCode: `// Optimized with smoothed motion — servos ease toward target instead of jumping
+#include <Servo.h>
+
+Servo baseServo, shoulderServo, elbowServo, gripperServo;
+
+const int basePot = A0;
+const int shoulderPot = A1;
+const int elbowPot = A2;
+const int gripperPot = A3;
+
+float currentBase = 90, currentShoulder = 90, currentElbow = 90, currentGripper = 90;
+const float smoothing = 0.1; // Lower = smoother but slower response
+
+float smoothMove(float current, int targetRaw) {
+  int target = map(targetRaw, 0, 1023, 0, 180);
+  return current + (target - current) * smoothing;
+}
+
+void setup() {
+  baseServo.attach(3);
+  shoulderServo.attach(5);
+  elbowServo.attach(6);
+  gripperServo.attach(9);
+  Serial.begin(9600);
+}
+
+void loop() {
+  currentBase = smoothMove(currentBase, analogRead(basePot));
+  currentShoulder = smoothMove(currentShoulder, analogRead(shoulderPot));
+  currentElbow = smoothMove(currentElbow, analogRead(elbowPot));
+  currentGripper = smoothMove(currentGripper, analogRead(gripperPot));
+
+  baseServo.write((int)currentBase);
+  shoulderServo.write((int)currentShoulder);
+  elbowServo.write((int)currentElbow);
+  gripperServo.write((int)currentGripper);
+
+  delay(15);
+}`,
+  },
+  {
+    id: 23, emoji: "🔋", title: "Battery Monitor System",
+    desc: "Monitor and display battery voltage and health status.",
+    difficulty: "advanced", time: "80 mins", xp: 190,
+    components: ["OLED Display (0.96\")", "Arduino Uno", "Resistor (10kΩ)", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, 0.96\" OLED, 2× 10kΩ resistors, breadboard, wires",
+      "Build a voltage divider: battery+ → R1(10k) → A0 → R2(10k) → GND",
+      "Wire OLED: SDA→A4, SCL→A5, VCC→5V, GND→GND",
+      "Upload the code — never connect a battery above 5V directly to any Arduino pin",
+      "Voltage and percentage should update on the OLED every second",
+      "🧪 Adjust maxVoltage/minVoltage to match your specific battery chemistry",
+      "⚠️ Readings unstable? The averaging in the optimized version smooths this out",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Measure voltage beyond 5V using a resistor voltage divider
+  2. Read and calibrate analog input
+  3. Display real-time data on OLED
+*/
+
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+const int voltagePin = A0;
+
+// Voltage divider: R1 (10k) from battery+ to A0, R2 (10k) from A0 to GND
+const float r1 = 10000.0;
+const float r2 = 10000.0;
+const float refVoltage = 5.0;
+
+void setup() {
+  Serial.begin(9600);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+}
+
+void loop() {
+  int raw = analogRead(voltagePin);
+  float measuredVoltage = (raw / 1023.0) * refVoltage;
+  float batteryVoltage = measuredVoltage * ((r1 + r2) / r2);
+
+  Serial.print("Battery Voltage: ");
+  Serial.println(batteryVoltage);
+
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 20);
+  display.print(batteryVoltage, 2);
+  display.println("V");
+  display.display();
+
+  delay(1000);
+}`,
+    optimizedCode: `// Optimized with battery percentage estimate, averaging, and low-battery warning
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+const int voltagePin = A0;
+
+const float r1 = 10000.0;
+const float r2 = 10000.0;
+const float refVoltage = 5.0;
+const float maxVoltage = 12.6; // Full charge (e.g. 3S LiPo)
+const float minVoltage = 9.0;  // Empty
+
+float readAveragedVoltage() {
+  long total = 0;
+  for (int i = 0; i < 10; i++) {
+    total += analogRead(voltagePin);
+    delay(2);
+  }
+  float raw = total / 10.0;
+  float measuredVoltage = (raw / 1023.0) * refVoltage;
+  return measuredVoltage * ((r1 + r2) / r2);
+}
+
+void setup() {
+  Serial.begin(9600);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+}
+
+void loop() {
+  float batteryVoltage = readAveragedVoltage();
+  int percentage = constrain(map(batteryVoltage * 100, minVoltage * 100, maxVoltage * 100, 0, 100), 0, 100);
+
+  Serial.print(batteryVoltage);
+  Serial.print("V (");
+  Serial.print(percentage);
+  Serial.println("%)");
+
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 10);
+  display.print(batteryVoltage, 2);
+  display.println("V");
+  display.setCursor(0, 35);
+  display.print(percentage);
+  display.println("%");
+
+  if (percentage < 15) {
+    display.setCursor(0, 55);
+    display.println("LOW BATTERY!");
+  }
+  display.display();
+
+  delay(1000);
+}`,
+  },
+  {
+    id: 24, emoji: "🎲", title: "Electronic Dice",
+    desc: "Roll a digital dice with LEDs and a push button.",
+    difficulty: "beginner", time: "25 mins", xp: 60,
+    components: ["LED (Red)", "Push Button", "Arduino Uno", "Resistor (220Ω)"],
+    instructions: [
+      "Gather: Arduino Uno, red LED, push button, 220Ω resistor, breadboard, wires",
+      "Connect LED anode → 220Ω resistor → pin 9, cathode → GND",
+      "Connect button between pin 2 and GND (internal pull-up handles the rest)",
+      "Upload the code via Arduino IDE",
+      "Press the button — the LED blinks 1-6 times to show your roll",
+      "🧪 Try the rolling-animation version for a suspenseful flicker before the result",
+      "⚠️ Same number every time? Confirm A0 is left floating (unconnected) for good randomSeed()",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Generate pseudo-random numbers with random()
+  2. Debounce a push button
+  3. Represent a value using LED blink counts
+*/
+
+const int buttonPin = 2;
+const int ledPin = 9;
+
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  randomSeed(analogRead(A0));
+  Serial.println("Press the button to roll the dice!");
+}
+
+void loop() {
+  if (digitalRead(buttonPin) == LOW) {
+    delay(50); // Simple debounce
+    int roll = random(1, 7); // 1 to 6
+    Serial.print("You rolled: ");
+    Serial.println(roll);
+
+    for (int i = 0; i < roll; i++) {
+      digitalWrite(ledPin, HIGH);
+      delay(200);
+      digitalWrite(ledPin, LOW);
+      delay(200);
+    }
+
+    while (digitalRead(buttonPin) == LOW) {
+      // Wait for button release
+    }
+  }
+}`,
+    optimizedCode: `// Optimized with a rolling animation before the final result
+const int buttonPin = 2;
+const int ledPin = 9;
+
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  randomSeed(analogRead(A0));
+}
+
+void loop() {
+  if (digitalRead(buttonPin) == LOW) {
+    delay(50);
+
+    // Rolling animation — rapid flicker for suspense
+    unsigned long rollStart = millis();
+    while (millis() - rollStart < 1000) {
+      digitalWrite(ledPin, HIGH);
+      delay(40);
+      digitalWrite(ledPin, LOW);
+      delay(40);
+    }
+
+    int roll = random(1, 7);
+    Serial.print("You rolled: ");
+    Serial.println(roll);
+
+    delay(300);
+    for (int i = 0; i < roll; i++) {
+      digitalWrite(ledPin, HIGH);
+      delay(250);
+      digitalWrite(ledPin, LOW);
+      delay(250);
+    }
+
+    while (digitalRead(buttonPin) == LOW) {
+      // Wait for release
+    }
+  }
+}`,
+  },
+  {
+    id: 25, emoji: "📢", title: "Clap Switch",
+    desc: "Toggle an LED by clapping using a sound sensor.",
+    difficulty: "beginner", time: "30 mins", xp: 70,
+    components: ["Sound Sensor", "LED (Red)", "Arduino Uno", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, sound sensor module (e.g. KY-038), red LED, breadboard, wires",
+      "Wire sound sensor: OUT→pin 2, VCC→5V, GND→GND",
+      "Connect LED to pin 9 (with resistor), cathode to GND",
+      "Upload the code and adjust the sensor's onboard sensitivity potentiometer",
+      "Clap near the sensor — the LED should toggle on/off",
+      "🧪 Try the double-clap version so accidental noise doesn't trigger it",
+      "⚠️ Too sensitive or not sensitive enough? Turn the tiny blue pot on the sensor board",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read a digital sound sensor
+  2. Toggle state on an event (not just level)
+  3. Simple edge detection
+*/
+
+const int soundPin = 2;
+const int ledPin = 9;
+bool ledState = false;
+
+void setup() {
+  pinMode(soundPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Clap to toggle the LED!");
+}
+
+void loop() {
+  if (digitalRead(soundPin) == HIGH) {
+    ledState = !ledState;
+    digitalWrite(ledPin, ledState);
+    Serial.println(ledState ? "LED ON" : "LED OFF");
+    delay(500); // Prevent one clap from triggering multiple toggles
+  }
+}`,
+    optimizedCode: `// Optimized with double-clap detection (two claps within 600ms = toggle)
+const int soundPin = 2;
+const int ledPin = 9;
+bool ledState = false;
+unsigned long firstClapTime = 0;
+bool waitingForSecondClap = false;
+const unsigned long clapWindow = 600;
+
+void setup() {
+  pinMode(soundPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Clap twice quickly to toggle the LED!");
+}
+
+void loop() {
+  if (digitalRead(soundPin) == HIGH) {
+    unsigned long now = millis();
+
+    if (!waitingForSecondClap) {
+      firstClapTime = now;
+      waitingForSecondClap = true;
+    } else if (now - firstClapTime < clapWindow) {
+      ledState = !ledState;
+      digitalWrite(ledPin, ledState);
+      Serial.println(ledState ? "LED ON" : "LED OFF");
+      waitingForSecondClap = false;
+    }
+    delay(200); // Debounce each individual clap
+  }
+
+  // Reset if second clap never comes
+  if (waitingForSecondClap && millis() - firstClapTime > clapWindow) {
+    waitingForSecondClap = false;
+  }
+}`,
+  },
+  {
+    id: 26, emoji: "🔔", title: "Motion Detection Alarm",
+    desc: "Detect movement with a PIR sensor and trigger an alarm.",
+    difficulty: "intermediate", time: "40 mins", xp: 95,
+    components: ["PIR Sensor", "Buzzer", "LED (Red)", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, PIR motion sensor, buzzer, red LED, breadboard, wires",
+      "Wire PIR: OUT→pin 2, VCC→5V, GND→GND",
+      "Connect buzzer to pin 8, LED to pin 9 (with resistor)",
+      "Upload the code — wait the full 30s warm-up before testing (PIR sensors need this)",
+      "Walk in front of the sensor — buzzer and LED should activate",
+      "🧪 Send 'd'/'a' over Serial to disarm/arm in the optimized version",
+      "⚠️ False triggers? Keep the PIR away from heaters, windows, and direct sunlight",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read a PIR motion sensor
+  2. Trigger multiple outputs (buzzer + LED) on an event
+  3. Handle sensor warm-up time
+*/
+
+const int pirPin = 2;
+const int buzzerPin = 8;
+const int ledPin = 9;
+
+void setup() {
+  pinMode(pirPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("PIR warming up...");
+  delay(30000); // PIR sensors need ~30s to stabilize
+  Serial.println("Motion Alarm Armed!");
+}
+
+void loop() {
+  if (digitalRead(pirPin) == HIGH) {
+    Serial.println("Motion detected!");
+    digitalWrite(ledPin, HIGH);
+    tone(buzzerPin, 1000);
+    delay(2000);
+    digitalWrite(ledPin, LOW);
+    noTone(buzzerPin);
+  }
+}`,
+    optimizedCode: `// Optimized with a non-blocking alarm and Serial arm/disarm control
+const int pirPin = 2;
+const int buzzerPin = 8;
+const int ledPin = 9;
+
+bool armed = true;
+bool alarmActive = false;
+unsigned long alarmStart = 0;
+const unsigned long alarmDuration = 2000;
+
+void setup() {
+  pinMode(pirPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("PIR warming up...");
+  delay(30000);
+  Serial.println("Motion Alarm Armed! Send 'd' to disarm, 'a' to arm.");
+}
+
+void loop() {
+  if (Serial.available()) {
+    char cmd = Serial.read();
+    if (cmd == 'd') { armed = false; Serial.println("Disarmed"); }
+    if (cmd == 'a') { armed = true; Serial.println("Armed"); }
+  }
+
+  if (armed && !alarmActive && digitalRead(pirPin) == HIGH) {
+    Serial.println("Motion detected!");
+    alarmActive = true;
+    alarmStart = millis();
+    digitalWrite(ledPin, HIGH);
+    tone(buzzerPin, 1000);
+  }
+
+  if (alarmActive && millis() - alarmStart >= alarmDuration) {
+    digitalWrite(ledPin, LOW);
+    noTone(buzzerPin);
+    alarmActive = false;
+  }
+}`,
+  },
+  {
+    id: 27, emoji: "🎯", title: "Laser Tripwire",
+    desc: "Create a laser security tripwire with alarms.",
+    difficulty: "intermediate", time: "45 mins", xp: 100,
+    components: ["Laser Module", "Photoresistor (LDR)", "Buzzer", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, laser module, photoresistor (LDR), buzzer, breadboard, wires",
+      "Mount the laser and LDR facing each other across the 'tripwire' gap",
+      "Wire laser→pin 8, LDR between 5V and A0 (with a 10kΩ pull-down to GND), buzzer→pin 9",
+      "Upload the code and let it calibrate against the unobstructed beam",
+      "Walk through the beam — the buzzer should sound and stay latched",
+      "🧪 Add a reset button so the optimized version's alarm needs a manual clear",
+      "⚠️ False alarms? Re-run calibration after finalizing the laser/LDR alignment",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Detect a laser beam interruption using an LDR
+  2. Threshold-based event triggering
+  3. Basic security system logic
+*/
+
+const int laserPin = 8;
+const int ldrPin = A0;
+const int buzzerPin = 9;
+const int threshold = 500; // Calibrate: value when beam hits LDR directly
+
+void setup() {
+  pinMode(laserPin, OUTPUT);
+  pinMode(buzzerPin, OUTPUT);
+  digitalWrite(laserPin, HIGH); // Laser always on
+  Serial.begin(9600);
+  Serial.println("Tripwire Armed!");
+}
+
+void loop() {
+  int lightLevel = analogRead(ldrPin);
+  Serial.println(lightLevel);
+
+  if (lightLevel < threshold) {
+    // Beam broken — light level dropped
+    tone(buzzerPin, 1000);
+    Serial.println("ALARM! Beam broken!");
+  } else {
+    noTone(buzzerPin);
+  }
+
+  delay(100);
+}`,
+    optimizedCode: `// Optimized with an auto-calibration step and a latching alarm
+const int laserPin = 8;
+const int ldrPin = A0;
+const int buzzerPin = 9;
+const int resetButton = 2;
+
+int baselineLight = 0;
+int triggerMargin = 150; // How far below baseline counts as "broken"
+bool alarmLatched = false;
+
+int calibrateBaseline() {
+  long total = 0;
+  for (int i = 0; i < 20; i++) {
+    total += analogRead(ldrPin);
+    delay(50);
+  }
+  return total / 20;
+}
+
+void setup() {
+  pinMode(laserPin, OUTPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(resetButton, INPUT_PULLUP);
+  digitalWrite(laserPin, HIGH);
+  Serial.begin(9600);
+
+  Serial.println("Calibrating... keep the beam aligned and unobstructed.");
+  baselineLight = calibrateBaseline();
+  Serial.print("Baseline: ");
+  Serial.println(baselineLight);
+  Serial.println("Tripwire Armed!");
+}
+
+void loop() {
+  if (digitalRead(resetButton) == LOW) {
+    alarmLatched = false;
+    noTone(buzzerPin);
+    Serial.println("Alarm reset.");
+    delay(300);
+  }
+
+  int lightLevel = analogRead(ldrPin);
+
+  if (!alarmLatched && lightLevel < (baselineLight - triggerMargin)) {
+    alarmLatched = true;
+    Serial.println("ALARM! Beam broken!");
+  }
+
+  if (alarmLatched) {
+    tone(buzzerPin, 1000);
+  }
+
+  delay(100);
+}`,
+  },
+  {
+    id: 28, emoji: "🚁", title: "Ultrasonic Radar Scanner",
+    desc: "Build a scanning radar display using an ultrasonic sensor and servo.",
+    difficulty: "advanced", time: "90 mins", xp: 200,
+    components: ["Ultrasonic Sensor (HC-SR04)", "Servo Motor (SG90)", "Arduino Uno", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, HC-SR04 ultrasonic sensor, SG90 servo, breadboard, wires",
+      "Mount the ultrasonic sensor on top of the servo horn",
+      "Wire HC-SR04: Trig→pin 9, Echo→pin 10, VCC→5V, GND→GND; Servo signal→pin 6",
+      "Upload the code and open Serial Monitor (or Serial Plotter) at 9600 baud",
+      "The servo sweeps 0-180° printing 'angle,distance' pairs as it scans",
+      "🧪 Feed the Serial output into a Processing sketch for a live radar display",
+      "⚠️ Erratic readings? The optimized version's median filtering rejects echo noise",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Sweep a servo through a range of angles
+  2. Measure distance with an ultrasonic sensor at each angle
+  3. Output structured data for visualization
+*/
+
+#include <Servo.h>
+
+Servo radarServo;
+const int trigPin = 9;
+const int echoPin = 10;
+
+long readDistanceCM() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH);
+  return duration * 0.034 / 2;
+}
+
+void setup() {
+  radarServo.attach(6);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  for (int angle = 0; angle <= 180; angle += 2) {
+    radarServo.write(angle);
+    delay(30);
+    long distance = readDistanceCM();
+    Serial.print(angle);
+    Serial.print(",");
+    Serial.println(distance);
+  }
+
+  for (int angle = 180; angle >= 0; angle -= 2) {
+    radarServo.write(angle);
+    delay(30);
+    long distance = readDistanceCM();
+    Serial.print(angle);
+    Serial.print(",");
+    Serial.println(distance);
+  }
+}`,
+    optimizedCode: `// Optimized with noise-filtered readings and a max range cutoff
+#include <Servo.h>
+
+Servo radarServo;
+const int trigPin = 9;
+const int echoPin = 10;
+const int maxRange = 200; // cm — readings beyond this are treated as "no object"
+
+long readDistanceOnce() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000); // 30ms timeout ≈ 5m max
+  if (duration == 0) return maxRange;
+  long distance = duration * 0.034 / 2;
+  return distance > maxRange ? maxRange : distance;
+}
+
+long readDistanceFiltered() {
+  long a = readDistanceOnce();
+  long b = readDistanceOnce();
+  long c = readDistanceOnce();
+  // Return the median of 3 readings to reject spikes
+  return max(min(a, b), min(max(a, b), c));
+}
+
+void scanSweep(int start, int end, int step) {
+  for (int angle = start; step > 0 ? angle <= end : angle >= end; angle += step) {
+    radarServo.write(angle);
+    delay(25);
+    long distance = readDistanceFiltered();
+    Serial.print(angle);
+    Serial.print(",");
+    Serial.println(distance);
+  }
+}
+
+void setup() {
+  radarServo.attach(6);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  scanSweep(0, 180, 2);
+  scanSweep(180, 0, -2);
+}`,
+  },
+  {
+    id: 29, emoji: "🎵", title: "Theremin Synthesizer",
+    desc: "Create a distance-based musical instrument.",
+    difficulty: "advanced", time: "75 mins", xp: 175,
+    components: ["Ultrasonic Sensor (HC-SR04)", "Buzzer", "Arduino Uno", "LED (Red)"],
+    instructions: [
+      "Gather: Arduino Uno, HC-SR04 ultrasonic sensor, buzzer, red LED, breadboard, wires",
+      "Wire HC-SR04: Trig→pin 9, Echo→pin 10, VCC→5V, GND→GND",
+      "Connect buzzer to pin 8, LED to pin 11 (PWM) for the optimized version",
+      "Upload the code and wave your hand 0-50cm from the sensor",
+      "Pitch should rise as your hand gets closer, drop as it moves away",
+      "🧪 Try the smoothed version — it avoids the warbly pitch of raw readings",
+      "⚠️ No sound at the far end? That's expected — distances beyond 50cm are silent by design",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Map ultrasonic distance readings to audio frequency
+  2. Real-time sound synthesis with tone()
+  3. Visual feedback with an LED
+*/
+
+const int trigPin = 9;
+const int echoPin = 10;
+const int buzzerPin = 8;
+const int ledPin = 13;
+
+long readDistanceCM() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000);
+  return duration * 0.034 / 2;
+}
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  long distance = readDistanceCM();
+
+  if (distance > 0 && distance < 50) {
+    int frequency = map(distance, 0, 50, 2000, 200);
+    tone(buzzerPin, frequency);
+    digitalWrite(ledPin, HIGH);
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.print("cm -> Freq: ");
+    Serial.println(frequency);
+  } else {
+    noTone(buzzerPin);
+    digitalWrite(ledPin, LOW);
+  }
+
+  delay(50);
+}`,
+    optimizedCode: `// Optimized with smoothed pitch (avoids warbling) and PWM LED brightness tied to distance
+const int trigPin = 9;
+const int echoPin = 10;
+const int buzzerPin = 8;
+const int ledPin = 11; // Must be a PWM pin for analogWrite
+
+int smoothedDistance = 25;
+const float smoothingFactor = 0.3;
+
+long readDistanceCM() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000);
+  if (duration == 0) return -1;
+  return duration * 0.034 / 2;
+}
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  long rawDistance = readDistanceCM();
+
+  if (rawDistance > 0 && rawDistance < 50) {
+    smoothedDistance = smoothedDistance + (rawDistance - smoothedDistance) * smoothingFactor;
+    int frequency = map(smoothedDistance, 0, 50, 2000, 200);
+    int brightness = map(smoothedDistance, 0, 50, 255, 20);
+
+    tone(buzzerPin, frequency);
+    analogWrite(ledPin, brightness);
+  } else {
+    noTone(buzzerPin);
+    analogWrite(ledPin, 0);
+  }
+
+  delay(30);
+}`,
+  },
+  {
+    id: 30, emoji: "📟", title: "GPS Tracker",
+    desc: "Build a GPS location tracker with OLED display.",
+    difficulty: "advanced", time: "100 mins", xp: 220,
+    components: ["GPS Module", "OLED Display (0.96\")", "Arduino Uno", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, GPS module (e.g. NEO-6M), 0.96\" OLED, breadboard, wires",
+      "Wire GPS: TX→pin 4, RX→pin 3, VCC→5V, GND→GND",
+      "Wire OLED: SDA→A4, SCL→A5, VCC→5V, GND→GND",
+      "Install 'TinyGPS++' library, then upload the code",
+      "Take the module outdoors — first fix can take 30-60 seconds",
+      "🧪 The optimized version adds speed, altitude, and satellite count",
+      "⚠️ No fix indoors? GPS needs a clear line of sight to the sky",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Parse NMEA GPS data with TinyGPS++
+  2. Communicate with a GPS module via SoftwareSerial
+  3. Display live coordinates on an OLED
+*/
+
+#include <SoftwareSerial.h>
+#include <TinyGPS++.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+SoftwareSerial gpsSerial(4, 3); // RX, TX
+TinyGPSPlus gps;
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+
+void setup() {
+  Serial.begin(9600);
+  gpsSerial.begin(9600);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+}
+
+void loop() {
+  while (gpsSerial.available() > 0) {
+    gps.encode(gpsSerial.read());
+  }
+
+  if (gps.location.isUpdated()) {
+    Serial.print("Lat: "); Serial.print(gps.location.lat(), 6);
+    Serial.print(" Lng: "); Serial.println(gps.location.lng(), 6);
+
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setCursor(0, 0);
+    display.println("GPS Tracker");
+    display.setCursor(0, 20);
+    display.print("Lat: "); display.println(gps.location.lat(), 6);
+    display.setCursor(0, 35);
+    display.print("Lng: "); display.println(gps.location.lng(), 6);
+    display.display();
+  }
+}`,
+    optimizedCode: `// Optimized with satellite count, speed, altitude, and a "searching" state
+#include <SoftwareSerial.h>
+#include <TinyGPS++.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+SoftwareSerial gpsSerial(4, 3);
+TinyGPSPlus gps;
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+
+void setup() {
+  Serial.begin(9600);
+  gpsSerial.begin(9600);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.setTextColor(WHITE);
+}
+
+void loop() {
+  while (gpsSerial.available() > 0) {
+    gps.encode(gpsSerial.read());
+  }
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+
+  if (!gps.location.isValid()) {
+    display.println("Searching for GPS fix...");
+    display.print("Satellites: ");
+    display.println(gps.satellites.value());
+  } else {
+    display.print("Lat: "); display.println(gps.location.lat(), 6);
+    display.print("Lng: "); display.println(gps.location.lng(), 6);
+    display.print("Alt: "); display.print(gps.altitude.meters(), 1); display.println("m");
+    display.print("Speed: "); display.print(gps.speed.kmph(), 1); display.println("km/h");
+    display.print("Sats: "); display.println(gps.satellites.value());
+
+    Serial.print("Lat: "); Serial.print(gps.location.lat(), 6);
+    Serial.print(" Lng: "); Serial.print(gps.location.lng(), 6);
+    Serial.print(" Speed: "); Serial.println(gps.speed.kmph());
+  }
+
+  display.display();
+  delay(500);
+}`,
+  },
+  // ── Recommendation-pool projects (Generate page / Dashboard "What Can I Make?") ──
+  // These use a separate id range (101-110, 201-210, 301-308) from the catalog above.
+  {
+    id: 101, emoji: "💡", title: "Smart LED Mood Lamp",
+    desc: "Build a responsive LED lamp that changes color based on ambient light levels using a photoresistor.",
+    difficulty: "beginner", time: "30 mins", xp: 75,
+    components: ["LED", "Photoresistor", "Arduino Uno", "220Ω Resistor"],
+    instructions: [
+      "Gather: Arduino Uno, LED, photoresistor, 220Ω resistor, breadboard, wires",
+      "Wire LDR between 5V and A0, with a 220Ω resistor from A0 to GND",
+      "Connect LED anode → pin 9 (PWM), cathode → GND",
+      "Upload the code via Arduino IDE",
+      "Dim the room — the LED should brighten smoothly as it gets darker",
+      "🧪 Try the smoothed version for gentle mood-lighting transitions",
+      "⚠️ LED stuck at max/min? Check the LDR wiring forms a proper voltage divider",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read ambient light with a photoresistor
+  2. Control LED brightness with PWM (analogWrite)
+  3. Build simple ambient-reactive lighting
+*/
+
+const int ldrPin = A0;
+const int ledPin = 9;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Mood Lamp Starting...");
+}
+
+void loop() {
+  int lightLevel = analogRead(ldrPin);
+  int brightness = map(lightLevel, 0, 1023, 255, 0); // Darker room = brighter lamp
+  analogWrite(ledPin, brightness);
+
+  Serial.print("Light: ");
+  Serial.print(lightLevel);
+  Serial.print(" | Brightness: ");
+  Serial.println(brightness);
+
+  delay(100);
+}`,
+    optimizedCode: `// Optimized with smoothed brightness transitions (no sudden jumps)
+const int ldrPin = A0;
+const int ledPin = 9;
+float currentBrightness = 0;
+const float smoothing = 0.05;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int lightLevel = analogRead(ldrPin);
+  int targetBrightness = map(lightLevel, 0, 1023, 255, 0);
+
+  currentBrightness += (targetBrightness - currentBrightness) * smoothing;
+  analogWrite(ledPin, (int)currentBrightness);
+
+  Serial.print("Light: ");
+  Serial.print(lightLevel);
+  Serial.print(" | Brightness: ");
+  Serial.println((int)currentBrightness);
+
+  delay(20);
+}`,
+  },
+  {
+    id: 102, emoji: "🌱", title: "Smart Plant Watering System",
+    desc: "Automate plant care with a soil moisture sensor that triggers a water pump when plants need watering.",
+    difficulty: "beginner", time: "45 mins", xp: 100,
+    components: ["Soil Moisture Sensor", "Water Pump", "Relay Module", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, soil moisture sensor, relay module, water pump, tubing, breadboard, wires",
+      "Wire moisture sensor: AO→A0, VCC→5V, GND→GND",
+      "Wire relay: IN→pin 7, VCC→5V, GND→GND; pump wired through the relay's NO/COM terminals",
+      "Power the pump from a separate supply matching its voltage rating",
+      "Upload the code and insert the sensor into dry vs wet soil to find your threshold",
+      "🧪 Add the cooldown version so it won't overwater on repeated dry readings",
+      "⚠️ Pump not triggering? Check the relay module's trigger polarity (some are active-LOW)",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read a soil moisture sensor
+  2. Control a water pump through a relay
+  3. Threshold-based automation
+*/
+
+const int moisturePin = A0;
+const int relayPin = 7;
+const int dryThreshold = 500; // Lower = wetter; calibrate for your soil/sensor
+
+void setup() {
+  pinMode(relayPin, OUTPUT);
+  digitalWrite(relayPin, LOW); // Pump off
+  Serial.begin(9600);
+  Serial.println("Plant Watering Bot Ready!");
+}
+
+void loop() {
+  int moisture = analogRead(moisturePin);
+  Serial.print("Moisture: ");
+  Serial.println(moisture);
+
+  if (moisture > dryThreshold) {
+    Serial.println("Soil is dry — watering...");
+    digitalWrite(relayPin, HIGH);
+    delay(3000); // Water for 3 seconds
+    digitalWrite(relayPin, LOW);
+  }
+
+  delay(60000); // Check once per minute
+}`,
+    optimizedCode: `// Optimized with a watering cooldown and averaged sensor readings
+const int moisturePin = A0;
+const int relayPin = 7;
+const int dryThreshold = 500;
+const unsigned long cooldownPeriod = 3600000UL; // 1 hour between waterings
+unsigned long lastWatered = 0;
+
+int readAverageMoisture() {
+  long total = 0;
+  for (int i = 0; i < 10; i++) {
+    total += analogRead(moisturePin);
+    delay(10);
+  }
+  return total / 10;
+}
+
+void setup() {
+  pinMode(relayPin, OUTPUT);
+  digitalWrite(relayPin, LOW);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int moisture = readAverageMoisture();
+  Serial.print("Moisture: ");
+  Serial.println(moisture);
+
+  bool cooldownExpired = (millis() - lastWatered) > cooldownPeriod;
+
+  if (moisture > dryThreshold && cooldownExpired) {
+    Serial.println("Soil is dry — watering...");
+    digitalWrite(relayPin, HIGH);
+    delay(3000);
+    digitalWrite(relayPin, LOW);
+    lastWatered = millis();
+  }
+
+  delay(60000);
+}`,
+  },
+  {
+    id: 103, emoji: "🎮", title: "Joystick-Controlled LED Matrix",
+    desc: "Use a joystick to draw and animate patterns on an 8x8 LED matrix display.",
+    difficulty: "beginner", time: "40 mins", xp: 90,
+    components: ["8x8 LED Matrix", "MAX7219", "Joystick Module", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, joystick module, MAX7219 8x8 LED matrix, breadboard, wires",
+      "Wire joystick: VRx→A0, VRy→A1, SW→pin 2, VCC→5V, GND→GND",
+      "Wire matrix: DIN→pin 11, CLK→pin 13, CS→pin 10, VCC→5V, GND→GND",
+      "Install the 'LedControl' library, then upload the code",
+      "Move the joystick to move the lit pixel around the grid",
+      "🧪 Try the trail version — it lets you draw persistent patterns, cleared with the button",
+      "⚠️ Nothing lights up? Double-check DIN/CLK/CS aren't swapped",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read joystick analog + button input
+  2. Drive an 8x8 LED matrix via MAX7219 (LedControl library)
+  3. Map continuous input to a discrete grid position
+*/
+
+#include <LedControl.h>
+
+LedControl lc = LedControl(11, 13, 10, 1); // DIN, CLK, CS, #devices
+const int joyX = A0;
+const int joyY = A1;
+
+int posX = 4, posY = 4;
+
+void setup() {
+  lc.shutdown(0, false);
+  lc.setIntensity(0, 8);
+  lc.clearDisplay(0);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int x = analogRead(joyX);
+  int y = analogRead(joyY);
+
+  lc.setLed(0, posY, posX, false); // Clear old position
+
+  if (x < 300 && posX > 0) posX--;
+  if (x > 700 && posX < 7) posX++;
+  if (y < 300 && posY > 0) posY--;
+  if (y > 700 && posY < 7) posY++;
+
+  lc.setLed(0, posY, posX, true); // Draw new position
+  delay(100);
+}`,
+    optimizedCode: `// Optimized: leaves a persistent trail so you can draw patterns
+#include <LedControl.h>
+
+LedControl lc = LedControl(11, 13, 10, 1);
+const int joyX = A0;
+const int joyY = A1;
+const int clearButton = 2;
+
+int posX = 4, posY = 4;
+bool grid[8][8] = {false};
+
+void setup() {
+  lc.shutdown(0, false);
+  lc.setIntensity(0, 8);
+  lc.clearDisplay(0);
+  pinMode(clearButton, INPUT_PULLUP);
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (digitalRead(clearButton) == LOW) {
+    lc.clearDisplay(0);
+    memset(grid, false, sizeof(grid));
+    delay(300);
+  }
+
+  int x = analogRead(joyX);
+  int y = analogRead(joyY);
+
+  if (x < 300 && posX > 0) posX--;
+  if (x > 700 && posX < 7) posX++;
+  if (y < 300 && posY > 0) posY--;
+  if (y > 700 && posY < 7) posY++;
+
+  grid[posY][posX] = true;
+  lc.setLed(0, posY, posX, true);
+  delay(100);
+}`,
+  },
+  {
+    id: 104, emoji: "🚦", title: "Traffic Light Controller",
+    desc: "Simulate a real traffic light sequence with red, yellow, and green LEDs and timed delays.",
+    difficulty: "beginner", time: "20 mins", xp: 55,
+    components: ["LED", "Arduino Uno", "220Ω Resistor", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, red/yellow/green LEDs, 220Ω resistor ×3, breadboard, wires",
+      "Wire red→pin 8, yellow→pin 9, green→pin 10, each through a 220Ω resistor to GND",
+      "Upload the code via Arduino IDE",
+      "Lights should cycle Red→Green→Yellow→Red with real traffic-light timing",
+      "🧪 Try the non-blocking state-machine version for cleaner, extensible timing logic",
+      "⚠️ No light? Check LED polarity and resistor placement",
+      "⚠️ Wrong colors lighting? Confirm each LED's pin matches its resistor's wiring",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Sequence three outputs with delay()
+  2. Understand real-world traffic light timing
+  3. State-based program flow
+*/
+
+const int redPin = 8;
+const int yellowPin = 9;
+const int greenPin = 10;
+
+void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(yellowPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  digitalWrite(redPin, HIGH);
+  Serial.println("RED");
+  delay(4000);
+  digitalWrite(redPin, LOW);
+
+  digitalWrite(greenPin, HIGH);
+  Serial.println("GREEN");
+  delay(4000);
+  digitalWrite(greenPin, LOW);
+
+  digitalWrite(yellowPin, HIGH);
+  Serial.println("YELLOW");
+  delay(1500);
+  digitalWrite(yellowPin, LOW);
+}`,
+    optimizedCode: `// Optimized with a non-blocking millis() state machine
+const int redPin = 8;
+const int yellowPin = 9;
+const int greenPin = 10;
+
+enum State { RED, GREEN, YELLOW };
+State state = RED;
+unsigned long previousMillis = 0;
+
+void setPhase(State s) {
+  digitalWrite(redPin, s == RED);
+  digitalWrite(yellowPin, s == YELLOW);
+  digitalWrite(greenPin, s == GREEN);
+}
+
+void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(yellowPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  Serial.begin(9600);
+  setPhase(RED);
+}
+
+void loop() {
+  unsigned long now = millis();
+  unsigned long duration = (state == RED) ? 4000 : (state == GREEN) ? 4000 : 1500;
+
+  if (now - previousMillis >= duration) {
+    previousMillis = now;
+    if (state == RED) state = GREEN;
+    else if (state == GREEN) state = YELLOW;
+    else state = RED;
+    setPhase(state);
+    Serial.println(state == RED ? "RED" : state == GREEN ? "GREEN" : "YELLOW");
+  }
+}`,
+  },
+  {
+    id: 105, emoji: "🎹", title: "Button Piano",
+    desc: "Create a mini piano using push buttons mapped to musical notes on a piezo buzzer.",
+    difficulty: "beginner", time: "25 mins", xp: 65,
+    components: ["Push Button", "Buzzer", "Arduino Uno", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, 4× push buttons, piezo buzzer, breadboard, jumper wires",
+      "Wire each button between pins 2-5 and GND — internal pull-ups handle the rest",
+      "Connect buzzer positive lead to pin 8, negative lead to GND",
+      "Upload the code via Arduino IDE",
+      "Press each button to hear a different note (C4-F4)",
+      "🧪 Add more buttons and notes to build a full octave",
+      "⚠️ No sound? Confirm it's a passive (not active) buzzer",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read multiple digital inputs
+  2. Generate tones with tone()
+  3. Map buttons to musical notes
+*/
+
+const int buttonPins[4] = {2, 3, 4, 5};
+const int notes[4] = {262, 294, 330, 349}; // C4, D4, E4, F4
+const int buzzerPin = 8;
+
+void setup() {
+  for (int i = 0; i < 4; i++) {
+    pinMode(buttonPins[i], INPUT_PULLUP);
+  }
+  pinMode(buzzerPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Piano Keys Ready!");
+}
+
+void loop() {
+  bool anyPressed = false;
+  for (int i = 0; i < 4; i++) {
+    if (digitalRead(buttonPins[i]) == LOW) {
+      tone(buzzerPin, notes[i]);
+      anyPressed = true;
+    }
+  }
+  if (!anyPressed) {
+    noTone(buzzerPin);
+  }
+}`,
+    optimizedCode: `// Optimized: avoids redundant tone() calls, prints note names
+const int buttonPins[4] = {2, 3, 4, 5};
+const int notes[4] = {262, 294, 330, 349};
+const char* noteNames[4] = {"C4", "D4", "E4", "F4"};
+const int buzzerPin = 8;
+int lastPlayed = -1;
+
+void setup() {
+  for (int i = 0; i < 4; i++) pinMode(buttonPins[i], INPUT_PULLUP);
+  pinMode(buzzerPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int pressed = -1;
+  for (int i = 0; i < 4; i++) {
+    if (digitalRead(buttonPins[i]) == LOW) {
+      pressed = i;
+      break;
+    }
+  }
+
+  if (pressed != lastPlayed) {
+    if (pressed == -1) {
+      noTone(buzzerPin);
+    } else {
+      tone(buzzerPin, notes[pressed]);
+      Serial.println(noteNames[pressed]);
+    }
+    lastPlayed = pressed;
+  }
+}`,
+  },
+  {
+    id: 106, emoji: "🌙", title: "Automatic Night Light",
+    desc: "An LED that turns on automatically when ambient light drops below a threshold.",
+    difficulty: "beginner", time: "20 mins", xp: 55,
+    components: ["LED", "Photoresistor", "Arduino Uno", "10kΩ Resistor"],
+    instructions: [
+      "Gather: Arduino Uno, LED, photoresistor, 10kΩ resistor, breadboard, wires",
+      "Wire LDR between 5V and A0, then a 10kΩ resistor from A0 to GND (voltage divider)",
+      "Connect LED anode → pin 9 (PWM), cathode → GND",
+      "Upload the code via Arduino IDE",
+      "Cover the LDR to simulate darkness — the LED should turn on smoothly",
+      "🧪 Adjust the thresholds in the optimized version to match your room's lighting",
+      "⚠️ LED flickering at dusk? Increase the hysteresis gap between thresholds",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read analog values from a photoresistor (LDR)
+  2. Use a voltage divider circuit
+  3. Threshold-based digital output
+*/
+
+const int ldrPin = A0;
+const int ledPin = 9;
+const int darkThreshold = 500; // Adjust based on your environment
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Night Light Starting...");
+}
+
+void loop() {
+  int lightLevel = analogRead(ldrPin);
+  Serial.print("Light Level: ");
+  Serial.println(lightLevel);
+
+  if (lightLevel < darkThreshold) {
+    digitalWrite(ledPin, HIGH); // Dark — turn LED on
+  } else {
+    digitalWrite(ledPin, LOW);  // Bright — turn LED off
+  }
+
+  delay(200);
+}`,
+    optimizedCode: `// Optimized with averaging and hysteresis to prevent flicker
+const int ldrPin = A0;
+const int ledPin = 9;
+const int onThreshold = 450;
+const int offThreshold = 550; // Hysteresis gap avoids rapid on/off toggling
+bool lightOn = false;
+
+int readAverageLight() {
+  long total = 0;
+  for (int i = 0; i < 8; i++) {
+    total += analogRead(ldrPin);
+    delay(5);
+  }
+  return total / 8;
+}
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int lightLevel = readAverageLight();
+
+  if (!lightOn && lightLevel < onThreshold) {
+    lightOn = true;
+  } else if (lightOn && lightLevel > offThreshold) {
+    lightOn = false;
+  }
+
+  int brightness = lightOn ? map(constrain(lightLevel, 0, onThreshold), 0, onThreshold, 255, 80) : 0;
+  analogWrite(ledPin, brightness);
+
+  Serial.print("Light: ");
+  Serial.print(lightLevel);
+  Serial.print(" | LED: ");
+  Serial.println(lightOn ? "ON" : "OFF");
+}`,
+  },
+  {
+    id: 107, emoji: "🎲", title: "Electronic Dice",
+    desc: "Press a button to roll a virtual die displayed on 7 LEDs arranged in a dice pattern.",
+    difficulty: "beginner", time: "25 mins", xp: 60,
+    components: ["LED", "Push Button", "Arduino Uno", "220Ω Resistor"],
+    instructions: [
+      "Gather: Arduino Uno, red LED, push button, 220Ω resistor, breadboard, wires",
+      "Connect LED anode → 220Ω resistor → pin 9, cathode → GND",
+      "Connect button between pin 2 and GND (internal pull-up handles the rest)",
+      "Upload the code via Arduino IDE",
+      "Press the button — the LED blinks 1-6 times to show your roll",
+      "🧪 Try the rolling-animation version for a suspenseful flicker before the result",
+      "⚠️ Same number every time? Confirm A0 is left floating (unconnected) for good randomSeed()",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Generate pseudo-random numbers with random()
+  2. Debounce a push button
+  3. Represent a value using LED blink counts
+*/
+
+const int buttonPin = 2;
+const int ledPin = 9;
+
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  randomSeed(analogRead(A0));
+  Serial.println("Press the button to roll the dice!");
+}
+
+void loop() {
+  if (digitalRead(buttonPin) == LOW) {
+    delay(50); // Simple debounce
+    int roll = random(1, 7); // 1 to 6
+    Serial.print("You rolled: ");
+    Serial.println(roll);
+
+    for (int i = 0; i < roll; i++) {
+      digitalWrite(ledPin, HIGH);
+      delay(200);
+      digitalWrite(ledPin, LOW);
+      delay(200);
+    }
+
+    while (digitalRead(buttonPin) == LOW) {
+      // Wait for button release
+    }
+  }
+}`,
+    optimizedCode: `// Optimized with a rolling animation before the final result
+const int buttonPin = 2;
+const int ledPin = 9;
+
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  randomSeed(analogRead(A0));
+}
+
+void loop() {
+  if (digitalRead(buttonPin) == LOW) {
+    delay(50);
+
+    unsigned long rollStart = millis();
+    while (millis() - rollStart < 1000) {
+      digitalWrite(ledPin, HIGH);
+      delay(40);
+      digitalWrite(ledPin, LOW);
+      delay(40);
+    }
+
+    int roll = random(1, 7);
+    Serial.print("You rolled: ");
+    Serial.println(roll);
+
+    delay(300);
+    for (int i = 0; i < roll; i++) {
+      digitalWrite(ledPin, HIGH);
+      delay(250);
+      digitalWrite(ledPin, LOW);
+      delay(250);
+    }
+
+    while (digitalRead(buttonPin) == LOW) {
+      // Wait for release
+    }
+  }
+}`,
+  },
+  {
+    id: 108, emoji: "⏰", title: "Countdown Timer",
+    desc: "Build a countdown timer with a 7-segment display and buzzer alert.",
+    difficulty: "beginner", time: "30 mins", xp: 70,
+    components: ["7-Segment Display", "Buzzer", "Push Button", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, common-cathode 7-segment display, buzzer, push button, breadboard, wires",
+      "Wire segments a-g to pins 2-8 (through current-limiting resistors if not built into your display)",
+      "Connect the display's common cathode pin(s) to GND",
+      "Wire button between pin 9 and GND, buzzer to pin 10",
+      "Upload the code and press the button to start a 9-to-0 countdown",
+      "🧪 Try the non-blocking version so the button stays responsive mid-countdown",
+      "⚠️ Wrong/garbled digits? Your display may be common-anode — invert the digit patterns",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Drive a 7-segment display directly (no driver IC)
+  2. Implement a simple countdown using delay()
+  3. Trigger a buzzer alert at zero
+*/
+
+// Segments a-g mapped to pins (common cathode 7-segment display)
+const int segPins[7] = {2, 3, 4, 5, 6, 7, 8}; // a,b,c,d,e,f,g
+const int buttonPin = 9;
+const int buzzerPin = 10;
+
+// Segment patterns for digits 0-9 (1 = segment on)
+const byte digits[10][7] = {
+  {1,1,1,1,1,1,0}, // 0
+  {0,1,1,0,0,0,0}, // 1
+  {1,1,0,1,1,0,1}, // 2
+  {1,1,1,1,0,0,1}, // 3
+  {0,1,1,0,0,1,1}, // 4
+  {1,0,1,1,0,1,1}, // 5
+  {1,0,1,1,1,1,1}, // 6
+  {1,1,1,0,0,0,0}, // 7
+  {1,1,1,1,1,1,1}, // 8
+  {1,1,1,1,0,1,1}, // 9
+};
+
+void displayDigit(int d) {
+  for (int i = 0; i < 7; i++) {
+    digitalWrite(segPins[i], digits[d][i]);
+  }
+}
+
+void setup() {
+  for (int i = 0; i < 7; i++) pinMode(segPins[i], OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(buzzerPin, OUTPUT);
+  Serial.begin(9600);
+  displayDigit(0);
+}
+
+void loop() {
+  if (digitalRead(buttonPin) == LOW) {
+    delay(50); // Debounce
+    for (int i = 9; i >= 0; i--) {
+      displayDigit(i);
+      Serial.println(i);
+      delay(1000);
+    }
+    tone(buzzerPin, 1000);
+    delay(1000);
+    noTone(buzzerPin);
+  }
+}`,
+    optimizedCode: `// Optimized with a non-blocking countdown (button still responsive during the count)
+const int segPins[7] = {2, 3, 4, 5, 6, 7, 8};
+const int buttonPin = 9;
+const int buzzerPin = 10;
+
+const byte digits[10][7] = {
+  {1,1,1,1,1,1,0}, {0,1,1,0,0,0,0}, {1,1,0,1,1,0,1}, {1,1,1,1,0,0,1}, {0,1,1,0,0,1,1},
+  {1,0,1,1,0,1,1}, {1,0,1,1,1,1,1}, {1,1,1,0,0,0,0}, {1,1,1,1,1,1,1}, {1,1,1,1,0,1,1},
+};
+
+bool counting = false;
+int currentCount = 0;
+unsigned long lastTick = 0;
+
+void displayDigit(int d) {
+  for (int i = 0; i < 7; i++) digitalWrite(segPins[i], digits[d][i]);
+}
+
+void setup() {
+  for (int i = 0; i < 7; i++) pinMode(segPins[i], OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(buzzerPin, OUTPUT);
+  Serial.begin(9600);
+  displayDigit(0);
+}
+
+void loop() {
+  if (!counting && digitalRead(buttonPin) == LOW) {
+    delay(50);
+    counting = true;
+    currentCount = 9;
+    displayDigit(currentCount);
+    lastTick = millis();
+  }
+
+  if (counting && millis() - lastTick >= 1000) {
+    lastTick = millis();
+    currentCount--;
+    if (currentCount >= 0) {
+      displayDigit(currentCount);
+      Serial.println(currentCount);
+    }
+    if (currentCount == 0) {
+      tone(buzzerPin, 1000, 1000);
+      counting = false;
+    }
+  }
+}`,
+  },
+  {
+    id: 109, emoji: "🌈", title: "Rainbow LED Fader",
+    desc: "Smoothly cycle through all rainbow colors on an RGB LED using PWM.",
+    difficulty: "beginner", time: "25 mins", xp: 65,
+    components: ["RGB LED", "Arduino Uno", "220Ω Resistor", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, common-cathode RGB LED, 220Ω resistor ×3, breadboard, wires",
+      "Wire each color pin (R,G,B) through its own 220Ω resistor to pins 9, 10, 11",
+      "Connect the LED's common cathode leg to GND",
+      "Upload the code via Arduino IDE",
+      "The LED should smoothly cycle through the color spectrum",
+      "🧪 Try the HSV version for a more even, continuous rainbow",
+      "⚠️ Colors look wrong/inverted? You may have a common-ANODE LED — wire common leg to 5V and invert PWM values",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Mix RGB channels with PWM (analogWrite)
+  2. Smooth color transitions using loops
+  3. Common-cathode RGB LED wiring
+*/
+
+const int redPin = 9;
+const int greenPin = 10;
+const int bluePin = 11;
+
+void setColor(int r, int g, int b) {
+  analogWrite(redPin, r);
+  analogWrite(greenPin, g);
+  analogWrite(bluePin, b);
+}
+
+void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+}
+
+void loop() {
+  for (int i = 0; i <= 255; i++) {
+    setColor(255 - i, i, 0);
+    delay(5);
+  }
+  for (int i = 0; i <= 255; i++) {
+    setColor(0, 255 - i, i);
+    delay(5);
+  }
+  for (int i = 0; i <= 255; i++) {
+    setColor(i, 0, 255 - i);
+    delay(5);
+  }
+}`,
+    optimizedCode: `// Optimized with HSV-to-RGB conversion for a true smooth rainbow cycle
+const int redPin = 9;
+const int greenPin = 10;
+const int bluePin = 11;
+
+void setColor(int r, int g, int b) {
+  analogWrite(redPin, r);
+  analogWrite(greenPin, g);
+  analogWrite(bluePin, b);
+}
+
+void hueToRGB(int hue, int &r, int &g, int &b) {
+  int region = hue / 60;
+  int remainder = (hue % 60) * 255 / 60;
+
+  switch (region) {
+    case 0: r = 255; g = remainder; b = 0; break;
+    case 1: r = 255 - remainder; g = 255; b = 0; break;
+    case 2: r = 0; g = 255; b = remainder; break;
+    case 3: r = 0; g = 255 - remainder; b = 255; break;
+    case 4: r = remainder; g = 0; b = 255; break;
+    default: r = 255; g = 0; b = 255 - remainder; break;
+  }
+}
+
+void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+}
+
+void loop() {
+  static int hue = 0;
+  int r, g, b;
+  hueToRGB(hue, r, g, b);
+  setColor(r, g, b);
+  hue = (hue + 1) % 360;
+  delay(15);
+}`,
+  },
+  {
+    id: 110, emoji: "📢", title: "Clap Switch",
+    desc: "Toggle an LED on/off by clapping, using a sound sensor module.",
+    difficulty: "beginner", time: "30 mins", xp: 70,
+    components: ["Sound Sensor", "LED", "Arduino Uno", "Relay Module"],
+    instructions: [
+      "Gather: Arduino Uno, sound sensor module (e.g. KY-038), LED, breadboard, wires",
+      "Wire sound sensor: OUT→pin 2, VCC→5V, GND→GND",
+      "Connect LED to pin 9 (with resistor), cathode to GND",
+      "Upload the code and adjust the sensor's onboard sensitivity potentiometer",
+      "Clap near the sensor — the LED should toggle on/off",
+      "🧪 Try the double-clap version so accidental noise doesn't trigger it",
+      "⚠️ Too sensitive or not sensitive enough? Turn the tiny blue pot on the sensor board",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read a digital sound sensor
+  2. Toggle state on an event (not just level)
+  3. Simple edge detection
+*/
+
+const int soundPin = 2;
+const int ledPin = 9;
+bool ledState = false;
+
+void setup() {
+  pinMode(soundPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Clap to toggle the LED!");
+}
+
+void loop() {
+  if (digitalRead(soundPin) == HIGH) {
+    ledState = !ledState;
+    digitalWrite(ledPin, ledState);
+    Serial.println(ledState ? "LED ON" : "LED OFF");
+    delay(500); // Prevent one clap from triggering multiple toggles
+  }
+}`,
+    optimizedCode: `// Optimized with double-clap detection (two claps within 600ms = toggle)
+const int soundPin = 2;
+const int ledPin = 9;
+bool ledState = false;
+unsigned long firstClapTime = 0;
+bool waitingForSecondClap = false;
+const unsigned long clapWindow = 600;
+
+void setup() {
+  pinMode(soundPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("Clap twice quickly to toggle the LED!");
+}
+
+void loop() {
+  if (digitalRead(soundPin) == HIGH) {
+    unsigned long now = millis();
+
+    if (!waitingForSecondClap) {
+      firstClapTime = now;
+      waitingForSecondClap = true;
+    } else if (now - firstClapTime < clapWindow) {
+      ledState = !ledState;
+      digitalWrite(ledPin, ledState);
+      Serial.println(ledState ? "LED ON" : "LED OFF");
+      waitingForSecondClap = false;
+    }
+    delay(200);
+  }
+
+  if (waitingForSecondClap && millis() - firstClapTime > clapWindow) {
+    waitingForSecondClap = false;
+  }
+}`,
+  },
+  {
+    id: 201, emoji: "🌡️", title: "Weather Station Dashboard",
+    desc: "Monitor temperature, humidity, and pressure with sensor data displayed on an OLED screen.",
+    difficulty: "intermediate", time: "60 mins", xp: 150,
+    components: ["DHT22", "BMP180", "OLED Display", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, DHT22, BMP180, 0.96\" OLED, breadboard, wires",
+      "Wire DHT22 DATA→pin 2, VCC→5V, GND→GND",
+      "Wire BMP180 and OLED on the shared I2C bus: SDA→A4, SCL→A5, VCC→5V, GND→GND",
+      "Install 'DHT sensor library' and 'Adafruit BMP085' libraries, then upload",
+      "The OLED should show live temperature, humidity, and pressure",
+      "🧪 Add the trend-arrow version to see if pressure is rising or falling",
+      "⚠️ 'nan' readings? Add a 10kΩ pull-up resistor between DHT22 DATA and VCC",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Combine two I2C/digital sensors (DHT22 + BMP180)
+  2. Display multiple readings on an OLED
+  3. Organize a small sensor dashboard
+*/
+
+#include <DHT.h>
+#include <Wire.h>
+#include <Adafruit_BMP085.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define DHTPIN 2
+DHT dht(DHTPIN, DHT22);
+Adafruit_BMP085 bmp;
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+  bmp.begin();
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.setTextColor(WHITE);
+}
+
+void loop() {
+  float humidity = dht.readHumidity();
+  float temp = dht.readTemperature();
+  float pressure = bmp.readPressure() / 100.0F;
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println("Weather Dashboard");
+  display.print("Temp: "); display.print(temp); display.println(" C");
+  display.print("Humidity: "); display.print(humidity); display.println(" %");
+  display.print("Pressure: "); display.print(pressure); display.println(" hPa");
+  display.display();
+
+  Serial.print(temp); Serial.print(",");
+  Serial.print(humidity); Serial.print(",");
+  Serial.println(pressure);
+
+  delay(2000);
+}`,
+    optimizedCode: `// Optimized with sensor error handling and a pressure trend indicator
+#include <DHT.h>
+#include <Wire.h>
+#include <Adafruit_BMP085.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define DHTPIN 2
+DHT dht(DHTPIN, DHT22);
+Adafruit_BMP085 bmp;
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+float lastPressure = 0;
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+  if (!bmp.begin()) Serial.println("BMP180 not found!");
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.setTextColor(WHITE);
+}
+
+void loop() {
+  float humidity = dht.readHumidity();
+  float temp = dht.readTemperature();
+  float pressure = bmp.readPressure() / 100.0F;
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println("Weather Dashboard");
+
+  if (isnan(humidity) || isnan(temp)) {
+    display.println("DHT22 read error!");
+  } else {
+    display.print("Temp: "); display.print(temp); display.println(" C");
+    display.print("Humidity: "); display.print(humidity); display.println(" %");
+  }
+
+  display.print("Pressure: "); display.print(pressure); display.print(" hPa ");
+  if (lastPressure != 0) {
+    display.println(pressure > lastPressure ? "^" : pressure < lastPressure ? "v" : "-");
+  }
+  display.display();
+
+  lastPressure = pressure;
+  delay(2000);
+}`,
+  },
+  {
+    id: 202, emoji: "🔐", title: "RFID Door Lock",
+    desc: "Create a secure door lock using RFID tags and a servo motor with LCD feedback.",
+    difficulty: "intermediate", time: "60 mins", xp: 140,
+    components: ["RFID RC522", "Servo Motor", "LCD 16x2", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, MFRC522 RFID module, SG90 servo, 16x2 I2C LCD, breadboard, wires",
+      "Wire RFID (SPI): SDA→10, SCK→13, MOSI→11, MISO→12, RST→9, 3.3V→3.3V, GND→GND",
+      "Wire servo signal→pin 6, LCD SDA→A4/SCL→A5, both powered from 5V/GND",
+      "Install 'MFRC522' and 'LiquidCrystal_I2C' libraries, then upload",
+      "Scan a card, read its UID from Serial Monitor, and paste it into allowedUID[]",
+      "🧪 Re-upload with your real UID(s), then test Access Granted/Denied",
+      "⚠️ RFID module is 3.3V only — never connect it to 5V or you may damage it",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read RFID tags with the MFRC522 module (SPI)
+  2. Compare scanned tag UIDs against an allowed list
+  3. Actuate a servo as a lock mechanism
+*/
+
+#include <SPI.h>
+#include <MFRC522.h>
+#include <Servo.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+#define SS_PIN 10
+#define RST_PIN 9
+MFRC522 rfid(SS_PIN, RST_PIN);
+Servo lockServo;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// Replace with your own tag's UID (print it from Serial Monitor first)
+byte allowedUID[4] = {0xDE, 0xAD, 0xBE, 0xEF};
+
+void setup() {
+  Serial.begin(9600);
+  SPI.begin();
+  rfid.PCD_Init();
+  lockServo.attach(6);
+  lockServo.write(0); // Locked position
+  lcd.init();
+  lcd.backlight();
+  lcd.print("Scan your card");
+}
+
+bool checkUID() {
+  for (byte i = 0; i < 4; i++) {
+    if (rfid.uid.uidByte[i] != allowedUID[i]) return false;
+  }
+  return true;
+}
+
+void loop() {
+  if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) return;
+
+  Serial.print("UID: ");
+  for (byte i = 0; i < rfid.uid.size; i++) {
+    Serial.print(rfid.uid.uidByte[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
+
+  lcd.clear();
+  if (checkUID()) {
+    lcd.print("Access Granted");
+    lockServo.write(90); // Unlock
+    delay(3000);
+    lockServo.write(0); // Re-lock
+  } else {
+    lcd.print("Access Denied");
+    delay(1500);
+  }
+  lcd.clear();
+  lcd.print("Scan your card");
+
+  rfid.PICC_HaltA();
+}`,
+    optimizedCode: `// Optimized with multiple allowed tags and audible feedback
+#include <SPI.h>
+#include <MFRC522.h>
+#include <Servo.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+#define SS_PIN 10
+#define RST_PIN 9
+MFRC522 rfid(SS_PIN, RST_PIN);
+Servo lockServo;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const int buzzerPin = 7;
+
+const byte allowedUIDs[2][4] = {
+  {0xDE, 0xAD, 0xBE, 0xEF},
+  {0x12, 0x34, 0x56, 0x78},
+};
+
+bool checkUID() {
+  for (int u = 0; u < 2; u++) {
+    bool match = true;
+    for (byte i = 0; i < 4; i++) {
+      if (rfid.uid.uidByte[i] != allowedUIDs[u][i]) { match = false; break; }
+    }
+    if (match) return true;
+  }
+  return false;
+}
+
+void setup() {
+  Serial.begin(9600);
+  SPI.begin();
+  rfid.PCD_Init();
+  lockServo.attach(6);
+  lockServo.write(0);
+  pinMode(buzzerPin, OUTPUT);
+  lcd.init();
+  lcd.backlight();
+  lcd.print("Scan your card");
+}
+
+void loop() {
+  if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) return;
+
+  lcd.clear();
+  if (checkUID()) {
+    lcd.print("Access Granted");
+    tone(buzzerPin, 1500, 200);
+    lockServo.write(90);
+    delay(3000);
+    lockServo.write(0);
+  } else {
+    lcd.print("Access Denied");
+    tone(buzzerPin, 300, 500);
+    delay(1500);
+  }
+  lcd.clear();
+  lcd.print("Scan your card");
+  rfid.PICC_HaltA();
+}`,
+  },
+  {
+    id: 203, emoji: "🤖", title: "Line-Following Robot",
+    desc: "Program a robot that autonomously follows a black line using IR sensors and differential motor control.",
+    difficulty: "intermediate", time: "90 mins", xp: 200,
+    components: ["IR Sensors", "Motor Driver L298N", "DC Motors", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, 2× IR line sensors, L298N motor driver, 2× DC motors + wheels, chassis",
+      "Wire both IR sensors' outputs to pins 2 and 3",
+      "Wire L298N: IN1-IN4→pins 8-11, ENA/ENB→pins 5/6, motors to OUT1-OUT4",
+      "Power the L298N from a separate battery pack (not through the Arduino)",
+      "Upload the code and place the robot on a black line on a light surface",
+      "🧪 Tune baseSpeed/turnSpeed in the optimized version for smoother tracking",
+      "⚠️ Robot jerky or stalling? Check the L298N has its own adequate power supply",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read IR line sensors for line detection
+  2. Control 2 DC motors via L298N H-bridge
+  3. Basic differential steering logic
+*/
+
+const int leftSensor = 2;
+const int rightSensor = 3;
+
+const int leftMotorIN1 = 8;
+const int leftMotorIN2 = 9;
+const int rightMotorIN1 = 10;
+const int rightMotorIN2 = 11;
+
+void setup() {
+  pinMode(leftSensor, INPUT);
+  pinMode(rightSensor, INPUT);
+  pinMode(leftMotorIN1, OUTPUT);
+  pinMode(leftMotorIN2, OUTPUT);
+  pinMode(rightMotorIN1, OUTPUT);
+  pinMode(rightMotorIN2, OUTPUT);
+  Serial.begin(9600);
+}
+
+void forward() {
+  digitalWrite(leftMotorIN1, HIGH); digitalWrite(leftMotorIN2, LOW);
+  digitalWrite(rightMotorIN1, HIGH); digitalWrite(rightMotorIN2, LOW);
+}
+
+void turnLeft() {
+  digitalWrite(leftMotorIN1, LOW); digitalWrite(leftMotorIN2, LOW);
+  digitalWrite(rightMotorIN1, HIGH); digitalWrite(rightMotorIN2, LOW);
+}
+
+void turnRight() {
+  digitalWrite(leftMotorIN1, HIGH); digitalWrite(leftMotorIN2, LOW);
+  digitalWrite(rightMotorIN1, LOW); digitalWrite(rightMotorIN2, LOW);
+}
+
+void stopMotors() {
+  digitalWrite(leftMotorIN1, LOW); digitalWrite(leftMotorIN2, LOW);
+  digitalWrite(rightMotorIN1, LOW); digitalWrite(rightMotorIN2, LOW);
+}
+
+void loop() {
+  bool onLineLeft = digitalRead(leftSensor);
+  bool onLineRight = digitalRead(rightSensor);
+
+  if (onLineLeft && onLineRight) {
+    forward();
+  } else if (onLineLeft && !onLineRight) {
+    turnLeft();
+  } else if (!onLineLeft && onLineRight) {
+    turnRight();
+  } else {
+    stopMotors();
+  }
+}`,
+    optimizedCode: `// Optimized with PWM speed control for smoother turns
+const int leftSensor = 2;
+const int rightSensor = 3;
+
+const int leftMotorIN1 = 8;
+const int leftMotorIN2 = 9;
+const int leftEnable = 5;
+const int rightMotorIN1 = 10;
+const int rightMotorIN2 = 11;
+const int rightEnable = 6;
+
+const int baseSpeed = 180;
+const int turnSpeed = 100;
+
+void setup() {
+  pinMode(leftSensor, INPUT);
+  pinMode(rightSensor, INPUT);
+  pinMode(leftMotorIN1, OUTPUT);
+  pinMode(leftMotorIN2, OUTPUT);
+  pinMode(rightMotorIN1, OUTPUT);
+  pinMode(rightMotorIN2, OUTPUT);
+  pinMode(leftEnable, OUTPUT);
+  pinMode(rightEnable, OUTPUT);
+  Serial.begin(9600);
+}
+
+void drive(int leftSpeed, int rightSpeed) {
+  digitalWrite(leftMotorIN1, HIGH); digitalWrite(leftMotorIN2, LOW);
+  digitalWrite(rightMotorIN1, HIGH); digitalWrite(rightMotorIN2, LOW);
+  analogWrite(leftEnable, leftSpeed);
+  analogWrite(rightEnable, rightSpeed);
+}
+
+void loop() {
+  bool onLineLeft = digitalRead(leftSensor);
+  bool onLineRight = digitalRead(rightSensor);
+
+  if (onLineLeft && onLineRight) {
+    drive(baseSpeed, baseSpeed);
+  } else if (onLineLeft && !onLineRight) {
+    drive(turnSpeed, baseSpeed);
+  } else if (!onLineLeft && onLineRight) {
+    drive(baseSpeed, turnSpeed);
+  } else {
+    drive(0, 0);
+  }
+}`,
+  },
+  {
+    id: 204, emoji: "📻", title: "IR Remote Decoder",
+    desc: "Capture and decode infrared signals from any TV remote control.",
+    difficulty: "intermediate", time: "35 mins", xp: 85,
+    components: ["IR Receiver", "Arduino Uno", "Breadboard", "Jumper Wires"],
+    instructions: [
+      "Gather: Arduino Uno, IR receiver module (e.g. VS1838B), breadboard, jumper wires",
+      "Wire IR receiver: OUT→pin 11, VCC→5V, GND→GND",
+      "Install the 'IRremote' library from Library Manager",
+      "Upload the code via Arduino IDE and open Serial Monitor at 9600 baud",
+      "Point any remote at the sensor and press buttons — codes print to Serial",
+      "🧪 Copy the printed hex codes into handleCommand() to map real buttons",
+      "⚠️ No signal? Most receivers need the flat side facing the remote",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Receive and decode infrared signals
+  2. Use the IRremote library
+  3. Map remote codes to actions
+*/
+
+#include <IRremote.hpp>
+
+const int irPin = 11;
+
+void setup() {
+  Serial.begin(9600);
+  IrReceiver.begin(irPin, ENABLE_LED_FEEDBACK);
+  Serial.println("IR Receiver Ready. Point a remote and press a button.");
+}
+
+void loop() {
+  if (IrReceiver.decode()) {
+    Serial.print("Code received: 0x");
+    Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX);
+    IrReceiver.resume();
+  }
+}`,
+    optimizedCode: `// Optimized with named button mapping and repeat filtering
+#include <IRremote.hpp>
+
+const int irPin = 11;
+unsigned long lastCode = 0;
+unsigned long lastReceiveTime = 0;
+
+void handleCommand(unsigned long code) {
+  switch (code) {
+    case 0xFF18E7: Serial.println("Button: UP"); break;
+    case 0xFF4AB5: Serial.println("Button: DOWN"); break;
+    case 0xFF10EF: Serial.println("Button: LEFT"); break;
+    case 0xFF5AA5: Serial.println("Button: RIGHT"); break;
+    case 0xFF38C7: Serial.println("Button: OK"); break;
+    default:
+      Serial.print("Unknown code: 0x");
+      Serial.println(code, HEX);
+  }
+}
+
+void setup() {
+  Serial.begin(9600);
+  IrReceiver.begin(irPin, ENABLE_LED_FEEDBACK);
+}
+
+void loop() {
+  if (IrReceiver.decode()) {
+    unsigned long code = IrReceiver.decodedIRData.decodedRawData;
+    if (code != 0 && millis() - lastReceiveTime > 200) {
+      handleCommand(code);
+      lastCode = code;
+      lastReceiveTime = millis();
+    }
+    IrReceiver.resume();
+  }
+}`,
+  },
+  {
+    id: 205, emoji: "⏱️", title: "Reaction Time Game",
+    desc: "Test your reflexes — press the button as fast as possible when the LED lights up.",
+    difficulty: "intermediate", time: "40 mins", xp: 90,
+    components: ["LED", "Push Button", "LCD 16x2", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, 16x2 I2C LCD, red LED, push button, breadboard, wires",
+      "Wire LCD: SDA→A4, SCL→A5, VCC→5V, GND→GND",
+      "Connect LED to pin 9 (with resistor), button between pin 8 and GND",
+      "Upload the code via Arduino IDE",
+      "Wait for 'GO!', then press the button as fast as you can",
+      "🧪 The optimized version tracks your best time and flags false starts",
+      "⚠️ LCD showing boxes? Adjust the contrast pot on the I2C backpack",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Use an I2C 16x2 LCD
+  2. Measure elapsed time with millis()
+  3. Random delays with random()
+*/
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const int ledPin = 9;
+const int buttonPin = 8;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  lcd.init();
+  lcd.backlight();
+  lcd.print("Reaction Timer");
+  Serial.begin(9600);
+  randomSeed(analogRead(A0));
+  delay(1500);
+}
+
+void loop() {
+  lcd.clear();
+  lcd.print("Get Ready...");
+  digitalWrite(ledPin, LOW);
+  delay(random(2000, 5000));
+
+  lcd.clear();
+  lcd.print("GO!");
+  digitalWrite(ledPin, HIGH);
+  unsigned long startTime = millis();
+
+  while (digitalRead(buttonPin) == HIGH) {
+    // Wait for button press
+  }
+
+  unsigned long reactionTime = millis() - startTime;
+  digitalWrite(ledPin, LOW);
+
+  lcd.clear();
+  lcd.print("Time: ");
+  lcd.print(reactionTime);
+  lcd.print("ms");
+  Serial.print("Reaction time: ");
+  Serial.println(reactionTime);
+
+  delay(3000);
+}`,
+    optimizedCode: `// Optimized with false-start detection and best-score tracking
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const int ledPin = 9;
+const int buttonPin = 8;
+unsigned long bestTime = 999999;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+  lcd.init();
+  lcd.backlight();
+  Serial.begin(9600);
+  randomSeed(analogRead(A0));
+}
+
+void loop() {
+  lcd.clear();
+  lcd.print("Get Ready...");
+  digitalWrite(ledPin, LOW);
+  unsigned long waitTime = random(2000, 5000);
+  unsigned long waitStart = millis();
+
+  while (millis() - waitStart < waitTime) {
+    if (digitalRead(buttonPin) == LOW) {
+      lcd.clear();
+      lcd.print("Too Soon!");
+      delay(2000);
+      return;
+    }
+  }
+
+  lcd.clear();
+  lcd.print("GO!");
+  digitalWrite(ledPin, HIGH);
+  unsigned long startTime = millis();
+
+  while (digitalRead(buttonPin) == HIGH) {
+    // Wait for button press
+  }
+
+  unsigned long reactionTime = millis() - startTime;
+  digitalWrite(ledPin, LOW);
+  if (reactionTime < bestTime) bestTime = reactionTime;
+
+  lcd.setCursor(0, 0);
+  lcd.print("Time: ");
+  lcd.print(reactionTime);
+  lcd.print("ms");
+  lcd.setCursor(0, 1);
+  lcd.print("Best: ");
+  lcd.print(bestTime);
+  lcd.print("ms");
+
+  delay(3000);
+}`,
+  },
+  {
+    id: 206, emoji: "🧭", title: "Digital Compass",
+    desc: "Build a compass using an I2C magnetometer and display heading on an OLED.",
+    difficulty: "intermediate", time: "50 mins", xp: 110,
+    components: ["HMC5883L", "OLED Display", "Arduino Uno", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, HMC5883L magnetometer, 0.96\" OLED, breadboard, wires",
+      "Wire both I2C devices: SDA→A4, SCL→A5, VCC→5V, GND→GND (shared bus)",
+      "Upload the code via Arduino IDE",
+      "Rotate the sensor flat and level — the heading should update in real time",
+      "🧪 Run the calibration routine in the optimized version for better accuracy",
+      "⚠️ Heading jumps around? Keep the sensor away from motors, speakers, and metal",
+      "⚠️ Nothing on I2C? Run an I2C scanner sketch to confirm the sensor's address",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. I2C communication with a magnetometer (HMC5883L)
+  2. Convert raw magnetic field readings to a heading angle
+  3. Display real-time data on an OLED
+*/
+
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+#define HMC5883L_ADDR 0x1E
+
+void setup() {
+  Serial.begin(9600);
+  Wire.begin();
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+
+  Wire.beginTransmission(HMC5883L_ADDR);
+  Wire.write(0x02);
+  Wire.write(0x00);
+  Wire.endTransmission();
+}
+
+void loop() {
+  int16_t x, y, z;
+  Wire.beginTransmission(HMC5883L_ADDR);
+  Wire.write(0x03);
+  Wire.endTransmission();
+  Wire.requestFrom(HMC5883L_ADDR, 6);
+
+  if (Wire.available() >= 6) {
+    x = Wire.read() << 8 | Wire.read();
+    z = Wire.read() << 8 | Wire.read();
+    y = Wire.read() << 8 | Wire.read();
+
+    float heading = atan2(y, x);
+    if (heading < 0) heading += 2 * PI;
+    float headingDeg = heading * 180 / PI;
+
+    Serial.print("Heading: ");
+    Serial.println(headingDeg);
+
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 20);
+    display.print(headingDeg, 0);
+    display.println(" deg");
+    display.display();
+  }
+
+  delay(200);
+}`,
+    optimizedCode: `// Optimized with calibration offsets and cardinal direction labels
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+#define HMC5883L_ADDR 0x1E
+
+float xOffset = 0, yOffset = 0;
+
+const char* directionFromHeading(float deg) {
+  const char* dirs[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+  int index = (int)((deg + 22.5) / 45) % 8;
+  return dirs[index];
+}
+
+void setup() {
+  Serial.begin(9600);
+  Wire.begin();
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+
+  Wire.beginTransmission(HMC5883L_ADDR);
+  Wire.write(0x02);
+  Wire.write(0x00);
+  Wire.endTransmission();
+}
+
+void loop() {
+  int16_t x, y, z;
+  Wire.beginTransmission(HMC5883L_ADDR);
+  Wire.write(0x03);
+  Wire.endTransmission();
+  Wire.requestFrom(HMC5883L_ADDR, 6);
+
+  if (Wire.available() >= 6) {
+    x = Wire.read() << 8 | Wire.read();
+    z = Wire.read() << 8 | Wire.read();
+    y = Wire.read() << 8 | Wire.read();
+
+    float heading = atan2(y - yOffset, x - xOffset);
+    if (heading < 0) heading += 2 * PI;
+    float headingDeg = heading * 180 / PI;
+
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 10);
+    display.print(headingDeg, 0);
+    display.println(" deg");
+    display.setTextSize(3);
+    display.setCursor(30, 35);
+    display.println(directionFromHeading(headingDeg));
+    display.display();
+
+    Serial.print(headingDeg);
+    Serial.print(" deg - ");
+    Serial.println(directionFromHeading(headingDeg));
+  }
+
+  delay(200);
+}`,
+  },
+  {
+    id: 207, emoji: "🎯", title: "Laser Tripwire Alarm",
+    desc: "Create a security beam — when the laser is broken, an alarm buzzer sounds.",
+    difficulty: "intermediate", time: "45 mins", xp: 100,
+    components: ["Laser Module", "Photoresistor", "Buzzer", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, laser module, photoresistor (LDR), buzzer, breadboard, wires",
+      "Mount the laser and LDR facing each other across the 'tripwire' gap",
+      "Wire laser→pin 8, LDR between 5V and A0 (with a 10kΩ pull-down to GND), buzzer→pin 9",
+      "Upload the code and let it calibrate against the unobstructed beam",
+      "Walk through the beam — the buzzer should sound and stay latched",
+      "🧪 Add a reset button so the optimized version's alarm needs a manual clear",
+      "⚠️ False alarms? Re-run calibration after finalizing the laser/LDR alignment",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Detect a laser beam interruption using an LDR
+  2. Threshold-based event triggering
+  3. Basic security system logic
+*/
+
+const int laserPin = 8;
+const int ldrPin = A0;
+const int buzzerPin = 9;
+const int threshold = 500;
+
+void setup() {
+  pinMode(laserPin, OUTPUT);
+  pinMode(buzzerPin, OUTPUT);
+  digitalWrite(laserPin, HIGH);
+  Serial.begin(9600);
+  Serial.println("Tripwire Armed!");
+}
+
+void loop() {
+  int lightLevel = analogRead(ldrPin);
+  Serial.println(lightLevel);
+
+  if (lightLevel < threshold) {
+    tone(buzzerPin, 1000);
+    Serial.println("ALARM! Beam broken!");
+  } else {
+    noTone(buzzerPin);
+  }
+
+  delay(100);
+}`,
+    optimizedCode: `// Optimized with an auto-calibration step and a latching alarm
+const int laserPin = 8;
+const int ldrPin = A0;
+const int buzzerPin = 9;
+const int resetButton = 2;
+
+int baselineLight = 0;
+int triggerMargin = 150;
+bool alarmLatched = false;
+
+int calibrateBaseline() {
+  long total = 0;
+  for (int i = 0; i < 20; i++) {
+    total += analogRead(ldrPin);
+    delay(50);
+  }
+  return total / 20;
+}
+
+void setup() {
+  pinMode(laserPin, OUTPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(resetButton, INPUT_PULLUP);
+  digitalWrite(laserPin, HIGH);
+  Serial.begin(9600);
+
+  baselineLight = calibrateBaseline();
+  Serial.print("Baseline: ");
+  Serial.println(baselineLight);
+  Serial.println("Tripwire Armed!");
+}
+
+void loop() {
+  if (digitalRead(resetButton) == LOW) {
+    alarmLatched = false;
+    noTone(buzzerPin);
+    Serial.println("Alarm reset.");
+    delay(300);
+  }
+
+  int lightLevel = analogRead(ldrPin);
+
+  if (!alarmLatched && lightLevel < (baselineLight - triggerMargin)) {
+    alarmLatched = true;
+    Serial.println("ALARM! Beam broken!");
+  }
+
+  if (alarmLatched) {
+    tone(buzzerPin, 1000);
+  }
+
+  delay(100);
+}`,
+  },
+  {
+    id: 208, emoji: "📊", title: "Data Logger to SD Card",
+    desc: "Log sensor readings to an SD card with timestamps for offline analysis.",
+    difficulty: "intermediate", time: "55 mins", xp: 120,
+    components: ["SD Card Module", "DHT11", "Arduino Uno", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, DHT11 sensor, SD card module, SD card, breadboard, wires",
+      "Wire DHT11: DATA→pin 2, VCC→5V, GND→GND",
+      "Wire SD module: CS→pin 10, MOSI→11, MISO→12, SCK→13, VCC→5V, GND→GND",
+      "Install 'DHT sensor library' and 'SD' library, then upload",
+      "Data logs to log.csv every 5 seconds — pull the card to review it",
+      "🧪 Add the header-row version so your CSV opens cleanly in a spreadsheet",
+      "⚠️ 'SD card init failed'? Reformat the card as FAT16/FAT32",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read a DHT11 temperature/humidity sensor
+  2. Log timestamped data to an SD card
+  3. Basic file I/O with the SD library
+*/
+
+#include <DHT.h>
+#include <SPI.h>
+#include <SD.h>
+
+#define DHTPIN 2
+DHT dht(DHTPIN, DHT11);
+const int chipSelect = 10;
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+
+  if (!SD.begin(chipSelect)) {
+    Serial.println("SD card init failed!");
+    while (1);
+  }
+  Serial.println("Data Logger Ready!");
+}
+
+void loop() {
+  float temp = dht.readTemperature();
+  float humidity = dht.readHumidity();
+
+  Serial.print("Temp: "); Serial.print(temp);
+  Serial.print(" Humidity: "); Serial.println(humidity);
+
+  File dataFile = SD.open("log.csv", FILE_WRITE);
+  if (dataFile) {
+    dataFile.print(millis());
+    dataFile.print(",");
+    dataFile.print(temp);
+    dataFile.print(",");
+    dataFile.println(humidity);
+    dataFile.close();
+  }
+
+  delay(5000);
+}`,
+    optimizedCode: `// Optimized: writes a CSV header once and skips invalid sensor readings
+#include <DHT.h>
+#include <SPI.h>
+#include <SD.h>
+
+#define DHTPIN 2
+DHT dht(DHTPIN, DHT11);
+const int chipSelect = 10;
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+
+  if (!SD.begin(chipSelect)) {
+    Serial.println("SD card init failed!");
+    while (1);
+  }
+
+  if (!SD.exists("log.csv")) {
+    File dataFile = SD.open("log.csv", FILE_WRITE);
+    if (dataFile) {
+      dataFile.println("timestamp_ms,temp_C,humidity_pct");
+      dataFile.close();
+    }
+  }
+  Serial.println("Data Logger Ready!");
+}
+
+void loop() {
+  float temp = dht.readTemperature();
+  float humidity = dht.readHumidity();
+
+  if (isnan(temp) || isnan(humidity)) {
+    Serial.println("Sensor read failed, skipping.");
+    delay(5000);
+    return;
+  }
+
+  String row = String(millis()) + "," + String(temp) + "," + String(humidity);
+  Serial.println(row);
+
+  File dataFile = SD.open("log.csv", FILE_WRITE);
+  if (dataFile) {
+    dataFile.println(row);
+    dataFile.close();
+  } else {
+    Serial.println("Warning: could not write to SD card.");
+  }
+
+  delay(5000);
+}`,
+  },
+  {
+    id: 209, emoji: "🔔", title: "Motion Detection Alarm",
+    desc: "Detect movement with a PIR sensor and trigger a buzzer and LED alert.",
+    difficulty: "intermediate", time: "40 mins", xp: 95,
+    components: ["PIR Sensor", "Buzzer", "LED", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, PIR motion sensor, buzzer, red LED, breadboard, wires",
+      "Wire PIR: OUT→pin 2, VCC→5V, GND→GND",
+      "Connect buzzer to pin 8, LED to pin 9 (with resistor)",
+      "Upload the code — wait the full 30s warm-up before testing (PIR sensors need this)",
+      "Walk in front of the sensor — buzzer and LED should activate",
+      "🧪 Send 'd'/'a' over Serial to disarm/arm in the optimized version",
+      "⚠️ False triggers? Keep the PIR away from heaters, windows, and direct sunlight",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read a PIR motion sensor
+  2. Trigger multiple outputs (buzzer + LED) on an event
+  3. Handle sensor warm-up time
+*/
+
+const int pirPin = 2;
+const int buzzerPin = 8;
+const int ledPin = 9;
+
+void setup() {
+  pinMode(pirPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("PIR warming up...");
+  delay(30000);
+  Serial.println("Motion Alarm Armed!");
+}
+
+void loop() {
+  if (digitalRead(pirPin) == HIGH) {
+    Serial.println("Motion detected!");
+    digitalWrite(ledPin, HIGH);
+    tone(buzzerPin, 1000);
+    delay(2000);
+    digitalWrite(ledPin, LOW);
+    noTone(buzzerPin);
+  }
+}`,
+    optimizedCode: `// Optimized with a non-blocking alarm and Serial arm/disarm control
+const int pirPin = 2;
+const int buzzerPin = 8;
+const int ledPin = 9;
+
+bool armed = true;
+bool alarmActive = false;
+unsigned long alarmStart = 0;
+const unsigned long alarmDuration = 2000;
+
+void setup() {
+  pinMode(pirPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("PIR warming up...");
+  delay(30000);
+  Serial.println("Motion Alarm Armed! Send 'd' to disarm, 'a' to arm.");
+}
+
+void loop() {
+  if (Serial.available()) {
+    char cmd = Serial.read();
+    if (cmd == 'd') { armed = false; Serial.println("Disarmed"); }
+    if (cmd == 'a') { armed = true; Serial.println("Armed"); }
+  }
+
+  if (armed && !alarmActive && digitalRead(pirPin) == HIGH) {
+    Serial.println("Motion detected!");
+    alarmActive = true;
+    alarmStart = millis();
+    digitalWrite(ledPin, HIGH);
+    tone(buzzerPin, 1000);
+  }
+
+  if (alarmActive && millis() - alarmStart >= alarmDuration) {
+    digitalWrite(ledPin, LOW);
+    noTone(buzzerPin);
+    alarmActive = false;
+  }
+}`,
+  },
+  {
+    id: 210, emoji: "🖥️", title: "Serial LCD Menu System",
+    desc: "Build a navigable menu system on an LCD using rotary encoder input.",
+    difficulty: "intermediate", time: "50 mins", xp: 105,
+    components: ["LCD 16x2", "Rotary Encoder", "Arduino Uno", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, 16x2 I2C LCD, rotary encoder module (e.g. KY-040), breadboard, wires",
+      "Wire encoder: CLK→pin 2, DT→pin 3, SW→pin 4, +→5V, GND→GND",
+      "Wire LCD: SDA→A4, SCL→A5, VCC→5V, GND→GND",
+      "Install 'LiquidCrystal_I2C' library, then upload the code",
+      "Turn the encoder to scroll the menu, press it to select",
+      "🧪 Try the scrolling two-line version for menus longer than 4 items",
+      "⚠️ Menu skips items erratically? Add a small delay/debounce between reads",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read a rotary encoder's rotation direction
+  2. Build a scrollable menu on an LCD
+  3. Use encoder click to "select" a menu item
+*/
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const int clkPin = 2;
+const int dtPin = 3;
+const int swPin = 4;
+
+const char* menuItems[4] = {"Start Project", "Settings", "About", "Exit"};
+int menuIndex = 0;
+int lastClkState;
+
+void setup() {
+  pinMode(clkPin, INPUT);
+  pinMode(dtPin, INPUT);
+  pinMode(swPin, INPUT_PULLUP);
+  lcd.init();
+  lcd.backlight();
+  lastClkState = digitalRead(clkPin);
+  showMenu();
+  Serial.begin(9600);
+}
+
+void showMenu() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("> ");
+  lcd.print(menuItems[menuIndex]);
+}
+
+void loop() {
+  int clkState = digitalRead(clkPin);
+  if (clkState != lastClkState) {
+    if (digitalRead(dtPin) != clkState) {
+      menuIndex = (menuIndex + 1) % 4;
+    } else {
+      menuIndex = (menuIndex - 1 + 4) % 4;
+    }
+    showMenu();
+  }
+  lastClkState = clkState;
+
+  if (digitalRead(swPin) == LOW) {
+    lcd.setCursor(0, 1);
+    lcd.print("Selected!       ");
+    Serial.println(menuItems[menuIndex]);
+    delay(300);
+  }
+}`,
+    optimizedCode: `// Optimized with debouncing and a scrolling two-line window
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const int clkPin = 2;
+const int dtPin = 3;
+const int swPin = 4;
+
+const char* menuItems[6] = {"Start Project", "Settings", "About", "WiFi Setup", "Brightness", "Exit"};
+const int menuCount = 6;
+int menuIndex = 0;
+int lastClkState;
+unsigned long lastMove = 0;
+
+void showMenu() {
+  lcd.clear();
+  for (int row = 0; row < 2; row++) {
+    int itemIdx = (menuIndex + row) % menuCount;
+    lcd.setCursor(0, row);
+    lcd.print(row == 0 ? "> " : "  ");
+    lcd.print(menuItems[itemIdx]);
+  }
+}
+
+void setup() {
+  pinMode(clkPin, INPUT);
+  pinMode(dtPin, INPUT);
+  pinMode(swPin, INPUT_PULLUP);
+  lcd.init();
+  lcd.backlight();
+  lastClkState = digitalRead(clkPin);
+  showMenu();
+  Serial.begin(9600);
+}
+
+void loop() {
+  int clkState = digitalRead(clkPin);
+  if (clkState != lastClkState && millis() - lastMove > 5) {
+    if (digitalRead(dtPin) != clkState) {
+      menuIndex = (menuIndex + 1) % menuCount;
+    } else {
+      menuIndex = (menuIndex - 1 + menuCount) % menuCount;
+    }
+    showMenu();
+    lastMove = millis();
+  }
+  lastClkState = clkState;
+
+  if (digitalRead(swPin) == LOW) {
+    Serial.print("Selected: ");
+    Serial.println(menuItems[menuIndex]);
+    delay(300);
+  }
+}`,
+  },
+  {
+    id: 301, emoji: "🔊", title: "Theremin Music Synthesizer",
+    desc: "Build a touchless instrument using ultrasonic distance to generate musical tones.",
+    difficulty: "advanced", time: "75 mins", xp: 175,
+    components: ["HC-SR04", "Piezo Buzzer", "Arduino Uno", "LED Strip"],
+    instructions: [
+      "Gather: Arduino Uno, HC-SR04 ultrasonic sensor, buzzer, LED (or strip), breadboard, wires",
+      "Wire HC-SR04: Trig→pin 9, Echo→pin 10, VCC→5V, GND→GND",
+      "Connect buzzer to pin 8, LED to pin 11 (PWM) for the optimized version",
+      "Upload the code and wave your hand 0-50cm from the sensor",
+      "Pitch should rise as your hand gets closer, drop as it moves away",
+      "🧪 Try the smoothed version — it avoids the warbly pitch of raw readings",
+      "⚠️ No sound at the far end? That's expected — distances beyond 50cm are silent by design",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Map ultrasonic distance readings to audio frequency
+  2. Real-time sound synthesis with tone()
+  3. Visual feedback with an LED
+*/
+
+const int trigPin = 9;
+const int echoPin = 10;
+const int buzzerPin = 8;
+const int ledPin = 13;
+
+long readDistanceCM() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000);
+  return duration * 0.034 / 2;
+}
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  long distance = readDistanceCM();
+
+  if (distance > 0 && distance < 50) {
+    int frequency = map(distance, 0, 50, 2000, 200);
+    tone(buzzerPin, frequency);
+    digitalWrite(ledPin, HIGH);
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.print("cm -> Freq: ");
+    Serial.println(frequency);
+  } else {
+    noTone(buzzerPin);
+    digitalWrite(ledPin, LOW);
+  }
+
+  delay(50);
+}`,
+    optimizedCode: `// Optimized with smoothed pitch (avoids warbling) and PWM LED brightness tied to distance
+const int trigPin = 9;
+const int echoPin = 10;
+const int buzzerPin = 8;
+const int ledPin = 11;
+
+int smoothedDistance = 25;
+const float smoothingFactor = 0.3;
+
+long readDistanceCM() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000);
+  if (duration == 0) return -1;
+  return duration * 0.034 / 2;
+}
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  long rawDistance = readDistanceCM();
+
+  if (rawDistance > 0 && rawDistance < 50) {
+    smoothedDistance = smoothedDistance + (rawDistance - smoothedDistance) * smoothingFactor;
+    int frequency = map(smoothedDistance, 0, 50, 2000, 200);
+    int brightness = map(smoothedDistance, 0, 50, 255, 20);
+
+    tone(buzzerPin, frequency);
+    analogWrite(ledPin, brightness);
+  } else {
+    noTone(buzzerPin);
+    analogWrite(ledPin, 0);
+  }
+
+  delay(30);
+}`,
+  },
+  {
+    id: 302, emoji: "📡", title: "Wireless Sensor Network",
+    desc: "Build a multi-node sensor network using NRF24L01 radio modules.",
+    difficulty: "advanced", time: "120 mins", xp: 250,
+    components: ["NRF24L01", "DHT11", "Arduino Nano", "OLED Display"],
+    instructions: [
+      "Gather: 2× Arduino Nano, 2× NRF24L01 modules, DHT11, 0.96\" OLED, breadboard, wires",
+      "Wire both NRF24L01s identically: CE→9, CSN→10, SCK/MOSI/MISO→SPI pins, VCC→3.3V (NOT 5V), GND→GND",
+      "On the sensor node: wire DHT11 DATA→pin 2",
+      "On the base station: wire OLED SDA→A4, SCL→A5",
+      "Install the 'RF24' library, then flash each sketch to its matching board",
+      "🧪 Power both nodes and watch live readings appear on the base station's OLED",
+      "⚠️ No signal? NRF24L01 needs a stable 3.3V supply — a decoupling capacitor across VCC/GND often fixes dropouts",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Wireless communication between Arduino boards using NRF24L01
+  2. Structuring sensor data into a packet
+  3. This is the SENSOR NODE — flash this to your remote/transmitting board
+*/
+
+#include <SPI.h>
+#include <RF24.h>
+#include <DHT.h>
+
+RF24 radio(9, 10); // CE, CSN
+const byte address[6] = "00001";
+
+#define DHTPIN 2
+DHT dht(DHTPIN, DHT11);
+
+struct SensorData {
+  float temperature;
+  float humidity;
+};
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+  radio.begin();
+  radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_LOW);
+  radio.stopListening();
+}
+
+void loop() {
+  SensorData data;
+  data.temperature = dht.readTemperature();
+  data.humidity = dht.readHumidity();
+
+  radio.write(&data, sizeof(data));
+
+  Serial.print("Sent - Temp: ");
+  Serial.print(data.temperature);
+  Serial.print(" Humidity: ");
+  Serial.println(data.humidity);
+
+  delay(2000);
+}`,
+    optimizedCode: `// This is the BASE STATION — flash this to the board with the OLED
+// Optimized with a "last seen" timeout so you know if a node goes offline
+#include <SPI.h>
+#include <RF24.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+RF24 radio(9, 10);
+const byte address[6] = "00001";
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+
+struct SensorData {
+  float temperature;
+  float humidity;
+};
+
+unsigned long lastReceived = 0;
+SensorData latestData = {0, 0};
+
+void setup() {
+  Serial.begin(9600);
+  radio.begin();
+  radio.openReadingPipe(0, address);
+  radio.setPALevel(RF24_PA_LOW);
+  radio.startListening();
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.setTextColor(WHITE);
+}
+
+void loop() {
+  if (radio.available()) {
+    radio.read(&latestData, sizeof(latestData));
+    lastReceived = millis();
+  }
+
+  bool nodeOnline = (millis() - lastReceived) < 10000;
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println("Sensor Network");
+  if (nodeOnline) {
+    display.print("Temp: "); display.print(latestData.temperature); display.println(" C");
+    display.print("Humidity: "); display.print(latestData.humidity); display.println(" %");
+  } else {
+    display.println("Node offline!");
+  }
+  display.display();
+}`,
+  },
+  {
+    id: 303, emoji: "🏠", title: "Smart Home Controller",
+    desc: "Control lights and fans via WiFi using an ESP8266 shield and a web interface.",
+    difficulty: "advanced", time: "100 mins", xp: 220,
+    components: ["ESP8266", "Relay Module", "LED", "Arduino Uno"],
+    instructions: [
+      "Gather: ESP8266 module (e.g. NodeMCU), relay module, LED, breadboard, jumper wires",
+      "This sketch runs directly on the ESP8266 — select 'NodeMCU 1.0' as your board",
+      "Wire relay IN→D1, LED→D2 (with resistor), VCC/GND to the ESP8266's 3.3V/GND",
+      "Set your WiFi ssid/password at the top of the sketch, then upload",
+      "Open Serial Monitor to find the ESP8266's IP address once connected",
+      "🧪 Visit the printed IP in a browser to control the relay and LED remotely",
+      "⚠️ Won't connect? ESP8266 only supports 2.4GHz WiFi networks",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Run a simple WiFi web server on ESP8266
+  2. Control a relay and LED remotely via HTTP
+  3. Basic home automation concepts
+
+  Note: This sketch runs directly on the ESP8266 module
+  (select "Generic ESP8266" or "NodeMCU" as your board).
+*/
+
+#include <ESP8266WiFi.h>
+
+const char* ssid = "YOUR_WIFI_NAME";
+const char* password = "YOUR_WIFI_PASSWORD";
+
+const int relayPin = 5;
+const int ledPin = 4;
+
+WiFiServer server(80);
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(relayPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("Connected! IP address: ");
+  Serial.println(WiFi.localIP());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+
+  String request = client.readStringUntil('\\r');
+  client.flush();
+
+  if (request.indexOf("/relay/on") != -1) digitalWrite(relayPin, HIGH);
+  if (request.indexOf("/relay/off") != -1) digitalWrite(relayPin, LOW);
+  if (request.indexOf("/led/on") != -1) digitalWrite(ledPin, HIGH);
+  if (request.indexOf("/led/off") != -1) digitalWrite(ledPin, LOW);
+
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: text/plain");
+  client.println();
+  client.println("OK");
+  client.stop();
+}`,
+    optimizedCode: `// Optimized: serves an HTML control page instead of raw text responses
+#include <ESP8266WiFi.h>
+
+const char* ssid = "YOUR_WIFI_NAME";
+const char* password = "YOUR_WIFI_PASSWORD";
+
+const int relayPin = 5;
+const int ledPin = 4;
+bool relayState = false;
+bool ledState = false;
+
+WiFiServer server(80);
+
+void handleRequest(String request) {
+  if (request.indexOf("/relay/on") != -1) { relayState = true; digitalWrite(relayPin, HIGH); }
+  if (request.indexOf("/relay/off") != -1) { relayState = false; digitalWrite(relayPin, LOW); }
+  if (request.indexOf("/led/on") != -1) { ledState = true; digitalWrite(ledPin, HIGH); }
+  if (request.indexOf("/led/off") != -1) { ledState = false; digitalWrite(ledPin, LOW); }
+}
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(relayPin, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) delay(500);
+  Serial.println(WiFi.localIP());
+  server.begin();
+}
+
+void loop() {
+  WiFiClient client = server.available();
+  if (!client) return;
+
+  String request = client.readStringUntil('\\r');
+  client.flush();
+  handleRequest(request);
+
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: text/html");
+  client.println();
+  client.println("<html><body style='font-family:sans-serif'>");
+  client.println("<h2>Smart Home Hub</h2>");
+  client.print("<p>Relay: "); client.print(relayState ? "ON" : "OFF"); client.println("</p>");
+  client.println("<a href='/relay/on'><button>Relay ON</button></a> ");
+  client.println("<a href='/relay/off'><button>Relay OFF</button></a><br><br>");
+  client.print("<p>LED: "); client.print(ledState ? "ON" : "OFF"); client.println("</p>");
+  client.println("<a href='/led/on'><button>LED ON</button></a> ");
+  client.println("<a href='/led/off'><button>LED OFF</button></a>");
+  client.println("</body></html>");
+  client.stop();
+}`,
+  },
+  {
+    id: 304, emoji: "🦾", title: "Robotic Arm with Inverse Kinematics",
+    desc: "Control a multi-servo robotic arm with calculated joint angles for precise positioning.",
+    difficulty: "advanced", time: "130 mins", xp: 260,
+    components: ["Servo Motor", "Joystick Module", "Arduino Mega", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Mega, 4× SG90 servos, 2× joystick modules, push button, breadboard, wires",
+      "Wire servos: base→3, shoulder→5, elbow→6, gripper→9",
+      "Wire the primary joystick VRx→A0, VRy→A1; a second joystick/pot for base→A2",
+      "Wire the gripper button to pin 22 (Mega has plenty of extra digital pins)",
+      "Upload the code — move the joystick to drive the arm's calculated reach position",
+      "🧪 Try the smoothed + base-rotation version for full 3D reach",
+      "⚠️ Arm reaching wrong spots? Re-measure your actual servo arm lengths and update upperArmLength/foreArmLength",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Basic 2-link inverse kinematics (trig-based)
+  2. Convert a joystick's X/Y target into joint angles
+  3. Coordinate multiple servos from calculated angles
+*/
+
+#include <Servo.h>
+
+Servo baseServo, shoulderServo, elbowServo, gripperServo;
+
+const int joyX = A0;
+const int joyY = A1;
+const int gripperButton = 22;
+
+const float upperArmLength = 10.0; // cm
+const float foreArmLength = 10.0;  // cm
+
+void setup() {
+  baseServo.attach(3);
+  shoulderServo.attach(5);
+  elbowServo.attach(6);
+  gripperServo.attach(9);
+  pinMode(gripperButton, INPUT_PULLUP);
+  Serial.begin(9600);
+}
+
+void loop() {
+  float targetX = map(analogRead(joyX), 0, 1023, -10, 10);
+  float targetY = map(analogRead(joyY), 0, 1023, 5, 20);
+
+  float dist = sqrt(targetX * targetX + targetY * targetY);
+  dist = constrain(dist, 0.1, upperArmLength + foreArmLength - 0.1);
+
+  float cosElbow = (dist * dist - upperArmLength * upperArmLength - foreArmLength * foreArmLength)
+                    / (2 * upperArmLength * foreArmLength);
+  float elbowAngle = acos(constrain(cosElbow, -1, 1)) * 180 / PI;
+
+  float shoulderAngle = (atan2(targetY, targetX) -
+                          atan2(foreArmLength * sin(radians(elbowAngle)),
+                                upperArmLength + foreArmLength * cos(radians(elbowAngle))))
+                         * 180 / PI;
+
+  shoulderServo.write(constrain(shoulderAngle, 0, 180));
+  elbowServo.write(constrain(elbowAngle, 0, 180));
+
+  if (digitalRead(gripperButton) == LOW) {
+    gripperServo.write(30);
+  } else {
+    gripperServo.write(90);
+  }
+
+  Serial.print("Shoulder: "); Serial.print(shoulderAngle);
+  Serial.print(" Elbow: "); Serial.println(elbowAngle);
+
+  delay(50);
+}`,
+    optimizedCode: `// Optimized with base rotation and smoothed joint motion
+#include <Servo.h>
+
+Servo baseServo, shoulderServo, elbowServo, gripperServo;
+
+const int joyX = A0;
+const int joyY = A1;
+const int baseAxis = A2;
+const int gripperButton = 22;
+
+const float upperArmLength = 10.0;
+const float foreArmLength = 10.0;
+
+float currentShoulder = 90, currentElbow = 90, currentBase = 90;
+const float smoothing = 0.15;
+
+void setup() {
+  baseServo.attach(3);
+  shoulderServo.attach(5);
+  elbowServo.attach(6);
+  gripperServo.attach(9);
+  pinMode(gripperButton, INPUT_PULLUP);
+  Serial.begin(9600);
+}
+
+void loop() {
+  float targetX = map(analogRead(joyX), 0, 1023, -10, 10);
+  float targetY = map(analogRead(joyY), 0, 1023, 5, 20);
+  int targetBase = map(analogRead(baseAxis), 0, 1023, 0, 180);
+
+  float dist = constrain(sqrt(targetX * targetX + targetY * targetY), 0.1, upperArmLength + foreArmLength - 0.1);
+  float cosElbow = (dist * dist - upperArmLength * upperArmLength - foreArmLength * foreArmLength)
+                    / (2 * upperArmLength * foreArmLength);
+  float targetElbow = acos(constrain(cosElbow, -1, 1)) * 180 / PI;
+  float targetShoulder = (atan2(targetY, targetX) -
+                           atan2(foreArmLength * sin(radians(targetElbow)),
+                                 upperArmLength + foreArmLength * cos(radians(targetElbow))))
+                          * 180 / PI;
+
+  currentShoulder += (constrain(targetShoulder, 0, 180) - currentShoulder) * smoothing;
+  currentElbow += (constrain(targetElbow, 0, 180) - currentElbow) * smoothing;
+  currentBase += (targetBase - currentBase) * smoothing;
+
+  shoulderServo.write((int)currentShoulder);
+  elbowServo.write((int)currentElbow);
+  baseServo.write((int)currentBase);
+  gripperServo.write(digitalRead(gripperButton) == LOW ? 30 : 90);
+
+  delay(20);
+}`,
+  },
+  {
+    id: 305, emoji: "🚁", title: "Ultrasonic Radar Scanner",
+    desc: "Sweep an ultrasonic sensor on a servo and display a radar-style map on Processing.",
+    difficulty: "advanced", time: "90 mins", xp: 200,
+    components: ["HC-SR04", "Servo Motor", "Arduino Uno", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, HC-SR04 ultrasonic sensor, SG90 servo, breadboard, wires",
+      "Mount the ultrasonic sensor on top of the servo horn",
+      "Wire HC-SR04: Trig→pin 9, Echo→pin 10, VCC→5V, GND→GND; Servo signal→pin 6",
+      "Upload the code and open Serial Monitor (or Serial Plotter) at 9600 baud",
+      "The servo sweeps 0-180° printing 'angle,distance' pairs as it scans",
+      "🧪 Feed the Serial output into a Processing sketch for a live radar display",
+      "⚠️ Erratic readings? The optimized version's median filtering rejects echo noise",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Sweep a servo through a range of angles
+  2. Measure distance with an ultrasonic sensor at each angle
+  3. Output structured data for visualization
+*/
+
+#include <Servo.h>
+
+Servo radarServo;
+const int trigPin = 9;
+const int echoPin = 10;
+
+long readDistanceCM() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH);
+  return duration * 0.034 / 2;
+}
+
+void setup() {
+  radarServo.attach(6);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  for (int angle = 0; angle <= 180; angle += 2) {
+    radarServo.write(angle);
+    delay(30);
+    long distance = readDistanceCM();
+    Serial.print(angle);
+    Serial.print(",");
+    Serial.println(distance);
+  }
+
+  for (int angle = 180; angle >= 0; angle -= 2) {
+    radarServo.write(angle);
+    delay(30);
+    long distance = readDistanceCM();
+    Serial.print(angle);
+    Serial.print(",");
+    Serial.println(distance);
+  }
+}`,
+    optimizedCode: `// Optimized with noise-filtered readings and a max range cutoff
+#include <Servo.h>
+
+Servo radarServo;
+const int trigPin = 9;
+const int echoPin = 10;
+const int maxRange = 200;
+
+long readDistanceOnce() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  long duration = pulseIn(echoPin, HIGH, 30000);
+  if (duration == 0) return maxRange;
+  long distance = duration * 0.034 / 2;
+  return distance > maxRange ? maxRange : distance;
+}
+
+long readDistanceFiltered() {
+  long a = readDistanceOnce();
+  long b = readDistanceOnce();
+  long c = readDistanceOnce();
+  return max(min(a, b), min(max(a, b), c));
+}
+
+void scanSweep(int start, int end, int step) {
+  for (int angle = start; step > 0 ? angle <= end : angle >= end; angle += step) {
+    radarServo.write(angle);
+    delay(25);
+    long distance = readDistanceFiltered();
+    Serial.print(angle);
+    Serial.print(",");
+    Serial.println(distance);
+  }
+}
+
+void setup() {
+  radarServo.attach(6);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  scanSweep(0, 180, 2);
+  scanSweep(180, 0, -2);
+}`,
+  },
+  {
+    id: 306, emoji: "🎵", title: "Audio Spectrum Analyzer",
+    desc: "Visualize audio frequencies on an LED matrix using FFT analysis.",
+    difficulty: "advanced", time: "80 mins", xp: 185,
+    components: ["Microphone Module", "8x8 LED Matrix", "MAX7219", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, analog microphone module, MAX7219 8x8 matrix, breadboard, wires",
+      "Wire microphone: OUT→A0, VCC→5V, GND→GND",
+      "Wire matrix: DIN→11, CLK→13, CS→10, VCC→5V, GND→GND",
+      "Install the 'arduinoFFT' and 'LedControl' libraries, then upload",
+      "Play music or speak near the mic — bars should react to different frequencies",
+      "🧪 Try the peak-hold version for a classic VU-meter look",
+      "⚠️ No response? Most electret mic modules need their onboard gain trimmer adjusted",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Sample audio with an analog microphone module
+  2. Run a Fast Fourier Transform (FFT) to extract frequency bands
+  3. Visualize frequency bins on an 8x8 LED matrix
+*/
+
+#include <arduinoFFT.h>
+#include <LedControl.h>
+
+#define SAMPLES 64
+#define SAMPLING_FREQUENCY 5000
+
+double vReal[SAMPLES];
+double vImag[SAMPLES];
+arduinoFFT FFT = arduinoFFT(vReal, vImag, SAMPLES, SAMPLING_FREQUENCY);
+
+const int micPin = A0;
+LedControl lc = LedControl(11, 13, 10, 1);
+
+void setup() {
+  lc.shutdown(0, false);
+  lc.setIntensity(0, 8);
+  lc.clearDisplay(0);
+  Serial.begin(9600);
+}
+
+void sampleAudio() {
+  for (int i = 0; i < SAMPLES; i++) {
+    vReal[i] = analogRead(micPin);
+    vImag[i] = 0;
+    delayMicroseconds(1000000 / SAMPLING_FREQUENCY);
+  }
+}
+
+void loop() {
+  sampleAudio();
+  FFT.Windowing(FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+  FFT.Compute(FFT_FORWARD);
+  FFT.ComplexToMagnitude();
+
+  lc.clearDisplay(0);
+  for (int col = 0; col < 8; col++) {
+    int bin = 2 + col * 2;
+    int magnitude = constrain(map(vReal[bin], 0, 4000, 0, 8), 0, 8);
+    for (int row = 0; row < magnitude; row++) {
+      lc.setLed(0, 7 - row, col, true);
+    }
+  }
+}`,
+    optimizedCode: `// Optimized with peak-hold decay for a smoother VU-meter look
+#include <arduinoFFT.h>
+#include <LedControl.h>
+
+#define SAMPLES 64
+#define SAMPLING_FREQUENCY 5000
+
+double vReal[SAMPLES];
+double vImag[SAMPLES];
+arduinoFFT FFT = arduinoFFT(vReal, vImag, SAMPLES, SAMPLING_FREQUENCY);
+
+const int micPin = A0;
+LedControl lc = LedControl(11, 13, 10, 1);
+int peaks[8] = {0};
+
+void setup() {
+  lc.shutdown(0, false);
+  lc.setIntensity(0, 8);
+  lc.clearDisplay(0);
+  Serial.begin(9600);
+}
+
+void sampleAudio() {
+  for (int i = 0; i < SAMPLES; i++) {
+    vReal[i] = analogRead(micPin);
+    vImag[i] = 0;
+    delayMicroseconds(1000000 / SAMPLING_FREQUENCY);
+  }
+}
+
+void loop() {
+  sampleAudio();
+  FFT.Windowing(FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+  FFT.Compute(FFT_FORWARD);
+  FFT.ComplexToMagnitude();
+
+  lc.clearDisplay(0);
+  for (int col = 0; col < 8; col++) {
+    int bin = 2 + col * 2;
+    int magnitude = constrain(map(vReal[bin], 0, 4000, 0, 8), 0, 8);
+
+    if (magnitude >= peaks[col]) {
+      peaks[col] = magnitude;
+    } else {
+      peaks[col] = max(0, peaks[col] - 1);
+    }
+
+    for (int row = 0; row < magnitude; row++) {
+      lc.setLed(0, 7 - row, col, true);
+    }
+    if (peaks[col] < 8) lc.setLed(0, 7 - peaks[col], col, true);
+  }
+}`,
+  },
+  {
+    id: 307, emoji: "⚡", title: "Power Consumption Monitor",
+    desc: "Measure voltage and current with INA219 and display real-time power graphs on OLED.",
+    difficulty: "advanced", time: "85 mins", xp: 190,
+    components: ["INA219", "OLED Display", "Arduino Uno", "Breadboard"],
+    instructions: [
+      "Gather: Arduino Uno, INA219 power sensor breakout, 0.96\" OLED, breadboard, wires",
+      "Wire INA219 in series with your load's power line: VIN+ → source, VIN− → load",
+      "Wire INA219 I2C: SDA→A4, SCL→A5, VCC→5V, GND→GND — same for OLED",
+      "Install 'Adafruit INA219' library, then upload",
+      "OLED should show live voltage, current, and power draw",
+      "🧪 Add the energy-tracking version to see cumulative mWh used over time",
+      "⚠️ Readings at zero? Double-check current flows THROUGH the INA219, not around it",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Measure voltage and current with an INA219 (I2C)
+  2. Calculate real-time power (P = V × I)
+  3. Display live readings on an OLED
+*/
+
+#include <Wire.h>
+#include <Adafruit_INA219.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+Adafruit_INA219 ina219;
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+
+void setup() {
+  Serial.begin(9600);
+  ina219.begin();
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.setTextColor(WHITE);
+}
+
+void loop() {
+  float busVoltage = ina219.getBusVoltage_V();
+  float current_mA = ina219.getCurrent_mA();
+  float power_mW = busVoltage * current_mA;
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println("Power Monitor");
+  display.print("V: "); display.print(busVoltage); display.println(" V");
+  display.print("I: "); display.print(current_mA); display.println(" mA");
+  display.print("P: "); display.print(power_mW); display.println(" mW");
+  display.display();
+
+  Serial.print(busVoltage); Serial.print("V, ");
+  Serial.print(current_mA); Serial.println("mA");
+
+  delay(1000);
+}`,
+    optimizedCode: `// Optimized with cumulative energy usage tracking (mWh)
+#include <Wire.h>
+#include <Adafruit_INA219.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+Adafruit_INA219 ina219;
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+double totalEnergy_mWh = 0;
+unsigned long lastSample = 0;
+
+void setup() {
+  Serial.begin(9600);
+  ina219.begin();
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.setTextColor(WHITE);
+  lastSample = millis();
+}
+
+void loop() {
+  float busVoltage = ina219.getBusVoltage_V();
+  float current_mA = ina219.getCurrent_mA();
+  float power_mW = busVoltage * current_mA;
+
+  unsigned long now = millis();
+  double hoursElapsed = (now - lastSample) / 3600000.0;
+  totalEnergy_mWh += power_mW * hoursElapsed;
+  lastSample = now;
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println("Power Monitor");
+  display.print("V: "); display.print(busVoltage); display.println(" V");
+  display.print("I: "); display.print(current_mA); display.println(" mA");
+  display.print("P: "); display.print(power_mW); display.println(" mW");
+  display.print("E: "); display.print(totalEnergy_mWh); display.println(" mWh");
+  display.display();
+
+  delay(1000);
+}`,
+  },
+  {
+    id: 308, emoji: "🤖", title: "Gesture-Controlled Robot",
+    desc: "Control a robot using hand gestures detected by an accelerometer on a glove.",
+    difficulty: "advanced", time: "110 mins", xp: 240,
+    components: ["MPU6050", "Motor Driver L298N", "DC Motors", "Arduino Uno"],
+    instructions: [
+      "Gather: Arduino Uno, MPU6050 module, L298N motor driver, 2× DC motors + wheels, chassis",
+      "Wire MPU6050: SDA→A4, SCL→A5, VCC→5V, GND→GND (worn on the controlling hand/glove)",
+      "Wire L298N: IN1-IN4→pins 8-11, motors to OUT1-OUT4",
+      "Power the L298N and motors from a separate battery pack",
+      "Upload the code and tilt the MPU6050 forward/back/left/right to drive the robot",
+      "🧪 Try the PWM-speed version so gentler tilts drive slower, sharper tilts drive faster",
+      "⚠️ Robot driving backwards from expected? Swap that side's IN1/IN2 wiring",
+    ],
+    basicCode: `/*
+  Learning Goals:
+  1. Read tilt data from an MPU6050 accelerometer (I2C)
+  2. Map tilt angles to robot movement commands
+  3. Drive motors via an L298N based on gesture input
+*/
+
+#include <Wire.h>
+#include <MPU6050.h>
+
+MPU6050 mpu;
+
+const int leftIN1 = 8;
+const int leftIN2 = 9;
+const int rightIN1 = 10;
+const int rightIN2 = 11;
+
+void setup() {
+  Wire.begin();
+  mpu.initialize();
+  pinMode(leftIN1, OUTPUT);
+  pinMode(leftIN2, OUTPUT);
+  pinMode(rightIN1, OUTPUT);
+  pinMode(rightIN2, OUTPUT);
+  Serial.begin(9600);
+}
+
+void drive(bool l1, bool l2, bool r1, bool r2) {
+  digitalWrite(leftIN1, l1); digitalWrite(leftIN2, l2);
+  digitalWrite(rightIN1, r1); digitalWrite(rightIN2, r2);
+}
+
+void loop() {
+  int16_t ax, ay, az;
+  mpu.getAcceleration(&ax, &ay, &az);
+
+  if (ay < -8000) {
+    drive(HIGH, LOW, HIGH, LOW);
+    Serial.println("Forward");
+  } else if (ay > 8000) {
+    drive(LOW, HIGH, LOW, HIGH);
+    Serial.println("Reverse");
+  } else if (ax < -8000) {
+    drive(LOW, HIGH, HIGH, LOW);
+    Serial.println("Left");
+  } else if (ax > 8000) {
+    drive(HIGH, LOW, LOW, HIGH);
+    Serial.println("Right");
+  } else {
+    drive(LOW, LOW, LOW, LOW);
+  }
+
+  delay(100);
+}`,
+    optimizedCode: `// Optimized with a smoothing filter and tilt-proportional speed via PWM
+#include <Wire.h>
+#include <MPU6050.h>
+
+MPU6050 mpu;
+
+const int leftIN1 = 8;
+const int leftIN2 = 9;
+const int leftEnable = 5;
+const int rightIN1 = 10;
+const int rightIN2 = 11;
+const int rightEnable = 6;
+
+float smoothAx = 0, smoothAy = 0;
+const float smoothing = 0.2;
+
+void setup() {
+  Wire.begin();
+  mpu.initialize();
+  pinMode(leftIN1, OUTPUT); pinMode(leftIN2, OUTPUT); pinMode(leftEnable, OUTPUT);
+  pinMode(rightIN1, OUTPUT); pinMode(rightIN2, OUTPUT); pinMode(rightEnable, OUTPUT);
+  Serial.begin(9600);
+}
+
+void drive(bool l1, bool l2, bool r1, bool r2, int speed) {
+  digitalWrite(leftIN1, l1); digitalWrite(leftIN2, l2);
+  digitalWrite(rightIN1, r1); digitalWrite(rightIN2, r2);
+  analogWrite(leftEnable, speed);
+  analogWrite(rightEnable, speed);
+}
+
+void loop() {
+  int16_t ax, ay, az;
+  mpu.getAcceleration(&ax, &ay, &az);
+
+  smoothAx += (ax - smoothAx) * smoothing;
+  smoothAy += (ay - smoothAy) * smoothing;
+
+  int speed = constrain(map(abs(smoothAy), 8000, 16000, 120, 255), 120, 255);
+
+  if (smoothAy < -8000) {
+    drive(HIGH, LOW, HIGH, LOW, speed);
+  } else if (smoothAy > 8000) {
+    drive(LOW, HIGH, LOW, HIGH, speed);
+  } else if (smoothAx < -8000) {
+    drive(LOW, HIGH, HIGH, LOW, 180);
+  } else if (smoothAx > 8000) {
+    drive(HIGH, LOW, LOW, HIGH, 180);
+  } else {
+    drive(LOW, LOW, LOW, LOW, 0);
+  }
+
+  delay(50);
+}`,
+  },
 ];
 
 // Wokwi project IDs mapping — every project gets a simulator
@@ -1263,6 +6004,16 @@ void loop() {
     "OLED Display (0.96\")": { description: "128×64 pixel I2C OLED. SSD1306 driver. No backlight needed.", pins: "SDA → A4 | SCL → A5 | VCC → 3.3/5V | GND → GND", tipIcon: "📊" },
     "LED Matrix 8x8": { description: "64 LEDs in an 8×8 grid controlled via MAX7219 driver.", pins: "DIN → Digital Pin | CS → Digital Pin | CLK → Digital Pin", tipIcon: "🎮" },
     "Battery Holder": { description: "Holds AA batteries for portable power. 4xAA = 6V.", pins: "+ → VIN or Motor Driver | − → GND", tipIcon: "🔋" },
+    "LED (Green)": { description: "Light-emitting diode. Forward voltage ~2.1V, max current 20mA.", pins: "Anode (+) → Resistor → Pin | Cathode (−) → GND", tipIcon: "💡" },
+    "Sound Sensor": { description: "Microphone module with digital trigger output on loud sounds (e.g. claps).", pins: "OUT → Digital Pin | VCC → 5V | GND → GND", tipIcon: "🎤" },
+    "PIR Sensor": { description: "Passive infrared motion detector. Needs ~30s warm-up after power-on.", pins: "OUT → Digital Pin | VCC → 5V | GND → GND", tipIcon: "🕵️" },
+    "Laser Module": { description: "Low-power laser diode (typically 5V, <5mW) for beam-break sensing.", pins: "+ → Digital or 5V | − → GND", tipIcon: "🔴" },
+    "IR Sensor": { description: "Infrared receiver module for decoding remote control signals (e.g. VS1838B).", pins: "OUT → Digital Pin | VCC → 5V | GND → GND", tipIcon: "📶" },
+    "GPS Module": { description: "NMEA-output GPS receiver (e.g. NEO-6M). Needs outdoor sky visibility for a fix.", pins: "TX → RX Pin | RX → TX Pin | VCC → 5V | GND → GND", tipIcon: "🛰️" },
+    "SD Card Module": { description: "SPI-based microSD card reader/writer for data logging.", pins: "CS → Digital Pin | MOSI/MISO/SCK → SPI Pins | VCC → 5V | GND → GND", tipIcon: "💾" },
+    "BMP180 (Pressure)": { description: "I2C barometric pressure and temperature sensor. Also derives altitude.", pins: "SDA → A4 | SCL → A5 | VCC → 3.3/5V | GND → GND", tipIcon: "🌦️" },
+    "ESP8266": { description: "WiFi-enabled microcontroller (runs its own Arduino-compatible sketches).", pins: "Programmed and powered independently — see board-specific pinout", tipIcon: "📶" },
+    "Arduino Mega": { description: "ATmega2560 board with 54 digital I/O pins and 16 analog inputs — more room for complex builds.", pins: "Digital: 0-53 | Analog: A0-A15 | PWM: 2-13,44-46", tipIcon: "🎛️" },
   };
 
   const stepProgress = checkedSteps.filter(Boolean).length;
