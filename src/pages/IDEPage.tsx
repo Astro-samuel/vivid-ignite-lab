@@ -566,9 +566,12 @@ export default function IDEPage() {
   const debugWithAI = () => {
     setShowDebug(true);
     if (debugMessages.length === 0) {
+      const hasErrors = errors.length > 0;
       const initialUserMsg: DebugMessage = {
         role: "user",
-        content: "I ran into some compilation errors. Can you help me debug my code?"
+        content: hasErrors
+          ? `I'm getting the following compilation errors in my sketch. Can you help me understand what's going wrong and how to fix it?\n\nErrors:\n${errors.join("\n")}`
+          : "My code compiled successfully, but can you review it and help me improve it? Look for any bad practices, potential bugs, or ways to make it better.",
       };
       setDebugMessages([initialUserMsg]);
       runDebugRequest([initialUserMsg]);

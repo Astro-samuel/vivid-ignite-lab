@@ -107,23 +107,16 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
       {/* ── Logo / Brand ── */}
       <div className="flex items-center justify-between px-4 py-4 flex-shrink-0 sidebar-header">
         <div
-          className="flex items-center gap-2.5 cursor-pointer group"
+          className="flex items-center gap-2.5 cursor-pointer"
           onClick={() => { navigate("/"); onClose?.(); }}
         >
-          <motion.div
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-sm sidebar-logo-icon shadow-sm relative overflow-hidden"
-          >
-            <span className="relative z-10">A</span>
-            <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/20 to-transparent animate-pulse" />
-          </motion.div>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-sm sidebar-logo-icon">
+            A
+          </div>
           <div>
-            <div className="flex items-center gap-1.5">
-              <p className="font-black text-sm leading-none sidebar-logo-text">
-                ArduinoLab
-              </p>
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-live-pulse" title="System Live" />
-            </div>
+            <p className="font-black text-sm leading-none sidebar-logo-text">
+              ArduinoLab
+            </p>
             <p className="text-[10px] font-semibold sidebar-logo-sub">
               Learn Electronics
             </p>
@@ -145,12 +138,9 @@ export default function Sidebar({ mobile = false, onClose }: SidebarProps) {
       <div className="flex flex-col items-center py-4 flex-shrink-0">
         <motion.div
           animate={{ y: [0, -4, 0] }}
-          whileHover={{ scale: 1.15, rotate: [0, -8, 8, 0] }}
-          transition={{ y: { duration: 3, repeat: Infinity, ease: "easeInOut" }, scale: { duration: 0.2 } }}
-          className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-md cursor-pointer sidebar-mascot relative"
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
-          🤖
-          <span className="absolute -top-1 -right-1 text-xs animate-spark-float">⚡</span>
+          <RobotMascot />
         </motion.div>
         {user ? (
           <p className="text-xs font-bold mt-1 sidebar-mascot-txt-primary">

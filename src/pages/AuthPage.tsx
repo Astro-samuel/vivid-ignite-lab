@@ -3,11 +3,11 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth, DEMO_USER } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { Mail, Lock, User, ArrowRight, Loader2, Zap } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import FadeInView from "@/components/motion/FadeInView";
 
 export default function AuthPage() {
-  const { user, loading: authLoading, signIn, signUp, signInAsGuest } = useAuth();
+  const { user, loading: authLoading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
@@ -45,12 +45,6 @@ export default function AuthPage() {
     }
   }, [user, authLoading, navigate]);
 
-  const handleGuestSignIn = async () => {
-    setError("");
-    setLoading(true);
-    await signInAsGuest();
-    navigate("/dashboard", { replace: true });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +84,7 @@ export default function AuthPage() {
     } else {
       const { error, data } = await signIn(email, password);
       if (error) {
-        setError(`${error.message || "Invalid credentials"}. Or use Quick Demo / Guest Access below to explore immediately.`);
+        setError(error.message || "Invalid credentials. Please check your email and password.");
       } else {
         const userId = data?.user?.id;
         if (userId) {
@@ -119,7 +113,7 @@ export default function AuthPage() {
     const { error } = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: `${window.location.origin}/auth`,
     });
-    if (error) setError(error.message || "Google sign-in failed. Try Quick Demo / Guest Access below.");
+    if (error) setError(error.message || "Google sign-in failed. Please try again.");
     setGoogleLoading(false);
   };
 
@@ -136,17 +130,6 @@ export default function AuthPage() {
               {mode === "login" ? "Welcome back, maker!" : "Join the maker community"}
             </p>
           </div>
-
-          {/* Quick Demo Access Button */}
-          <button
-            type="button"
-            onClick={handleGuestSignIn}
-            disabled={loading}
-            className="w-full py-3.5 bg-primary/10 hover:bg-primary/20 border-2 border-primary/40 active:translate-y-[2px] rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 text-primary transition-all mb-4 shadow-sm"
-          >
-            <Zap size={18} className="text-primary" />
-            Quick Demo / Guest Access (Instant Preview)
-          </button>
 
           {/* Google Sign In */}
           <button
