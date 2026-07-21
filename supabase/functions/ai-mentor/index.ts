@@ -85,6 +85,17 @@ serve(async (req) => {
     }
 
     const { messages, preferences, contextMeta } = await req.json();
+    if (!Array.isArray(messages) || messages.length === 0 || messages.length > 50) {
+      return new Response(JSON.stringify({ error: "messages must be an array of 1-50 items" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const serializedSize = JSON.stringify(messages).length;
+    if (serializedSize > 50 * 1024) {
+      return new Response(JSON.stringify({ error: "messages payload too large (max 50KB)" }), {
+        status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
