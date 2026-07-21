@@ -6191,10 +6191,8 @@ void loop() {
     // which checks allSteps + codePassed + simulatorPassed
   };
 
-  const sendDebugMessage = async () => {
-    if (!debugInput.trim()) return;
-    const msg = debugInput.trim();
-    setDebugInput("");
+  const submitDebugQuery = async (msg: string) => {
+    if (!msg.trim()) return;
     setDebugMessages((prev) => [...prev, { role: "user", content: msg }]);
     setAiTyping(true);
 
@@ -6281,6 +6279,14 @@ void loop() {
       setDebugMessages(prev => [...prev, { role: "ai", content: "Sorry, I had trouble connecting. Please try again." }]);
     } finally {
       setAiTyping(false);
+    }
+  };
+
+  const sendDebugMessage = () => {
+    const msg = debugInput.trim();
+    if (msg) {
+      setDebugInput("");
+      submitDebugQuery(msg);
     }
   };
 
@@ -6948,12 +6954,7 @@ void loop() {
                   <button
                     onClick={() => {
                       setShowDebugPanel(true);
-                      setDebugMessages((prev) => [...prev, { role: "user", content: "Review my code and suggest improvements" }]);
-                      setAiTyping(true);
-                      setTimeout(() => {
-                        setAiTyping(false);
-                        setDebugMessages((prev) => [...prev, { role: "ai", content: getAIDebugResponse("review improve suggestion") }]);
-                      }, 1000);
+                      submitDebugQuery("Review my code and suggest improvements");
                     }}
                     className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
                     style={{ color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}
