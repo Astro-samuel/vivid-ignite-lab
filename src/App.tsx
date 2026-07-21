@@ -29,7 +29,6 @@ import AuthPage from "./pages/AuthPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import OnboardingPage from "./pages/OnboardingPage";
-import ProtectedRoute from "./components/ProtectedRoute";
 import AISettingsPage from "./pages/AISettingsPage";
 import SnippetsPage from "./pages/SnippetsPage";
 import ErrorDatabasePage from "./pages/ErrorDatabasePage";
@@ -37,6 +36,7 @@ import InsightsPage from "./pages/InsightsPage";
 import LearnPage from "./pages/LearnPage";
 import LessonPage from "./pages/LessonPage";
 import DailyChallengePage from "./pages/DailyChallengePage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -54,21 +54,10 @@ function PageLoader() {
 
 function AnimatedRoutes() {
   const location = useLocation();
-  const [displayLocation, setDisplayLocation] = useState(location);
-
-  useEffect(() => {
-    if (location.pathname === displayLocation.pathname) return;
-    if (!document.startViewTransition) {
-      setDisplayLocation(location);
-      return;
-    }
-    document.startViewTransition(() => {
-      flushSync(() => setDisplayLocation(location));
-    });
-  }, [location, displayLocation]);
 
   return (
-    <Routes location={displayLocation}>
+    <Suspense fallback={<PageLoader />}>
+      <Routes location={location}>
         <Route path="/" element={<ErrorBoundary><Index /></ErrorBoundary>} />
         <Route path="/auth" element={<ErrorBoundary><AuthPage /></ErrorBoundary>} />
         <Route path="/forgot-password" element={<ErrorBoundary><ForgotPasswordPage /></ErrorBoundary>} />
@@ -102,6 +91,7 @@ function AnimatedRoutes() {
         <Route path="/learn/challenge" element={<ProtectedRoute><ErrorBoundary><DailyChallengePage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+    </Suspense>
   );
 }
 
