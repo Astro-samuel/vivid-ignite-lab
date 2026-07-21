@@ -8,6 +8,7 @@ import ArduinoSetupGuide from "@/components/ArduinoSetupGuide";
 import { useArduinoFlasher } from "@/hooks/useArduinoFlasher";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
+import { supabase } from "@/integrations/supabase/client";
 
 import Layout from "@/components/Layout";
 import { useNavigate, useParams } from "react-router-dom";
@@ -6190,42 +6191,97 @@ void loop() {
     // which checks allSteps + codePassed + simulatorPassed
   };
 
-  const getAIDebugResponse = (input: string): string => {
-    const lower = input.toLowerCase();
-    const code = showSolution ? currentCode : userCode;
-
-    if (lower.includes("review") || lower.includes("improve") || lower.includes("suggestion") || lower.includes("look at")) {
-      if (code.includes("delay(") && !code.includes("millis(")) {
-        return "📝 I see you're using `delay()` which blocks execution. Consider using `millis()` for non-blocking timing — this lets your Arduino do other things while waiting. Want me to explain how?";
-      }
-      if (!code.includes("Serial.begin")) {
-        return "📝 I'd suggest adding `Serial.begin(9600)` in setup() and some `Serial.print()` calls in loop(). It's the easiest way to debug and see what your values are!";
-      }
-      return "📝 Your code structure looks solid! A few suggestions:\n• Add comments explaining key logic\n• Consider edge cases (what if sensor returns 0?)\n• Use `constrain()` to keep values in safe ranges";
-    }
-    if (lower.includes("error") || lower.includes("fix") || lower.includes("wrong") || lower.includes("help")) {
-      if (errors.length > 0) {
-        return `🔍 I see ${errors.length} issue(s). Let's tackle the first one:\n\n"${errors[0]}"\n\nHint: Check for typos in function names and make sure every statement ends with a semicolon. Can you spot the issue?`;
-      }
-      return "🔍 Try clicking 'Run & Check' first so I can see what errors come up. Then I can help you debug step by step!";
-    }
-    if (lower.includes("todo") || lower.includes("start") || lower.includes("begin") || lower.includes("how")) {
-      return `🧩 Great question! For "${project.title}", start with setup():\n\n1. Use \`pinMode(pin, OUTPUT)\` for each output device\n2. Use \`Serial.begin(9600)\` so you can debug\n\nThen in loop(), think about what needs to happen repeatedly. What sensor are you reading?`;
-    }
-    return "🤔 I'm here to help! Try asking me to:\n• **Review your code** for improvements\n• **Debug errors** after running\n• **Explain a concept** like PWM, analogRead, etc.\n• Help you **get started** with the TODO sections";
-  };
-
-  const sendDebugMessage = () => {
+  const sendDebugMessage = async () => {
     if (!debugInput.trim()) return;
     const msg = debugInput.trim();
     setDebugInput("");
     setDebugMessages((prev) => [...prev, { role: "user", content: msg }]);
     setAiTyping(true);
-    setTimeout(() => {
+
+    const code = showSolution ? currentCode : userCode;
+    const isCodeUntouched = code.trim() === starterTemplate.trim();
+    
+    let aiPrompt = msg;
+    const lowerMsg = msg.toLowerCase();
+    if (lowerMsg.includes("debug") || lowerMsg.includes("review") || lowerMsg.includes("error") || lowerMsg.includes("fix") || lowerMsg.includes("help") || lowerMsg.includes("check")) {
+      if (isCodeUntouched) {
+         aiPrompt = `I haven't written any code yet — I'm looking at the starter template for "${project.title}". What should I do first? Don't review the template, help me understand what I need to write. My question: ${msg}`;
+      } else {
+         aiPrompt = `Please review my code for "${project.title}" and give me SPECIFIC feedback — reference actual variable names, line numbers, and logic from what I wrote. Don't give generic tips. Errors (if any): ${errors.join(", ")}\n\nCode:\n\`\`\`cpp\n${code}\n\`\`\`\n\nQuestion: ${msg}`;
+      }
+    } else {
+      aiPrompt = `Context: I'm working on the "${project.title}" project.\n\nCode:\n\`\`\`cpp\n${code}\n\`\`\`\n\nQuestion: ${msg}`;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) {
+        setDebugMessages(prev => [...prev, { role: "ai", content: "Please log in to use the AI Mentor." }]);
+        setAiTyping(false);
+        return;
+      }
+
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-mentor`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          messages: [
+            ...debugMessages.map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.content })),
+            { role: "user", content: aiPrompt }
+          ],
+          preferences: { tone: "supportive", hintDepth: "detailed", formality: "friendly" },
+          contextMeta: { lesson_title: project.title }
+        }),
+      });
+
+      if (!resp.ok) throw new Error("Failed to connect to AI Mentor");
+
+      const reader = resp.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantText = "";
+      
+      setDebugMessages(prev => [...prev, { role: "ai", content: "" }]);
+
+      if (reader) {
+        let buffer = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          let newlineIdx: number;
+          while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
+            let line = buffer.slice(0, newlineIdx);
+            buffer = buffer.slice(newlineIdx + 1);
+            if (line.startsWith("data: ")) {
+              const jsonStr = line.slice(6).trim();
+              if (jsonStr === "[DONE]") break;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  assistantText += content;
+                  setDebugMessages(prev => {
+                    const next = [...prev];
+                    next[next.length - 1] = { role: "ai", content: assistantText };
+                    return next;
+                  });
+                  debugBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+                }
+              } catch (e) {}
+            }
+          }
+        }
+      }
+    } catch (err) {
+      setDebugMessages(prev => [...prev, { role: "ai", content: "Sorry, I had trouble connecting. Please try again." }]);
+    } finally {
       setAiTyping(false);
-      setDebugMessages((prev) => [...prev, { role: "ai", content: getAIDebugResponse(msg) }]);
-      setTimeout(() => debugBottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-    }, 800 + Math.random() * 500);
+    }
   };
 
   const handleRevealSolution = () => {
