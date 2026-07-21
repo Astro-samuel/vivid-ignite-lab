@@ -128,18 +128,10 @@ export default function Index() {
         <section
           className="relative px-8 pt-24 pb-28 overflow-hidden min-h-[80vh] flex items-center justify-center"
         >
-          {/* Background Video (Cropped slightly on the right/bottom to hide watermarks) */}
+          {/* Background Video (Scaled to fill edge-to-edge and crop black borders) */}
           <video
-            className="absolute pointer-events-none z-0"
-            style={{
-              top: "-2%",
-              left: "-2%",
-              width: "106%",
-              height: "106%",
-              objectFit: "cover",
-              objectPosition: "40% center", // shifts focus to balance centering while keeping the right watermark cropped
-            }}
-            src="/Copy_iPhone_17_transition_Arduino_202606112016.mp4"
+            className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none z-0 scale-110 md:scale-125"
+            src="/video-project-12.mp4"
             autoPlay
             loop
             muted
