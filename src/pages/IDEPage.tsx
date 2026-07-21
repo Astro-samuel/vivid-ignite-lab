@@ -501,6 +501,8 @@ export default function IDEPage() {
           code,
           errors,
           messages: currentMessages,
+          sketchTitle,
+          fqbn,
         }),
       });
 
@@ -563,15 +565,27 @@ export default function IDEPage() {
     }
   };
 
+  const isBlankCode = (c: string) => {
+    const stripped = c.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\s/g, "");
+    return stripped === "voidsetup(){}voidloop(){}" || stripped.length < 30;
+  };
+
   const debugWithAI = () => {
     setShowDebug(true);
     if (debugMessages.length === 0) {
+      if (isBlankCode(code)) {
+        setDebugMessages([{
+          role: "ai",
+          content: "✏️ Your sketch is still blank! Write some code first — even just a few lines — and then I can give you specific feedback on what you wrote.",
+        }]);
+        return;
+      }
       const hasErrors = errors.length > 0;
       const initialUserMsg: DebugMessage = {
         role: "user",
         content: hasErrors
-          ? `I'm getting the following compilation errors in my sketch. Can you help me understand what's going wrong and how to fix it?\n\nErrors:\n${errors.join("\n")}`
-          : "My code compiled successfully, but can you review it and help me improve it? Look for any bad practices, potential bugs, or ways to make it better.",
+          ? `I'm getting the following compilation errors in my "${sketchTitle}" sketch (board: ${BOARD_LABELS[fqbn] ?? fqbn}). Can you help me understand what's going wrong?\n\nErrors:\n${errors.join("\n")}`
+          : `My "${sketchTitle}" sketch (board: ${BOARD_LABELS[fqbn] ?? fqbn}) compiled without errors. Can you review the actual code I wrote and give me specific, actionable feedback — not generic tips?`,
       };
       setDebugMessages([initialUserMsg]);
       runDebugRequest([initialUserMsg]);

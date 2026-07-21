@@ -492,9 +492,24 @@ export default function LessonPage() {
   const transcript = getLessonTranscript(lesson.title);
   const showTranscriptBlock = transcript.toLowerCase().includes(transcriptSearch.toLowerCase());
 
+  const starterCode = (lesson?.challenge_starter_code || "").replace(/\\n/g, "\n").trim();
+  const isCodeUntouched = code.trim() === starterCode || code.trim().replace(/\s/g, "") === "voidsetup(){}voidloop(){}";
+
+  const handleDebugWithAI = () => {
+    if (isCodeUntouched) {
+      handleSendQuestion(
+        `I haven't written any code yet — I'm looking at the starter template for "${lesson?.title}". What should I do first? Don't review the template, help me understand what I need to write.`
+      );
+    } else {
+      handleSendQuestion(
+        `Please review my code for "${lesson?.title}" and give me SPECIFIC feedback — reference actual variable names, line numbers, and logic from what I wrote. Don't give generic tips.\n\n\`\`\`cpp\n${code}\n\`\`\``
+      );
+    }
+  };
+
   const quickStarters = [
-    `How does ${lesson.title} work?`,
-    "Explain setup() here",
+    `How does ${lesson?.title} work?`,
+    "Explain setup() in this lesson",
     "Help me debug code",
     "What parts are needed?"
   ];
@@ -1209,7 +1224,7 @@ export default function LessonPage() {
               {quickStarters.map((q) => (
                 <button
                   key={q}
-                  onClick={() => handleSendQuestion(q)}
+                  onClick={() => q === "Help me debug code" ? handleDebugWithAI() : handleSendQuestion(q)}
                   className="text-[10px] font-black text-left p-2.5 bg-primary/10 hover:bg-primary/20 border-2 border-primary/30 rounded-xl text-primary transition-all leading-tight cursor-pointer"
                 >
                   "{q}"
