@@ -495,10 +495,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      check_username_available: {
-        Args: { desired_username: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
