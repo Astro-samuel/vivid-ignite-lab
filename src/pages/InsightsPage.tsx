@@ -194,7 +194,7 @@ export default function InsightsPage() {
 
               <div className="h-64 w-full flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" radius="80%" data={radarData}>
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                     <PolarGrid stroke="hsl(228, 20%, 22%)" />
                     <PolarAngleAxis dataKey="subject" tick={{ fill: "hsl(228, 14%, 62%)", fontSize: 10 }} />
                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "hsl(228, 14%, 62%)", fontSize: 8 }} />
