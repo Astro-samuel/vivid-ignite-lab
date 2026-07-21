@@ -2,11 +2,27 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("Origin") || "";
+  const allowedOrigins = [
+    "https://arduinoai.lovable.app",
+    "http://localhost:8080",
+    "http://localhost:5173",
+    "http://127.0.0.1:8080",
+    "http://127.0.0.1:5173"
+  ];
+
+  let allowedOrigin = "*";
+  if (allowedOrigins.includes(origin) || origin.endsWith(".lovable.app") || origin.endsWith(".lovableproject.com")) {
+    allowedOrigin = origin;
+  }
+
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  };
+}
 
 async function authenticateRequest(req: Request) {
   const authHeader = req.headers.get("Authorization");
@@ -23,6 +39,7 @@ async function authenticateRequest(req: Request) {
 }
 
 serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -52,12 +69,14 @@ You think like a real human engineer: you read the full code holistically before
 ${projectContext}
 
 Current Code in Editor:
-\`\`\`cpp
+<sketch_code>
 ${code}
-\`\`\`
+</sketch_code>
 
 Compiler Output / Errors:
+<compiler_errors>
 ${errors && errors.length > 0 ? errors.join("\n") : "No compiler errors. The student wants a specific code review."}
+</compiler_errors>`;
 
 How to reason and respond:
 1. READ THE WHOLE SKETCH first. Understand the student's intent before addressing any single line.

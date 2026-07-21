@@ -6192,7 +6192,7 @@ void loop() {
   };
 
   const submitDebugQuery = async (msg: string) => {
-    if (!msg.trim()) return;
+    if (!msg.trim() || aiTyping) return;
     setDebugMessages((prev) => [...prev, { role: "user", content: msg }]);
     setAiTyping(true);
 
@@ -6205,10 +6205,10 @@ void loop() {
       if (isCodeUntouched) {
          aiPrompt = `I haven't written any code yet — I'm looking at the starter template for "${project.title}". What should I do first? Don't review the template, help me understand what I need to write. My question: ${msg}`;
       } else {
-         aiPrompt = `Please review my code for "${project.title}" and give me SPECIFIC feedback — reference actual variable names, line numbers, and logic from what I wrote. Don't give generic tips. Errors (if any): ${errors.join(", ")}\n\nCode:\n\`\`\`cpp\n${code}\n\`\`\`\n\nQuestion: ${msg}`;
+         aiPrompt = `Please review my code for "${project.title}" and give me SPECIFIC feedback — reference actual variable names, line numbers, and logic from what I wrote. Don't give generic tips. Errors (if any): ${errors.join(", ")}\n\n<user_code>\n${code}\n</user_code>\n\nQuestion: ${msg}`;
       }
     } else {
-      aiPrompt = `Context: I'm working on the "${project.title}" project.\n\nCode:\n\`\`\`cpp\n${code}\n\`\`\`\n\nQuestion: ${msg}`;
+      aiPrompt = `Context: I'm working on the "${project.title}" project.\n\n<user_code>\n${code}\n</user_code>\n\nQuestion: ${msg}`;
     }
 
     try {
