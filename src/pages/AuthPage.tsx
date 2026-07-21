@@ -64,22 +64,15 @@ export default function AuthPage() {
         return;
       }
 
-      const { data: available, error: checkErr } = await supabase.rpc("check_username_available", {
-        desired_username: username.trim(),
-      });
-      if (checkErr) {
-        setError("Could not verify username. Try again or use Guest Access.");
-        setLoading(false);
-        return;
-      }
-      if (!available) {
-        setError("Username is already taken");
-        setLoading(false);
-        return;
-      }
-
       const { error } = await signUp(email, password, username.trim());
-      if (error) setError(error.message);
+      if (error) {
+        const msg = error.message || "";
+        if (/duplicate|unique|profiles_username/i.test(msg)) {
+          setError("Username is already taken");
+        } else {
+          setError(msg);
+        }
+      }
       else setConfirmMsg("Check your email to confirm your account!");
     } else {
       const { error, data } = await signIn(email, password);
