@@ -42,6 +42,26 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    if (!Array.isArray(texts) || texts.length === 0 || texts.length > 100) {
+      return new Response(
+        JSON.stringify({ error: "texts must be an array of 1-100 items" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    for (const t of texts) {
+      if (typeof t !== "string" || t.length > 2000) {
+        return new Response(
+          JSON.stringify({ error: "each text must be a string of max 2000 chars" }),
+          { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+    if (typeof targetLanguage !== "string" || targetLanguage.length > 50) {
+      return new Response(
+        JSON.stringify({ error: "invalid targetLanguage" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
