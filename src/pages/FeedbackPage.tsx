@@ -75,13 +75,13 @@ export default function FeedbackPage() {
           <div
             className="text-center p-10 rounded-2xl border max-w-md w-full"
             style={{
-              background: "rgba(16,185,129,0.04)",
-              borderColor: "rgba(16,185,129,0.2)",
+              background: "hsl(var(--success) / 0.08)",
+              borderColor: "hsl(var(--success) / 0.25)",
             }}
           >
-            <CheckCircle size={56} className="mx-auto mb-4" style={{ color: "#10B981" }} />
-            <h2 className="text-2xl font-bold mb-2" style={{ color: "#FFFFFF" }}>Thank You! 🎉</h2>
-            <p className="text-sm mb-6" style={{ color: "hsl(226, 35%, 65%)" }}>
+            <CheckCircle size={56} className="mx-auto mb-4" style={{ color: "hsl(var(--success))" }} />
+            <h2 className="text-2xl font-bold mb-2 text-foreground">Thank You! 🎉</h2>
+            <p className="text-sm mb-6 text-muted-foreground">
               Your feedback helps us make Arduino AI better for everyone.
             </p>
             <button
@@ -93,11 +93,7 @@ export default function FeedbackPage() {
                 setCategory("");
                 setMessage("");
               }}
-              className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105"
-              style={{
-                background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-                color: "#0A0E27",
-              }}
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all hover:scale-105 bg-primary text-primary-foreground"
             >
               Submit Another
             </button>
@@ -113,13 +109,13 @@ export default function FeedbackPage() {
         {/* Header */}
         <FadeInView>
           <div className="flex items-center gap-2 mb-1">
-            <MessageSquareHeart size={16} style={{ color: "#8B5CF6" }} />
-            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#8B5CF6" }}>
+            <MessageSquareHeart size={16} className="text-primary" />
+            <span className="text-xs font-semibold tracking-widest uppercase text-primary">
               Share Your Thoughts
             </span>
           </div>
-          <h1 className="text-3xl font-bold mb-2" style={{ color: "#FFFFFF" }}>Feedback</h1>
-          <p className="text-sm mb-8" style={{ color: "hsl(226, 35%, 65%)" }}>
+          <h1 className="text-3xl font-bold mb-2 text-foreground">Feedback</h1>
+          <p className="text-sm mb-8 text-muted-foreground">
             Help us improve Arduino AI — we read every submission!
           </p>
         </FadeInView>
@@ -128,26 +124,24 @@ export default function FeedbackPage() {
           {/* Name & Email */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: "#A0AED9" }}>
-                Name <span style={{ color: "#FF4500" }}>*</span>
+              <label className="block text-xs font-medium mb-1.5 text-muted-foreground">
+                Name <span style={{ color: "hsl(var(--destructive))" }}>*</span>
               </label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={100}
                 placeholder="Your name"
-                className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all"
+                className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all bg-background text-foreground"
                 style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: errors.name ? "1px solid #FF4500" : "1px solid hsl(232, 40%, 20%)",
-                  color: "#FFFFFF",
+                  border: errors.name ? "1px solid hsl(var(--destructive))" : "1px solid hsl(var(--input))",
                 }}
               />
-              {errors.name && <p className="text-xs mt-1" style={{ color: "#FF4500" }}>{errors.name}</p>}
+              {errors.name && <p className="text-xs mt-1" style={{ color: "hsl(var(--destructive))" }}>{errors.name}</p>}
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: "#A0AED9" }}>
-                Email <span className="text-xs" style={{ color: "hsl(226,35%,50%)" }}>(optional)</span>
+              <label className="block text-xs font-medium mb-1.5 text-muted-foreground">
+                Email <span className="text-xs text-muted-foreground">(optional)</span>
               </label>
               <input
                 value={email}
@@ -155,21 +149,19 @@ export default function FeedbackPage() {
                 maxLength={255}
                 type="email"
                 placeholder="you@example.com"
-                className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all"
+                className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all bg-background text-foreground"
                 style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: errors.email ? "1px solid #FF4500" : "1px solid hsl(232, 40%, 20%)",
-                  color: "#FFFFFF",
+                  border: errors.email ? "1px solid hsl(var(--destructive))" : "1px solid hsl(var(--input))",
                 }}
               />
-              {errors.email && <p className="text-xs mt-1" style={{ color: "#FF4500" }}>{errors.email}</p>}
+              {errors.email && <p className="text-xs mt-1" style={{ color: "hsl(var(--destructive))" }}>{errors.email}</p>}
             </div>
           </div>
 
           {/* Star Rating */}
           <div>
-            <label className="block text-xs font-medium mb-2" style={{ color: "#A0AED9" }}>
-              Rating <span style={{ color: "#FF4500" }}>*</span>
+            <label className="block text-xs font-medium mb-2 text-muted-foreground">
+              Rating <span style={{ color: "hsl(var(--destructive))" }}>*</span>
             </label>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -182,27 +174,27 @@ export default function FeedbackPage() {
                 >
                   <Star
                     size={28}
-                    fill={(hoveredStar || rating) >= star ? "#F59E0B" : "transparent"}
+                    fill={(hoveredStar || rating) >= star ? "hsl(var(--primary))" : "transparent"}
                     style={{
-                      color: (hoveredStar || rating) >= star ? "#F59E0B" : "hsl(232, 40%, 25%)",
+                      color: (hoveredStar || rating) >= star ? "hsl(var(--primary))" : "hsl(var(--border))",
                       transition: "all 0.15s",
                     }}
                   />
                 </button>
               ))}
               {(hoveredStar || rating) > 0 && (
-                <span className="ml-2 text-xs font-medium" style={{ color: "#F59E0B" }}>
+                <span className="ml-2 text-xs font-medium text-primary">
                   {ratingLabels[hoveredStar || rating]}
                 </span>
               )}
             </div>
-            {errors.rating && <p className="text-xs mt-1" style={{ color: "#FF4500" }}>{errors.rating}</p>}
+            {errors.rating && <p className="text-xs mt-1" style={{ color: "hsl(var(--destructive))" }}>{errors.rating}</p>}
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-xs font-medium mb-2" style={{ color: "#A0AED9" }}>
-              Category <span style={{ color: "#FF4500" }}>*</span>
+            <label className="block text-xs font-medium mb-2 text-muted-foreground">
+              Category <span style={{ color: "hsl(var(--destructive))" }}>*</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {categories.map((cat) => (
@@ -211,9 +203,9 @@ export default function FeedbackPage() {
                   onClick={() => setCategory(cat.value)}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all hover:scale-105"
                   style={{
-                    background: category === cat.value ? "rgba(59,130,246,0.12)" : "rgba(255,255,255,0.04)",
-                    border: category === cat.value ? "1px solid rgba(59,130,246,0.4)" : "1px solid hsl(232, 40%, 20%)",
-                    color: category === cat.value ? "#3B82F6" : "#A0AED9",
+                    background: category === cat.value ? "hsl(var(--primary-light))" : "hsl(var(--background-hover) / 0.4)",
+                    border: category === cat.value ? "1px solid hsl(var(--primary) / 0.4)" : "1px solid hsl(var(--border))",
+                    color: category === cat.value ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
                   }}
                 >
                   <span>{cat.emoji}</span>
@@ -221,13 +213,13 @@ export default function FeedbackPage() {
                 </button>
               ))}
             </div>
-            {errors.category && <p className="text-xs mt-1" style={{ color: "#FF4500" }}>{errors.category}</p>}
+            {errors.category && <p className="text-xs mt-1" style={{ color: "hsl(var(--destructive))" }}>{errors.category}</p>}
           </div>
 
           {/* Message */}
           <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: "#A0AED9" }}>
-              Message <span style={{ color: "#FF4500" }}>*</span>
+            <label className="block text-xs font-medium mb-1.5 text-muted-foreground">
+              Message <span style={{ color: "hsl(var(--destructive))" }}>*</span>
             </label>
             <textarea
               value={message}
@@ -235,23 +227,21 @@ export default function FeedbackPage() {
               maxLength={1000}
               rows={4}
               placeholder="Tell us what you think, what could be better, or what you'd love to see..."
-              className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all resize-none"
+              className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-all resize-none bg-background text-foreground"
               style={{
-                background: "rgba(255,255,255,0.04)",
-                border: errors.message ? "1px solid #FF4500" : "1px solid hsl(232, 40%, 20%)",
-                color: "#FFFFFF",
+                border: errors.message ? "1px solid hsl(var(--destructive))" : "1px solid hsl(var(--input))",
               }}
             />
             <div className="flex justify-between mt-1">
-              {errors.message && <p className="text-xs" style={{ color: "#FF4500" }}>{errors.message}</p>}
-              <span className="text-xs ml-auto" style={{ color: "hsl(226,35%,45%)" }}>
+              {errors.message && <p className="text-xs" style={{ color: "hsl(var(--destructive))" }}>{errors.message}</p>}
+              <span className="text-xs ml-auto text-muted-foreground">
                 {message.length}/1000
               </span>
             </div>
           </div>
 
           {errors.form && (
-            <p className="text-xs px-3 py-2 rounded-lg" style={{ background: "rgba(255,69,0,0.1)", color: "#FF4500" }}>
+            <p className="text-xs px-3 py-2 rounded-lg" style={{ background: "hsl(var(--destructive) / 0.1)", color: "hsl(var(--destructive))" }}>
               {errors.form}
             </p>
           )}
@@ -260,12 +250,7 @@ export default function FeedbackPage() {
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
-            style={{
-              background: "linear-gradient(135deg, #8B5CF6, #EC4899)",
-              color: "#FFFFFF",
-              boxShadow: "0 4px 20px rgba(139,92,246,0.3)",
-            }}
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100 bg-primary text-primary-foreground"
           >
             <Send size={14} />
             {submitting ? "Sending..." : "Submit Feedback"}

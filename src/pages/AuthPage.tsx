@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, DEMO_USER } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2, Zap } from "lucide-react";
 import FadeInView from "@/components/motion/FadeInView";
 
 export default function AuthPage() {
-  const { user, loading: authLoading, signIn, signUp } = useAuth();
+  const { user, loading: authLoading, signIn, signUp, signInAsGuest } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
@@ -21,6 +21,10 @@ export default function AuthPage() {
   useEffect(() => {
     const checkUser = async () => {
       if (user) {
+        if (user.id === DEMO_USER.id) {
+          navigate("/dashboard", { replace: true });
+          return;
+        }
         const { data: profile } = await supabase
           .from("profiles")
           .select("display_name")
@@ -40,6 +44,13 @@ export default function AuthPage() {
       checkUser();
     }
   }, [user, authLoading, navigate]);
+
+  const handleGuestSignIn = async () => {
+    setError("");
+    setLoading(true);
+    await signInAsGuest();
+    navigate("/dashboard", { replace: true });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +74,7 @@ export default function AuthPage() {
         desired_username: username.trim(),
       });
       if (checkErr) {
-        setError("Could not verify username. Try again.");
+        setError("Could not verify username. Try again or use Guest Access.");
         setLoading(false);
         return;
       }
@@ -78,8 +89,9 @@ export default function AuthPage() {
       else setConfirmMsg("Check your email to confirm your account!");
     } else {
       const { error, data } = await signIn(email, password);
-      if (error) setError(error.message);
-      else {
+      if (error) {
+        setError(`${error.message || "Invalid credentials"}. Or use Quick Demo / Guest Access below to explore immediately.`);
+      } else {
         const userId = data?.user?.id;
         if (userId) {
           const { data: profile } = await supabase
@@ -107,7 +119,7 @@ export default function AuthPage() {
     const { error } = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: `${window.location.origin}/auth`,
     });
-    if (error) setError(error.message || "Google sign-in failed");
+    if (error) setError(error.message || "Google sign-in failed. Try Quick Demo / Guest Access below.");
     setGoogleLoading(false);
   };
 
@@ -125,8 +137,20 @@ export default function AuthPage() {
             </p>
           </div>
 
+          {/* Quick Demo Access Button */}
+          <button
+            type="button"
+            onClick={handleGuestSignIn}
+            disabled={loading}
+            className="w-full py-3.5 bg-primary/10 hover:bg-primary/20 border-2 border-primary/40 active:translate-y-[2px] rounded-xl text-sm font-extrabold flex items-center justify-center gap-2 text-primary transition-all mb-4 shadow-sm"
+          >
+            <Zap size={18} className="text-primary" />
+            Quick Demo / Guest Access (Instant Preview)
+          </button>
+
           {/* Google Sign In */}
           <button
+            type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading}
             className="w-full py-3 bg-card hover:bg-[hsl(var(--background-hover))] border-2 border-b-4 border-border active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold flex items-center justify-center gap-3 transition-all text-foreground mb-6"

@@ -514,9 +514,29 @@
   75%  { transform: scale(1.1)  rotate(3deg); }
 }
 
-@keyframes pageIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* ── Native page transitions (View Transitions API) ──
+   Pure stationary opacity crossfade: no vertical movement or translateY shift.
+   The persistent layout (sidebar, top header, content container) stays 100% grounded and stable. */
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+}
+::view-transition-group(root) {
+  animation: none;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  animation: 120ms ease-out both vt-fade-out;
+}
+::view-transition-new(root) {
+  animation: 180ms ease-in both vt-fade-in;
 }
 
 /* ── Utility animation classes ── */
@@ -526,14 +546,6 @@
 .animate-heart-beat   { animation: heartBeat 800ms ease-in-out; }
 .animate-celebration  { animation: celebrationBounce 600ms ease-in-out; }
 .animate-slide-in-right { animation: slideInRight 0.2s ease-out; }
-
-.page-transition-enter {
-  animation: pageIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-main {
-  animation: pageIn 0.25s ease-out;
-}
 
 /* ── Stagger delays ── */
 .delay-75  { animation-delay: 75ms; }
@@ -549,6 +561,10 @@ main {
     transition-duration: 0.01ms !important;
   }
   .lesson-node-available { animation: none; }
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.01ms !important;
+  }
 }
 
 /* ── Gradient utilities ── */

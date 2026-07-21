@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Package, Download, Save, FolderOpen, Trash2, Plus } from "lucide-react";
+import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Package, Download, Save, FolderOpen, Trash2, Plus, Cpu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import CodeEditor from "@/components/CodeEditor";
 import ArduinoSetupGuide from "@/components/ArduinoSetupGuide";
+import PinoutModal from "@/components/PinoutModal";
 import { useArduinoFlasher } from "@/hooks/useArduinoFlasher";
 import { useIdeSketches, type IdeSketch } from "@/hooks/useIdeSketches";
 import { compileSketch } from "@/lib/compileSketch";
@@ -150,8 +151,7 @@ void setup() {
   lcd.print("Arduino Lab!");
 }
 
-void loop() {
-}`
+void loop() {}`
   },
   {
     name: "Servo",
@@ -244,10 +244,22 @@ export default function IDEPage() {
   const [showSimulator, setShowSimulator] = useState(true);
   const [showLibrariesPanel, setShowLibrariesPanel] = useState(false);
   const [showSketchesPanel, setShowSketchesPanel] = useState(false);
+  const [showPinoutModal, setShowPinoutModal] = useState(false);
   const [librarySearch, setLibrarySearch] = useState("");
   const [installedLibraries, setInstalledLibraries] = useState<string[]>([]);
   const debugBottomRef = useRef<HTMLDivElement>(null);
   const skipAutosaveRef = useRef(true);
+
+  // Check for transferred code from lessons or snippets
+  useEffect(() => {
+    const transferredCode = localStorage.getItem("activeIDECode");
+    if (transferredCode) {
+      setCode(transferredCode);
+      localStorage.removeItem("activeIDECode");
+      sonnerToast.success("Loaded sketch code into IDE!");
+    }
+  }, []);
+
 
   // Parse code to find active includes on load/edit
   useEffect(() => {
@@ -265,6 +277,33 @@ export default function IDEPage() {
       debugBottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [debugMessages, showDebug]);
+
+  // Keyboard shortcuts (Ctrl+S / Cmd+S to save, Ctrl+Enter / Cmd+Enter to run)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        saveNow();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        runAndCheck();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [code, fqbn, sketchTitle, activeSketchId, user, saveState, runStep]);
+
+  // Unsaved work loss protection
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (saveState === "unsaved") {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [saveState]);
 
   // Debounced autosave: only for sketches that already have a saved row —
   // fresh/untitled work needs one explicit Save to create that row first.
@@ -597,6 +636,7 @@ export default function IDEPage() {
             {/* Panel toggles */}
             <button
               onClick={() => setShowInstructions(!showInstructions)}
+              aria-label="Toggle Instructions"
               className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showInstructions ? "bg-primary/15 text-primary border border-primary/30" : "bg-muted/50 text-muted-foreground border border-transparent"}`}
               title={showInstructions ? "Hide Instructions" : "Show Instructions"}
             >
@@ -604,6 +644,7 @@ export default function IDEPage() {
             </button>
             <button
               onClick={() => setShowLibrariesPanel(!showLibrariesPanel)}
+              aria-label="Toggle Library Manager"
               className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showLibrariesPanel ? "bg-primary/15 text-primary border border-primary/30" : "bg-muted/50 text-muted-foreground border border-transparent"}`}
               title={showLibrariesPanel ? "Hide Library Manager" : "Show Library Manager"}
             >
@@ -611,6 +652,7 @@ export default function IDEPage() {
             </button>
             <button
               onClick={() => setShowSketchesPanel(!showSketchesPanel)}
+              aria-label="Toggle My Sketches"
               className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showSketchesPanel ? "bg-primary/15 text-primary border border-primary/30" : "bg-muted/50 text-muted-foreground border border-transparent"}`}
               title={showSketchesPanel ? "Hide My Sketches" : "Show My Sketches"}
             >
@@ -618,22 +660,32 @@ export default function IDEPage() {
             </button>
             <button
               onClick={() => setShowSimulator(!showSimulator)}
+              aria-label="Toggle Simulator"
               className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showSimulator ? "bg-primary/15 text-primary border border-primary/30" : "bg-muted/50 text-muted-foreground border border-transparent"}`}
               title={showSimulator ? "Hide Simulator" : "Show Simulator"}
             >
               {showSimulator ? <PanelRightClose size={14} /> : <PanelRightOpen size={14} />}
             </button>
+            <button
+              onClick={() => setShowPinoutModal(true)}
+              aria-label="Open Pin Reference Guide"
+              className="p-1.5 rounded-lg transition-all hover:scale-105 bg-muted/50 text-muted-foreground hover:text-foreground border border-transparent flex items-center gap-1 text-xs font-semibold"
+              title="Pinout Guide"
+            >
+              <Cpu size={14} className="text-primary" /> Pinout Guide
+            </button>
 
             <div className="w-px h-5 mx-1 ide-top-btn-divider" />
 
-            <button onClick={newSketch} className="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105 ide-btn-reset">
+            <button onClick={newSketch} aria-label="Create new sketch" className="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105 ide-btn-reset">
               <Plus size={11} /> New
             </button>
-            <button onClick={saveNow} disabled={saveState === "saving"} className="rounded-lg border border-primary/30 text-primary hover:bg-primary/10 transition-all px-2.5 py-1.5 text-xs flex items-center gap-1.5 disabled:opacity-60">
+            <button onClick={saveNow} aria-label="Save sketch" disabled={saveState === "saving"} className="rounded-lg border border-primary/30 text-primary hover:bg-primary/10 transition-all px-2.5 py-1.5 text-xs flex items-center gap-1.5 disabled:opacity-60">
               <Save size={11} /> {saveState === "saving" ? "Saving..." : "Save"}
             </button>
             <button
               onClick={runAndCheck}
+              aria-label="Run and check code"
               disabled={runStep === "compiling" || runStep === "simulating" || runStep === "safety"}
               className="rounded-lg bg-primary text-primary-foreground hover:bg-primary-dark px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 transition-all disabled:opacity-60"
             >
@@ -1040,6 +1092,7 @@ export default function IDEPage() {
           )}
         </div>
       </div>
+      <PinoutModal isOpen={showPinoutModal} onClose={() => setShowPinoutModal(false)} />
     </Layout>
   );
 }

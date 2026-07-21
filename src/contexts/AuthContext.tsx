@@ -2,12 +2,25 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
+export const DEMO_USER: User = {
+  id: "demo-maker-001",
+  app_metadata: { provider: "email" },
+  user_metadata: { username: "Demo Maker", display_name: "Demo Maker" },
+  aud: "authenticated",
+  created_at: new Date().toISOString(),
+  email: "demo.maker@arduinolab.local",
+  phone: "",
+  role: "authenticated",
+  updated_at: new Date().toISOString(),
+};
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   signUp: (email: string, password: string, username?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any; data?: any }>;
+  signInAsGuest: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -19,7 +32,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (localStorage.getItem("demo_session") === "true") {
+      setUser(DEMO_USER);
+      setSession({
+        access_token: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "demo_token",
+        token_type: "bearer",
+        expires_in: 3600,
+        refresh_token: "demo_refresh",
+        user: DEMO_USER,
+      } as Session);
+      setLoading(false);
+      return;
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (localStorage.getItem("demo_session") === "true") return;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -37,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (localStorage.getItem("demo_session") === "true") return;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -51,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateStreak = async (userId: string) => {
+    if (userId === DEMO_USER.id) return;
     const todayKey = `streak_checked_${userId}`;
     const today = new Date().toISOString().slice(0, 10);
 
@@ -105,16 +134,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error, data };
   };
 
+  const signInAsGuest = async () => {
+    localStorage.setItem("demo_session", "true");
+    localStorage.setItem(`onboarding_${DEMO_USER.id}`, "done");
+    setUser(DEMO_USER);
+    setSession({
+      access_token: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "demo_token",
+      token_type: "bearer",
+      expires_in: 3600,
+      refresh_token: "demo_refresh",
+      user: DEMO_USER,
+    } as Session);
+    setLoading(false);
+    return { error: null };
+  };
+
   const signOut = async () => {
-    const userId = user?.id;
-    await supabase.auth.signOut();
+    const isDemo = localStorage.getItem("demo_session") === "true";
+    localStorage.removeItem("demo_session");
+    if (!isDemo) {
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        // Ignore signout errors
+      }
+    }
+    setUser(null);
+    setSession(null);
     // Clear all user-scoped and legacy app data
     const legacyKeys = ["userInventory", "activeGeneratedProject", "savedProjects", "removedCatalogProjects"];
     legacyKeys.forEach((key) => localStorage.removeItem(key));
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signInAsGuest, signOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -125,3 +178,4 @@ export function useAuth() {
   if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 }
+

@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
 import { useUserProjects } from "@/hooks/useUserProjects";
+import { getInventoryComponents, canBuild as canBuildInventory, missingComponents } from "@/lib/inventory";
 
 const SkillBadge = ({ skill }: { skill: string }) => {
   const ref = useRef<HTMLSpanElement>(null);
@@ -92,13 +93,6 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
 
 function getTimeSeed(): number {
   return Math.floor(Date.now() / (24 * 60 * 60 * 1000));
-}
-
-function getInventoryComponents(userId?: string): string[] {
-  try {
-    const key = userId ? `inventory_${userId}` : "userInventory";
-    return JSON.parse(localStorage.getItem(key) || "[]");
-  } catch { return []; }
 }
 
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
@@ -255,15 +249,9 @@ export default function CatalogPage() {
     return result;
   }, [removedIds, userProjectIds]);
 
-  const inventoryNorm = inventory.map(c => c.toLowerCase().trim());
-  const canBuild = (project: typeof allProjects[0]) =>
-    project.components.every(req => inventoryNorm.some(owned => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned)));
+  const canBuild = (project: typeof allProjects[0]) => canBuildInventory(inventory, project.components);
 
-  const getMissingComponents = (project: typeof allProjects[0]) => {
-    return project.components.filter(
-      req => !inventoryNorm.some(owned => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
-    );
-  };
+  const getMissingComponents = (project: typeof allProjects[0]) => missingComponents(inventory, project.components);
 
   // Apply search/filter on top — but always show the level header even if 0 results
   const filtered = visibleProjects.filter((p) => {
@@ -689,7 +677,20 @@ export default function CatalogPage() {
           <FadeInView className="text-center py-20">
             <div className="text-5xl mb-4">🔍</div>
             <p className="font-semibold mb-1" style={{ color: "hsl(var(--foreground))" }}>No projects found</p>
-            <p style={{ color: "hsl(var(--muted-foreground))" }}>Try different search terms or filters</p>
+            <p className="text-sm mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>Try different search terms or filters</p>
+            <button
+              onClick={() => {
+                setSearch("");
+                setDiffFilter("all");
+                setSelectedTags(new Set());
+                setCostFilter(0);
+                setComponentFilter("");
+                setInvMatchFilter("all");
+              }}
+              className="px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold rounded-xl text-xs transition-all shadow-sm"
+            >
+              Clear Filters &amp; Search
+            </button>
           </FadeInView>
         )}
       </div>

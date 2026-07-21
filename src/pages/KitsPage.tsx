@@ -29,31 +29,31 @@ const kits = [
     id: 1, emoji: "🌱", name: "Basic Starter Kit", price: "$25",
     desc: "Perfect for absolute beginners. Learn the fundamentals of Arduino.",
     components: ["Arduino Uno", "Breadboard", "Jumper Wires", "LED (Red) ×5", "LED (Green) ×5", "LED (Blue) ×5", "Resistor (220Ω) ×10", "Resistor (1kΩ) ×10", "Push Button ×5", "Potentiometer ×2", "Buzzer"],
-    componentCount: 11, projects: "15+", color: "#10B981", borderColor: "rgba(16,185,129,0.5)",
+    componentCount: 11, projects: "15+",
   },
   {
     id: 2, emoji: "📊", name: "Sensor Explorer Kit", price: "$45",
     desc: "Dive into the world of sensors. Measure temperature, distance, light, and more.",
     components: ["Arduino Uno", "Breadboard", "Jumper Wires", "Temperature Sensor (DHT11)", "Ultrasonic Sensor (HC-SR04)", "PIR Motion Sensor", "Photoresistor (LDR) ×2", "IR Sensor ×2", "Soil Moisture Sensor", "BMP180 Pressure", "Sound Sensor", "Rain Sensor"],
-    componentCount: 12, projects: "25+", color: "#3B82F6", borderColor: "rgba(59,130,246,0.5)",
+    componentCount: 12, projects: "25+",
   },
   {
     id: 3, emoji: "🤖", name: "Robotics Kit", price: "$65",
     desc: "Build moving robots! Includes motors, drivers, and chassis components.",
     components: ["Arduino Uno", "Motor Driver (L298N)", "DC Motor ×4", "Servo Motor (SG90) ×2", "Ultrasonic Sensor (HC-SR04) ×2", "IR Sensor ×3", "Battery Holder", "Breadboard", "Chassis Kit"],
-    componentCount: 9, projects: "20+", color: "#F59E0B", borderColor: "rgba(245,158,11,0.5)",
+    componentCount: 9, projects: "20+",
   },
   {
     id: 4, emoji: "🌐", name: "IoT & WiFi Kit", price: "$55",
     desc: "Connect your projects to the internet. Build smart home devices.",
     components: ["ESP32", "ESP8266", "Relay Module ×2", "Temperature Sensor (DHT22)", "PIR Motion Sensor", "OLED Display (0.96\")", "LED Strip (WS2812B)", "Buzzer", "Jumper Wires", "Breadboard"],
-    componentCount: 10, projects: "30+", color: "#8B5CF6", borderColor: "rgba(139,92,246,0.5)",
+    componentCount: 10, projects: "30+",
   },
   {
     id: 5, emoji: "⭐", name: "Complete Maker Kit", price: "$120",
     desc: "Everything you need! The ultimate kit for serious Arduino enthusiasts.",
     components: ["Arduino Uno", "Arduino Nano", "ESP32", "Breadboard ×2", "Jumper Wires", "LED (Red) ×10", "LED (Green) ×10", "RGB LED ×5", "Resistor (220Ω) ×20", "Resistor (10kΩ) ×10", "DHT22", "HC-SR04", "Servo Motor ×3", "DC Motor ×4", "L298N Motor Driver", "OLED Display", "16x2 LCD", "Buzzer", "Relay Module ×2", "Potentiometer ×3"],
-    componentCount: 20, projects: "50+", color: "#EC4899", borderColor: "rgba(255,20,147,0.5)", bestValue: true,
+    componentCount: 20, projects: "50+", bestValue: true,
   },
 ];
 
@@ -98,11 +98,11 @@ export default function KitsPage() {
       <div className="px-8 py-10 max-w-6xl mx-auto">
         <FadeInView className="mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <Package size={14} style={{ color: "#10B981" }} />
-            <span className="text-xs font-semibold" style={{ color: "#10B981" }}>Component Kits</span>
+            <Package size={14} style={{ color: "hsl(var(--muted-foreground))" }} />
+            <span className="text-xs font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>Component Kits</span>
           </div>
-          <h1 className="text-3xl font-bold mb-2" style={{ color: "#FFFFFF" }}>Starter Kits</h1>
-          <p style={{ color: "#A0AED9" }}>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: "hsl(var(--foreground))" }}>Starter Kits</h1>
+          <p style={{ color: "hsl(var(--muted-foreground))" }}>
             Don't have components yet? Choose a kit that matches your interests and we'll set up your inventory automatically.
           </p>
         </FadeInView>
@@ -116,13 +116,12 @@ export default function KitsPage() {
                 <MotionCard
                   className="rounded-2xl border overflow-hidden relative"
                   style={{
-                    background: "hsl(229, 45%, 14%)",
-                    borderColor: owned ? kit.borderColor : "hsl(229, 42%, 26%)",
-                    boxShadow: owned ? `0 0 20px ${kit.color}18` : "none",
+                    background: "hsl(var(--card))",
+                    borderColor: owned ? "hsl(var(--success) / 0.5)" : "hsl(var(--border))",
                   }}
                 >
                   {kit.bestValue && (
-                    <div className="absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-xl" style={{ background: "linear-gradient(135deg, #F59E0B, #FFA500)", color: "#0A0E27" }}>
+                    <div className="absolute top-0 right-0 px-3 py-1 text-xs font-bold rounded-bl-xl" style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}>
                       BEST VALUE
                     </div>
                   )}
@@ -130,27 +129,27 @@ export default function KitsPage() {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <span className="text-3xl">{kit.emoji}</span>
-                        <div><h3 className="font-bold text-base" style={{ color: "#FFFFFF" }}>{kit.name}</h3></div>
+                        <div><h3 className="font-bold text-base" style={{ color: "hsl(var(--foreground))" }}>{kit.name}</h3></div>
                       </div>
-                      <span className="text-xl font-black" style={{ color: kit.color }}>{kit.price}</span>
+                      <span className="text-xl font-black" style={{ color: "hsl(var(--foreground))" }}>{kit.price}</span>
                     </div>
                     <div className="flex items-center justify-between mb-3">
-                      <div className="flex-1 h-1 rounded-full mr-3" style={{ background: "hsl(229, 42%, 22%)" }}>
-                        <div className="h-full rounded-full" style={{ width: "40%", background: kit.color }} />
+                      <div className="flex-1 h-1 rounded-full mr-3" style={{ background: "hsl(var(--background-hover))" }}>
+                        <div className="h-full rounded-full" style={{ width: "40%", background: "hsl(var(--muted-foreground))" }} />
                       </div>
-                      <span className="text-xs flex items-center gap-1" style={{ color: kit.color }}>
+                      <span className="text-xs flex items-center gap-1" style={{ color: "hsl(var(--muted-foreground))" }}>
                         <Zap size={11} /> {kit.projects} projects
                       </span>
                     </div>
-                    <p className="text-sm mb-4" style={{ color: "#A0AED9" }}>{kit.desc}</p>
-                    <p className="text-xs font-semibold mb-2" style={{ color: "hsl(226, 35%, 65%)" }}>{kit.componentCount} components</p>
-                    <p className="text-xs font-semibold mb-2" style={{ color: kit.color }}>Includes:</p>
+                    <p className="text-sm mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>{kit.desc}</p>
+                    <p className="text-xs font-semibold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>{kit.componentCount} components</p>
+                    <p className="text-xs font-semibold mb-2" style={{ color: "hsl(var(--muted-foreground))" }}>Includes:</p>
                     <div className="flex flex-wrap gap-1.5 mb-5">
                       {kit.components.slice(0, 8).map((c) => (
-                        <span key={c} className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "hsl(229, 42%, 20%)", color: "hsl(226, 35%, 75%)", border: "1px solid hsl(229, 42%, 30%)" }}>{c}</span>
+                        <span key={c} className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "hsl(var(--background-hover))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}>{c}</span>
                       ))}
                       {kit.components.length > 8 && (
-                        <span className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "hsl(229, 42%, 20%)", color: "hsl(226, 35%, 65%)", border: "1px solid hsl(229, 42%, 30%)" }}>+{kit.components.length - 8} more</span>
+                        <span className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "hsl(var(--background-hover))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}>+{kit.components.length - 8} more</span>
                       )}
                     </div>
                     <button
@@ -158,8 +157,8 @@ export default function KitsPage() {
                       disabled={owned || isSaving}
                       className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:cursor-default"
                       style={owned
-                        ? { background: `${kit.color}22`, color: kit.color, border: `1px solid ${kit.color}44` }
-                        : { background: `linear-gradient(135deg, ${kit.color}, ${kit.color}BB)`, color: kit.id === 1 || kit.id === 2 ? "#0A0E27" : "#FFFFFF", boxShadow: `0 0 20px ${kit.color}44` }
+                        ? { background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }
+                        : { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }
                       }
                     >
                       {isSaving ? <><Loader2 size={16} className="animate-spin" /> Adding to Inventory...</> : owned ? <><CheckCircle size={16} /> ✓ Added to Inventory!</> : <><CheckCircle size={16} /> I Have This Kit</>}
@@ -172,9 +171,9 @@ export default function KitsPage() {
         </StaggerContainer>
 
         <FadeInView delay={0.3}>
-          <div className="mt-8 rounded-2xl p-6 border text-center" style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}>
-            <h3 className="font-bold mb-2" style={{ color: "#FFFFFF" }}>Don't have a kit?</h3>
-            <p className="text-sm mb-4" style={{ color: "#A0AED9" }}>
+          <div className="mt-8 rounded-2xl p-6 border text-center" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
+            <h3 className="font-bold mb-2" style={{ color: "hsl(var(--foreground))" }}>Don't have a kit?</h3>
+            <p className="text-sm mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>
               You can manually add individual components in the "My Components" section, or let our AI suggest projects based on common beginner setups.
             </p>
           </div>
@@ -188,7 +187,7 @@ export default function KitsPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold z-50"
-            style={{ background: "linear-gradient(135deg, #10B981, #059669)", color: "#0A0E27", boxShadow: "0 0 20px rgba(16,185,129,0.4)" }}
+            style={{ background: "hsl(var(--success))", color: "hsl(var(--background))" }}
           >
             <CheckCircle size={16} /> {toast}
           </motion.div>

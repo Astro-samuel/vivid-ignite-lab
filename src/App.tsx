@@ -5,10 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LevelUpProvider } from "@/contexts/LevelUpContext";
-import PageTransition from "@/components/PageTransition";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ScrollToTop from "@/components/ScrollToTop";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import ProjectSkeleton from "@/components/ProjectSkeleton";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -54,9 +54,21 @@ function PageLoader() {
 
 function AnimatedRoutes() {
   const location = useLocation();
+  const [displayLocation, setDisplayLocation] = useState(location);
+
+  useEffect(() => {
+    if (location.pathname === displayLocation.pathname) return;
+    if (!document.startViewTransition) {
+      setDisplayLocation(location);
+      return;
+    }
+    document.startViewTransition(() => {
+      flushSync(() => setDisplayLocation(location));
+    });
+  }, [location, displayLocation]);
+
   return (
-    <PageTransition>
-      <Routes location={location}>
+    <Routes location={displayLocation}>
         <Route path="/" element={<ErrorBoundary><Index /></ErrorBoundary>} />
         <Route path="/auth" element={<ErrorBoundary><AuthPage /></ErrorBoundary>} />
         <Route path="/forgot-password" element={<ErrorBoundary><ForgotPasswordPage /></ErrorBoundary>} />
@@ -90,7 +102,6 @@ function AnimatedRoutes() {
         <Route path="/learn/challenge" element={<ProtectedRoute><ErrorBoundary><DailyChallengePage /></ErrorBoundary></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </PageTransition>
   );
 }
 

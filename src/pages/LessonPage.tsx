@@ -795,12 +795,25 @@ export default function LessonPage() {
                         <>
                           <button
                             onClick={() => saveSnapshot()}
+                            aria-label="Save code snapshot"
                             className="flex items-center gap-1 px-3 py-1 bg-card hover:bg-muted border border-border rounded-lg text-xs font-bold text-foreground transition-all cursor-pointer"
                           >
                             <Save size={10} /> Snapshot
                           </button>
                           <button
+                            onClick={() => {
+                              localStorage.setItem("activeIDECode", code);
+                              sonnerToast.success("Opening lesson code in IDE...");
+                              navigate("/ide");
+                            }}
+                            aria-label="Open in IDE"
+                            className="flex items-center gap-1 px-3 py-1 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-lg text-xs font-bold text-primary transition-all cursor-pointer"
+                          >
+                            <Play size={10} /> Open in IDE
+                          </button>
+                          <button
                             onClick={() => setShowVersionPanel(!showVersionPanel)}
+                            aria-label="Toggle code history"
                             className="flex items-center gap-1 px-3 py-1 bg-card hover:bg-muted border border-border rounded-lg text-xs font-bold text-foreground transition-all cursor-pointer"
                           >
                             <History size={10} /> History ({codeVersions.length})

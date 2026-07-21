@@ -6319,7 +6319,7 @@ void loop() {
               <button
                 onClick={() => { setShowCompletionCelebration(false); navigate("/dashboard"); }}
                 className="px-6 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
-                style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-deep)))", color: "hsl(var(--primary-foreground))" }}
+                style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)))", color: "hsl(var(--primary-foreground))" }}
               >
                 View Dashboard
               </button>

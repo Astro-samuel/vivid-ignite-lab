@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
 import { supabase } from "@/integrations/supabase/client";
+import { getInventoryComponents, canBuild } from "@/lib/inventory";
 
 type Tab = "inProgress" | "completed" | "saved";
 
@@ -30,13 +31,6 @@ const quickProjects = [
   { id: 303, emoji: "🏠", title: "Smart Home Controller", difficulty: "advanced", time: "100 mins", xp: 220, components: ["ESP8266", "Relay Module", "LED", "Arduino Uno"] },
   { id: 301, emoji: "🔊", title: "Theremin Synthesizer", difficulty: "advanced", time: "75 mins", xp: 175, components: ["HC-SR04", "Piezo Buzzer", "Arduino Uno", "LED Strip"] },
 ];
-
-function getInventoryComponents(userId?: string): string[] {
-  try {
-    const key = userId ? `inventory_${userId}` : "userInventory";
-    return JSON.parse(localStorage.getItem(key) || "[]");
-  } catch { return []; }
-}
 
 const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 
@@ -66,13 +60,8 @@ function WhatCanIMakeWidget({
   userProjectIds: Set<number>;
 }) {
   const inventory = useMemo(() => getInventoryComponents(userId), [userId]);
-  const inventoryNorm = inventory.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
   const availableProjects = quickProjects.filter(p => !userProjectIds.has(p.id));
-  const buildable = availableProjects.filter(p =>
-    p.components.every(req =>
-      inventoryNorm.some(owned => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
-    )
-  );
+  const buildable = availableProjects.filter(p => canBuild(inventory, p.components));
 
   if (inventory.length === 0) {
     return (

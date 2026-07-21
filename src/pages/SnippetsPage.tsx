@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Code, Copy, Check, Search } from "lucide-react";
+import { Code, Copy, Check, Search, Play } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import FadeInView from "@/components/motion/FadeInView";
 import MotionCard from "@/components/motion/MotionCard";
@@ -485,6 +486,7 @@ const diffColors = {
 };
 
 export default function SnippetsPage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Category>("all");
   const [copiedId, setCopiedId] = useState<number | null>(null);
@@ -505,6 +507,11 @@ export default function SnippetsPage() {
     navigator.clipboard.writeText(code);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleOpenInIDE = (code: string) => {
+    localStorage.setItem("activeIDECode", code);
+    navigate("/ide");
   };
 
   return (
@@ -620,6 +627,18 @@ export default function SnippetsPage() {
                             <pre className="text-xs font-mono p-4 overflow-x-auto text-foreground">
                               <code>{snippet.code}</code>
                             </pre>
+                          </div>
+                          <div className="mt-3 flex justify-end">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenInIDE(snippet.code);
+                              }}
+                              aria-label={`Open ${snippet.title} in IDE`}
+                              className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                            >
+                              <Play size={12} /> Open in IDE
+                            </button>
                           </div>
                         </motion.div>
                       )}

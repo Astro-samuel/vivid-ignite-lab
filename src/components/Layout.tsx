@@ -183,7 +183,7 @@ export default function Layout({ children }: LayoutProps) {
         </header>
 
         {/* ── Page content ── */}
-        <main className="flex-1 overflow-y-auto page-transition-enter pb-0">
+        <main className="flex-1 overflow-y-auto pb-0">
           {children}
         </main>
       </div>

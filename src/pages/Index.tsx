@@ -6,7 +6,6 @@ import {
   Package,
   ArrowRight,
   Cpu,
-  Star,
   Clock,
   Lightbulb,
   Code,
@@ -19,7 +18,6 @@ import StaggerContainer, {
   staggerItem,
 } from "@/components/motion/StaggerContainer";
 import { motion } from "framer-motion";
-import { GlowingEffectDemo } from "@/components/ui/demo";
 
 const featuredProjects = [
   {
@@ -66,36 +64,24 @@ const quickActions = [
     title: "Generate Project",
     desc: "Let AI create a custom project based on your components",
     path: "/generate",
-    color: "#3B82F6",
-    bg: "rgba(59,130,246,0.06)",
-    border: "rgba(59,130,246,0.15)",
   },
   {
     icon: Lightbulb,
     title: "Think Bigger",
     desc: "Get innovative project ideas that push boundaries",
     path: "/think-bigger",
-    color: "#8B5CF6",
-    bg: "rgba(139,92,246,0.06)",
-    border: "rgba(139,92,246,0.15)",
   },
   {
     icon: Trophy,
     title: "Achievements",
     desc: "Track your progress and earn badges",
     path: "/achievements",
-    color: "#F59E0B",
-    bg: "rgba(245,158,11,0.06)",
-    border: "rgba(245,158,11,0.15)",
   },
   {
     icon: Package,
     title: "Starter Kits",
     desc: "Browse pre-configured component kits",
     path: "/kits",
-    color: "#10B981",
-    bg: "rgba(16,185,129,0.06)",
-    border: "rgba(16,185,129,0.15)",
   },
 ];
 
@@ -105,55 +91,30 @@ const howItWorks = [
     icon: Cpu,
     title: "Add Components",
     desc: "Tell us what Arduino components you have in your toolkit.",
-    color: "#3B82F6",
   },
   {
     step: "2",
     icon: Zap,
     title: "Generate Projects",
     desc: "AI creates custom projects tailored to your skill level.",
-    color: "#8B5CF6",
   },
   {
     step: "3",
     icon: Code,
     title: "Build & Learn",
     desc: "Follow step-by-step instructions with code and simulation.",
-    color: "#10B981",
   },
   {
     step: "4",
     icon: Rocket,
     title: "Level Up",
     desc: "Earn XP, unlock achievements, and tackle harder projects.",
-    color: "#F59E0B",
   },
 ];
 
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
-  const styles =
-    difficulty === "beginner"
-      ? {
-          background: "rgba(16,185,129,0.15)",
-          color: "#10B981",
-          border: "1px solid rgba(16,185,129,0.3)",
-        }
-      : difficulty === "intermediate"
-        ? {
-            background: "rgba(245,158,11,0.15)",
-            color: "#F59E0B",
-            border: "1px solid rgba(245,158,11,0.3)",
-          }
-        : {
-            background: "rgba(139,92,246,0.15)",
-            color: "#8B5CF6",
-            border: "1px solid rgba(139,92,246,0.3)",
-          };
   return (
-    <span
-      className="text-xs px-2 py-0.5 rounded-full font-semibold capitalize"
-      style={styles}
-    >
+    <span className="text-xs px-2 py-0.5 rounded-full font-semibold capitalize bg-[hsl(var(--background-hover))] text-muted-foreground">
       {difficulty}
     </span>
   );
@@ -191,14 +152,14 @@ export default function Index() {
             className="absolute inset-0 z-0"
             style={{
               background:
-                "linear-gradient(to bottom, rgba(10, 14, 39, 0.2) 0%, rgba(10, 14, 39, 0.35) 60%, hsl(232, 48%, 6%) 100%)",
+                "linear-gradient(to bottom, hsl(var(--background) / 0.2) 0%, hsl(var(--background) / 0.35) 60%, hsl(var(--background)) 100%)",
             }}
           />
           <div
             className="absolute inset-0 z-0"
             style={{
               background:
-                "radial-gradient(circle at 50% 50%, transparent 40%, rgba(10, 14, 39, 0.25) 95%)",
+                "radial-gradient(circle at 50% 50%, transparent 40%, hsl(var(--background) / 0.25) 95%)",
             }}
           />
 
@@ -208,9 +169,9 @@ export default function Index() {
               <div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 border text-sm font-medium animate-float"
                 style={{
-                  background: "rgba(139,92,246,0.12)",
-                  borderColor: "rgba(139,92,246,0.3)",
-                  color: "#8B5CF6",
+                  background: "hsl(var(--primary-light))",
+                  borderColor: "hsl(var(--primary) / 0.3)",
+                  color: "hsl(var(--primary))",
                   backdropFilter: "blur(4px)",
                 }}
               >
@@ -222,10 +183,10 @@ export default function Index() {
 
             <FadeInView delay={0.1}>
               <h1
-                className="font-black mb-6 leading-tight"
+                className="font-black mb-6 leading-tight text-foreground"
                 style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", textShadow: "0 4px 12px rgba(0,0,0,0.5)" }}
               >
-                <span style={{ color: "#FFFFFF" }}>Build Amazing</span>
+                <span>Build Amazing</span>
                 <br />
                 <span
                   className="gradient-text-hero"
@@ -238,8 +199,8 @@ export default function Index() {
 
             <FadeInView delay={0.2}>
               <p
-                className="text-base mb-10 max-w-xl mx-auto leading-relaxed"
-                style={{ color: "#D1D5DB", textShadow: "0 2px 4px rgba(0,0,0,0.6)" }}
+                className="text-base mb-10 max-w-xl mx-auto leading-relaxed text-muted-foreground"
+                style={{ textShadow: "0 2px 4px rgba(0,0,0,0.6)" }}
               >
                 Tell us what components you have, and our AI will generate
                 custom Arduino projects tailored to your skill level. Learn,
@@ -251,25 +212,15 @@ export default function Index() {
               <div className="flex gap-4 justify-center flex-wrap">
                 <Link to="/components">
                   <button
-                    className="px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105"
-                    style={{
-                      background: "linear-gradient(135deg, #3B82F6, #1D4ED8)",
-                      color: "#FFFFFF",
-                      boxShadow: "0 0 20px rgba(59,130,246,0.25)",
-                    }}
+                    className="px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 bg-primary text-primary-foreground"
                   >
                     <Cpu size={16} /> Add My Components
                   </button>
                 </Link>
                 <Link to="/catalog">
                   <button
-                    className="px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 border transition-all hover:scale-105 hover:bg-white/5"
-                    style={{
-                      borderColor: "rgba(139,92,246,0.4)",
-                      color: "#FFFFFF",
-                      background: "rgba(10, 14, 39, 0.4)",
-                      backdropFilter: "blur(4px)",
-                    }}
+                    className="px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 border transition-all hover:scale-105 hover:bg-primary/10 border-primary/30 text-primary backdrop-blur-sm"
+                    style={{ background: "hsl(var(--background) / 0.4)" }}
                   >
                     <BookOpen size={16} /> Browse Projects
                   </button>
@@ -279,20 +230,20 @@ export default function Index() {
 
             {/* Stats */}
             <FadeInView delay={0.4}>
-              <div 
-                className="flex gap-12 justify-center mt-16 border border-white/10 rounded-2xl p-4 max-w-md mx-auto"
-                style={{ background: "rgba(10, 14, 39, 0.2)", backdropFilter: "blur(4px)" }}
+              <div
+                className="flex gap-12 justify-center mt-16 border border-border rounded-2xl p-4 max-w-md mx-auto backdrop-blur-sm"
+                style={{ background: "hsl(var(--background) / 0.2)" }}
               >
                 {[
-                  { value: "50+", label: "Projects", color: "#3B82F6" },
-                  { value: "100+", label: "Components", color: "#8B5CF6" },
-                  { value: "AI", label: "Powered", color: "#F59E0B" },
-                ].map(({ value, label, color }) => (
+                  { value: "50+", label: "Projects" },
+                  { value: "100+", label: "Components" },
+                  { value: "AI", label: "Powered" },
+                ].map(({ value, label }) => (
                   <div key={label} className="text-center flex-1">
-                    <p className="font-black text-3xl" style={{ color }}>
+                    <p className="font-black text-3xl text-foreground">
                       {value}
                     </p>
-                    <p className="text-xs mt-1" style={{ color: "#A0AED9" }}>
+                    <p className="text-xs mt-1 text-muted-foreground">
                       {label}
                     </p>
                   </div>
@@ -307,48 +258,39 @@ export default function Index() {
           <div className="max-w-5xl mx-auto">
             <FadeInView>
               <h2
-                className="text-xl font-bold mb-1"
-                style={{ color: "#FFFFFF" }}
+                className="text-xl font-bold mb-1 text-foreground"
               >
                 Quick Actions
               </h2>
-              <p className="mb-8 text-sm" style={{ color: "#A0AED9" }}>
+              <p className="mb-8 text-sm text-muted-foreground">
                 Jump into action with these shortcuts
               </p>
             </FadeInView>
             <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {quickActions.map(
-                ({ icon: Icon, title, desc, path, color, bg, border }) => (
+                ({ icon: Icon, title, desc, path }) => (
                   <motion.div key={path} variants={staggerItem}>
                     <Link to={path}>
                       <MotionCard
-                        className="rounded-xl p-5 h-full cursor-pointer group border"
-                        style={{ background: bg, borderColor: border }}
+                        className="rounded-xl p-5 h-full cursor-pointer group border bg-card border-border"
                       >
                         <div
-                          className="w-10 h-10 rounded-lg flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
-                          style={{
-                            background: `${color}15`,
-                            border: `1px solid ${color}33`,
-                          }}
+                          className="w-10 h-10 rounded-lg flex items-center justify-center mb-4 transition-transform group-hover:scale-110 bg-[hsl(var(--background-hover))]"
                         >
-                          <Icon size={18} style={{ color }} />
+                          <Icon size={18} className="text-foreground" />
                         </div>
                         <h3
-                          className="font-bold text-sm mb-1.5"
-                          style={{ color: "#FFFFFF" }}
+                          className="font-bold text-sm mb-1.5 text-foreground"
                         >
                           {title}
                         </h3>
                         <p
-                          className="text-xs mb-3"
-                          style={{ color: "#A0AED9" }}
+                          className="text-xs mb-3 text-muted-foreground"
                         >
                           {desc}
                         </p>
                         <span
-                          className="text-xs font-semibold flex items-center gap-1 transition-all group-hover:gap-2"
-                          style={{ color }}
+                          className="text-xs font-semibold flex items-center gap-1 transition-all group-hover:gap-2 text-primary"
                         >
                           Explore <ArrowRight size={12} />
                         </span>
@@ -364,49 +306,42 @@ export default function Index() {
         {/* How It Works */}
         <section
           className="px-8 py-14"
-          style={{ background: "hsl(232, 48%, 6%)" }}
+          style={{ background: "hsl(var(--background))" }}
         >
           <div className="max-w-5xl mx-auto">
             <FadeInView className="text-center mb-10">
               <p
-                className="text-xs font-semibold mb-2"
-                style={{ color: "#8B5CF6" }}
+                className="text-xs font-semibold mb-2 text-primary"
               >
                 How It Works
               </p>
-              <h2 className="text-xl font-bold" style={{ color: "#FFFFFF" }}>
+              <h2 className="text-xl font-bold text-foreground">
                 From Components to Complete Projects
               </h2>
             </FadeInView>
             <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {howItWorks.map(({ step, icon: Icon, title, desc, color }) => (
+              {howItWorks.map(({ step, icon: Icon, title, desc }) => (
                 <motion.div
                   key={step}
                   variants={staggerItem}
                   className="text-center"
                 >
                   <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                    style={{
-                      background: `${color}12`,
-                      border: `1px solid ${color}30`,
-                    }}
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[hsl(var(--background-hover))]"
                   >
-                    <Icon size={22} style={{ color }} />
+                    <Icon size={22} className="text-muted-foreground" />
                   </div>
                   <div
-                    className="text-xs font-bold mb-2 inline-block px-2 py-0.5 rounded-full"
-                    style={{ background: `${color}15`, color }}
+                    className="text-xs font-bold mb-2 inline-block px-2 py-0.5 rounded-full bg-[hsl(var(--background-hover))] text-muted-foreground"
                   >
                     Step {step}
                   </div>
                   <h3
-                    className="font-bold text-sm mb-1"
-                    style={{ color: "#FFFFFF" }}
+                    className="font-bold text-sm mb-1 text-foreground"
                   >
                     {title}
                   </h3>
-                  <p className="text-xs" style={{ color: "#A0AED9" }}>
+                  <p className="text-xs text-muted-foreground">
                     {desc}
                   </p>
                 </motion.div>
@@ -421,25 +356,19 @@ export default function Index() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <p
-                  className="text-xs font-semibold mb-1"
-                  style={{ color: "#F59E0B" }}
+                  className="text-xs font-semibold mb-1 text-primary"
                 >
                   Featured
                 </p>
                 <h2
-                  className="text-xl font-bold"
-                  style={{ color: "#FFFFFF" }}
+                  className="text-xl font-bold text-foreground"
                 >
                   Popular Projects to Get Started
                 </h2>
               </div>
               <Link to="/catalog">
                 <button
-                  className="px-4 py-2 rounded-lg text-xs font-semibold border transition-all hover:scale-105"
-                  style={{
-                    borderColor: "rgba(59,130,246,0.3)",
-                    color: "#3B82F6",
-                  }}
+                  className="px-4 py-2 rounded-lg text-xs font-semibold border transition-all hover:scale-105 border-primary/30 text-primary"
                 >
                   View All
                 </button>
@@ -450,19 +379,16 @@ export default function Index() {
                 <motion.div key={p.id} variants={staggerItem}>
                   <Link to={`/project/${p.id}`}>
                     <MotionCard
-                      className="glass-card rounded-xl border p-5 cursor-pointer group transition-all"
-                      style={{ borderColor: "rgba(255,255,255,0.05)" }}
+                      className="glass-card rounded-xl border p-5 cursor-pointer group transition-all border-border"
                     >
                       <div className="text-3xl mb-3">{p.emoji}</div>
                       <h3
-                        className="font-bold text-sm mb-1.5"
-                        style={{ color: "#FFFFFF" }}
+                        className="font-bold text-sm mb-1.5 text-foreground"
                       >
                         {p.title}
                       </h3>
                       <p
-                        className="text-xs mb-3 line-clamp-2"
-                        style={{ color: "#A0AED9" }}
+                        className="text-xs mb-3 line-clamp-2 text-muted-foreground"
                       >
                         {p.desc}
                       </p>
@@ -470,26 +396,19 @@ export default function Index() {
                         <DifficultyBadge difficulty={p.difficulty} />
                       </div>
                       <div
-                        className="flex items-center justify-between text-xs mb-3"
-                        style={{ color: "#A0AED9" }}
+                        className="flex items-center justify-between text-xs mb-3 text-muted-foreground"
                       >
                         <span className="flex items-center gap-1">
                           <Clock size={11} /> {p.time}
                         </span>
                         <span
-                          className="font-bold"
-                          style={{ color: "#F59E0B" }}
+                          className="font-bold text-primary"
                         >
                           +{p.xp} XP
                         </span>
                       </div>
                       <div
-                        className="w-full py-2 rounded-lg text-xs font-bold text-center transition-all group-hover:scale-[1.02]"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #3B82F6, #1D4ED8)",
-                          color: "#FFFFFF",
-                        }}
+                        className="w-full py-2 rounded-lg text-xs font-bold text-center transition-all group-hover:scale-[1.02] bg-primary text-primary-foreground"
                       >
                         Start Project
                       </div>
@@ -504,26 +423,20 @@ export default function Index() {
         {/* CTA Section */}
         <section
           className="px-8 py-16"
-          style={{ background: "hsl(232, 48%, 6%)" }}
+          style={{ background: "hsl(var(--background))" }}
         >
           <FadeInView className="max-w-2xl mx-auto text-center">
             <h2
-              className="text-2xl font-bold mb-3"
-              style={{ color: "#FFFFFF" }}
+              className="text-2xl font-bold mb-3 text-foreground"
             >
               Ready to Start Building?
             </h2>
-            <p className="text-sm mb-8" style={{ color: "#A0AED9" }}>
+            <p className="text-sm mb-8 text-muted-foreground">
               Add your components and let AI create the perfect project for you.
             </p>
             <Link to="/generate">
               <button
-                className="px-8 py-3.5 rounded-xl text-sm font-bold flex items-center gap-2 mx-auto transition-all hover:scale-105"
-                style={{
-                  background: "linear-gradient(135deg, #6366F1, #8B5CF6)",
-                  color: "#FFFFFF",
-                  boxShadow: "0 0 25px rgba(99,102,241,0.25)",
-                }}
+                className="px-8 py-3.5 rounded-xl text-sm font-bold flex items-center gap-2 mx-auto transition-all hover:scale-105 bg-primary text-primary-foreground"
               >
                 <Zap size={16} /> Generate Your First Project
               </button>

@@ -53,7 +53,6 @@ function OptionGroup({ title, options, value, onChange }: {
               style={selected ? {
                 background: "hsl(var(--primary) / 0.1)",
                 borderColor: "hsl(var(--primary) / 0.5)",
-                boxShadow: "0 0 12px hsl(var(--primary) / 0.15)",
               } : {
                 background: "hsl(var(--muted))",
                 borderColor: "hsl(var(--border))",
@@ -106,7 +105,7 @@ export default function AISettingsPage() {
     <Layout>
       <div className="px-8 py-10 max-w-2xl mx-auto">
         <FadeInView className="flex items-center gap-3 mb-8">
-          <Bot size={22} style={{ color: "hsl(var(--purple))" }} />
+          <Bot size={22} style={{ color: "hsl(var(--primary))" }} />
           <h1 className="text-2xl font-bold" style={{ color: "hsl(var(--foreground))" }}>AI Mentor Settings</h1>
         </FadeInView>
 
@@ -137,9 +136,8 @@ export default function AISettingsPage() {
             disabled={saving}
             className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-70"
             style={{
-              background: "linear-gradient(135deg, hsl(var(--purple)), hsl(var(--pink)))",
-              color: "hsl(var(--foreground))",
-              boxShadow: "0 0 15px hsl(var(--purple) / 0.3)",
+              background: "hsl(var(--primary))",
+              color: "hsl(var(--primary-foreground))",
             }}
           >
             <Save size={16} /> {saving ? "Saving..." : "Save Preferences"}
@@ -170,7 +168,7 @@ export default function AISettingsPage() {
         {saved && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
             className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold z-50"
-            style={{ background: "linear-gradient(135deg, hsl(var(--success)), hsl(150, 100%, 35%))", color: "hsl(var(--background))", boxShadow: "0 0 20px hsl(var(--success) / 0.4)" }}>
+            style={{ background: "hsl(var(--success))", color: "hsl(var(--background))" }}>
             <CheckCircle size={16} /> Preferences Saved!
           </motion.div>
         )}

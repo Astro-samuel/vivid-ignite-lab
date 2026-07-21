@@ -7,6 +7,7 @@ import FadeInView from "@/components/motion/FadeInView";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProjects } from "@/hooks/useUserProjects";
 import { toast as sonnerToast } from "sonner";
+import { getInventoryComponents, matchScore } from "@/lib/inventory";
 
 interface Project {
   id: number;
@@ -55,21 +56,13 @@ const projectPool: Project[] = [
   { id: 308, emoji: "🤖", title: "Gesture-Controlled Robot", difficulty: "advanced", time: "110 mins", xp: 240, description: "Control a robot using hand gestures detected by an accelerometer on a glove.", components: ["MPU6050", "Motor Driver L298N", "DC Motors", "Arduino Uno"] },
 ];
 
-function getInventoryComponents(userId?: string): string[] {
-  try {
-    const key = userId ? `inventory_${userId}` : "userInventory";
-    const inv = JSON.parse(localStorage.getItem(key) || "[]");
-    return inv;
-  } catch { return []; }
-}
-
 function DifficultyBadge({ difficulty }: { difficulty: string }) {
   const styles =
     difficulty === "beginner"
-      ? { background: "rgba(16,185,129,0.15)", color: "#10B981", border: "1px solid rgba(16,185,129,0.3)" }
+      ? { background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "1px solid hsl(var(--success) / 0.3)" }
       : difficulty === "intermediate"
-      ? { background: "rgba(255,165,0,0.15)", color: "#FFA500", border: "1px solid rgba(255,165,0,0.3)" }
-      : { background: "rgba(139,92,246,0.15)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.3)" };
+      ? { background: "hsl(var(--warning) / 0.15)", color: "hsl(var(--warning))", border: "1px solid hsl(var(--warning) / 0.3)" }
+      : { background: "hsl(var(--purple) / 0.15)", color: "hsl(var(--purple))", border: "1px solid hsl(var(--purple) / 0.3)" };
   return (
     <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold capitalize" style={styles}>
       {difficulty}
@@ -87,17 +80,17 @@ function ProjectCard({
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl border p-5 animate-pulse" style={{ background: "hsl(229, 45%, 16%)", borderColor: "hsl(229, 42%, 28%)" }}>
+      <div className="rounded-2xl border p-5 animate-pulse" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl" style={{ background: "hsl(229, 42%, 22%)" }} />
+          <div className="w-10 h-10 rounded-xl" style={{ background: "hsl(var(--background-hover))" }} />
           <div className="flex-1">
-            <div className="h-4 rounded w-3/4 mb-2" style={{ background: "hsl(229, 42%, 22%)" }} />
-            <div className="h-3 rounded w-1/2" style={{ background: "hsl(229, 42%, 22%)" }} />
+            <div className="h-4 rounded w-3/4 mb-2" style={{ background: "hsl(var(--background-hover))" }} />
+            <div className="h-3 rounded w-1/2" style={{ background: "hsl(var(--background-hover))" }} />
           </div>
         </div>
         <div className="flex items-center gap-2 mt-3">
-          <Loader2 size={14} className="animate-spin" style={{ color: "#3B82F6" }} />
-          <span className="text-sm" style={{ color: "#3B82F6" }}>Generating {index + 1}/5...</span>
+          <Loader2 size={14} className="animate-spin" style={{ color: "hsl(var(--muted-foreground))" }} />
+          <span className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>Generating {index + 1}/5...</span>
         </div>
       </div>
     );
@@ -108,41 +101,41 @@ function ProjectCard({
       className="rounded-2xl border overflow-hidden transition-all duration-300"
       style={
         isSelected
-          ? { background: "hsl(229, 45%, 16%)", borderColor: "rgba(59,130,246,0.5)", boxShadow: "0 0 20px rgba(59,130,246,0.1)" }
-          : { background: "hsl(229, 45%, 16%)", borderColor: "hsl(229, 42%, 28%)" }
+          ? { background: "hsl(var(--card))", borderColor: "hsl(var(--primary) / 0.5)" }
+          : { background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }
       }
     >
       <div className="p-5">
         <div className="flex items-start gap-3">
-          <button onClick={onSelect} title={isSelected ? "Deselect project" : "Select project"} aria-label={isSelected ? "Deselect project" : "Select project"} className="mt-1 flex-shrink-0 transition-transform hover:scale-110" style={{ color: isSelected ? "#3B82F6" : "#A0AED9" }}>
+          <button onClick={onSelect} title={isSelected ? "Deselect project" : "Select project"} aria-label={isSelected ? "Deselect project" : "Select project"} className="mt-1 flex-shrink-0 transition-transform hover:scale-110" style={{ color: isSelected ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}>
             {isSelected ? <CheckSquare size={17} /> : <Square size={17} />}
           </button>
           <div className="text-2xl flex-shrink-0">{project.emoji}</div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-bold text-base" style={{ color: "#FFFFFF" }}>{project.title}</h3>
-              <button onClick={() => setExpanded(!expanded)} title={expanded ? "Collapse details" : "Expand details"} aria-label={expanded ? "Collapse details" : "Expand details"} className="flex-shrink-0 transition-all hover:scale-110" style={{ color: "#A0AED9" }}>
+              <h3 className="font-bold text-base" style={{ color: "hsl(var(--foreground))" }}>{project.title}</h3>
+              <button onClick={() => setExpanded(!expanded)} title={expanded ? "Collapse details" : "Expand details"} aria-label={expanded ? "Collapse details" : "Expand details"} className="flex-shrink-0 transition-all hover:scale-110" style={{ color: "hsl(var(--muted-foreground))" }}>
                 {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
             </div>
             <div className="flex items-center gap-3 mt-2 flex-wrap">
               <DifficultyBadge difficulty={project.difficulty} />
-              <span className="flex items-center gap-1 text-xs" style={{ color: "#A0AED9" }}>
+              <span className="flex items-center gap-1 text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
                 <Clock size={11} /> {project.time}
               </span>
-              <span className="text-xs font-bold" style={{ color: "#F59E0B" }}>+{project.xp} XP</span>
+              <span className="text-xs font-bold" style={{ color: "hsl(var(--primary))" }}>+{project.xp} XP</span>
             </div>
           </div>
         </div>
 
         {expanded && (
           <div className="mt-4 pl-10 animate-fade-in-up">
-            <p className="text-sm mb-3" style={{ color: "#A0AED9" }}>{project.description}</p>
+            <p className="text-sm mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>{project.description}</p>
             <div className="mb-4">
-              <p className="text-xs font-semibold mb-1.5" style={{ color: "#3B82F6" }}>Required Components:</p>
+              <p className="text-xs font-semibold mb-1.5" style={{ color: "hsl(var(--muted-foreground))" }}>Required Components:</p>
               <div className="flex flex-wrap gap-1.5">
                 {project.components.map((c) => (
-                  <span key={c} className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "rgba(59,130,246,0.08)", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.2)" }}>
+                  <span key={c} className="text-xs px-2 py-0.5 rounded-lg" style={{ background: "hsl(var(--background-hover))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}>
                     {c}
                   </span>
                 ))}
@@ -153,9 +146,8 @@ function ProjectCard({
               disabled={isStarting}
               className="px-5 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{
-                background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-                color: "#0A0E27",
-                boxShadow: "0 0 15px rgba(59,130,246,0.3)",
+                background: "hsl(var(--primary))",
+                color: "hsl(var(--primary-foreground))",
               }}
             >
               {isStarting ? <><Loader2 size={14} className="animate-spin" /> Starting...</> : <><Zap size={14} /> Start This Project</>}
@@ -242,8 +234,6 @@ export default function GeneratePage() {
     setSelected(new Set());
     setShowAll(false);
 
-    const ownedNorm = components.map(c => c.replace(/ ×\d+$/, "").replace(/\s×\d+/, "").toLowerCase().trim());
-
     // Combine static pool + community projects, exclude user's existing projects (by ID and title)
     let pool = [...projectPool, ...communityProjects]
       .filter((p) => !userProjectIds.has(p.id) && !userProjectTitles.has(p.title.toLowerCase()));
@@ -259,19 +249,11 @@ export default function GeneratePage() {
     const fresh = pool.filter((p) => !previouslyShown.has(p.id));
     const stale = pool.filter((p) => previouslyShown.has(p.id));
 
-    // Prioritize fresh projects, fill remaining from stale if needed
-    const ownedNormForScore = ownedNorm;
-    const scoreProject = (p: Project) => {
-      const matchCount = p.components.filter((req) =>
-        ownedNormForScore.some((owned) => owned.includes(req.toLowerCase()) || req.toLowerCase().includes(owned))
-      ).length;
-      return p.components.length > 0 ? matchCount / p.components.length : 0;
-    };
-
-    // Score and sort fresh projects by match, then append stale as fallback
-    const scoredFresh = fresh.map(p => ({ ...p, matchScore: scoreProject(p) }))
+    // Score and sort fresh projects by how much of the user's real inventory covers
+    // each project's required parts, then append stale as fallback
+    const scoredFresh = fresh.map(p => ({ ...p, matchScore: matchScore(components, p.components) }))
       .sort((a, b) => b.matchScore - a.matchScore || Math.random() - 0.5);
-    const scoredStale = stale.map(p => ({ ...p, matchScore: scoreProject(p) }))
+    const scoredStale = stale.map(p => ({ ...p, matchScore: matchScore(components, p.components) }))
       .sort((a, b) => b.matchScore - a.matchScore || Math.random() - 0.5);
 
     const selected5 = [...scoredFresh, ...scoredStale].slice(0, 5);
@@ -432,11 +414,11 @@ export default function GeneratePage() {
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-1">
-            <Zap size={14} style={{ color: "#8B5CF6" }} />
-            <span className="text-xs font-semibold" style={{ color: "#8B5CF6" }}>AI-Powered Generation</span>
+            <Zap size={14} style={{ color: "hsl(var(--muted-foreground))" }} />
+            <span className="text-xs font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>AI-Powered Generation</span>
           </div>
-          <h1 className="text-3xl font-bold mb-1" style={{ color: "#FFFFFF" }}>Generate Project</h1>
-          <p className="text-sm" style={{ color: "#A0AED9" }}>
+          <h1 className="text-3xl font-bold mb-1" style={{ color: "hsl(var(--foreground))" }}>Generate Project</h1>
+          <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
             Let AI create a custom Arduino project based on your available components
           </p>
         </div>
@@ -444,20 +426,20 @@ export default function GeneratePage() {
         {/* Two panel row */}
         <div className="grid grid-cols-2 gap-4 mb-5">
           {/* Components Panel */}
-          <div className="rounded-2xl border p-5" style={{ background: "hsl(229, 45%, 16%)", borderColor: "hsl(229, 42%, 28%)" }}>
+          <div className="rounded-2xl border p-5" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(59,130,246,0.12)" }}>
-                <Zap size={14} style={{ color: "#3B82F6" }} />
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "hsl(var(--background-hover))" }}>
+                <Zap size={14} style={{ color: "hsl(var(--muted-foreground))" }} />
               </div>
-              <span className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>Your Components</span>
-              <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "rgba(59,130,246,0.15)", color: "#3B82F6" }}>{components.length}</span>
+              <span className="font-semibold text-sm" style={{ color: "hsl(var(--foreground))" }}>Your Components</span>
+              <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "hsl(var(--background-hover))", color: "hsl(var(--muted-foreground))" }}>{components.length}</span>
             </div>
             <div className="flex flex-wrap gap-1.5 mb-3 max-h-32 overflow-y-auto">
               {components.map((c) => (
                 <div
                   key={c}
                   className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium group"
-                  style={{ background: "rgba(255,255,255,0.06)", color: "#E0E7FF", border: "1px solid rgba(255,255,255,0.1)" }}
+                  style={{ background: "hsl(var(--background-hover))", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }}
                 >
                   {c}
                   <button
@@ -465,7 +447,7 @@ export default function GeneratePage() {
                     title="Remove component"
                     aria-label={`Remove component ${c}`}
                     className="opacity-0 group-hover:opacity-100 transition-opacity ml-0.5"
-                    style={{ color: "#FF4500" }}
+                    style={{ color: "hsl(var(--destructive))" }}
                   >
                     <X size={10} />
                   </button>
@@ -479,14 +461,14 @@ export default function GeneratePage() {
                 onKeyDown={(e) => e.key === "Enter" && addComponent()}
                 placeholder="Add component..."
                 className="flex-1 px-3 py-1.5 rounded-lg text-xs focus:outline-none"
-                style={{ background: "hsl(229, 42%, 22%)", border: "1px solid rgba(59,130,246,0.2)", color: "#FFFFFF" }}
+                style={{ background: "hsl(var(--background-hover))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))" }}
               />
               <button
                 onClick={addComponent}
                 title="Add component"
                 aria-label="Add component"
                 className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105"
-                style={{ background: "rgba(59,130,246,0.15)", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.3)" }}
+                style={{ background: "hsl(var(--background-hover))", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }}
               >
                 <Plus size={12} />
               </button>
@@ -494,24 +476,24 @@ export default function GeneratePage() {
           </div>
 
           {/* Filters Panel */}
-          <div className="rounded-2xl border p-5" style={{ background: "hsl(229, 45%, 16%)", borderColor: "hsl(229, 42%, 28%)" }}>
+          <div className="rounded-2xl border p-5" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)" }}>
-                <Star size={14} style={{ color: "#F59E0B" }} />
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "hsl(var(--background-hover))" }}>
+                <Star size={14} style={{ color: "hsl(var(--muted-foreground))" }} />
               </div>
-              <span className="font-semibold text-sm" style={{ color: "#FFFFFF" }}>Generation Options</span>
+              <span className="font-semibold text-sm" style={{ color: "hsl(var(--foreground))" }}>Generation Options</span>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label htmlFor="difficulty-select" className="text-xs font-semibold mb-1.5 block" style={{ color: "#A0AED9" }}>Difficulty</label>
+                <label htmlFor="difficulty-select" className="text-xs font-semibold mb-1.5 block" style={{ color: "hsl(var(--muted-foreground))" }}>Difficulty</label>
                 <select
                   id="difficulty-select"
                   title="Select difficulty"
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none appearance-none"
-                  style={{ background: "hsl(229, 42%, 22%)", border: "1px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }}
+                  style={{ background: "hsl(var(--background-hover))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))" }}
                 >
                   <option>Any Difficulty</option>
                   <option>Beginner</option>
@@ -520,14 +502,14 @@ export default function GeneratePage() {
                 </select>
               </div>
               <div>
-                <label htmlFor="category-select" className="text-xs font-semibold mb-1.5 block" style={{ color: "#A0AED9" }}>Category</label>
+                <label htmlFor="category-select" className="text-xs font-semibold mb-1.5 block" style={{ color: "hsl(var(--muted-foreground))" }}>Category</label>
                 <select
                   id="category-select"
                   title="Select category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none appearance-none"
-                  style={{ background: "hsl(229, 42%, 22%)", border: "1px solid rgba(255,255,255,0.1)", color: "#FFFFFF" }}
+                  style={{ background: "hsl(var(--background-hover))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))" }}
                 >
                   <option>Any Category</option>
                   <option>Sensors</option>
@@ -548,9 +530,8 @@ export default function GeneratePage() {
             disabled={generating || aiRecommending}
             className="py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70"
             style={{
-              background: generating ? "rgba(139,92,246,0.3)" : "linear-gradient(135deg, #8B5CF6, #EC4899, #FF4500)",
-              color: "#FFFFFF",
-              boxShadow: generating ? "none" : "0 0 30px rgba(139,92,246,0.4)",
+              background: generating ? "hsl(var(--primary) / 0.3)" : "hsl(var(--primary))",
+              color: "hsl(var(--primary-foreground))",
             }}
           >
             {generating ? (
@@ -562,11 +543,11 @@ export default function GeneratePage() {
           <button
             onClick={generateAIRecommendations}
             disabled={generating || aiRecommending}
-            className="py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70"
+            className="py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70 border"
             style={{
-              background: aiRecommending ? "rgba(59,130,246,0.15)" : "linear-gradient(135deg, #3B82F6, #2563EB, #10B981)",
-              color: aiRecommending ? "#3B82F6" : "#0A0E27",
-              boxShadow: aiRecommending ? "none" : "0 0 30px rgba(59,130,246,0.3)",
+              background: aiRecommending ? "hsl(var(--background-hover) / 0.5)" : "hsl(var(--card))",
+              color: aiRecommending ? "hsl(var(--muted-foreground))" : "hsl(var(--foreground))",
+              borderColor: "hsl(var(--border))",
             }}
           >
             {aiRecommending ? (
@@ -583,7 +564,7 @@ export default function GeneratePage() {
             <button
               onClick={generateProjects}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition-all hover:scale-105"
-              style={{ borderColor: "rgba(59,130,246,0.4)", color: "#3B82F6" }}
+              style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
             >
               <RefreshCw size={14} /> Generate Different Ideas
             </button>
@@ -591,7 +572,7 @@ export default function GeneratePage() {
               onClick={handleSave}
               disabled={savingAll}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
-              style={{ background: "rgba(245,158,11,0.15)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.3)" }}
+              style={{ background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}
             >
               {savingAll ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : <><Save size={14} /> {selected.size > 0 ? `Save Selected (${selected.size})` : "Save All"}</>}
             </button>
@@ -600,20 +581,19 @@ export default function GeneratePage() {
 
         {/* Progress indicator */}
         {generating && (
-          <div className="mb-5 p-4 rounded-xl border" style={{ background: "rgba(59,130,246,0.04)", borderColor: "rgba(59,130,246,0.15)" }}>
+          <div className="mb-5 p-4 rounded-xl border" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
             <div className="flex items-center gap-3 mb-2">
-              <Loader2 size={14} className="animate-spin" style={{ color: "#3B82F6" }} />
-              <span className="text-sm font-semibold" style={{ color: "#3B82F6" }}>
+              <Loader2 size={14} className="animate-spin" style={{ color: "hsl(var(--muted-foreground))" }} />
+              <span className="text-sm font-semibold" style={{ color: "hsl(var(--foreground))" }}>
                 Generating {Math.min(projects.length + 1, 5)}/5 projects...
               </span>
             </div>
-            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(229, 42%, 22%)" }}>
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(var(--background-hover))" }}>
               <div
                 className="h-full rounded-full transition-all duration-700"
                 style={{
                   width: `${(projects.length / 5) * 100}%`,
-                  background: "linear-gradient(90deg, #3B82F6, #8B5CF6)",
-                  boxShadow: "0 0 10px rgba(59,130,246,0.6)",
+                  background: "hsl(var(--primary))",
                 }}
               />
             </div>
@@ -637,7 +617,7 @@ export default function GeneratePage() {
               <button
                 onClick={() => setShowAll(true)}
                 className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-                style={{ background: "rgba(139,92,246,0.08)", border: "1px dashed rgba(139,92,246,0.4)", color: "#8B5CF6" }}
+                style={{ background: "hsl(var(--background-hover) / 0.5)", border: "1px dashed hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
               >
                 <ChevronDown size={18} />
                 Show 2 More Projects
@@ -648,16 +628,16 @@ export default function GeneratePage() {
 
         {/* Empty state */}
         {projects.length === 0 && !generating && (
-          <div className="text-center py-16 rounded-2xl border" style={{ borderColor: "hsl(229, 42%, 28%)", background: "hsl(229, 45%, 16%)" }}>
+          <div className="text-center py-16 rounded-2xl border" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--card))" }}>
             <div className="text-6xl mb-4 animate-float">⚡</div>
-            <h3 className="font-bold text-xl mb-2" style={{ color: "#FFFFFF" }}>Ready to Create?</h3>
-            <p style={{ color: "#A0AED9" }}>Click Generate to get 5 unique Arduino project ideas!</p>
+            <h3 className="font-bold text-xl mb-2" style={{ color: "hsl(var(--foreground))" }}>Ready to Create?</h3>
+            <p style={{ color: "hsl(var(--muted-foreground))" }}>Click Generate to get 5 unique Arduino project ideas!</p>
           </div>
         )}
       </div>
 
       {toast && (
-        <div className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up z-50" style={{ background: "linear-gradient(135deg, #10B981, #059669)", color: "#0A0E27", boxShadow: "0 0 20px rgba(16,185,129,0.4)" }}>
+        <div className="fixed bottom-6 right-6 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold animate-fade-in-up z-50" style={{ background: "hsl(var(--success))", color: "hsl(var(--background))" }}>
           <Star size={16} /> {toast}
         </div>
       )}

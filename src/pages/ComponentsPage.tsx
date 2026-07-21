@@ -31,12 +31,17 @@ const allComponents: ComponentItem[] = [
   { name: "Sound Sensor", category: "Sensor" },
   { name: "Rain Sensor", category: "Sensor" },
   { name: "BMP180 (Pressure)", category: "Sensor" },
+  { name: "Magnetometer (HMC5883L)", category: "Sensor" },
+  { name: "Accelerometer/Gyro (MPU6050)", category: "Sensor" },
+  { name: "Power Monitor (INA219)", category: "Sensor" },
+  { name: "Microphone Module", category: "Sensor" },
   { name: "Servo Motor (SG90)", category: "Actuator" },
   { name: "DC Motor", category: "Actuator" },
   { name: "Stepper Motor", category: "Actuator" },
   { name: "Buzzer", category: "Actuator" },
   { name: "Relay Module", category: "Actuator" },
   { name: "Water Pump", category: "Actuator" },
+  { name: "Laser Module", category: "Actuator" },
   { name: "16x2 LCD", category: "Display" },
   { name: "OLED Display (0.96\")", category: "Display" },
   { name: "7-Segment Display", category: "Display" },
@@ -46,6 +51,7 @@ const allComponents: ComponentItem[] = [
   { name: "NRF24L01 (RF)", category: "Communication" },
   { name: "SIM800L (GSM)", category: "Communication" },
   { name: "LoRa Module", category: "Communication" },
+  { name: "GPS Module", category: "Communication" },
   { name: "LED (Red)", category: "Passive" },
   { name: "LED (Green)", category: "Passive" },
   { name: "LED (Blue)", category: "Passive" },
@@ -56,6 +62,7 @@ const allComponents: ComponentItem[] = [
   { name: "Capacitor 100µF", category: "Passive" },
   { name: "Push Button", category: "Passive" },
   { name: "Potentiometer", category: "Passive" },
+  { name: "Rotary Encoder", category: "Passive" },
   { name: "Transistor BC547", category: "Passive" },
   { name: "Motor Driver (L298N)", category: "Module" },
   { name: "RFID RC522", category: "Module" },
@@ -261,11 +268,11 @@ export default function ComponentsPage() {
         <div className="flex-1 px-8 py-10 overflow-y-auto">
           <FadeInView className="mb-6">
             <div className="flex items-center gap-2 mb-1">
-              <span style={{ color: "#3B82F6" }}>⚙️</span>
-              <span className="text-xs font-semibold" style={{ color: "#3B82F6" }}>Inventory Management</span>
+              <span style={{ color: "hsl(var(--muted-foreground))" }}>⚙️</span>
+              <span className="text-xs font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>Inventory Management</span>
             </div>
-            <h1 className="text-3xl font-bold mb-1" style={{ color: "#FFFFFF" }}>My Components</h1>
-            <p className="text-sm" style={{ color: "#A0AED9" }}>
+            <h1 className="text-3xl font-bold mb-1" style={{ color: "hsl(var(--foreground))" }}>My Components</h1>
+            <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
               Add the Arduino components you own. We'll generate projects that match your inventory.
             </p>
           </FadeInView>
@@ -276,9 +283,9 @@ export default function ComponentsPage() {
               onClick={() => setShowPastePanel(!showPastePanel)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
               style={{
-                background: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(255,20,147,0.15))",
-                color: "#8B5CF6",
-                border: "1px solid rgba(139,92,246,0.3)",
+                background: "hsl(var(--card))",
+                color: "hsl(var(--foreground))",
+                border: "1px solid hsl(var(--border))",
               }}
             >
               <Brain size={15} />
@@ -289,9 +296,9 @@ export default function ComponentsPage() {
               onClick={() => { setShowVisualSearch(!showVisualSearch); setShowPastePanel(false); }}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
               style={{
-                background: "linear-gradient(135deg, rgba(59,130,246,0.15), rgba(0,153,255,0.15))",
-                color: "#3B82F6",
-                border: "1px solid rgba(59,130,246,0.3)",
+                background: "hsl(var(--card))",
+                color: "hsl(var(--foreground))",
+                border: "1px solid hsl(var(--border))",
               }}
             >
               <Camera size={15} />
@@ -311,18 +318,18 @@ export default function ComponentsPage() {
               >
                 <div
                   className="rounded-2xl border p-5"
-                  style={{ background: "rgba(59,130,246,0.04)", borderColor: "rgba(59,130,246,0.2)" }}
+                  style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Camera size={16} style={{ color: "#3B82F6" }} />
-                      <span className="font-bold text-sm" style={{ color: "#3B82F6" }}>Visual Component Search</span>
+                      <Camera size={16} style={{ color: "hsl(var(--foreground))" }} />
+                      <span className="font-bold text-sm" style={{ color: "hsl(var(--foreground))" }}>Visual Component Search</span>
                     </div>
-                    <button onClick={() => setShowVisualSearch(false)} style={{ color: "#A0AED9" }}>
+                    <button onClick={() => setShowVisualSearch(false)} style={{ color: "hsl(var(--muted-foreground))" }}>
                       <X size={14} />
                     </button>
                   </div>
-                  <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
+                  <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
                     Upload a photo of an electronic component you can't identify — AI will recognize it and add it to your inventory.
                   </p>
 
@@ -339,20 +346,20 @@ export default function ComponentsPage() {
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       className="w-full py-8 rounded-xl border-2 border-dashed flex flex-col items-center gap-2 transition-all hover:scale-[1.01]"
-                      style={{ borderColor: "rgba(59,130,246,0.3)", color: "#3B82F6" }}
+                      style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
                     >
                       <Camera size={28} />
                       <span className="text-sm font-semibold">Take Photo or Upload Image</span>
-                      <span className="text-xs" style={{ color: "#A0AED9" }}>Supports JPG, PNG, WEBP</span>
+                      <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>Supports JPG, PNG, WEBP</span>
                     </button>
                   ) : (
                     <div>
                       <div className="rounded-xl overflow-hidden mb-3 relative">
-                        <img src={previewImage} alt="Component" className="w-full max-h-48 object-contain rounded-xl" style={{ background: "hsl(229, 42%, 10%)" }} />
+                        <img src={previewImage} alt="Component" className="w-full max-h-48 object-contain rounded-xl" style={{ background: "hsl(var(--background))" }} />
                         <button
                           onClick={() => { setPreviewImage(null); setVisualResults([]); }}
                           className="absolute top-2 right-2 p-1.5 rounded-lg"
-                          style={{ background: "rgba(0,0,0,0.6)", color: "#FFF" }}
+                          style={{ background: "hsl(var(--background) / 0.6)", color: "hsl(var(--foreground))" }}
                         >
                           <X size={12} />
                         </button>
@@ -360,30 +367,30 @@ export default function ComponentsPage() {
 
                       {visualSearching && (
                         <div className="flex items-center gap-2 py-3 justify-center">
-                          <Loader2 size={16} className="animate-spin" style={{ color: "#3B82F6" }} />
-                          <span className="text-sm" style={{ color: "#3B82F6" }}>Analyzing image...</span>
+                          <Loader2 size={16} className="animate-spin" style={{ color: "hsl(var(--muted-foreground))" }} />
+                          <span className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>Analyzing image...</span>
                         </div>
                       )}
 
                       {visualResults.length > 0 && (
-                        <div className="mt-3 p-4 rounded-xl" style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.2)" }}>
+                        <div className="mt-3 p-4 rounded-xl" style={{ background: "hsl(var(--success) / 0.06)", border: "1px solid hsl(var(--success) / 0.2)" }}>
                           <div className="flex items-center gap-2 mb-3">
-                            <Sparkles size={14} style={{ color: "#10B981" }} />
-                            <span className="text-sm font-bold" style={{ color: "#10B981" }}>
+                            <Sparkles size={14} style={{ color: "hsl(var(--success))" }} />
+                            <span className="text-sm font-bold" style={{ color: "hsl(var(--success))" }}>
                               Identified {visualResults.length} component{visualResults.length !== 1 ? "s" : ""}
                             </span>
                           </div>
                           <div className="space-y-1.5 mb-3">
                             {visualResults.map(item => (
                               <div key={item.name} className="flex items-center justify-between px-3 py-2 rounded-lg"
-                                style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)" }}>
-                                <span className="text-xs font-medium" style={{ color: "#E0E7FF" }}>
+                                style={{ background: "hsl(var(--success) / 0.08)", border: "1px solid hsl(var(--success) / 0.15)" }}>
+                                <span className="text-xs font-medium" style={{ color: "hsl(var(--foreground))" }}>
                                   {ownedNames.includes(item.name) ? "✓ " : "+ "}{item.name}
                                 </span>
                                 <span className="text-xs px-2 py-0.5 rounded-full" style={{
-                                  background: item.confidence === "high" ? "rgba(16,185,129,0.15)" : item.confidence === "medium" ? "rgba(255,165,0,0.15)" : "rgba(255,80,80,0.15)",
-                                  color: item.confidence === "high" ? "#10B981" : item.confidence === "medium" ? "#FFA500" : "#FF5050",
-                                  border: `1px solid ${item.confidence === "high" ? "rgba(16,185,129,0.3)" : item.confidence === "medium" ? "rgba(255,165,0,0.3)" : "rgba(255,80,80,0.3)"}`
+                                  background: item.confidence === "high" ? "hsl(var(--success) / 0.15)" : item.confidence === "medium" ? "hsl(var(--warning) / 0.15)" : "hsl(var(--destructive) / 0.15)",
+                                  color: item.confidence === "high" ? "hsl(var(--success))" : item.confidence === "medium" ? "hsl(var(--warning))" : "hsl(var(--destructive))",
+                                  border: `1px solid ${item.confidence === "high" ? "hsl(var(--success) / 0.3)" : item.confidence === "medium" ? "hsl(var(--warning) / 0.3)" : "hsl(var(--destructive) / 0.3)"}`
                                 }}>
                                   {item.confidence}
                                 </span>
@@ -393,7 +400,7 @@ export default function ComponentsPage() {
                           <button
                             onClick={addVisualResultsToInventory}
                             className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-                            style={{ background: "linear-gradient(135deg, #10B981, #059669)", color: "#0A0E27" }}
+                            style={{ background: "hsl(var(--success))", color: "hsl(var(--background))" }}
                           >
                             <Plus size={14} /> Add to Inventory
                           </button>
@@ -404,7 +411,7 @@ export default function ComponentsPage() {
                         <button
                           onClick={() => fileInputRef.current?.click()}
                           className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-                          style={{ background: "rgba(59,130,246,0.15)", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.3)" }}
+                          style={{ background: "hsl(var(--background-hover))", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }}
                         >
                           <Camera size={14} /> Try Another Photo
                         </button>
@@ -426,18 +433,18 @@ export default function ComponentsPage() {
               >
                 <div
                   className="rounded-2xl border p-5"
-                  style={{ background: "rgba(139,92,246,0.06)", borderColor: "rgba(139,92,246,0.25)" }}
+                  style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <Brain size={16} style={{ color: "#8B5CF6" }} />
-                      <span className="font-bold text-sm" style={{ color: "#8B5CF6" }}>Paste Your Component List</span>
+                      <Brain size={16} style={{ color: "hsl(var(--foreground))" }} />
+                      <span className="font-bold text-sm" style={{ color: "hsl(var(--foreground))" }}>Paste Your Component List</span>
                     </div>
-                    <button onClick={() => setShowPastePanel(false)} style={{ color: "#A0AED9" }}>
+                    <button onClick={() => setShowPastePanel(false)} style={{ color: "hsl(var(--muted-foreground))" }}>
                       <X size={14} />
                     </button>
                   </div>
-                  <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
+                  <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
                     Paste a shopping cart, project guide, or parts list — AI will recognize the components and add them to your inventory.
                   </p>
                   <textarea
@@ -446,9 +453,9 @@ export default function ComponentsPage() {
                     placeholder={"e.g.\n1x Arduino Uno\n2x DHT11 Temperature Sensor\n5x 220 ohm Resistor\nServo motor SG90\nBreadboard + jumper wires..."}
                     className="w-full h-28 px-4 py-3 rounded-xl text-sm resize-none focus:outline-none"
                     style={{
-                      background: "hsl(229, 42%, 12%)",
-                      border: "1px solid rgba(139,92,246,0.2)",
-                      color: "#FFFFFF",
+                      background: "hsl(var(--background-hover))",
+                      border: "1px solid hsl(var(--border))",
+                      color: "hsl(var(--foreground))",
                     }}
                   />
                   <button
@@ -456,9 +463,8 @@ export default function ComponentsPage() {
                     disabled={recognizing || !pasteText.trim()}
                     className="mt-3 w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-60 disabled:cursor-not-allowed"
                     style={{
-                      background: "linear-gradient(135deg, #8B5CF6, #EC4899)",
-                      color: "#FFFFFF",
-                      boxShadow: "0 0 15px rgba(139,92,246,0.3)",
+                      background: "hsl(var(--primary))",
+                      color: "hsl(var(--primary-foreground))",
                     }}
                   >
                     {recognizing ? <><Loader2 size={14} className="animate-spin" /> Recognizing...</> : <><Brain size={14} /> Recognize Components</>}
@@ -472,11 +478,11 @@ export default function ComponentsPage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         className="mt-4 p-4 rounded-xl"
-                        style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.2)" }}
+                        style={{ background: "hsl(var(--success) / 0.06)", border: "1px solid hsl(var(--success) / 0.2)" }}
                       >
                         <div className="flex items-center gap-2 mb-3">
-                          <Sparkles size={14} style={{ color: "#10B981" }} />
-                          <span className="text-sm font-bold" style={{ color: "#10B981" }}>
+                          <Sparkles size={14} style={{ color: "hsl(var(--success))" }} />
+                          <span className="text-sm font-bold" style={{ color: "hsl(var(--success))" }}>
                             Found {recognized.length} component{recognized.length !== 1 ? "s" : ""}!
                           </span>
                         </div>
@@ -486,9 +492,9 @@ export default function ComponentsPage() {
                               key={name}
                               className="text-xs px-2.5 py-1 rounded-lg font-medium"
                               style={{
-                                background: ownedNames.includes(name) ? "rgba(245,158,11,0.12)" : "rgba(16,185,129,0.12)",
-                                color: ownedNames.includes(name) ? "#F59E0B" : "#10B981",
-                                border: `1px solid ${ownedNames.includes(name) ? "rgba(245,158,11,0.3)" : "rgba(16,185,129,0.3)"}`,
+                                background: ownedNames.includes(name) ? "hsl(var(--primary) / 0.12)" : "hsl(var(--success) / 0.12)",
+                                color: ownedNames.includes(name) ? "hsl(var(--primary))" : "hsl(var(--success))",
+                                border: `1px solid ${ownedNames.includes(name) ? "hsl(var(--primary) / 0.3)" : "hsl(var(--success) / 0.3)"}`,
                               }}
                             >
                               {ownedNames.includes(name) ? "✓ " : "+"} {name}
@@ -499,8 +505,8 @@ export default function ComponentsPage() {
                           onClick={addRecognizedToInventory}
                           className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
                           style={{
-                            background: "linear-gradient(135deg, #10B981, #059669)",
-                            color: "#0A0E27",
+                            background: "hsl(var(--success))",
+                            color: "hsl(var(--background))",
                           }}
                         >
                           <Plus size={14} /> Add All to Inventory
@@ -516,33 +522,30 @@ export default function ComponentsPage() {
           {/* Component Library card */}
           <div
             className="rounded-2xl border overflow-hidden"
-            style={{ background: "hsl(229, 45%, 14%)", borderColor: "hsl(229, 42%, 26%)" }}
+            style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
           >
             <div
               className="flex items-center justify-between px-5 py-4 border-b"
-              style={{ borderColor: "hsl(229, 42%, 22%)" }}
+              style={{ borderColor: "hsl(var(--border))" }}
             >
-              <span className="font-semibold" style={{ color: "#FFFFFF" }}>Component Library</span>
+              <span className="font-semibold" style={{ color: "hsl(var(--foreground))" }}>Component Library</span>
               <span
                 className="text-xs px-3 py-1 rounded-full font-semibold"
-                style={{ background: "rgba(59,130,246,0.12)", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.25)" }}
+                style={{ background: "hsl(var(--background-hover))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}
               >
                 {totalSelected} components selected
               </span>
             </div>
 
             {/* Save Inventory button */}
-            <div className="px-5 py-3 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
+            <div className="px-5 py-3 border-b" style={{ borderColor: "hsl(var(--border))" }}>
               <button
                 onClick={handleSave}
                 disabled={saving}
                 className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-80 disabled:cursor-not-allowed"
                 style={{
-                  background: saved
-                    ? "linear-gradient(135deg, #10B981, #059669)"
-                    : "linear-gradient(135deg, #3B82F6, #2563EB)",
-                  color: "#0A0E27",
-                  boxShadow: saved ? "0 0 20px rgba(16,185,129,0.4)" : "0 0 20px rgba(59,130,246,0.3)",
+                  background: saved ? "hsl(var(--success))" : "hsl(var(--primary))",
+                  color: saved ? "hsl(var(--background))" : "hsl(var(--primary-foreground))",
                 }}
               >
                 {saving ? <><Loader2 size={15} className="animate-spin" /> Saving...</> : saved ? <><Save size={15} /> ✓ Inventory Saved!</> : <><Save size={15} /> Save Inventory</>}
@@ -550,7 +553,7 @@ export default function ComponentsPage() {
             </div>
 
             {/* Category tabs */}
-            <div className="flex flex-wrap gap-1 px-5 py-3 border-b" style={{ borderColor: "hsl(229, 42%, 22%)" }}>
+            <div className="flex flex-wrap gap-1 px-5 py-3 border-b" style={{ borderColor: "hsl(var(--border))" }}>
               {categories.map((cat) => (
                 <button
                   key={cat}
@@ -558,8 +561,8 @@ export default function ComponentsPage() {
                   className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
                   style={
                     activeCategory === cat
-                      ? { background: "#3B82F6", color: "#0A0E27" }
-                      : { color: "hsl(226, 35%, 65%)", background: "transparent" }
+                      ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }
+                      : { color: "hsl(var(--muted-foreground))", background: "transparent" }
                   }
                 >
                   {cat}
@@ -578,10 +581,10 @@ export default function ComponentsPage() {
                     className="flex items-center justify-between px-4 py-3 rounded-xl transition-all cursor-pointer"
                     style={
                       owned
-                        ? { background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.25)" }
+                        ? { background: "hsl(var(--primary) / 0.06)", border: "1px solid hsl(var(--primary) / 0.25)" }
                         : wishlisted
-                        ? { background: "rgba(255,20,147,0.06)", border: "1px solid rgba(255,20,147,0.2)" }
-                        : { background: "hsl(229, 42%, 18%)", border: "1px solid transparent" }
+                        ? { background: "hsl(var(--purple) / 0.06)", border: "1px solid hsl(var(--purple) / 0.2)" }
+                        : { background: "hsl(var(--background-hover))", border: "1px solid transparent" }
                     }
                     onClick={() => !owned && toggleComponent(comp.name)}
                   >
@@ -591,19 +594,19 @@ export default function ComponentsPage() {
                         className="w-5 h-5 rounded flex items-center justify-center cursor-pointer transition-all"
                         style={
                           owned
-                            ? { background: "#3B82F6", border: "1px solid #3B82F6" }
-                            : { background: "transparent", border: "1px solid hsl(229, 42%, 35%)" }
+                            ? { background: "hsl(var(--primary))", border: "1px solid hsl(var(--primary))" }
+                            : { background: "transparent", border: "1px solid hsl(var(--border))" }
                         }
                       >
                         {owned && (
                           <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                            <path d="M1 4L3.5 6.5L9 1" stroke="#0A0E27" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M1 4L3.5 6.5L9 1" stroke="hsl(var(--primary-foreground))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         )}
                       </div>
                       <span
                         className="text-sm font-medium"
-                        style={{ color: owned ? "#FFFFFF" : "hsl(226, 35%, 55%)" }}
+                        style={{ color: owned ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
                       >
                         {comp.name}
                       </span>
@@ -617,12 +620,12 @@ export default function ComponentsPage() {
                           className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110"
                           title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
                           style={{
-                            background: wishlisted ? "rgba(255,20,147,0.15)" : "transparent",
-                            border: wishlisted ? "1px solid rgba(255,20,147,0.3)" : "1px solid hsl(229, 42%, 30%)",
-                            color: wishlisted ? "#EC4899" : "hsl(226, 35%, 55%)",
+                            background: wishlisted ? "hsl(var(--purple) / 0.15)" : "transparent",
+                            border: wishlisted ? "1px solid hsl(var(--purple) / 0.3)" : "1px solid hsl(var(--border))",
+                            color: wishlisted ? "hsl(var(--purple))" : "hsl(var(--muted-foreground))",
                           }}
                         >
-                          <Heart size={11} fill={wishlisted ? "#EC4899" : "none"} />
+                          <Heart size={11} fill={wishlisted ? "hsl(var(--purple))" : "none"} />
                         </button>
                       )}
 
@@ -631,17 +634,17 @@ export default function ComponentsPage() {
                           <button
                             onClick={() => adjustQty(comp.name, -1)}
                             className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-                            style={{ background: "hsl(229, 42%, 22%)", border: "1px solid hsl(229, 42%, 30%)", color: "#FFFFFF" }}
+                            style={{ background: "hsl(var(--background-hover))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))" }}
                           >
                             <Minus size={11} />
                           </button>
-                          <span className="text-sm font-bold w-6 text-center" style={{ color: "#FFFFFF" }}>
+                          <span className="text-sm font-bold w-6 text-center" style={{ color: "hsl(var(--foreground))" }}>
                             {quantities[comp.name]}
                           </span>
                           <button
                             onClick={() => adjustQty(comp.name, 1)}
                             className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:scale-110"
-                            style={{ background: "hsl(229, 42%, 22%)", border: "1px solid hsl(229, 42%, 30%)", color: "#FFFFFF" }}
+                            style={{ background: "hsl(var(--background-hover))", border: "1px solid hsl(var(--border))", color: "hsl(var(--foreground))" }}
                           >
                             <Plus size={11} />
                           </button>
@@ -656,24 +659,24 @@ export default function ComponentsPage() {
         </div>
 
         {/* Right sidebar panel */}
-        <div className="w-72 flex-shrink-0 px-4 py-10 space-y-4 border-l overflow-y-auto" style={{ borderColor: "hsl(229, 42%, 20%)" }}>
+        <div className="w-72 flex-shrink-0 px-4 py-10 space-y-4 border-l overflow-y-auto" style={{ borderColor: "hsl(var(--border))" }}>
 
           {/* Wishlist Panel */}
           <div
             className="rounded-2xl p-5 border"
-            style={{ background: "rgba(255,20,147,0.05)", borderColor: "rgba(255,20,147,0.2)" }}
+            style={{ background: "hsl(var(--purple) / 0.05)", borderColor: "hsl(var(--purple) / 0.2)" }}
           >
             <button
               onClick={() => setShowWishlist(!showWishlist)}
               className="flex items-center gap-2 w-full mb-2"
             >
-              <Heart size={16} style={{ color: "#EC4899" }} fill={wishlist.length > 0 ? "#EC4899" : "none"} />
-              <span className="font-bold text-sm" style={{ color: "#EC4899" }}>
+              <Heart size={16} style={{ color: "hsl(var(--purple))" }} fill={wishlist.length > 0 ? "hsl(var(--purple))" : "none"} />
+              <span className="font-bold text-sm" style={{ color: "hsl(var(--purple))" }}>
                 Wishlist {wishlist.length > 0 && `(${wishlist.length})`}
               </span>
-              <ShoppingCart size={12} style={{ color: "#EC4899", marginLeft: "auto" }} />
+              <ShoppingCart size={12} style={{ color: "hsl(var(--purple))", marginLeft: "auto" }} />
             </button>
-            <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
+            <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
               Components you want but don't have yet. Plan your next purchase!
             </p>
 
@@ -685,7 +688,7 @@ export default function ComponentsPage() {
                   className="space-y-1.5"
                 >
                   {wishlist.length === 0 ? (
-                    <p className="text-xs italic" style={{ color: "hsl(226, 35%, 45%)" }}>
+                    <p className="text-xs italic" style={{ color: "hsl(var(--muted-foreground))" }}>
                       Click the ♡ icon next to any component to add it here.
                     </p>
                   ) : (
@@ -694,15 +697,15 @@ export default function ComponentsPage() {
                         <div
                           key={name}
                           className="flex items-center justify-between px-3 py-2 rounded-lg"
-                          style={{ background: "rgba(255,20,147,0.08)", border: "1px solid rgba(255,20,147,0.15)" }}
+                          style={{ background: "hsl(var(--purple) / 0.08)", border: "1px solid hsl(var(--purple) / 0.15)" }}
                         >
-                          <span className="text-xs font-medium truncate" style={{ color: "#E0E7FF" }}>{name}</span>
+                          <span className="text-xs font-medium truncate" style={{ color: "hsl(var(--foreground))" }}>{name}</span>
                           <div className="flex items-center gap-1 flex-shrink-0">
                             <button
                               onClick={() => moveWishlistToInventory(name)}
                               className="p-1 rounded transition-all hover:scale-110"
                               title="Got it! Move to inventory"
-                              style={{ color: "#10B981" }}
+                              style={{ color: "hsl(var(--success))" }}
                             >
                               <Plus size={11} />
                             </button>
@@ -710,14 +713,14 @@ export default function ComponentsPage() {
                               onClick={() => toggleWishlist(name)}
                               className="p-1 rounded transition-all hover:scale-110"
                               title="Remove from wishlist"
-                              style={{ color: "#FF4500" }}
+                              style={{ color: "hsl(var(--destructive))" }}
                             >
                               <X size={11} />
                             </button>
                           </div>
                         </div>
                       ))}
-                      <p className="text-xs mt-2 italic" style={{ color: "hsl(226, 35%, 55%)" }}>
+                      <p className="text-xs mt-2 italic" style={{ color: "hsl(var(--muted-foreground))" }}>
                         💡 Get these components to unlock more projects!
                       </p>
                     </>
@@ -730,11 +733,11 @@ export default function ComponentsPage() {
           {/* Tips */}
           <div
             className="rounded-2xl p-5 border"
-            style={{ background: "rgba(245,158,11,0.05)", borderColor: "rgba(245,158,11,0.2)" }}
+            style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <Lightbulb size={16} style={{ color: "#F59E0B" }} />
-              <span className="font-bold text-sm" style={{ color: "#F59E0B" }}>Tips for Better Projects</span>
+              <Lightbulb size={16} style={{ color: "hsl(var(--muted-foreground))" }} />
+              <span className="font-bold text-sm" style={{ color: "hsl(var(--foreground))" }}>Tips for Better Projects</span>
             </div>
             <ul className="space-y-2">
               {[
@@ -744,7 +747,7 @@ export default function ComponentsPage() {
                 "Use 🤖 Smart Recognition to paste shopping lists",
                 "Add wishlist items to plan future purchases",
               ].map((tip) => (
-                <li key={tip} className="flex items-start gap-2 text-xs" style={{ color: "#A0AED9" }}>
+                <li key={tip} className="flex items-start gap-2 text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>
                   <span className="mt-0.5 flex-shrink-0">•</span>
                   <span>{tip}</span>
                 </li>
@@ -755,22 +758,22 @@ export default function ComponentsPage() {
           {/* Need Components */}
           <div
             className="rounded-2xl p-5 border"
-            style={{ background: "rgba(16,185,129,0.05)", borderColor: "rgba(16,185,129,0.2)" }}
+            style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Package size={16} style={{ color: "#10B981" }} />
-              <span className="font-bold text-sm" style={{ color: "#10B981" }}>Need Components?</span>
+              <Package size={16} style={{ color: "hsl(var(--foreground))" }} />
+              <span className="font-bold text-sm" style={{ color: "hsl(var(--foreground))" }}>Need Components?</span>
             </div>
-            <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
+            <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
               Check out our starter kits to quickly set up your inventory with common components.
             </p>
             <button
               onClick={() => navigate("/kits")}
-              className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+              className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] border"
               style={{
-                background: "linear-gradient(135deg, #10B981, #059669)",
-                color: "#0A0E27",
-                boxShadow: "0 0 15px rgba(16,185,129,0.3)",
+                background: "hsl(var(--background-hover))",
+                color: "hsl(var(--foreground))",
+                borderColor: "hsl(var(--border))",
               }}
             >
               <Package size={14} /> Browse Kits
@@ -780,22 +783,21 @@ export default function ComponentsPage() {
           {/* Ready to Build */}
           <div
             className="rounded-2xl p-5 border"
-            style={{ background: "rgba(59,130,246,0.05)", borderColor: "rgba(59,130,246,0.2)" }}
+            style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Zap size={16} style={{ color: "#3B82F6" }} />
-              <span className="font-bold text-sm" style={{ color: "#3B82F6" }}>Ready to Build?</span>
+              <Zap size={16} style={{ color: "hsl(var(--foreground))" }} />
+              <span className="font-bold text-sm" style={{ color: "hsl(var(--foreground))" }}>Ready to Build?</span>
             </div>
-            <p className="text-xs mb-3" style={{ color: "#A0AED9" }}>
+            <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
               Once you've added your components, let AI generate custom projects just for you.
             </p>
             <button
               onClick={() => navigate("/generate")}
               className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
               style={{
-                background: "linear-gradient(135deg, #3B82F6, #2563EB)",
-                color: "#0A0E27",
-                boxShadow: "0 0 15px rgba(59,130,246,0.3)",
+                background: "hsl(var(--primary))",
+                color: "hsl(var(--primary-foreground))",
               }}
             >
               <Zap size={14} /> Generate Project
