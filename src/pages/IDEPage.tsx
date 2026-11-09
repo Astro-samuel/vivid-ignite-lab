@@ -8,7 +8,7 @@ import ArduinoSetupGuide from "@/components/ArduinoSetupGuide";
 import PinoutModal from "@/components/PinoutModal";
 import { useArduinoFlasher } from "@/hooks/useArduinoFlasher";
 import { useIdeSketches, type IdeSketch } from "@/hooks/useIdeSketches";
-import { compileSketch } from "@/lib/compileSketch";
+import { compileSketch, localCheck } from "@/lib/compileSketch";
 import { BOARD_PROFILES } from "@/lib/stk500";
 import { levelForXp } from "@/lib/xp";
 import { supabase } from "@/integrations/supabase/client";
@@ -438,7 +438,24 @@ export default function IDEPage() {
     setXpAwarded(false);
     setRunStep("compiling");
 
-    const result = await compileSketch(code, fqbn);
+    let result = await compileSketch(code, fqbn);
+    let checkedLocally = false;
+
+    // The remote compiler needs a signed-in session and a configured build server. When it is not
+    // available, fall back to the offline syntax check so Run & Check still gives useful feedback.
+    if (!result.ok && result.unavailable) {
+      await delay(500);
+      const problems = localCheck(code);
+      if (problems.length > 0) {
+        setErrors(problems);
+        setRunStep("error");
+        sonnerToast.info("Checked locally", { description: `${result.error} This was a quick syntax check, not a full build.` });
+        return;
+      }
+      result = { ok: true };
+      checkedLocally = true;
+    }
+
     if (!result.ok) {
       const lines = result.log
         ? result.log.split("\n").filter(l => l.trim()).slice(0, 20)
@@ -453,6 +470,10 @@ export default function IDEPage() {
     setRunStep("safety");
     await delay(500);
     setRunStep("success");
+    if (checkedLocally) {
+      sonnerToast.info("Syntax check passed", { description: "The build server is not available, so this was a quick local check, not a full build. No XP awarded." });
+      return;
+    }
     setXpAwarded(true);
 
     // Persist +75 XP to the user's profile (only once per session)
@@ -789,7 +810,7 @@ export default function IDEPage() {
             {runStep === "success" && (
               <div className="flex items-center gap-2 animate-fade-in-up ml-2">
                 <CheckCircle size={18} className="text-success" />
-                <span className="font-bold text-sm text-success">✓ Task Complete! +75 XP Awarded</span>
+                <span className="font-bold text-sm text-success">{xpAwarded ? "Task complete! +75 XP awarded" : "Syntax check passed (local check, no XP)"}</span>
               </div>
             )}
             {runStep === "error" && (

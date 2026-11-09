@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
+import { localCheck } from "@/lib/compileSketch";
 import FadeInView from "@/components/motion/FadeInView";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -294,19 +295,8 @@ export default function LessonPage() {
     setRunStep("compiling");
     await new Promise((r) => setTimeout(r, 1200));
 
-    const foundErrors: string[] = [];
-
-    // Check for common Arduino errors
-    if (code.includes("pinMod(")) foundErrors.push("Error: 'pinMod' is not defined. Did you mean 'pinMode'?");
-    if (/delay\(\d+;/.test(code)) foundErrors.push("Syntax error: missing closing parenthesis ')' in delay()");
-    if (code.includes("void setup()") && !code.includes("pinMode") && !code.includes("Serial.begin") && !code.includes("// TODO")) {
-      foundErrors.push("Warning: setup() is empty. Initialize your pins with pinMode() and Serial with Serial.begin().");
-    }
-    if (code.includes("// TODO: Initialize") || code.includes("// TODO: Write your main")) {
-      foundErrors.push("Incomplete: You still have TODO sections. Fill in your code before running!");
-    }
-    if (!code.includes("void setup()")) foundErrors.push("Error: Missing setup() function.");
-    if (!code.includes("void loop()")) foundErrors.push("Error: Missing loop() function.");
+    // Shared offline check: empty sketch, undeclared names, missing setup()/loop(), unbalanced brackets, unfinished TODOs.
+    const foundErrors = localCheck(code);
 
     if (foundErrors.length > 0) {
       setErrors(foundErrors);

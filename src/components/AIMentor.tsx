@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageSquare, X, Send, Bot, Sparkles, ChevronDown, Maximize2, Minimize2, GripVertical, Settings } from "lucide-react";
+import { X, Send, Sparkles, Maximize2, Minimize2, GripVertical, Settings } from "lucide-react";
+import Mascot from "@/components/Mascot";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAIPreferences } from "@/hooks/useAIPreferences";
 import { useAIContext } from "@/hooks/useAIContext";
@@ -215,128 +216,103 @@ export default function AIMentor({ projectId }: AIMentorProps) {
     });
   };
 
-  const panelWidth = expanded ? "w-[480px]" : "w-80";
+  const panelWidth = expanded ? "w-[min(480px,calc(100vw-2.5rem))]" : "w-[min(340px,calc(100vw-2.5rem))]";
 
   return (
     <>
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 400, damping: 22, delay: 0.2 }}
+      {/* Launcher: the same Volt mascot as the homepage */}
+      <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center z-50 shadow-2xl"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        style={{
-          background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))",
-          boxShadow: open
-            ? "0 0 25px rgba(99, 102, 241, 0.4)"
-            : "0 0 15px rgba(99, 102, 241, 0.2)",
-        }}
+        aria-label={open ? "Close AI mentor" : "Open AI mentor"}
+        aria-expanded={open}
+        className="fixed bottom-5 right-5 z-50 rounded-2xl transition-transform hover:scale-105 active:scale-95"
       >
-        {open ? <ChevronDown size={22} color="#fff" /> : <MessageSquare size={22} color="#fff" />}
-        <span
-          className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full"
-          style={{ background: "hsl(var(--success))", border: "2px solid hsl(var(--background))" }}
-        />
-      </motion.button>
+        <span className="relative block">
+          <Mascot size={76} mood={open ? "cheer" : "happy"} bob={!open} />
+          <span
+            aria-hidden="true"
+            className="absolute top-3 right-1 w-3.5 h-3.5 rounded-full border-2 border-white"
+            style={{ background: "hsl(var(--green-bright))" }}
+          />
+        </span>
+      </button>
 
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 40, scale: 0.97 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-            className={`fixed bottom-24 right-6 ${panelWidth} rounded-2xl border z-50 flex flex-col overflow-hidden shadow-2xl`}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            role="dialog"
+            aria-label="AI mentor"
+            className={`fixed bottom-28 right-5 ${panelWidth} rounded-2xl border-2 border-b-4 z-50 flex flex-col overflow-hidden bg-card`}
             style={{
-              background: "hsl(var(--background-card))",
               borderColor: "hsl(var(--border))",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(99,102,241,0.05)",
               transform: `translate(${position.x}px, ${position.y}px)`,
-              maxHeight: expanded ? "680px" : "480px",
+              maxHeight: expanded ? "min(680px, calc(100vh - 9rem))" : "min(480px, calc(100vh - 9rem))",
               transition: isDragging ? "none" : "width 0.3s, max-height 0.3s",
             }}
           >
             {/* Header */}
             <div
-              className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0"
-              style={{
-                background: "linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--secondary) / 0.05))",
-                borderColor: "hsl(var(--border))",
-              }}
+              className="flex items-center justify-between px-3 py-2.5 border-b-2 flex-shrink-0"
+              style={{ background: "hsl(var(--success-light))", borderColor: "hsl(var(--border))" }}
             >
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <div
                   onMouseDown={handleMouseDown}
-                  className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-white/10 transition-colors"
+                  className="cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-black/5 transition-colors"
                   title="Drag to move"
                 >
-                  <GripVertical size={14} style={{ color: "#A0AED9" }} />
+                  <GripVertical size={14} className="text-muted-foreground" />
                 </div>
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))" }}
-                >
-                  <Bot size={16} color="#fff" />
-                </div>
+                <Mascot size={40} mood="happy" />
                 <div>
-                  <p className="font-bold text-sm" style={{ color: "#FFFFFF" }}>AI Mentor</p>
+                  <p className="font-black text-sm leading-tight text-foreground">AI Mentor</p>
                   <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--success))" }} />
-                    <p className="text-xs" style={{ color: "hsl(var(--success))" }}>Online</p>
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--green-bright))" }} />
+                    <p className="text-xs font-bold" style={{ color: "hsl(var(--primary))" }}>Online</p>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5">
                 <button
                   onClick={() => navigate("/ai-settings")}
-                  className="p-1 rounded transition-all hover:bg-white/10"
-                  style={{ color: "#A0AED9" }}
+                  className="p-1.5 rounded-lg text-muted-foreground hover:bg-black/5 transition-colors"
                   title="AI Settings"
+                  aria-label="AI settings"
                 >
-                  <Settings size={14} />
+                  <Settings size={15} />
                 </button>
                 <button
                   onClick={() => setExpanded(!expanded)}
-                  className="p-1 rounded transition-all hover:bg-white/10"
-                  style={{ color: "#A0AED9" }}
+                  className="p-1.5 rounded-lg text-muted-foreground hover:bg-black/5 transition-colors"
+                  aria-label={expanded ? "Shrink chat" : "Expand chat"}
                 >
-                  {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+                  {expanded ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
                 </button>
-                <button onClick={() => setOpen(false)} className="p-1 rounded transition-all hover:bg-white/10" style={{ color: "#A0AED9" }}>
-                  <X size={14} />
+                <button
+                  onClick={() => setOpen(false)}
+                  className="p-1.5 rounded-lg text-muted-foreground hover:bg-black/5 transition-colors"
+                  aria-label="Close chat"
+                >
+                  <X size={15} />
                 </button>
               </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ minHeight: 0 }}>
+            <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3" style={{ minHeight: 0, background: "hsl(var(--background))" }}>
               {messages.map((m, i) => (
                 <div key={i} className={`flex gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                  {m.role === "assistant" && (
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                      style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))" }}
-                    >
-                      <Sparkles size={11} color="#fff" />
-                    </div>
-                  )}
+                  {m.role === "assistant" && <Mascot size={32} className="flex-shrink-0 -mt-1" />}
                   <div
-                    className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${expanded ? "text-sm" : ""}`}
+                    className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl leading-relaxed whitespace-pre-wrap font-semibold ${expanded ? "text-[15px]" : "text-sm"}`}
                     style={
                       m.role === "user"
-                        ? {
-                            background: "hsl(var(--primary))",
-                            color: "hsl(var(--primary-foreground))",
-                            borderBottomRightRadius: "4px",
-                          }
-                        : {
-                            background: "hsl(var(--background-hover))",
-                            color: "hsl(var(--foreground))",
-                            border: "1px solid hsl(var(--border))",
-                            borderBottomLeftRadius: "4px",
-                          }
+                        ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderBottomRightRadius: "4px" }
+                        : { background: "hsl(var(--card))", color: "hsl(var(--foreground))", border: "2px solid hsl(var(--border))", borderBottomLeftRadius: "4px" }
                     }
                   >
                     {m.content}
@@ -345,13 +321,11 @@ export default function AIMentor({ projectId }: AIMentorProps) {
               ))}
               {streaming && messages[messages.length - 1]?.role !== "assistant" && (
                 <div className="flex gap-2 justify-start">
-                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))" }}>
-                    <Sparkles size={11} color="#fff" />
-                  </div>
-                  <div className="px-3 py-2 rounded-2xl text-xs flex items-center gap-1" style={{ background: "hsl(var(--background-hover))", border: "1px solid hsl(var(--border))" }}>
-                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "hsl(var(--primary))" }} />
-                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "hsl(var(--primary))", animationDelay: "0.15s" }} />
-                    <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: "hsl(var(--primary))", animationDelay: "0.3s" }} />
+                  <Mascot size={32} className="flex-shrink-0 -mt-1" />
+                  <div className="px-3.5 py-3 rounded-2xl flex items-center gap-1" style={{ background: "hsl(var(--card))", border: "2px solid hsl(var(--border))", borderBottomLeftRadius: "4px" }} aria-label="Mentor is typing">
+                    <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: "hsl(var(--green-bright))" }} />
+                    <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: "hsl(var(--green-bright))", animationDelay: "0.15s" }} />
+                    <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: "hsl(var(--green-bright))", animationDelay: "0.3s" }} />
                   </div>
                 </div>
               )}
@@ -360,32 +334,29 @@ export default function AIMentor({ projectId }: AIMentorProps) {
 
             {/* Context indicator */}
             {projectId && context.questions_asked.length > 0 && (
-              <div className="px-4 py-1.5 text-xs flex items-center gap-1.5 border-t" style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground-muted))" }}>
-                <Sparkles size={10} /> {context.questions_asked.length} previous questions remembered
+              <div className="px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 border-t-2 bg-card" style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--foreground-muted))" }}>
+                <Sparkles size={11} /> {context.questions_asked.length} previous questions remembered
               </div>
             )}
 
             {/* Input */}
-            <div
-              className="flex items-center gap-2 px-3 py-3 border-t flex-shrink-0"
-              style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background-card))" }}
-            >
+            <div className="flex items-center gap-2 px-3 py-3 border-t-2 flex-shrink-0 bg-card" style={{ borderColor: "hsl(var(--border))" }}>
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && send()}
                 placeholder="Ask your mentor..."
+                aria-label="Message the AI mentor"
                 disabled={streaming}
-                className={`flex-1 bg-transparent focus:outline-none disabled:opacity-50 ${expanded ? "text-sm" : "text-xs"}`}
-                style={{ color: "#FFFFFF" }}
+                className={`flex-1 min-w-0 rounded-2xl px-4 py-2.5 border-2 border-border bg-[hsl(var(--background-hover))] font-bold text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[hsl(var(--blue-bright))] focus:bg-card disabled:opacity-50 ${expanded ? "text-[15px]" : "text-sm"}`}
               />
               <button
                 onClick={send}
                 disabled={!input.trim() || streaming}
-                className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-105 disabled:opacity-40"
-                style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))" }}
+                aria-label="Send message"
+                className="clay-btn clay-btn-primary !p-2.5 !rounded-xl"
               >
-                <Send size={12} color="#fff" />
+                <Send size={16} />
               </button>
             </div>
           </motion.div>

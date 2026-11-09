@@ -288,6 +288,17 @@ export default function GeneratePage() {
   const [savingAll, setSavingAll] = useState(false);
   const [startingId, setStartingId] = useState<number | null>(null);
 
+  const reportSaveError = (result: { error?: string; limitReached?: boolean }) => {
+    if (result.limitReached) {
+      sonnerToast.error("Project limit reached", {
+        description: "You can have up to 5 active projects. Complete or remove one to save another.",
+        duration: 5000,
+      });
+    } else {
+      sonnerToast.error("Couldn't save the project", { description: result.error, duration: 5000 });
+    }
+  };
+
   const handleSave = async () => {
     if (!user) { navigate("/auth"); return; }
     setSavingAll(true);
@@ -310,10 +321,7 @@ export default function GeneratePage() {
         source: "generate",
       });
       if (result.error) {
-        sonnerToast.error("🚫 Project limit reached", {
-          description: "You can only have up to 5 projects in your dashboard. Complete or remove a project to start a new one.",
-          duration: 5000,
-        });
+        reportSaveError(result);
         break;
       }
       savedCount++;
@@ -338,10 +346,7 @@ export default function GeneratePage() {
         source: "generate",
       });
       if (result.error) {
-        sonnerToast.error("🚫 Project limit reached", {
-          description: "You can only have up to 5 projects in your dashboard. Complete or remove a project to start a new one.",
-          duration: 5000,
-        });
+        reportSaveError(result);
         setStartingId(null);
         return;
       }

@@ -11,6 +11,7 @@ import { useUserProjects } from "@/hooks/useUserProjects";
 import { supabase } from "@/integrations/supabase/client";
 
 import Layout from "@/components/Layout";
+import { localCheck } from "@/lib/compileSketch";
 import { simulationBonusXp } from "@/lib/xp";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -6170,19 +6171,8 @@ void loop() {
     await delay(1200);
 
     const code = showSolution ? currentCode : userCode;
-    const foundErrors: string[] = [];
-
-    // Check for common Arduino errors
-    if (code.includes("pinMod(")) foundErrors.push("Error: 'pinMod' is not defined. Did you mean 'pinMode'?");
-    if (/delay\(\d+;/.test(code)) foundErrors.push("Syntax error: missing closing parenthesis ')' in delay()");
-    if (code.includes("void setup()") && !code.includes("pinMode") && !code.includes("Serial.begin") && !code.includes("// TODO")) {
-      foundErrors.push("Warning: setup() is empty. Initialize your pins with pinMode() and Serial with Serial.begin().");
-    }
-    if (code.includes("// TODO: Initialize") || code.includes("// TODO: Write your main")) {
-      foundErrors.push("Incomplete: You still have TODO sections. Fill in your code before running!");
-    }
-    if (!code.includes("void setup()")) foundErrors.push("Error: Missing setup() function.");
-    if (!code.includes("void loop()")) foundErrors.push("Error: Missing loop() function.");
+    // Shared offline check: empty sketch, undeclared names, missing setup()/loop(), unbalanced brackets, unfinished TODOs.
+    const foundErrors = localCheck(code);
 
     if (foundErrors.length > 0) {
       setErrors(foundErrors);
@@ -6362,10 +6352,14 @@ void loop() {
     });
     setSaving(false);
     if (result.error) {
-      sonnerToast.error("🚫 Project limit reached", {
-        description: "You can only have up to 5 projects in your dashboard. Complete or remove a project to start a new one.",
-        duration: 5000,
-      });
+      if (result.limitReached) {
+        sonnerToast.error("Project limit reached", {
+          description: "You can have up to 5 active projects. Complete or remove one to save another.",
+          duration: 5000,
+        });
+      } else {
+        sonnerToast.error("Couldn't save the project", { description: result.error, duration: 5000 });
+      }
     } else {
       setSaved(true);
     }

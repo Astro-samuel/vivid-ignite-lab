@@ -1,16 +1,14 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useDeferredValue } from "react";
 import { Search, Clock, X, Filter, Tag, Lock, Sparkles } from "lucide-react";
 import { PROJECT_SKILLS, SKILL_COLORS } from "@/lib/skillMapping";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
-import MotionCard from "@/components/motion/MotionCard";
-import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonnerToast } from "sonner";
 import { useUserProjects } from "@/hooks/useUserProjects";
-import { getInventoryComponents, canBuild as canBuildInventory, missingComponents } from "@/lib/inventory";
+import { getInventoryComponents, missingComponents } from "@/lib/inventory";
 
 const SkillBadge = ({ skill }: { skill: string }) => {
   const ref = useRef<HTMLSpanElement>(null);
@@ -111,14 +109,6 @@ const costRanges = [
   { label: "$10–$20", min: 10, max: 20 },
   { label: "$20+", min: 20, max: Infinity },
 ];
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: (i: number) => ({
-    opacity: 1, y: 0, scale: 1,
-    transition: { delay: i * 0.06, duration: 0.4, ease: "easeOut" as const },
-  }),
-};
 
 const getPurchaseUrl = (componentName: string) => {
   const clean = componentName.toLowerCase();
@@ -249,13 +239,26 @@ export default function CatalogPage() {
     return result;
   }, [removedIds, userProjectIds]);
 
-  const canBuild = (project: typeof allProjects[0]) => canBuildInventory(inventory, project.components);
+  // Component matching tokenises names, so compute it once per inventory instead of per card per render.
+  const missingByProject = useMemo(() => {
+    const map = new Map<number, string[]>();
+    allProjects.forEach((p) => map.set(p.id, missingComponents(inventory, p.components)));
+    return map;
+  }, [inventory]);
 
-  const getMissingComponents = (project: typeof allProjects[0]) => missingComponents(inventory, project.components);
+  const getMissingComponents = (project: typeof allProjects[0]) =>
+    missingByProject.get(project.id) ?? missingComponents(inventory, project.components);
+
+  const canBuild = (project: typeof allProjects[0]) =>
+    project.components.length > 0 && getMissingComponents(project).length === 0;
+
+  // Keep typing responsive: filter against a deferred copy of the query.
+  const deferredSearch = useDeferredValue(search);
 
   // Apply search/filter on top — but always show the level header even if 0 results
-  const filtered = visibleProjects.filter((p) => {
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
+  const filtered = useMemo(() => visibleProjects.filter((p) => {
+    const query = deferredSearch.toLowerCase();
+    const matchSearch = p.title.toLowerCase().includes(query) || p.tags.some((t) => t.toLowerCase().includes(query));
     const matchDiff = diffFilter === "all" || p.difficulty === diffFilter;
     const matchTags = selectedTags.size === 0 || p.tags.some(t => selectedTags.has(t));
     const range = costRanges[costFilter];
@@ -263,14 +266,14 @@ export default function CatalogPage() {
     const matchComponent = !componentFilter || p.components.some(c => c.toLowerCase().includes(componentFilter.toLowerCase()));
     
     // Inventory matching filters
-    const missing = getMissingComponents(p);
+    const missing = missingByProject.get(p.id) ?? [];
     const matchInventory = 
       invMatchFilter === "all" ? true :
       invMatchFilter === "buildable" ? missing.length === 0 :
       invMatchFilter === "almost" ? missing.length === 1 : true;
 
     return matchSearch && matchDiff && matchTags && matchCost && matchComponent && matchInventory;
-  });
+  }), [visibleProjects, deferredSearch, diffFilter, selectedTags, costFilter, componentFilter, invMatchFilter, missingByProject]);
 
   const levels = ["beginner", "intermediate", "advanced"];
   const levelLabels: Record<string, string> = { beginner: "🟢 Beginner", intermediate: "🟡 Intermediate", advanced: "🟣 Advanced" };
@@ -284,12 +287,7 @@ export default function CatalogPage() {
         {/* Header */}
         <FadeInView className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-            >
-              <Sparkles size={24} style={{ color: "hsl(var(--primary))" }} />
-            </motion.div>
+            <Sparkles size={24} style={{ color: "hsl(var(--primary))" }} />
             <h1 className="text-3xl font-bold" style={{ color: "hsl(var(--foreground))" }}>
               Project <span className="gradient-text-teal">Catalog</span>
             </h1>
@@ -318,10 +316,8 @@ export default function CatalogPage() {
 
           <div className="flex gap-2">
             {["all", "beginner", "intermediate", "advanced"].map((d) => (
-              <motion.button
+              <button
                 key={d}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
                 onClick={() => setDiffFilter(d)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-colors"
                 style={
@@ -331,7 +327,7 @@ export default function CatalogPage() {
                 }
               >
                 {d}
-              </motion.button>
+              </button>
             ))}
           </div>
 
@@ -341,10 +337,8 @@ export default function CatalogPage() {
               { id: "buildable", label: "⚡ Can Build" },
               { id: "almost", label: "🔍 1 Part Away" },
             ].map((f) => (
-              <motion.button
+              <button
                 key={f.id}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
                 onClick={() => setInvMatchFilter(f.id as any)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
                 style={
@@ -358,13 +352,11 @@ export default function CatalogPage() {
                 }
               >
                 {f.label}
-              </motion.button>
+              </button>
             ))}
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={() => setShowFilters(!showFilters)}
             className="px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors"
             style={
@@ -380,18 +372,12 @@ export default function CatalogPage() {
                 {activeFilterCount}
               </span>
             )}
-          </motion.button>
+          </button>
         </FadeInView>
 
         {/* Advanced Filters Panel */}
-        <AnimatePresence>
-          {showFilters && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden mb-6"
-            >
+        {showFilters && (
+            <div className="mb-6 animate-fade-in-up">
               <div className="rounded-2xl border p-5 space-y-4" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
                 <div>
                   <label className="text-xs font-semibold mb-2 block" style={{ color: "hsl(var(--primary))" }}>
@@ -460,9 +446,8 @@ export default function CatalogPage() {
                   </button>
                 )}
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
 
         {/* Grouped by level — always show all 3 levels */}
         {levels
@@ -475,13 +460,7 @@ export default function CatalogPage() {
               <div key={lvl} className="mb-10">
                 <FadeInView>
                   <div className="flex items-center gap-3 mb-4">
-                    <motion.span
-                      className="text-lg"
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 4 }}
-                    >
-                      {levelEmoji[lvl]}
-                    </motion.span>
+                    <span className="text-lg">{levelEmoji[lvl]}</span>
                     <h2 className="text-lg font-bold" style={{ color: "hsl(var(--foreground))" }}>
                       {lvl.charAt(0).toUpperCase() + lvl.slice(1)}
                     </h2>
@@ -506,21 +485,16 @@ export default function CatalogPage() {
                     {levelProjects.map((p, i) => {
                       const buildable = canBuild(p);
                       return (
-                        <motion.div
+                        <div
                           key={p.id}
-                          custom={i}
-                          variants={cardVariants}
-                          initial="hidden"
-                          whileInView="visible"
-                          viewport={{ once: true, margin: "-30px" }}
+                          className="animate-fade-in-up"
+                          style={{ animationDelay: `${Math.min(i, 8) * 40}ms`, animationFillMode: "both" }}
                         >
-                          <MotionCard className={`card-neon p-4 group relative ${locked ? "cursor-not-allowed" : "cursor-pointer"}`}>
+                          <div className={`clay-card p-4 group relative h-full ${locked ? "cursor-not-allowed" : "cursor-pointer"}`}>
                             {locked && (
-                              <div className="absolute inset-0 z-10 rounded-2xl flex flex-col items-center justify-center gap-2 backdrop-blur-[2px]"
+                              <div className="absolute inset-0 z-10 rounded-2xl flex flex-col items-center justify-center gap-2"
                                 style={{ background: "hsl(var(--background) / 0.7)" }}>
-                                <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                                  <Lock size={24} style={{ color: "hsl(var(--muted-foreground))" }} />
-                                </motion.div>
+                                <Lock size={24} style={{ color: "hsl(var(--muted-foreground))" }} />
                                 <span className="text-xs font-bold text-center px-3" style={{ color: "hsl(var(--muted-foreground))" }}>
                                   Unlock at Level {LEVEL_REQUIREMENTS[p.difficulty]?.level}
                                 </span>
@@ -541,23 +515,15 @@ export default function CatalogPage() {
                             )}
 
                             {buildable && !locked && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold bg-success/15 text-success border border-success/30"
-                              >
+                              <div className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold bg-success/15 text-success border border-success/30">
                                 ✓ Can Build
-                              </motion.div>
+                              </div>
                             )}
 
                             {!buildable && !locked && getMissingComponents(p).length === 1 && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold bg-warning/15 text-warning border border-warning/30"
-                              >
+                              <div className="absolute top-2 left-2 text-xs px-2 py-0.5 rounded-full font-bold bg-warning/15 text-warning border border-warning/30">
                                 ⚡ 1 Part Away
-                              </motion.div>
+                              </div>
                             )}
 
                             <div className={`text-2xl mb-2 ${(buildable || getMissingComponents(p).length === 1) && !locked ? "mt-5" : ""}`}>{p.emoji}</div>
@@ -637,9 +603,7 @@ export default function CatalogPage() {
                               );
                             })()}
 
-                            <motion.button
-                              whileHover={{ scale: locked ? 1 : 1.03 }}
-                              whileTap={{ scale: locked ? 1 : 0.97 }}
+                            <button
                               disabled={locked}
                               onClick={() => {
                                 if (locked) {
@@ -655,16 +619,12 @@ export default function CatalogPage() {
                                 }));
                                 navigate(`/project/${p.id}`);
                               }}
-                              className={`w-full py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 disabled:hover:scale-100 ${
-                                locked
-                                  ? "bg-muted text-muted-foreground border border-border"
-                                  : "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
-                              }`}
+                              className={`clay-btn clay-btn-sm w-full ${locked ? "bg-muted text-muted-foreground border-border" : "clay-btn-primary"}`}
                             >
                               {locked ? "Locked" : "View Project"}
-                            </motion.button>
-                          </MotionCard>
-                        </motion.div>
+                            </button>
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
