@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -12,9 +13,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Nunito', 'sans-serif'],
-        display: ['Baloo 2', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['Nunito', 'system-ui', 'sans-serif'],
+        display: ['Nunito', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -41,6 +42,22 @@ export default {
         warning: {
           DEFAULT: "hsl(var(--warning))",
           dark: "hsl(var(--warning-dark))",
+        },
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          light: "hsl(var(--gold-light))",
+          bright: "hsl(var(--gold-bright))",
+        },
+        orange: {
+          DEFAULT: "hsl(var(--orange))",
+          bright: "hsl(var(--orange-bright))",
+        },
+        blue: {
+          DEFAULT: "hsl(var(--secondary))",
+          bright: "hsl(var(--blue-bright))",
+        },
+        green: {
+          bright: "hsl(var(--green-bright))",
         },
         "brand-purple": {
           DEFAULT: "hsl(var(--purple))",
@@ -121,5 +138,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

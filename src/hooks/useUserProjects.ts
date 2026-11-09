@@ -130,6 +130,23 @@ export function useUserProjects() {
     await fetchProjects();
   }, [user, fetchProjects]);
 
+  // Extra XP that is not tied to completing a project (e.g. the simulation bonus).
+  const awardBonusXp = useCallback(async (xpAmount: number) => {
+    if (!user || xpAmount <= 0) return;
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("total_xp")
+      .eq("id", user.id)
+      .single();
+    if (!profile) return;
+    const newXp = (profile.total_xp || 0) + xpAmount;
+    await supabase.from("profiles").update({
+      total_xp: newXp,
+      level: levelForXp(newXp),
+      updated_at: new Date().toISOString(),
+    }).eq("id", user.id);
+  }, [user]);
+
   const deleteProject = useCallback(async (projectId: number) => {
     if (!user) return;
     await supabase.from("user_projects")
@@ -143,5 +160,5 @@ export function useUserProjects() {
     return projects.some(p => p.project_id === projectId);
   }, [projects]);
 
-  return { projects, loading, saveProject, updateProgress, completeProject, deleteProject, isProjectSaved, refetch: fetchProjects };
+  return { projects, loading, saveProject, updateProgress, completeProject, awardBonusXp, deleteProject, isProjectSaved, refetch: fetchProjects };
 }

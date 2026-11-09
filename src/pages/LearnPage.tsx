@@ -99,43 +99,14 @@ function LessonNode({
   const offset = index % 2 === 0 ? 0 : 32;
 
   return (
-    <div className="flex flex-col items-center" style={{ marginLeft: offset }}>
+    <div className={`relative flex flex-col items-center ${isAvailable ? "mt-10" : ""}`} style={{ marginLeft: offset }}>
+      {isAvailable && <span className="node-start-bubble" aria-hidden="true">{lesson.lesson_order === 1 ? "START" : "NEXT"}</span>}
       <motion.button
         id={`lesson-node-${lesson.id}`}
         onClick={onClick}
         disabled={isLocked}
-        className="lesson-node relative"
-        style={
-          isCompleted
-            ? {
-                background: "hsl(var(--success))",
-                borderColor: "hsl(var(--success-dark))",
-                boxShadow: "0 5px 0 0 hsl(var(--success-dark)), 0 8px 16px hsl(var(--success) / 0.3)",
-                color: "hsl(var(--primary-foreground))",
-                width: 64,
-                height: 64,
-              }
-            : isAvailable
-            ? {
-                background: pathColor.bg,
-                borderColor: pathColor.border,
-                boxShadow: `0 5px 0 0 ${pathColor.shadow}, 0 8px 20px hsl(var(--primary) / 0.35)`,
-                color: "hsl(var(--primary-foreground))",
-                width: 64,
-                height: 64,
-                animation: "nodeFloat 3s ease-in-out infinite",
-              }
-            : {
-                background: "hsl(var(--background-hover))",
-                borderColor: "hsl(var(--border))",
-                boxShadow: "0 4px 0 0 hsl(var(--border))",
-                color: "hsl(var(--muted-foreground))",
-                width: 64,
-                height: 64,
-                cursor: "not-allowed",
-              }
-        }
-        whileHover={!isLocked ? { scale: 1.12 } : {}}
+        className={`lesson-node relative ${isCompleted ? "lesson-node-completed" : isAvailable ? "lesson-node-available" : "lesson-node-locked"}`}
+        whileHover={!isLocked ? { scale: 1.06 } : {}}
         whileTap={!isLocked ? { scale: 0.95 } : {}}
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -143,11 +114,11 @@ function LessonNode({
         aria-label={`${lesson.title} — ${status}`}
       >
         {isCompleted ? (
-          <CheckCircle size={28} strokeWidth={2.5} />
+          <CheckCircle size={32} strokeWidth={3.5} />
         ) : isLocked ? (
           <Lock size={22} strokeWidth={2} />
         ) : (
-          <span style={{ fontFamily: "'Baloo 2', sans-serif", fontWeight: 800, fontSize: "1.1rem" }}>
+          <span style={{ fontFamily: "'Nunito', sans-serif", fontWeight: 800, fontSize: "1.1rem" }}>
             {lesson.lesson_order}
           </span>
         )}
@@ -156,7 +127,7 @@ function LessonNode({
       {/* Label below node */}
       <p
         className="text-center mt-1.5 font-bold text-xs leading-tight max-w-[80px]"
-        style={{ color: isLocked ? "hsl(var(--muted-foreground))" : pathColor.text, fontFamily: "'Baloo 2', sans-serif" }}
+        style={{ color: isLocked ? "hsl(var(--muted-foreground))" : pathColor.text, fontFamily: "'Nunito', sans-serif" }}
       >
         {lesson.title}
       </p>
@@ -273,7 +244,7 @@ export default function LearnPage() {
               className="w-12 h-12 rounded-full border-4"
               style={{ borderColor: "hsl(var(--border))", borderTopColor: "hsl(var(--primary))" }}
             />
-            <p className="font-bold text-sm" style={{ color: "hsl(var(--muted-foreground))", fontFamily: "'Baloo 2', sans-serif" }}>
+            <p className="font-bold text-sm" style={{ color: "hsl(var(--muted-foreground))", fontFamily: "'Nunito', sans-serif" }}>
               Loading curriculum...
             </p>
           </div>
@@ -300,7 +271,7 @@ export default function LearnPage() {
         >
           <h1
             className="text-3xl font-black mb-1"
-            style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}
+            style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}
           >
             Learn Arduino
           </h1>
@@ -329,7 +300,7 @@ export default function LearnPage() {
               transition={{ delay: i * 0.06 }}
             >
               <Icon size={20} style={{ color }} strokeWidth={2.5} />
-              <p className="text-2xl font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color }}>
+              <p className="text-2xl font-black" style={{ fontFamily: "'Nunito', sans-serif", color }}>
                 {value}
               </p>
               <p className="text-xs font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>{label}</p>
@@ -379,12 +350,12 @@ export default function LearnPage() {
                     <Flame size={13} style={{ color: "hsl(var(--primary))" }} />
                     <span
                       className="text-xs font-black uppercase tracking-wider"
-                      style={{ color: "hsl(var(--primary))", fontFamily: "'Baloo 2', sans-serif" }}
+                      style={{ color: "hsl(var(--primary))", fontFamily: "'Nunito', sans-serif" }}
                     >
                       Daily Challenge
                     </span>
                   </div>
-                  <h3 className="font-black text-sm" style={{ color: "hsl(var(--foreground))", fontFamily: "'Baloo 2', sans-serif" }}>
+                  <h3 className="font-black text-sm" style={{ color: "hsl(var(--foreground))", fontFamily: "'Nunito', sans-serif" }}>
                     {dailyChallenge.title}
                   </h3>
                   <p className="text-xs font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>
@@ -415,7 +386,7 @@ export default function LearnPage() {
           <div className="flex items-center justify-between mb-4">
             <h2
               className="text-lg font-black"
-              style={{ color: "hsl(var(--foreground))", fontFamily: "'Baloo 2', sans-serif" }}
+              style={{ color: "hsl(var(--foreground))", fontFamily: "'Nunito', sans-serif" }}
             >
               Skill Paths
             </h2>
@@ -503,7 +474,7 @@ export default function LearnPage() {
                     </div>
                     <p
                       className="text-xs font-black leading-tight"
-                      style={{ color: isSelected ? c.text : "hsl(var(--foreground))", fontFamily: "'Baloo 2', sans-serif" }}
+                      style={{ color: isSelected ? c.text : "hsl(var(--foreground))", fontFamily: "'Nunito', sans-serif" }}
                     >
                       {path.title}
                     </p>
@@ -551,7 +522,7 @@ export default function LearnPage() {
                 <div>
                   <h3
                     className="text-xl font-black"
-                    style={{ color: selectedColor.text, fontFamily: "'Baloo 2', sans-serif" }}
+                    style={{ color: selectedColor.text, fontFamily: "'Nunito', sans-serif" }}
                   >
                     {selectedPathData.title}
                   </h3>
@@ -582,7 +553,7 @@ export default function LearnPage() {
               >
                 <h3
                   className="text-sm font-black mb-5 uppercase tracking-wider"
-                  style={{ color: "hsl(var(--muted-foreground))", fontFamily: "'Baloo 2', sans-serif" }}
+                  style={{ color: "hsl(var(--muted-foreground))", fontFamily: "'Nunito', sans-serif" }}
                 >
                   Lesson Map
                 </h3>
@@ -627,7 +598,7 @@ export default function LearnPage() {
                             >
                               <p
                                 className="font-black text-sm leading-tight mb-1"
-                                style={{ color: selectedColor.text, fontFamily: "'Baloo 2', sans-serif" }}
+                                style={{ color: selectedColor.text, fontFamily: "'Nunito', sans-serif" }}
                               >
                                 {lesson.title}
                               </p>
@@ -668,7 +639,7 @@ export default function LearnPage() {
                       >
                         <Trophy size={28} style={{ color: "hsl(var(--success))" }} />
                       </div>
-                      <p className="font-black text-sm" style={{ color: "hsl(var(--success))", fontFamily: "'Baloo 2', sans-serif" }}>
+                      <p className="font-black text-sm" style={{ color: "hsl(var(--success))", fontFamily: "'Nunito', sans-serif" }}>
                         Path Complete! 🎉
                       </p>
                     </motion.div>
@@ -690,7 +661,7 @@ export default function LearnPage() {
               style={{ background: "hsl(var(--card))", border: "3px solid hsl(var(--border))" }}>
               📚
             </div>
-            <h3 className="text-xl font-black mb-2" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
+            <h3 className="text-xl font-black mb-2" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>
               No learning paths yet
             </h3>
             <p className="text-sm font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>

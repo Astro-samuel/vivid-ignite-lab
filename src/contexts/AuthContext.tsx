@@ -2,6 +2,9 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
+// Temporarily disabled login: everyone is the demo user. Set to false to restore real auth.
+export const AUTH_DISABLED = true;
+
 export const DEMO_USER: User = {
   id: "demo-maker-001",
   app_metadata: { provider: "email" },
@@ -32,7 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (localStorage.getItem("demo_session") === "true") {
+    if (AUTH_DISABLED || localStorage.getItem("demo_session") === "true") {
+      localStorage.setItem(`onboarding_${DEMO_USER.id}`, "done");
       setUser(DEMO_USER);
       setSession({
         access_token: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "demo_token",

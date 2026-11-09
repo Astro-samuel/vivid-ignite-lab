@@ -14,7 +14,7 @@ import ExplainCode from "@/components/ExplainCode";
 import CodeEditor from "@/components/CodeEditor";
 import { toast as sonnerToast } from "sonner";
 import { useArduinoFlasher } from "@/hooks/useArduinoFlasher";
-import { levelForXp } from "@/lib/xp";
+import { levelForXp, simulationBonusXp } from "@/lib/xp";
 import Confetti from "@/components/Confetti";
 import { useLevelUp } from "@/contexts/LevelUpContext";
 
@@ -162,8 +162,10 @@ export default function LessonPage() {
   // Compilation & Simulation states
   const [runStep, setRunStep] = useState<"idle" | "compiling" | "simulating" | "success" | "error">("idle");
   const [errors, setErrors] = useState<string[]>([]);
+  const [simNotes, setSimNotes] = useState<string[]>([]);
   const [codePassed, setCodePassed] = useState(false);
   const [simulatorPassed, setSimulatorPassed] = useState(false);
+  const [earnedXp, setEarnedXp] = useState(0);
   const [simExpanded, setSimExpanded] = useState(false);
 
   // Version Control
@@ -213,6 +215,13 @@ export default function LessonPage() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatHistory]);
+
+  // A compile result only counts for the code it was run on.
+  useEffect(() => {
+    setCodePassed(false);
+    setSimulatorPassed(false);
+    setSimNotes([]);
+  }, [code]);
 
   useEffect(() => {
     if (!lesson) return;
@@ -281,6 +290,7 @@ export default function LessonPage() {
 
   const runAndCheck = async () => {
     setErrors([]);
+    setSimNotes([]);
     setRunStep("compiling");
     await new Promise((r) => setTimeout(r, 1200));
 
@@ -314,28 +324,33 @@ export default function LessonPage() {
     if (code.includes("analogWrite") && code.includes("delay(1)")) {
       safetyWarnings.push("Warning: Very short delay with analog output may cause instability.");
     }
+    // The code compiled. The simulation check is optional bonus XP, so a note here never blocks the lesson.
     if (safetyWarnings.length > 0) {
-      setErrors(safetyWarnings);
-      setRunStep("error");
+      setSimNotes(safetyWarnings);
       setSimulatorPassed(false);
+      setRunStep("success");
+      sonnerToast.success("Code compiles", { description: "The simulation check had a note, so no bonus XP this time." });
       return;
     }
 
+    setSimNotes([]);
     setSimulatorPassed(true);
     setRunStep("success");
-    sonnerToast.success("🚀 Code compiled and simulation passed!");
+    sonnerToast.success(`Code compiles. Simulation passed: +${simulationBonusXp(lesson?.xp_reward || 0)} bonus XP`);
   };
 
   const handleComplete = async () => {
-    if (!user || !lesson) return;
+    if (!user || !lesson || !codePassed) return;
     setSubmitting(true);
+    const bonusXp = simulatorPassed ? simulationBonusXp(lesson.xp_reward) : 0;
+    const totalXp = lesson.xp_reward + bonusXp;
 
     await supabase.from("user_lesson_progress").upsert({
       user_id: user.id,
       lesson_id: lesson.id,
       path_id: lesson.path_id,
       status: "completed",
-      score: lesson.xp_reward,
+      score: totalXp,
       completed_at: new Date().toISOString(),
       started_at: new Date().toISOString(),
     }, { onConflict: "user_id,lesson_id" });
@@ -347,7 +362,7 @@ export default function LessonPage() {
       .single();
 
     if (profile) {
-      const newXp = (profile.total_xp || 0) + lesson.xp_reward;
+      const newXp = (profile.total_xp || 0) + totalXp;
       const newLevel = levelForXp(newXp);
       await supabase.from("profiles").update({
         total_xp: newXp,
@@ -356,6 +371,7 @@ export default function LessonPage() {
       if (newLevel > (profile.level || 1)) announceLevelUp(newLevel);
     }
 
+    setEarnedXp(totalXp);
     setCompleted(true);
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 5000);
@@ -427,7 +443,7 @@ export default function LessonPage() {
 
           let newlineIdx: number;
           while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
-            let line = buffer.slice(0, newlineIdx);
+            const line = buffer.slice(0, newlineIdx);
             buffer = buffer.slice(newlineIdx + 1);
             if (line.startsWith("data: ")) {
               const jsonStr = line.slice(6).trim();
@@ -443,7 +459,7 @@ export default function LessonPage() {
                     return next;
                   });
                 }
-              } catch (e) {}
+              } catch { /* partial JSON line: wait for the next chunk */ }
             }
           }
         }
@@ -458,7 +474,7 @@ export default function LessonPage() {
   const tabs = [
     { id: "concept" as Tab, label: "📖 Concept", icon: BookOpen },
     { id: "challenge" as Tab, label: "💻 Challenge", icon: Code },
-    { id: "simulate" as Tab, label: "🤖 Simulate", icon: Zap },
+    { id: "simulate" as Tab, label: "Simulate (bonus XP)", icon: Zap },
     { id: "build" as Tab, label: "🔨 Build", icon: Wrench },
   ];
 
@@ -721,7 +737,7 @@ export default function LessonPage() {
                 {runStep !== "idle" && (
                   <div className="rounded-xl px-5 py-3 flex items-center gap-6 border mb-4 bg-card border-border">
                     {(["compiling", "simulating"] as const).map((step, i) => {
-                      const labels = ["Compiling", "Simulating"];
+                      const labels = ["Compiling", "Simulation check (bonus)"];
                       const stepOrder = ["compiling", "simulating"];
                       const stepIdx = stepOrder.indexOf(runStep);
                       const thisIdx = stepOrder.indexOf(step);
@@ -747,8 +763,11 @@ export default function LessonPage() {
                       );
                     })}
                     {runStep === "success" && (
-                      <span className="font-bold text-sm animate-fade-in-up flex items-center gap-2 text-success">
-                        <CheckCircle size={16} /> ✓ Compilation Successful!
+                      <span className="font-bold text-sm animate-fade-in-up flex flex-wrap items-center gap-2 text-success">
+                        <CheckCircle size={16} /> Code compiles{simulatorPassed ? ` · simulation passed, +${simulationBonusXp(lesson.xp_reward)} bonus XP` : ""}
+                        {!simulatorPassed && simNotes.length > 0 && (
+                          <span className="text-xs font-semibold text-warning">Simulation note: {simNotes[0]} (no bonus XP)</span>
+                        )}
                       </span>
                     )}
                     {runStep === "error" && (
@@ -1080,10 +1099,10 @@ export default function LessonPage() {
                 {/* Direct Board Upload Card */}
                 <div className="rounded-2xl p-5 mb-6 border-2 border-primary/30 bg-primary/5 space-y-4">
                   <h4 className="font-black text-sm text-foreground font-display flex items-center gap-2">
-                    <Zap size={16} className="text-primary" /> Physical Arduino Upload
+                    <Zap size={16} className="text-primary" /> Upload to your board (optional)
                   </h4>
                   <p className="text-xs font-bold text-muted-foreground">
-                    Before you can mark this lesson as complete, you must connect your physical Arduino board and upload your working code.
+                    Have a board? Connect it and upload your sketch to see it run for real. You can finish the lesson without one.
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
                     <button
@@ -1143,13 +1162,20 @@ export default function LessonPage() {
                         <CheckCircle size={12} /> Sketch successfully uploaded!
                       </span>
                     ) : (
-                      <span className="text-warning flex items-center gap-1">
-                        <AlertTriangle size={12} /> Pending upload to physical Arduino
-                      </span>
+                      <span className="text-muted-foreground">Not uploaded (optional)</span>
                     )}
                   </div>
                 </div>
 
+                {!completed && (
+                  <p className="text-xs font-bold text-muted-foreground mb-3 text-center">
+                    {codePassed
+                      ? simulatorPassed
+                        ? `Simulation check passed: +${simulationBonusXp(lesson.xp_reward)} bonus XP when you complete.`
+                        : "Compiled. Passing the simulation check earns bonus XP (optional)."
+                      : "Run & Compile your code on the Challenge tab to unlock completion. The simulation is optional bonus XP."}
+                  </p>
+                )}
                 {completed ? (
                   <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
@@ -1158,7 +1184,7 @@ export default function LessonPage() {
                   >
                     <div className="text-5xl mb-3">🎉</div>
                     <h3 className="text-xl font-extrabold font-display text-success mb-1">Lesson Complete!</h3>
-                    <p className="text-sm font-semibold text-muted-foreground mb-4">You earned {lesson.xp_reward} XP. Keep pushing forward!</p>
+                    <p className="text-sm font-semibold text-muted-foreground mb-4">You earned {earnedXp || lesson.xp_reward} XP{earnedXp > lesson.xp_reward ? `, including ${earnedXp - lesson.xp_reward} bonus XP for passing the simulation check` : ""}. Keep pushing forward!</p>
                     <button
                       onClick={() => navigate("/learn")}
                       className="px-6 py-3 bg-primary hover:bg-primary/90 border-2 border-b-4 border-primary/60 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-primary-foreground transition-all shadow-sm"
@@ -1169,11 +1195,11 @@ export default function LessonPage() {
                 ) : (
                   <button
                     onClick={handleComplete}
-                    disabled={submitting || !codeUploaded}
+                    disabled={submitting || !codePassed}
                     className="w-full py-4 bg-success hover:bg-success/90 border-2 border-b-4 border-success/70 active:border-b-2 active:translate-y-[2px] rounded-xl text-sm font-extrabold text-white flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-50 disabled:pointer-events-none"
                   >
                     <CheckCircle size={16} />
-                    {submitting ? "Completing..." : !codeUploaded ? "Upload Code to Board to Complete" : "Mark as Complete"}
+                    {submitting ? "Completing..." : !codePassed ? "Compile your code to complete" : "Mark as complete"}
                   </button>
                 )}
               </motion.div>

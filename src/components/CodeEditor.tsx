@@ -34,20 +34,20 @@ export default function CodeEditor({ code, onChange, readOnly = false, maxHeight
       {/* Line numbers */}
       <div
         ref={lineRef}
-        className="flex-shrink-0 select-none text-right pr-3 pt-4 pb-4 overflow-hidden"
+        className="flex-shrink-0 select-none text-right pr-3 pt-5 pb-5 overflow-hidden"
         style={{
           fontFamily: "'JetBrains Mono', monospace",
-          fontSize: "13px",
-          lineHeight: "1.7",
-          color: "hsl(228, 25%, 35%)",
-          background: "hsl(229, 48%, 7%)",
-          borderRight: "1px solid hsl(232, 38%, 18%)",
-          width: "48px",
-          minWidth: "48px",
+          fontSize: "14px",
+          lineHeight: "1.75",
+          color: "hsl(210, 12%, 42%)",
+          background: "hsl(var(--code-bg))",
+          borderRight: "1px solid hsl(var(--code-border))",
+          width: "56px",
+          minWidth: "56px",
         }}
       >
         {Array.from({ length: lineCount }, (_, i) => (
-          <div key={i} className="px-1" style={{ height: "calc(13px * 1.7)" }}>
+          <div key={i} className="px-1" style={{ height: "calc(14px * 1.75)" }}>
             {i + 1}
           </div>
         ))}
@@ -57,13 +57,13 @@ export default function CodeEditor({ code, onChange, readOnly = false, maxHeight
       {readOnly ? (
         <pre
           ref={preRef}
-          className="flex-1 p-4 overflow-auto text-sm"
+          className="flex-1 px-5 py-5 overflow-auto text-sm"
           style={{
             fontFamily: "'JetBrains Mono', monospace",
-            fontSize: "13px",
-            lineHeight: "1.7",
-            color: "#E0E7FF",
-            background: "hsl(232, 48%, 8%)",
+            fontSize: "14px",
+            lineHeight: "1.75",
+            color: "hsl(var(--code-fg))",
+            background: "hsl(var(--code-bg))",
             margin: 0,
             border: "none",
             whiteSpace: "pre",
@@ -76,14 +76,14 @@ export default function CodeEditor({ code, onChange, readOnly = false, maxHeight
           ref={codeRef}
           value={code}
           onChange={(e) => onChange?.(e.target.value)}
-          className="flex-1 p-4 text-sm resize-none focus:outline-none"
+          className="flex-1 px-5 py-5 text-sm resize-none focus:outline-none"
           style={{
             fontFamily: "'JetBrains Mono', monospace",
-            fontSize: "13px",
-            lineHeight: "1.7",
-            color: "#E0E7FF",
-            background: "hsl(232, 48%, 8%)",
-            caretColor: "#3B82F6",
+            fontSize: "14px",
+            lineHeight: "1.75",
+            color: "hsl(var(--code-fg))",
+            background: "hsl(var(--code-bg))",
+            caretColor: "hsl(var(--gold-bright))",
             border: "none",
           }}
           spellCheck={false}

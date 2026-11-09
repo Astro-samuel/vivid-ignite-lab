@@ -76,7 +76,7 @@ ${code}
 Compiler Output / Errors:
 <compiler_errors>
 ${errors && errors.length > 0 ? errors.join("\n") : "No compiler errors. The student wants a specific code review."}
-</compiler_errors>`;
+</compiler_errors>
 
 How to reason and respond:
 1. READ THE WHOLE SKETCH first. Understand the student's intent before addressing any single line.

@@ -9,11 +9,5 @@ verify_jwt = false
 [functions.explain-code]
 verify_jwt = false
 
-[functions.recognize-components]
-verify_jwt = false
-
-[functions.recommend-projects]
-verify_jwt = false
-
 [functions.visual-search]
 verify_jwt = false

@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { toast as sonnerToast } from "sonner";
-import { Minus, Plus, Save, Zap, Lightbulb, Package, Loader2, Brain, Heart, X, Sparkles, ShoppingCart, Camera, Eye } from "lucide-react";
+import { Minus, Plus, Save, Zap, Lightbulb, Package, Loader2, Heart, X, ShoppingCart, Check, Camera, Eye, Sparkles } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import FadeInView from "@/components/motion/FadeInView";
@@ -110,12 +110,7 @@ export default function ComponentsPage() {
   const [quantities, setQuantities] = useState<Record<string, number>>(loadQuantities);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  // Smart Recognition state
-  const [pasteText, setPasteText] = useState("");
-  const [recognizing, setRecognizing] = useState(false);
-  const [recognized, setRecognized] = useState<string[]>([]);
-  const [showPastePanel, setShowPastePanel] = useState(false);
+  const [baseline, setBaseline] = useState(() => JSON.stringify(Object.entries(loadQuantities()).sort()));
 
   // Wishlist state
   const [wishlist, setWishlist] = useState<string[]>(() => loadWishlist(user?.id));
@@ -168,38 +163,9 @@ export default function ComponentsPage() {
     
     sonnerToast.success("📦 Inventory saved and synced to account!");
     setSaving(false);
+    setBaseline(JSON.stringify(Object.entries(quantities).sort()));
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
-  };
-
-  // Smart Recognition
-  const handleRecognize = async () => {
-    if (!pasteText.trim()) return;
-    setRecognizing(true);
-    setRecognized([]);
-    try {
-      const { data, error } = await supabase.functions.invoke("recognize-components", {
-        body: { text: pasteText.trim() },
-      });
-      if (error) throw error;
-      if (data?.components) {
-        setRecognized(data.components);
-      }
-    } catch (e) {
-      console.error("Recognition error:", e);
-    }
-    setRecognizing(false);
-  };
-
-  const addRecognizedToInventory = () => {
-    setQuantities(prev => {
-      const next = { ...prev };
-      recognized.forEach(name => { if (!next[name]) next[name] = 1; });
-      return next;
-    });
-    setRecognized([]);
-    setPasteText("");
-    setShowPastePanel(false);
   };
 
   // Wishlist
@@ -220,6 +186,26 @@ export default function ComponentsPage() {
     });
   };
 
+  // ── Selection summary ──
+  const removeComponent = (name: string) => {
+    setQuantities((prev) => {
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
+  };
+  const clearSelection = () => setQuantities({});
+
+  const selectedByCategory = [
+    ...categories.map((cat) => ({
+      cat: cat as string,
+      items: allComponents.filter((c) => c.category === cat && quantities[c.name] !== undefined).map((c) => c.name),
+    })),
+    // Items in the inventory that are not in the library (e.g. added from a kit) still need to show up.
+    { cat: "Added elsewhere", items: Object.keys(quantities).filter((n) => !allComponents.some((c) => c.name === n)) },
+  ].filter((g) => g.items.length > 0);
+  const totalUnits = Object.values(quantities).reduce((sum, q) => sum + q, 0);
+  const isDirty = JSON.stringify(Object.entries(quantities).sort()) !== baseline;
   // Visual Search
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -263,9 +249,9 @@ export default function ComponentsPage() {
 
   return (
     <Layout>
-      <div className="flex h-full">
+      <div className="flex flex-col lg:flex-row lg:h-full">
         {/* Main panel */}
-        <div className="flex-1 px-8 py-10 overflow-y-auto">
+        <div className="flex-1 min-w-0 px-5 sm:px-8 py-8 lg:py-10 lg:overflow-y-auto">
           <FadeInView className="mb-6">
             <div className="flex items-center gap-2 mb-1">
               <span style={{ color: "hsl(var(--muted-foreground))" }}>⚙️</span>
@@ -277,36 +263,16 @@ export default function ComponentsPage() {
             </p>
           </FadeInView>
 
-          {/* Smart Recognition Panel */}
+          {/* Visual search (camera) */}
           <div className="mb-4">
             <button
-              onClick={() => setShowPastePanel(!showPastePanel)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
-              style={{
-                background: "hsl(var(--card))",
-                color: "hsl(var(--foreground))",
-                border: "1px solid hsl(var(--border))",
-              }}
+              onClick={() => setShowVisualSearch(!showVisualSearch)}
+              aria-expanded={showVisualSearch}
+              className="clay-btn clay-btn-ghost"
             >
-              <Brain size={15} />
-              🤖 Smart Component Recognition
-              <Sparkles size={12} />
-            </button>
-            <button
-              onClick={() => { setShowVisualSearch(!showVisualSearch); setShowPastePanel(false); }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
-              style={{
-                background: "hsl(var(--card))",
-                color: "hsl(var(--foreground))",
-                border: "1px solid hsl(var(--border))",
-              }}
-            >
-              <Camera size={15} />
-              📸 Visual Search
-              <Eye size={12} />
+              <Camera size={16} /> Search by camera <Eye size={14} />
             </button>
           </div>
-
           {/* Visual Search Panel */}
           <AnimatePresence>
             {showVisualSearch && (
@@ -423,102 +389,6 @@ export default function ComponentsPage() {
             )}
           </AnimatePresence>
 
-          <AnimatePresence>
-            {showPastePanel && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden mb-4"
-              >
-                <div
-                  className="rounded-2xl border p-5"
-                  style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Brain size={16} style={{ color: "hsl(var(--foreground))" }} />
-                      <span className="font-bold text-sm" style={{ color: "hsl(var(--foreground))" }}>Paste Your Component List</span>
-                    </div>
-                    <button onClick={() => setShowPastePanel(false)} style={{ color: "hsl(var(--muted-foreground))" }}>
-                      <X size={14} />
-                    </button>
-                  </div>
-                  <p className="text-xs mb-3" style={{ color: "hsl(var(--muted-foreground))" }}>
-                    Paste a shopping cart, project guide, or parts list — AI will recognize the components and add them to your inventory.
-                  </p>
-                  <textarea
-                    value={pasteText}
-                    onChange={(e) => setPasteText(e.target.value)}
-                    placeholder={"e.g.\n1x Arduino Uno\n2x DHT11 Temperature Sensor\n5x 220 ohm Resistor\nServo motor SG90\nBreadboard + jumper wires..."}
-                    className="w-full h-28 px-4 py-3 rounded-xl text-sm resize-none focus:outline-none"
-                    style={{
-                      background: "hsl(var(--background-hover))",
-                      border: "1px solid hsl(var(--border))",
-                      color: "hsl(var(--foreground))",
-                    }}
-                  />
-                  <button
-                    onClick={handleRecognize}
-                    disabled={recognizing || !pasteText.trim()}
-                    className="mt-3 w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-60 disabled:cursor-not-allowed"
-                    style={{
-                      background: "hsl(var(--primary))",
-                      color: "hsl(var(--primary-foreground))",
-                    }}
-                  >
-                    {recognizing ? <><Loader2 size={14} className="animate-spin" /> Recognizing...</> : <><Brain size={14} /> Recognize Components</>}
-                  </button>
-
-                  {/* Recognized Results */}
-                  <AnimatePresence>
-                    {recognized.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="mt-4 p-4 rounded-xl"
-                        style={{ background: "hsl(var(--success) / 0.06)", border: "1px solid hsl(var(--success) / 0.2)" }}
-                      >
-                        <div className="flex items-center gap-2 mb-3">
-                          <Sparkles size={14} style={{ color: "hsl(var(--success))" }} />
-                          <span className="text-sm font-bold" style={{ color: "hsl(var(--success))" }}>
-                            Found {recognized.length} component{recognized.length !== 1 ? "s" : ""}!
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 mb-3">
-                          {recognized.map(name => (
-                            <span
-                              key={name}
-                              className="text-xs px-2.5 py-1 rounded-lg font-medium"
-                              style={{
-                                background: ownedNames.includes(name) ? "hsl(var(--primary) / 0.12)" : "hsl(var(--success) / 0.12)",
-                                color: ownedNames.includes(name) ? "hsl(var(--primary))" : "hsl(var(--success))",
-                                border: `1px solid ${ownedNames.includes(name) ? "hsl(var(--primary) / 0.3)" : "hsl(var(--success) / 0.3)"}`,
-                              }}
-                            >
-                              {ownedNames.includes(name) ? "✓ " : "+"} {name}
-                            </span>
-                          ))}
-                        </div>
-                        <button
-                          onClick={addRecognizedToInventory}
-                          className="w-full py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-                          style={{
-                            background: "hsl(var(--success))",
-                            color: "hsl(var(--background))",
-                          }}
-                        >
-                          <Plus size={14} /> Add All to Inventory
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           {/* Component Library card */}
           <div
             className="rounded-2xl border overflow-hidden"
@@ -529,27 +399,6 @@ export default function ComponentsPage() {
               style={{ borderColor: "hsl(var(--border))" }}
             >
               <span className="font-semibold" style={{ color: "hsl(var(--foreground))" }}>Component Library</span>
-              <span
-                className="text-xs px-3 py-1 rounded-full font-semibold"
-                style={{ background: "hsl(var(--background-hover))", color: "hsl(var(--muted-foreground))", border: "1px solid hsl(var(--border))" }}
-              >
-                {totalSelected} components selected
-              </span>
-            </div>
-
-            {/* Save Inventory button */}
-            <div className="px-5 py-3 border-b" style={{ borderColor: "hsl(var(--border))" }}>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all hover:scale-[1.01] disabled:opacity-80 disabled:cursor-not-allowed"
-                style={{
-                  background: saved ? "hsl(var(--success))" : "hsl(var(--primary))",
-                  color: saved ? "hsl(var(--background))" : "hsl(var(--primary-foreground))",
-                }}
-              >
-                {saving ? <><Loader2 size={15} className="animate-spin" /> Saving...</> : saved ? <><Save size={15} /> ✓ Inventory Saved!</> : <><Save size={15} /> Save Inventory</>}
-              </button>
             </div>
 
             {/* Category tabs */}
@@ -659,7 +508,74 @@ export default function ComponentsPage() {
         </div>
 
         {/* Right sidebar panel */}
-        <div className="w-72 flex-shrink-0 px-4 py-10 space-y-4 border-l overflow-y-auto" style={{ borderColor: "hsl(var(--border))" }}>
+        <div className="lg:w-80 flex-shrink-0 px-5 py-8 lg:py-10 space-y-4 border-t lg:border-t-0 lg:border-l lg:overflow-y-auto" style={{ borderColor: "hsl(var(--border))" }}>
+
+                    {/* Selection summary */}
+          <section aria-labelledby="selection-summary-title" className="clay-card p-5">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h2 id="selection-summary-title" className="font-black text-lg text-foreground">Your selection</h2>
+              {totalSelected > 0 && (
+                <span className={`clay-badge ${isDirty ? "clay-badge-warning" : "clay-badge-success"}`}>
+                  {isDirty ? "Unsaved" : <><Check size={11} /> Saved</>}
+                </span>
+              )}
+            </div>
+
+            <dl className="grid grid-cols-2 gap-3 mb-4">
+              <div className="rounded-xl px-3 py-2.5" style={{ background: "hsl(var(--secondary-light))" }}>
+                <dt className="silk" style={{ color: "hsl(var(--secondary))" }}>Components</dt>
+                <dd className="font-black text-2xl tabular-nums" style={{ color: "hsl(var(--secondary))" }}>{totalSelected}</dd>
+              </div>
+              <div className="rounded-xl px-3 py-2.5" style={{ background: "hsl(var(--success-light))" }}>
+                <dt className="silk" style={{ color: "hsl(var(--primary))" }}>Total units</dt>
+                <dd className="font-black text-2xl tabular-nums" style={{ color: "hsl(var(--primary))" }}>{totalUnits}</dd>
+              </div>
+            </dl>
+
+            {totalSelected === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                Nothing selected yet. Tick components in the library to add them here.
+              </p>
+            ) : (
+              <div className="max-h-80 overflow-y-auto -mx-1 px-1 space-y-4">
+                {selectedByCategory.map((group) => (
+                  <div key={group.cat}>
+                    <p className="silk mb-1.5">{group.cat} · {group.items.length}</p>
+                    <ul className="space-y-1">
+                      {group.items.map((name) => (
+                        <li key={name} className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 bg-[hsl(var(--background-hover))]">
+                          <span className="flex-1 min-w-0 truncate text-sm font-bold text-foreground" title={name}>{name}</span>
+                          <span className="font-mono text-xs font-semibold text-muted-foreground tabular-nums">×{quantities[name]}</span>
+                          <button
+                            onClick={() => removeComponent(name)}
+                            aria-label={`Remove ${name}`}
+                            className="p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-card transition-colors"
+                          >
+                            <X size={13} />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-5 space-y-2">
+              <button
+                onClick={handleSave}
+                disabled={saving || (!isDirty && !saving)}
+                className="clay-btn clay-btn-primary w-full"
+              >
+                {saving ? <><Loader2 size={15} className="animate-spin" /> Saving...</> : saved && !isDirty ? <><Check size={15} /> Inventory saved</> : <><Save size={15} /> Save inventory</>}
+              </button>
+              {totalSelected > 0 && (
+                <button onClick={clearSelection} className="clay-btn clay-btn-ghost clay-btn-sm w-full">
+                  Clear selection
+                </button>
+              )}
+            </div>
+          </section>
 
           {/* Wishlist Panel */}
           <div
@@ -744,7 +660,6 @@ export default function ComponentsPage() {
                 "Add all your components, even basic ones like resistors",
                 "Include the quantity - it affects what projects you can build",
                 "More components = more complex project suggestions",
-                "Use 🤖 Smart Recognition to paste shopping lists",
                 "Add wishlist items to plan future purchases",
               ].map((tip) => (
                 <li key={tip} className="flex items-start gap-2 text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>

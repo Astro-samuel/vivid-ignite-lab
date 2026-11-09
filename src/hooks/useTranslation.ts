@@ -54,7 +54,7 @@ function getSavedLang() {
       const found = languages.find((l) => l.code === saved);
       if (found) return found;
     }
-  } catch {}
+  } catch { /* storage unavailable (private mode or quota): continue without it */ }
   return languages[0];
 }
 

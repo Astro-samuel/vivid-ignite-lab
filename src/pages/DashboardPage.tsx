@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   Play, CheckCircle, Trash2, Clock, Bookmark, Flame, Star, LogIn,
-  Loader2, Zap, ArrowRight, BookOpen, GraduationCap, Gem, Trophy,
+  Loader2, Lock, Zap, ArrowRight, BookOpen, GraduationCap, Gem, Trophy,
 } from "lucide-react";
 import Layout from "@/components/Layout";
+import Mascot from "@/components/Mascot";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
@@ -73,7 +74,7 @@ function WhatCanIMakeWidget({
       >
         <div className="flex items-center gap-2 mb-2">
           <Zap size={18} style={{ color: "hsl(var(--foreground))" }} />
-          <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
+          <span className="font-black text-sm" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>
             What Can I Make?
           </span>
         </div>
@@ -101,12 +102,12 @@ function WhatCanIMakeWidget({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Zap size={18} style={{ color: "hsl(var(--foreground))" }} />
-          <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
+          <span className="font-black text-sm" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>
             What Can I Make?
           </span>
           <span
             className="text-xs px-2.5 py-0.5 rounded-full font-black"
-            style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "2px solid hsl(var(--success) / 0.3)", fontFamily: "'Baloo 2', sans-serif" }}
+            style={{ background: "hsl(var(--success) / 0.15)", color: "hsl(var(--success))", border: "2px solid hsl(var(--success) / 0.3)", fontFamily: "'Nunito', sans-serif" }}
           >
             {buildable.length} ready
           </span>
@@ -154,7 +155,7 @@ function WhatCanIMakeWidget({
               }}
             >
               <div className="text-xl mb-1">{p.emoji}</div>
-              <p className="text-xs font-black truncate" style={{ color: "hsl(var(--foreground))", fontFamily: "'Baloo 2', sans-serif" }}>
+              <p className="text-xs font-black truncate" style={{ color: "hsl(var(--foreground))", fontFamily: "'Nunito', sans-serif" }}>
                 {p.title}
               </p>
               <div className="flex items-center gap-1.5 mt-1">
@@ -299,9 +300,9 @@ export default function DashboardPage() {
               className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mx-auto mb-6"
               style={{ background: "hsl(var(--card))", border: "3px solid hsl(var(--border))", boxShadow: "0 5px 0 0 hsl(var(--background))" }}
             >
-              🔒
+              <Lock size={36} />
             </div>
-            <h1 className="text-3xl font-black mb-2" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
+            <h1 className="text-3xl font-black mb-2" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>
               Sign in to continue
             </h1>
             <p className="text-sm font-semibold mb-6" style={{ color: "hsl(var(--muted-foreground))" }}>
@@ -333,43 +334,28 @@ export default function DashboardPage() {
 
         {/* ── Page Header ── */}
         <motion.div className="mb-6" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-3xl font-black mb-0.5" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
+          <h1 className="text-3xl font-black mb-0.5" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>
             Dashboard
           </h1>
           <p className="text-sm font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>
-            Track your progress and keep the streak alive 🔥
+            Your projects, streak and daily challenges.
           </p>
         </motion.div>
 
-        {/* ── Stats Grid ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        {/* ── Stats ── */}
+        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           {[
-            { label: "In Progress", value: inProgressProjects.length, bg: "hsl(var(--muted))", border: "hsl(var(--border))", shadow: "hsl(var(--background))", text: "hsl(var(--foreground))", emoji: "▶️" },
-            { label: "Completed",   value: completedProjects.length,  bg: "hsl(var(--success) / 0.1)", border: "hsl(var(--success) / 0.3)", shadow: "hsl(var(--success) / 0.15)", text: "hsl(var(--success))", emoji: "✅" },
-            { label: "Saved",       value: savedProjects.length,      bg: "hsl(var(--purple) / 0.1)", border: "hsl(var(--purple) / 0.3)", shadow: "hsl(var(--purple) / 0.15)", text: "hsl(var(--purple))", emoji: "🔖" },
-            { label: "Total XP",    value: dbXp,                      bg: "hsl(var(--primary) / 0.1)", border: "hsl(var(--primary) / 0.3)", shadow: "hsl(var(--primary) / 0.15)", text: "hsl(var(--primary))", emoji: "💎" },
-          ].map(({ label, value, bg, border, shadow, text, emoji }, i) => (
-            <motion.div
-              key={label}
-              className="rounded-2xl p-5 text-center"
-              style={{
-                background: bg,
-                border: `2.5px solid ${border}`,
-                boxShadow: `0 5px 0 0 ${shadow}`,
-              }}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06, type: "spring", stiffness: 300, damping: 25 }}
-              whileHover={{ translateY: -2, boxShadow: `0 7px 0 0 ${shadow}` }}
-            >
-              <div className="text-2xl mb-1">{emoji}</div>
-              <p className="text-3xl font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: text }}>
-                {value.toLocaleString()}
-              </p>
-              <p className="text-xs font-bold mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>{label}</p>
-            </motion.div>
+            { label: "In progress", value: inProgressProjects.length, bg: "hsl(var(--secondary-light))", edge: "hsl(var(--blue-bright) / 0.6)", tone: "hsl(var(--secondary))" },
+            { label: "Completed",   value: completedProjects.length,  bg: "hsl(var(--success-light))",   edge: "hsl(var(--green-bright) / 0.7)", tone: "hsl(var(--primary))" },
+            { label: "Saved",       value: savedProjects.length,      bg: "hsl(var(--purple-light))",    edge: "hsl(var(--purple) / 0.45)",     tone: "hsl(var(--purple))" },
+            { label: "Total XP",    value: dbXp,                      bg: "hsl(var(--gold-light))",      edge: "hsl(var(--gold-bright))",       tone: "hsl(var(--gold))" },
+          ].map(({ label, value, bg, edge, tone }) => (
+            <div key={label} className="rounded-2xl px-5 py-4 border-2 border-b-4" style={{ background: bg, borderColor: edge }}>
+              <dt className="silk" style={{ color: tone }}>{label}</dt>
+              <dd className="mt-1 font-black text-3xl tabular-nums" style={{ color: tone }}>{value.toLocaleString()}</dd>
+            </div>
           ))}
-        </div>
+        </dl>
 
         {/* ── Welcome guide for new users ── */}
         {inProgressProjects.length === 0 && completedProjects.length === 0 && savedProjects.length === 0 && (
@@ -380,23 +366,15 @@ export default function DashboardPage() {
             transition={{ delay: 0.15 }}
           >
             {/* Decorative bubble */}
-            <div
-              className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20"
-              style={{ background: "hsl(var(--muted-foreground))" }}
-            />
+            
             <div className="relative z-10 flex flex-col sm:flex-row gap-5 items-center">
-              <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
-                style={{ background: "hsl(var(--card))", border: "2.5px solid hsl(var(--border))", boxShadow: "0 4px 0 0 hsl(var(--background))" }}
-              >
-                🚀
-              </div>
+              <Mascot size={84} mood="cheer" className="flex-shrink-0" />
               <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-xl font-black mb-1" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
-                  Welcome to ArduinoLab!
+                <h2 className="text-xl font-black mb-1" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>
+                  Your bench is ready.
                 </h2>
                 <p className="text-sm font-semibold mb-4" style={{ color: "hsl(var(--muted-foreground))" }}>
-                  Your workspace is ready. Let's build your first project!
+                  Pick a project from the catalog, or start with the first lesson.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                   <button
@@ -435,7 +413,7 @@ export default function DashboardPage() {
                 <motion.div animate={streakAnimating ? { rotate: [0, -15, 15, 0], scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.6 }}>
                   <Flame size={18} style={{ color: streakDays > 0 ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }} />
                 </motion.div>
-                <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
+                <span className="font-black text-sm" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>
                   Daily Streak
                 </span>
               </div>
@@ -445,12 +423,12 @@ export default function DashboardPage() {
                   background: streakDays > 0 ? "hsl(var(--primary) / 0.15)" : "hsl(var(--muted) / 0.5)",
                   color: streakDays > 0 ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
                   border: `2px solid ${streakDays > 0 ? "hsl(var(--primary) / 0.3)" : "hsl(var(--border) / 0.5)"}`,
-                  fontFamily: "'Baloo 2', sans-serif",
+                  fontFamily: "'Nunito', sans-serif",
                 }}
                 animate={streakAnimating ? { scale: [1, 1.2, 1] } : {}}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                {streakDays} {streakDays === 1 ? "day" : "days"} {streakAnimating ? "🎉" : ""}
+                {streakDays} {streakDays === 1 ? "day" : "days"}
               </motion.span>
             </div>
 
@@ -499,7 +477,7 @@ export default function DashboardPage() {
           >
             <div className="flex items-center gap-2 mb-4">
               <Star size={18} style={{ color: "hsl(var(--foreground))" }} />
-              <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
+              <span className="font-black text-sm" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>
                 Daily Challenges
               </span>
             </div>
@@ -533,7 +511,7 @@ export default function DashboardPage() {
                         style={{
                           color: c.done ? "hsl(var(--success))" : "hsl(var(--foreground))",
                           textDecoration: c.done ? "line-through" : "none",
-                          fontFamily: "'Baloo 2', sans-serif",
+                          fontFamily: "'Nunito', sans-serif",
                         }}
                       >
                         {c.title}
@@ -543,7 +521,7 @@ export default function DashboardPage() {
                   </div>
                   <span
                     className="text-xs font-black px-2 py-0.5 rounded-full flex-shrink-0"
-                    style={{ background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "2px solid hsl(var(--primary) / 0.3)", fontFamily: "'Baloo 2', sans-serif" }}
+                    style={{ background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))", border: "2px solid hsl(var(--primary) / 0.3)", fontFamily: "'Nunito', sans-serif" }}
                   >
                     +{c.xp} XP
                   </span>
@@ -571,7 +549,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <BookOpen size={18} style={{ color: "hsl(var(--foreground))" }} />
-              <span className="font-black text-sm" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
+              <span className="font-black text-sm" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>
                 Learning Pathway
               </span>
             </div>
@@ -581,7 +559,7 @@ export default function DashboardPage() {
               style={{ color: "hsl(var(--primary))" }}
               id="go-to-learn-btn"
             >
-              📚 Explore Learning Hub
+              Open the learning hub
             </button>
           </div>
 
@@ -609,11 +587,11 @@ export default function DashboardPage() {
                         : { background: "hsl(var(--muted))", border: "2px solid hsl(var(--border))", boxShadow: "0 3px 0 0 hsl(var(--background))" }
                     }
                   >
-                    {s.done ? "✅" : s.emoji}
+                    {s.done ? <CheckCircle size={18} /> : <span className="silk">{s.step}</span>}
                   </div>
                   <p
                     className="text-[10px] font-black text-center"
-                    style={{ color: s.done ? "hsl(var(--success))" : "hsl(var(--foreground))", fontFamily: "'Baloo 2', sans-serif" }}
+                    style={{ color: s.done ? "hsl(var(--success))" : "hsl(var(--foreground))", fontFamily: "'Nunito', sans-serif" }}
                   >
                     {s.label}
                   </p>
@@ -636,33 +614,21 @@ export default function DashboardPage() {
         <WhatCanIMakeWidget navigate={navigate} userId={user?.id} userProjectIds={userProjectIds} />
 
         {/* ── Project Tabs ── */}
-        <div className="flex gap-2 mb-5">
+        <div role="tablist" className="flex gap-6 mb-5 border-b border-border">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 id={`tab-${tab.id}`}
+                role="tab"
+                aria-selected={isActive}
                 onClick={() => setActiveTab(tab.id)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-black cursor-pointer transition-all"
-                style={
-                  isActive
-                    ? {
-                        background: "hsl(var(--muted))",
-                        color: "hsl(var(--primary))",
-                        border: "2.5px solid hsl(var(--border))",
-                        boxShadow: "0 3px 0 0 hsl(var(--background))",
-                        fontFamily: "'Baloo 2', sans-serif",
-                      }
-                    : {
-                        background: "hsl(var(--card))",
-                        color: "hsl(var(--foreground-muted))",
-                        border: "2px solid hsl(var(--border))",
-                        fontFamily: "'Baloo 2', sans-serif",
-                      }
-                }
+                className={`pb-3 -mb-px text-sm font-semibold cursor-pointer border-b-2 transition-colors ${
+                  isActive ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
               >
-                {tab.emoji} {tab.label} ({tab.count})
+                {tab.label} <span className="font-mono text-xs tabular-nums text-muted-foreground">{tab.count}</span>
               </button>
             );
           })}
@@ -677,7 +643,7 @@ export default function DashboardPage() {
               className="w-12 h-12 rounded-full border-4 mx-auto mb-3"
               style={{ borderColor: "hsl(var(--border))", borderTopColor: "hsl(var(--primary))" }}
             />
-            <p className="font-bold text-sm" style={{ color: "hsl(var(--muted-foreground))", fontFamily: "'Baloo 2', sans-serif" }}>
+            <p className="font-bold text-sm" style={{ color: "hsl(var(--muted-foreground))", fontFamily: "'Nunito', sans-serif" }}>
               Loading projects...
             </p>
           </div>
@@ -708,7 +674,7 @@ export default function DashboardPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div>
-                          <h3 className="font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>
+                          <h3 className="font-black" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>
                             {p.title}
                           </h3>
                           <p className="text-xs font-semibold mt-0.5 line-clamp-1" style={{ color: "hsl(var(--muted-foreground))" }}>
@@ -755,7 +721,7 @@ export default function DashboardPage() {
                           transition={{ duration: 0.8, delay: 0.1 }}
                         />
                       </div>
-                      <p className="text-right text-xs font-black mt-1" style={{ color: "hsl(var(--success))", fontFamily: "'Baloo 2', sans-serif" }}>
+                      <p className="text-right text-xs font-black mt-1" style={{ color: "hsl(var(--success))", fontFamily: "'Nunito', sans-serif" }}>
                         {p.progress || 0}%
                       </p>
                     </div>
@@ -783,12 +749,12 @@ export default function DashboardPage() {
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>{p.title}</h3>
+                            <h3 className="font-black" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>{p.title}</h3>
                             <CheckCircle size={16} style={{ color: "hsl(var(--success))" }} />
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             <DifficultyBadge difficulty={p.difficulty || "beginner"} />
-                            <span className="text-xs font-black" style={{ color: "hsl(var(--primary))", fontFamily: "'Baloo 2', sans-serif" }}>
+                            <span className="text-xs font-black" style={{ color: "hsl(var(--primary))", fontFamily: "'Nunito', sans-serif" }}>
                               +{p.xp} XP
                             </span>
                           </div>
@@ -826,13 +792,13 @@ export default function DashboardPage() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between flex-wrap gap-2">
                         <div>
-                          <h3 className="font-black" style={{ fontFamily: "'Baloo 2', sans-serif", color: "hsl(var(--foreground))" }}>{p.title}</h3>
+                          <h3 className="font-black" style={{ fontFamily: "'Nunito', sans-serif", color: "hsl(var(--foreground))" }}>{p.title}</h3>
                           <div className="flex items-center gap-2 mt-1">
                             <DifficultyBadge difficulty={p.difficulty || "beginner"} />
                             <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>
                               <Clock size={10} /> {p.time}
                             </span>
-                            <span className="text-xs font-black" style={{ color: "hsl(var(--primary))", fontFamily: "'Baloo 2', sans-serif" }}>+{p.xp} XP</span>
+                            <span className="text-xs font-black" style={{ color: "hsl(var(--primary))", fontFamily: "'Nunito', sans-serif" }}>+{p.xp} XP</span>
                           </div>
                         </div>
                         <button
@@ -866,7 +832,7 @@ export default function DashboardPage() {
               color: "white",
               border: "2.5px solid hsl(var(--success-dark))",
               boxShadow: "0 5px 0 0 hsl(var(--success-dark))",
-              fontFamily: "'Baloo 2', sans-serif",
+              fontFamily: "'Nunito', sans-serif",
             }}
             initial={{ y: 40, opacity: 0, scale: 0.9 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -882,33 +848,19 @@ export default function DashboardPage() {
 }
 
 function EmptyState({
-  emoji, message, action, actionLabel,
+  message, action, actionLabel,
 }: {
-  emoji: string;
+  emoji?: string;
   message: string;
   action: () => void;
   actionLabel: string;
 }) {
   return (
-    <motion.div
-      className="text-center py-14"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-    >
-      <div
-        className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4"
-        style={{ background: "hsl(var(--muted))", border: "3px solid hsl(var(--border))", boxShadow: "0 5px 0 0 hsl(var(--background))" }}
-      >
-        {emoji}
-      </div>
-      <p className="font-bold text-sm mb-4" style={{ color: "hsl(var(--muted-foreground))", fontFamily: "'Baloo 2', sans-serif" }}>
-        {message}
-      </p>
+    <div className="text-center py-14 border border-dashed border-input rounded-xl">
+      <p className="text-[15px] text-muted-foreground mb-4">{message}</p>
       <button onClick={action} className="clay-btn clay-btn-primary clay-btn-sm mx-auto">
         {actionLabel}
       </button>
-    </motion.div>
+    </div>
   );
 }
-
-

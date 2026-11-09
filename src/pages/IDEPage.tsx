@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Package, Download, Save, FolderOpen, Trash2, Plus, Cpu } from "lucide-react";
+import { Play, AlertTriangle, CheckCircle, XCircle, Brain, Loader2, Zap, ChevronRight, BookOpen, Circle, ArrowLeft, PanelLeftClose, PanelLeftOpen, Package, Download, Save, FolderOpen, Trash2, Plus, Cpu, Code, Monitor, Copy, Check, ExternalLink, Terminal, Upload, Usb } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import CodeEditor from "@/components/CodeEditor";
@@ -241,7 +241,9 @@ export default function IDEPage() {
   const [debugError, setDebugError] = useState("");
   const [xpAwarded, setXpAwarded] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
-  const [showSimulator, setShowSimulator] = useState(true);
+  const [view, setView] = useState<"code" | "simulator">("code");
+  const [simLoaded, setSimLoaded] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [showLibrariesPanel, setShowLibrariesPanel] = useState(false);
   const [showSketchesPanel, setShowSketchesPanel] = useState(false);
   const [showPinoutModal, setShowPinoutModal] = useState(false);
@@ -614,6 +616,37 @@ export default function IDEPage() {
     runDebugRequest(updatedMessages);
   };
 
+  const switchView = (v: "code" | "simulator") => {
+    setView(v);
+    if (v === "simulator") setSimLoaded(true);
+  };
+
+  const copySketch = async () => {
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(code);
+      ok = true;
+    } catch {
+      // Fallback for when the async clipboard API is blocked (e.g. focus is inside the iframe).
+      const ta = document.createElement("textarea");
+      ta.value = code;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { ok = document.execCommand("copy"); } catch { ok = false; }
+      document.body.removeChild(ta);
+    }
+    if (ok) {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 3000);
+      sonnerToast.success("Sketch copied", { description: "In Wokwi: click the code editor, press Ctrl+A, then Ctrl+V." });
+    } else {
+      sonnerToast.error("Couldn't copy the sketch", { description: "Select the code in the Code tab and copy it manually." });
+    }
+  };
+
   const saveStateLabel: Record<SaveState, string> = {
     idle: "Not saved yet",
     saving: "Saving…",
@@ -624,24 +657,24 @@ export default function IDEPage() {
 
   return (
     <Layout>
-      <div className="flex flex-col h-[calc(100vh-48px)]">
+      <div className="flex flex-col h-[calc(100vh-60px)]">
         {/* Top Bar */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0 ide-top-bar">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-3 border-b flex-shrink-0 ide-top-bar">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => navigate(-1)}
               title="Go Back"
               aria-label="Go Back"
-              className="p-1.5 rounded-lg transition-all hover:scale-105 ide-top-back-btn"
+              className="ide-icon-btn"
             >
-              <ArrowLeft size={14} />
+              <ArrowLeft size={18} />
             </button>
-            <div>
+            <div className="min-w-0">
               <input
                 value={sketchTitle}
                 onChange={(e) => setSketchTitle(e.target.value)}
                 aria-label="Sketch title"
-                className="font-bold text-sm bg-transparent border-none outline-none focus:underline ide-title-text w-44"
+                className="font-extrabold text-base bg-transparent border-none outline-none focus:underline ide-title-text w-52 max-w-full"
               />
               <p className="text-xs ide-subtitle-text">
                 {BOARD_LABELS[fqbn]} • {saveStateLabel[saveState]}
@@ -649,67 +682,79 @@ export default function IDEPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Panel toggles */}
+          <div role="tablist" aria-label="Workspace" className="flex items-center gap-1 p-1 rounded-2xl ide-view-tabs">
+            {([
+              { id: "code", label: "Code", Icon: Code },
+              { id: "simulator", label: "Simulator", Icon: Monitor },
+            ] as const).map(({ id, label, Icon }) => (
+              <button
+                key={id}
+                id={`ide-tab-${id}`}
+                role="tab"
+                aria-selected={view === id}
+                onClick={() => switchView(id)}
+                className="ide-view-tab"
+              >
+                <Icon size={16} /> {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <button
               onClick={() => setShowInstructions(!showInstructions)}
               aria-label="Toggle Instructions"
-              className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showInstructions ? "bg-primary/15 text-primary border border-primary/30" : "bg-muted/50 text-muted-foreground border border-transparent"}`}
-              title={showInstructions ? "Hide Instructions" : "Show Instructions"}
+              aria-pressed={showInstructions}
+              className="ide-icon-btn"
+              title={showInstructions ? "Hide starter templates" : "Show starter templates"}
             >
-              {showInstructions ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
+              {showInstructions ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
             </button>
             <button
               onClick={() => setShowLibrariesPanel(!showLibrariesPanel)}
               aria-label="Toggle Library Manager"
-              className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showLibrariesPanel ? "bg-primary/15 text-primary border border-primary/30" : "bg-muted/50 text-muted-foreground border border-transparent"}`}
+              aria-pressed={showLibrariesPanel}
+              className="ide-icon-btn"
               title={showLibrariesPanel ? "Hide Library Manager" : "Show Library Manager"}
             >
-              <Package size={14} />
+              <Package size={18} />
             </button>
             <button
               onClick={() => setShowSketchesPanel(!showSketchesPanel)}
               aria-label="Toggle My Sketches"
-              className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showSketchesPanel ? "bg-primary/15 text-primary border border-primary/30" : "bg-muted/50 text-muted-foreground border border-transparent"}`}
+              aria-pressed={showSketchesPanel}
+              className="ide-icon-btn"
               title={showSketchesPanel ? "Hide My Sketches" : "Show My Sketches"}
             >
-              <FolderOpen size={14} />
-            </button>
-            <button
-              onClick={() => setShowSimulator(!showSimulator)}
-              aria-label="Toggle Simulator"
-              className={`p-1.5 rounded-lg transition-all hover:scale-105 ${showSimulator ? "bg-primary/15 text-primary border border-primary/30" : "bg-muted/50 text-muted-foreground border border-transparent"}`}
-              title={showSimulator ? "Hide Simulator" : "Show Simulator"}
-            >
-              {showSimulator ? <PanelRightClose size={14} /> : <PanelRightOpen size={14} />}
+              <FolderOpen size={18} />
             </button>
             <button
               onClick={() => setShowPinoutModal(true)}
               aria-label="Open Pin Reference Guide"
-              className="p-1.5 rounded-lg transition-all hover:scale-105 bg-muted/50 text-muted-foreground hover:text-foreground border border-transparent flex items-center gap-1 text-xs font-semibold"
+              className="ide-chip"
               title="Pinout Guide"
             >
-              <Cpu size={14} className="text-primary" /> Pinout Guide
+              <Cpu size={14} /> Pinout
             </button>
 
-            <div className="w-px h-5 mx-1 ide-top-btn-divider" />
+            <div className="w-px h-6 mx-1 ide-top-btn-divider" />
 
-            <button onClick={newSketch} aria-label="Create new sketch" className="px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all hover:scale-105 ide-btn-reset">
-              <Plus size={11} /> New
+            <button onClick={newSketch} aria-label="Create new sketch" className="clay-btn clay-btn-ghost clay-btn-sm">
+              <Plus size={14} /> New
             </button>
-            <button onClick={saveNow} aria-label="Save sketch" disabled={saveState === "saving"} className="rounded-lg border border-primary/30 text-primary hover:bg-primary/10 transition-all px-2.5 py-1.5 text-xs flex items-center gap-1.5 disabled:opacity-60">
-              <Save size={11} /> {saveState === "saving" ? "Saving..." : "Save"}
+            <button onClick={saveNow} aria-label="Save sketch" disabled={saveState === "saving"} className="clay-btn clay-btn-ghost clay-btn-sm">
+              <Save size={14} /> {saveState === "saving" ? "Saving..." : "Save"}
             </button>
             <button
               onClick={runAndCheck}
               aria-label="Run and check code"
               disabled={runStep === "compiling" || runStep === "simulating" || runStep === "safety"}
-              className="rounded-lg bg-primary text-primary-foreground hover:bg-primary-dark px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 transition-all disabled:opacity-60"
+              className="clay-btn clay-btn-primary clay-btn-sm"
             >
-              {runStep === "compiling" && <><Loader2 size={12} className="animate-spin" /> Compiling...</>}
-              {runStep === "simulating" && <><Loader2 size={12} className="animate-spin" /> Simulating...</>}
-              {runStep === "safety" && <><Loader2 size={12} className="animate-spin" /> Safety Check...</>}
-              {(runStep === "idle" || runStep === "success" || runStep === "error") && <><Play size={12} /> Run &amp; Check</>}
+              {runStep === "compiling" && <><Loader2 size={14} className="animate-spin" /> Compiling...</>}
+              {runStep === "simulating" && <><Loader2 size={14} className="animate-spin" /> Simulating...</>}
+              {runStep === "safety" && <><Loader2 size={14} className="animate-spin" /> Safety Check...</>}
+              {(runStep === "idle" || runStep === "success" || runStep === "error") && <><Play size={14} /> Run &amp; Check</>}
             </button>
           </div>
         </div>
@@ -762,90 +807,75 @@ export default function IDEPage() {
         {/* Main area */}
         <div className="flex flex-1 overflow-hidden">
           {/* Instructions Panel */}
-          {showInstructions && (
-            <div className="w-64 flex-shrink-0 border-r flex flex-col overflow-y-auto glass-card transition-all duration-300 animate-fade-in-up ide-instructions-panel">
+          {showInstructions && view === "code" && (
+            <div className="w-72 flex-shrink-0 border-r flex flex-col overflow-y-auto bg-card transition-all duration-300 animate-fade-in-up ide-instructions-panel">
               <div className="flex items-center gap-2 px-4 py-3 border-b ide-instructions-panel-title">
                 <BookOpen size={15} className="text-muted-foreground" />
                 <span className="font-bold text-sm text-foreground">Start Building</span>
               </div>
-              <div className="p-3 space-y-2">
-                <p className="text-xs text-muted-foreground px-1 pb-1">
+              <div className="p-4 space-y-3">
+                <p className="text-sm text-muted-foreground pb-1">
                   Blank sketch by default — or drop in a starter template:
                 </p>
                 {STARTER_TEMPLATES.map((tpl) => (
                   <button
                     key={tpl.id}
                     onClick={() => loadTemplate(tpl)}
-                    className="w-full text-left rounded-xl border border-border hover:border-primary/40 hover:bg-primary/5 transition-all p-3"
+                    className="w-full text-left rounded-xl border border-border hover:border-primary/40 hover:bg-primary/5 transition-all p-4"
                   >
-                    <span className="text-xs font-semibold text-foreground block">{tpl.name}</span>
-                    <span className="text-[11px] text-muted-foreground">{tpl.description}</span>
+                    <span className="text-sm font-extrabold text-foreground block">{tpl.name}</span>
+                    <span className="text-xs text-muted-foreground">{tpl.description}</span>
                   </button>
                 ))}
               </div>
-              <div className="p-3 pt-0">
+              <div className="p-4 pt-0">
                 <ArduinoSetupGuide />
               </div>
             </div>
           )}
 
           {/* Code Editor */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div
-              className="flex items-center gap-2 px-4 py-2 border-b text-xs font-mono flex-shrink-0 bg-[hsl(232,48%,6%)] border-[hsl(232,40%,16%)] text-[hsl(228,25%,60%)]"
-            >
-              <span className="text-primary">sketch.ino</span>
-              <span>•</span>
+          <div className={view === "code" ? "flex-1 flex flex-col overflow-hidden min-w-0" : "hidden"}>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3 border-b flex-shrink-0 ide-code-header">
+              <span className="font-mono text-sm font-semibold text-white">sketch.ino</span>
               <select
                 value={fqbn}
                 onChange={(e) => setFqbn(e.target.value)}
                 aria-label="Board"
-                className="bg-transparent border-none text-[hsl(228,25%,60%)] text-xs focus:outline-none cursor-pointer"
+                className="ide-select"
               >
                 {Object.keys(BOARD_PROFILES).map((key) => (
                   <option key={key} value={key} className="bg-slate-900 text-white">{BOARD_LABELS[key] ?? key}</option>
                 ))}
               </select>
-              <span className="ml-2">|</span>
-              <button
-                onClick={downloadIno}
-                className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-700 text-slate-300 hover:bg-slate-800 transition-all cursor-pointer flex items-center gap-1"
-              >
-                <Download size={10} /> Download .ino
-              </button>
-              <button
-                onClick={serialConnected ? disconnectSerial : connectSerial}
-                className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-all cursor-pointer ${
-                  serialConnected ? "bg-success/15 text-success border-success/30" : "bg-transparent text-muted-foreground border-border"
-                }`}
-              >
-                {serialConnected ? "🔌 Connected" : "🔌 Connect Board"}
-              </button>
-              {serialConnected && (
-                <button
-                  onClick={uploadToBoard}
-                  disabled={uploading}
-                  className="text-[10px] font-bold px-2 py-0.5 rounded border border-border text-muted-foreground hover:bg-muted transition-all cursor-pointer ml-1"
-                >
-                  {uploading ? "Uploading..." : "📤 Upload to Board"}
+              <div className="flex flex-wrap items-center gap-2 ml-auto">
+                <button onClick={downloadIno} className="ide-chip">
+                  <Download size={14} /> Download .ino
                 </button>
-              )}
-              <button
-                onClick={() => setShowSerialConsole(!showSerialConsole)}
-                className="text-[10px] font-bold px-2 py-0.5 rounded border border-border text-muted-foreground hover:bg-muted transition-all cursor-pointer ml-1"
-              >
-                📟 Serial Monitor {serialLogs.length > 0 && `(${serialLogs.length})`}
-              </button>
-              <span className="ml-auto text-xs text-success">✎ Editable</span>
+                <button
+                  onClick={serialConnected ? disconnectSerial : connectSerial}
+                  className={`ide-chip ${serialConnected ? "ide-chip-on" : ""}`}
+                >
+                  <Usb size={14} /> {serialConnected ? "Board connected" : "Connect board"}
+                </button>
+                {serialConnected && (
+                  <button onClick={uploadToBoard} disabled={uploading} className="ide-chip">
+                    <Upload size={14} /> {uploading ? "Uploading..." : "Upload to board"}
+                  </button>
+                )}
+                <button onClick={() => setShowSerialConsole(!showSerialConsole)} className="ide-chip">
+                  <Terminal size={14} /> Serial monitor {serialLogs.length > 0 && `(${serialLogs.length})`}
+                </button>
+              </div>
             </div>
             <div className="relative flex-1 flex flex-col overflow-hidden">
               <div className="flex-1 relative">
                 <CodeEditor code={code} onChange={setCode} minHeight="100%" maxHeight="100%" />
               </div>
               {showSerialConsole && (
-                <div className="h-44 border-t flex flex-col overflow-hidden bg-slate-950 ide-serial-console">
-                  <div className="flex items-center justify-between px-4 py-1.5 border-b text-xs font-mono ide-serial-console-header">
-                    <span className="text-foreground font-bold">📟 Serial Monitor (9600 baud)</span>
+                <div className="h-56 border-t flex flex-col overflow-hidden bg-slate-950 ide-serial-console">
+                  <div className="flex items-center justify-between px-5 py-2.5 border-b text-xs font-mono ide-serial-console-header">
+                    <span className="text-foreground font-bold">Serial monitor (9600 baud)</span>
                     <div className="flex gap-2">
                       <button
                         onClick={clearLogs}
@@ -861,7 +891,7 @@ export default function IDEPage() {
                       </button>
                     </div>
                   </div>
-                  <div className="flex-1 p-3 overflow-y-auto font-mono text-[10px] space-y-1 text-success">
+                  <div className="flex-1 p-3 overflow-y-auto font-mono text-xs leading-relaxed space-y-1 text-success">
                     {serialLogs.length === 0 ? (
                       <span className="text-muted-foreground italic">No output. Verify connection and upload code.</span>
                     ) : (
@@ -893,23 +923,36 @@ export default function IDEPage() {
             )}
           </div>
 
-          {/* Wokwi Simulator Panel */}
-          {showSimulator && (
-            <div className="w-72 flex-shrink-0 border-l flex flex-col transition-all duration-300 ide-wokwi-simulator-panel">
-              <div className="flex items-center gap-2 px-4 py-3 border-b ide-wokwi-simulator-panel-header">
-                <Play size={14} className="text-muted-foreground" />
-                <span className="font-bold text-sm text-foreground">Simulator</span>
+          {/* Simulator — its own full-width workspace. Stays mounted after first open so the sim keeps its state. */}
+          <div className={view === "simulator" ? "flex-1 flex flex-col overflow-hidden min-w-0" : "hidden"}>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3 border-b flex-shrink-0 ide-code-header">
+              <span className="text-sm font-semibold text-white">Simulator</span>
+              <span className="text-xs">Wokwi runs separately and can't read your sketch. Copy it, click Wokwi's code editor, then Ctrl+A and Ctrl+V.</span>
+              <div className="flex flex-wrap items-center gap-2 ml-auto">
+                <button onClick={copySketch} className={`ide-chip ${copied ? "ide-chip-on" : ""}`}>
+                  {copied ? <><Check size={14} /> Copied</> : <><Copy size={14} /> Copy sketch</>}
+                </button>
+                <a
+                  href="https://wokwi.com/projects/new/arduino-uno"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ide-chip"
+                >
+                  <ExternalLink size={14} /> Open in new tab
+                </a>
               </div>
-              <div className="flex-1 relative">
+            </div>
+            <div className="flex-1 relative bg-white">
+              {simLoaded && (
                 <iframe
                   src="https://wokwi.com/projects/new/arduino-uno"
-                  className="w-full h-full border-none"
+                  className="absolute inset-0 w-full h-full border-none"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
                   title="Wokwi Simulator"
                 />
-              </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* My Sketches Panel */}
           {showSketchesPanel && (

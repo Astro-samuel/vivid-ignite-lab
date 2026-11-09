@@ -85,7 +85,7 @@ async function streamMentor({
     }
 
     if (buffer.trim()) {
-      for (let raw of buffer.split("\n")) {
+      for (const raw of buffer.split("\n")) {
         if (!raw || raw.startsWith(":") || !raw.startsWith("data: ")) continue;
         const jsonStr = raw.slice(6).trim();
         if (jsonStr === "[DONE]") continue;
@@ -93,7 +93,7 @@ async function streamMentor({
           const parsed = JSON.parse(jsonStr);
           const c = parsed.choices?.[0]?.delta?.content;
           if (c) onDelta(c);
-        } catch {}
+        } catch { /* partial JSON line: wait for the next chunk */ }
       }
     }
 

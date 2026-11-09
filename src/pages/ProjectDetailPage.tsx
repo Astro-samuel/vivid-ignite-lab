@@ -11,6 +11,7 @@ import { useUserProjects } from "@/hooks/useUserProjects";
 import { supabase } from "@/integrations/supabase/client";
 
 import Layout from "@/components/Layout";
+import { simulationBonusXp } from "@/lib/xp";
 import { useNavigate, useParams } from "react-router-dom";
 
 const allProjects = [
@@ -5831,11 +5832,11 @@ void loop() {
         const parsed = JSON.parse(stored);
         if (parsed.id === projectId) {
           // Cache for future visits
-          try { localStorage.setItem(`projectCache_${projectId}`, stored); } catch {}
+          try { localStorage.setItem(`projectCache_${projectId}`, stored); } catch { /* storage unavailable (private mode or quota): continue without it */ }
           return parsed;
         }
       }
-    } catch {}
+    } catch { /* storage unavailable (private mode or quota): continue without it */ }
     return null;
   })();
 
@@ -5844,7 +5845,7 @@ void loop() {
     try {
       const cached = localStorage.getItem(`projectCache_${projectId}`);
       if (cached) return JSON.parse(cached);
-    } catch {}
+    } catch { /* storage unavailable (private mode or quota): continue without it */ }
     return null;
   })();
 
@@ -5879,7 +5880,7 @@ void loop() {
   })();
 
   const { user } = useAuth();
-  const { saveProject, isProjectSaved, updateProgress, completeProject, deleteProject, projects: userDbProjects } = useUserProjects();
+  const { saveProject, isProjectSaved, updateProgress, completeProject, awardBonusXp, deleteProject, projects: userDbProjects } = useUserProjects();
 
   // Load saved progress from DB
   const dbProject = userDbProjects.find(p => p.project_id === projectId);
@@ -5902,6 +5903,19 @@ void loop() {
   const [simulatorPassed, setSimulatorPassed] = useState(false);
   const [codePassed, setCodePassed] = useState(false);
   const [completionAwarded, setCompletionAwarded] = useState(false);
+  const [simNotes, setSimNotes] = useState<string[]>([]);
+  const [simBonusAwarded, setSimBonusAwarded] = useState(false);
+  const simBonusKey = user ? `simBonus_${user.id}_${projectId}` : null;
+  const simBonus = simulationBonusXp(project.xp || 0);
+
+  // The simulation bonus is paid once per project; remember it across reloads.
+  useEffect(() => {
+    try {
+      setSimBonusAwarded(!!(simBonusKey && localStorage.getItem(simBonusKey)));
+    } catch {
+      setSimBonusAwarded(false);
+    }
+  }, [simBonusKey]);
 
   // Sync saved state and checked steps from DB
   useEffect(() => {
@@ -5920,23 +5934,38 @@ void loop() {
     }
   }, [dbProject, isProjectSaved, projectId]);
 
-  // AUTO-COMPLETION CHECK: All steps done + code compiled + simulator passed
+  // AUTO-COMPLETION: all steps done + code compiles. The simulation check is optional bonus XP.
   const allStepsCompleted = checkedSteps.length > 0 && checkedSteps.every(Boolean);
-  
+
+  const markSimBonusPaid = () => {
+    setSimBonusAwarded(true);
+    try { if (simBonusKey) localStorage.setItem(simBonusKey, "1"); } catch { /* storage unavailable: bonus may repeat after reload */ }
+  };
+
   useEffect(() => {
-    if (allStepsCompleted && codePassed && simulatorPassed && !completionAwarded && saved && user) {
-      // All conditions met — trigger auto-completion
+    if (allStepsCompleted && codePassed && !completionAwarded && saved && user) {
       setCompletionAwarded(true);
       setCompleted(true);
       setShowCompletionCelebration(true);
 
-      // Award XP and update DB
-      completeProject(projectId, project.xp || 0);
+      // If the simulation check already passed, pay the bonus together with the completion XP.
+      const bonus = simulatorPassed && !simBonusAwarded ? simBonus : 0;
+      completeProject(projectId, (project.xp || 0) + bonus);
+      if (bonus > 0) markSimBonusPaid();
 
-      // Hide celebration after 5s
       setTimeout(() => setShowCompletionCelebration(false), 5000);
     }
-  }, [allStepsCompleted, codePassed, simulatorPassed, completionAwarded, saved, user, projectId, project.xp, completeProject]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allStepsCompleted, codePassed, simulatorPassed, completionAwarded, saved, user, projectId, project.xp, completeProject, simBonusAwarded, simBonus]);
+
+  // Passing the simulation check after the project is already complete still earns the bonus, once.
+  useEffect(() => {
+    if (!completionAwarded || !simulatorPassed || simBonusAwarded || !user) return;
+    markSimBonusPaid();
+    awardBonusXp(simBonus);
+    sonnerToast.success(`Simulation bonus: +${simBonus} XP`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completionAwarded, simulatorPassed, simBonusAwarded, user, simBonus, awardBonusXp]);
 
   // Auto-save progress to DB when steps change
   const autoSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -5945,14 +5974,9 @@ void loop() {
     if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current);
     autoSaveTimeout.current = setTimeout(() => {
       const completedCount = checkedSteps.filter(Boolean).length;
-      const allStepsDone = checkedSteps.length > 0 && checkedSteps.every(Boolean);
-      // Progress milestones: steps=25%, code=50%, simulator=100%
-      let progress = 0;
-      if (allStepsDone && codePassed && simulatorPassed) progress = 100;
-      else if (allStepsDone && codePassed) progress = 50;
-      else if (allStepsDone) progress = 25;
-      else if (project.instructions.length > 0) progress = Math.min(Math.round((completedCount / project.instructions.length) * 24), 24);
-      // Don't overwrite completed status via auto-save
+      // Progress: steps are the first half, a successful compile is the second half.
+      const stepShare = project.instructions.length > 0 ? completedCount / project.instructions.length : 0;
+      const progress = Math.round(stepShare * 50) + (codePassed ? 50 : 0);      // Don't overwrite completed status via auto-save
       if (!completionAwarded) {
         updateProgress(projectId, {
           checked_steps: checkedSteps,
@@ -5963,7 +5987,7 @@ void loop() {
       }
     }, 2000);
     return () => { if (autoSaveTimeout.current) clearTimeout(autoSaveTimeout.current); };
-  }, [checkedSteps, activeNote, user, saved, completionAwarded, codePassed, simulatorPassed, project.instructions.length, projectId, updateProgress]);
+  }, [checkedSteps, activeNote, user, saved, completionAwarded, codePassed, project.instructions.length, projectId, updateProgress]);
 
   // Extract learning concepts from code comments
   const learningConcepts = (() => {
@@ -6019,15 +6043,10 @@ void loop() {
 
   const stepProgress = checkedSteps.filter(Boolean).length;
   const totalSteps = project.instructions.length;
-  // Progress milestones: steps=25%, code=50%, simulator=100%
-  const progressPercent = (() => {
-    if (allStepsCompleted && codePassed && simulatorPassed) return 100;
-    if (allStepsCompleted && codePassed) return 50;
-    if (allStepsCompleted) return 25;
-    // Before all steps done, scale 0-24%
-    return totalSteps > 0 ? Math.min(Math.round((stepProgress / totalSteps) * 24), 24) : 0;
-  })();
-
+  // Progress: steps are the first half, a successful compile is the second half.
+  const progressPercent = totalSteps > 0
+    ? Math.round((stepProgress / totalSteps) * 50) + (codePassed ? 50 : 0)
+    : (codePassed ? 50 : 0);
   const toggleStep = (index: number) => {
     setCheckedSteps(prev => {
       const next = [...prev];
@@ -6137,8 +6156,16 @@ void loop() {
 
   const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+  // A compile result only counts for the code it was run on.
+  useEffect(() => {
+    setCodePassed(false);
+    setSimulatorPassed(false);
+    setSimNotes([]);
+  }, [userCode]);
+
   const runAndCheck = async () => {
     setErrors([]);
+    setSimNotes([]);
     setRunStep("compiling");
     await delay(1200);
 
@@ -6176,21 +6203,19 @@ void loop() {
     if (code.includes("analogWrite") && code.includes("delay(1)")) {
       safetyWarnings.push("Warning: Very short delay with analog output may cause instability.");
     }
+    // The code compiled, so a note from the simulation check never blocks completion; it only skips the bonus.
     if (safetyWarnings.length > 0) {
-      setErrors(safetyWarnings);
-      setRunStep("error");
+      setSimNotes(safetyWarnings);
       setSimulatorPassed(false);
+      setRunStep("success");
       return;
     }
 
-    // Simulator passed
+    setSimNotes([]);
     setSimulatorPassed(true);
     setRunStep("success");
-
-    // Note: completion is now handled by the auto-completion effect
-    // which checks allSteps + codePassed + simulatorPassed
+    // Completion is handled by the auto-completion effect (steps + compile); the bonus by the effect below it.
   };
-
   const submitDebugQuery = async (msg: string) => {
     if (!msg.trim() || aiTyping) return;
     setDebugMessages((prev) => [...prev, { role: "user", content: msg }]);
@@ -6253,7 +6278,7 @@ void loop() {
 
           let newlineIdx: number;
           while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
-            let line = buffer.slice(0, newlineIdx);
+            const line = buffer.slice(0, newlineIdx);
             buffer = buffer.slice(newlineIdx + 1);
             if (line.startsWith("data: ")) {
               const jsonStr = line.slice(6).trim();
@@ -6270,7 +6295,7 @@ void loop() {
                   });
                   debugBottomRef.current?.scrollIntoView({ behavior: "smooth" });
                 }
-              } catch (e) {}
+              } catch { /* partial JSON line: wait for the next chunk */ }
             }
           }
         }
@@ -6357,10 +6382,7 @@ void loop() {
   const completionChecks = [
     { label: "All steps completed", done: allStepsCompleted },
     { label: "Code compiles successfully", done: codePassed },
-    { label: "Simulator runs without errors", done: simulatorPassed },
-    { label: "No critical warnings", done: codePassed && simulatorPassed },
   ];
-
   return (
     <Layout>
       {/* Completion Celebration Overlay */}
@@ -6372,7 +6394,7 @@ void loop() {
               Project Complete!
             </h2>
             <div className="flex items-center justify-center gap-2 text-xl font-bold" style={{ color: "hsl(var(--secondary))" }}>
-              <Zap size={24} /> +{project.xp} XP Earned!
+              <Zap size={24} /> +{project.xp} XP Earned!{simBonusAwarded ? ` (+${simBonus} simulation bonus)` : ""}
             </div>
             <p className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
               This project has been moved to your Completed Projects
@@ -6606,7 +6628,7 @@ void loop() {
             {([
               { id: "instructions" as ActiveTab, label: "Instructions", icon: "≡" },
               { id: "code" as ActiveTab, label: "Code", icon: "</>" },
-              { id: "simulate" as ActiveTab, label: "Simulate", icon: "▷" },
+              { id: "simulate" as ActiveTab, label: "Simulate (bonus XP)", icon: "▷" },
             ]).map((tab) => (
               <button
                 key={tab.id}
@@ -6655,7 +6677,7 @@ void loop() {
             {(allStepsCompleted || codePassed || simulatorPassed) && (
               <div className="mb-4 p-4 rounded-xl space-y-2" style={{ background: completed ? "hsl(var(--success) / 0.06)" : "hsl(var(--muted) / 0.5)", border: `1px solid ${completed ? "hsl(var(--success) / 0.3)" : "hsl(var(--border))"}` }}>
                 <p className="text-xs font-bold mb-2" style={{ color: completed ? "hsl(var(--success))" : "hsl(var(--foreground))" }}>
-                  {completed ? "🎉 Project Complete!" : "📋 Completion Requirements"}
+                  {completed ? "Project complete" : "Completion requirements"}
                 </p>
                 {completionChecks.map((check, i) => (
                   <div key={i} className="flex items-center gap-2">
@@ -6666,6 +6688,14 @@ void loop() {
                     <span className="text-xs" style={{ color: check.done ? "hsl(var(--success))" : "hsl(var(--muted-foreground))" }}>{check.label}</span>
                   </div>
                 ))}
+                <div className="flex items-center gap-2 pt-2 mt-1 border-t" style={{ borderColor: "hsl(var(--border))" }}>
+                  {simulatorPassed
+                    ? <CheckCircle size={14} style={{ color: "hsl(var(--gold))" }} />
+                    : <div className="w-3.5 h-3.5 rounded-full border border-dashed" style={{ borderColor: "hsl(var(--muted-foreground))" }} />}
+                  <span className="text-xs" style={{ color: simulatorPassed ? "hsl(var(--gold))" : "hsl(var(--muted-foreground))" }}>
+                    Bonus: simulation check passes (+{simBonus} XP, optional)
+                  </span>
+                </div>
               </div>
             )}
 
@@ -6731,7 +6761,7 @@ void loop() {
             {runStep !== "idle" && (
               <div className="rounded-xl px-5 py-3 flex items-center gap-6 border" style={{ background: "hsl(var(--background))", borderColor: "hsl(var(--border))" }}>
                 {(["compiling", "simulating"] as const).map((step, i) => {
-                  const labels = ["Compiling", "Simulating"];
+                  const labels = ["Compiling", "Simulation check (bonus)"];
                   const stepOrder = ["compiling", "simulating"];
                   const stepIdx = stepOrder.indexOf(runStep);
                   const thisIdx = stepOrder.indexOf(step);
@@ -6746,7 +6776,10 @@ void loop() {
                 })}
                 {runStep === "success" && (
                   <span className="font-bold text-sm animate-fade-in-up flex items-center gap-2" style={{ color: "hsl(var(--success))" }}>
-                    <CheckCircle size={16} /> ✓ Compilation Successful! +{project.xp} XP
+                    <CheckCircle size={16} /> Code compiles{simulatorPassed ? ` · simulation passed, +${simBonus} bonus XP` : ""}
+                    {!simulatorPassed && simNotes.length > 0 && (
+                      <span className="text-xs font-semibold" style={{ color: "hsl(var(--warning))" }}>Simulation note: {simNotes[0]} (no bonus XP)</span>
+                    )}
                   </span>
                 )}
                 {runStep === "error" && (

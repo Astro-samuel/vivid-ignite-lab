@@ -12,3 +12,9 @@ export function maxXpForLevel(level: number): number {
   if (level >= 2) return 500;
   return 200;
 }
+
+// Compiling is what completes a lesson or project. Passing the simulation check is optional
+// extra credit, worth a quarter of the base XP (at least 5).
+export function simulationBonusXp(baseXp: number): number {
+  return Math.max(5, Math.round(baseXp * 0.25));
+}

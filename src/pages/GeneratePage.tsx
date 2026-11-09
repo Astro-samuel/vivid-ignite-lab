@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Zap, RefreshCw, Save, CheckSquare, Square, ChevronDown, ChevronUp, Clock, Star, Loader2, X, Plus, Brain } from "lucide-react";
+import { Zap, RefreshCw, Save, CheckSquare, Square, ChevronDown, ChevronUp, Clock, Star, Loader2, X, Plus } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -177,7 +177,6 @@ export default function GeneratePage() {
   const [newComponent, setNewComponent] = useState("");
   const [previouslyShown, setPreviouslyShown] = useState<Set<number>>(new Set());
   const [communityProjects, setCommunityProjects] = useState<Project[]>([]);
-  const [aiRecommending, setAiRecommending] = useState(false);
 
   // Fetch approved community projects on mount
   useEffect(() => {
@@ -282,65 +281,8 @@ export default function GeneratePage() {
     });
   };
 
-  const generateAIRecommendations = async () => {
-    if (!user) { navigate("/auth"); return; }
-    setAiRecommending(true);
-    setProjects([]);
-    setLoadingStates([true, true, true, true, true]);
-    setSelected(new Set());
-    setShowAll(false);
-
-    try {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("level, projects_completed")
-        .eq("id", user.id)
-        .single();
-
-      const { data, error } = await supabase.functions.invoke("recommend-projects", {
-        body: {
-          components,
-          level: profile?.level || 1,
-          projectsCompleted: profile?.projects_completed || 0,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.projects && Array.isArray(data.projects)) {
-        const aiProjects: Project[] = data.projects
-          .filter((p: any) => !userProjectTitles.has((p.title || "").toLowerCase()))
-          .map((p: any, i: number) => ({
-            id: 700 + i + Math.floor(Math.random() * 100),
-            emoji: p.emoji || "🤖",
-            title: p.title,
-            description: p.description,
-            difficulty: p.difficulty || "beginner",
-            time: p.time || "30 mins",
-            xp: p.xp || 75,
-            components: p.components || [],
-          }));
-
-        aiProjects.forEach((project, i) => {
-          setTimeout(() => {
-            setProjects(prev => { const next = [...prev]; next[i] = project; return next; });
-            setLoadingStates(prev => { const next = [...prev]; next[i] = false; return next; });
-            if (i === aiProjects.length - 1) setAiRecommending(false);
-          }, (i + 1) * 600);
-        });
-      } else {
-        throw new Error("No projects returned");
-      }
-    } catch (e: any) {
-      console.error("AI recommendation error:", e);
-      setAiRecommending(false);
-      setLoadingStates([]);
-      sonnerToast.error(e?.message || "AI recommendation failed. Try the regular generator instead.");
-    }
-  };
-
   const toggleSelect = (id: number) => {
-    setSelected((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
+    setSelected((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   };
 
   const [savingAll, setSavingAll] = useState(false);
@@ -524,11 +466,11 @@ export default function GeneratePage() {
         </div>
 
         {/* Generate Buttons */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="mb-6">
           <button
             onClick={generateProjects}
-            disabled={generating || aiRecommending}
-            className="py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70"
+            disabled={generating}
+            className="w-full py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70"
             style={{
               background: generating ? "hsl(var(--primary) / 0.3)" : "hsl(var(--primary))",
               color: "hsl(var(--primary-foreground))",
@@ -538,22 +480,6 @@ export default function GeneratePage() {
               <><Loader2 size={18} className="animate-spin" /> Generating...</>
             ) : (
               <><Zap size={18} /> ✦ Generate Project</>
-            )}
-          </button>
-          <button
-            onClick={generateAIRecommendations}
-            disabled={generating || aiRecommending}
-            className="py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-3 transition-all hover:scale-[1.01] disabled:opacity-70 border"
-            style={{
-              background: aiRecommending ? "hsl(var(--background-hover) / 0.5)" : "hsl(var(--card))",
-              color: aiRecommending ? "hsl(var(--muted-foreground))" : "hsl(var(--foreground))",
-              borderColor: "hsl(var(--border))",
-            }}
-          >
-            {aiRecommending ? (
-              <><Loader2 size={18} className="animate-spin" /> AI Thinking...</>
-            ) : (
-              <><Brain size={18} /> 🤖 AI Recommend for My Level</>
             )}
           </button>
         </div>

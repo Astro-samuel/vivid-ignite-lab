@@ -1,85 +1,94 @@
-/* Baloo 2 (headings) + Nunito (body) — Duolingo-style friendly fonts */
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Fonts are loaded from index.html (preconnect + stylesheet). */
 
 @layer base {
   :root {
-    /* ===== PREMIUM DARK DESIGN SYSTEM ===== */
+    /* ===== PLAYFUL, CHUNKY, LIGHT =====
+       White surface. Bright green = go / progress. Gold = XP. Orange = streak. Blue = secondary actions + current nav.
+       Surfaces get a thick bottom edge instead of a soft shadow, so everything reads as a pressable tile. */
 
-    /* Backgrounds — deep cool slate, intentionally tinted (not flat gray) */
-    --background: 228 32% 8%;
-    --background-card: 228 28% 12%;
-    --background-hover: 228 24% 18%;
+    --background: 150 55% 95%;
+    --background-card: 0 0% 100%;
+    --background-hover: 150 32% 90%;
 
-    /* Text */
-    --foreground: 220 24% 97%;           /* Near-white, subtle cool tint */
-    --foreground-secondary: 228 20% 78%;
-    --foreground-muted: 228 14% 62%;     /* Tinted slate, not flat gray */
+    --foreground: 0 0% 24%;
+    --foreground-secondary: 0 0% 30%;
+    --foreground-muted: 0 0% 41%;
 
-    /* Primary — Amber (solder / copper / warning-LED: the maker-tool accent) */
-    --primary: 38 92% 50%;
-    --primary-dark: 32 88% 42%;
-    --primary-light: 38 85% 13%;
+    /* Primary — green. Button fills use this (AA with white text); bright variant is for non-text fills. */
+    --primary: 96 100% 27%;
+    --primary-dark: 96 100% 19%;
+    --primary-light: 96 80% 92%;
     --primary-foreground: 0 0% 100%;
+    --green-bright: 96 98% 40%;
+    --green-bright-edge: 96 100% 33%;
 
-    /* Secondary — Cyan (functional, used sparingly) */
-    --secondary: 189 70% 40%;
-    --secondary-light: 189 60% 12%;
-    --secondary-foreground: 210 40% 98%;
+    /* Secondary — blue */
+    --secondary: 203 100% 35%;
+    --secondary-light: 203 100% 94%;
+    --secondary-foreground: 0 0% 100%;
+    --blue-bright: 199 93% 54%;
+    --blue-edge: 199 80% 43%;
 
-    /* Success */
-    --success: 142 60% 42%;
-    --success-dark: 142 62% 34%;
-    --success-light: 142 50% 14%;
+    /* Gold — XP, rewards */
+    --gold: 38 100% 34%;
+    --gold-light: 48 100% 90%;
+    --gold-bright: 47 100% 50%;
+    --gold-edge: 44 100% 42%;
 
-    /* Warning — distinct golden-yellow, kept apart from primary's amber */
-    --warning: 48 88% 52%;
-    --warning-dark: 42 80% 42%;
-    --warning-light: 48 80% 13%;
+    /* Orange — streak */
+    --orange: 28 100% 38%;
+    --orange-bright: 35 100% 50%;
+    --orange-edge: 30 100% 42%;
 
-    /* Danger */
-    --destructive: 0 72% 56%;
-    --destructive-dark: 0 65% 46%;
-    --destructive-light: 0 65% 15%;
+    --success: 96 100% 27%;
+    --success-dark: 96 100% 19%;
+    --success-light: 96 80% 92%;
+
+    --warning: 30 100% 36%;
+    --warning-dark: 28 100% 28%;
+    --warning-light: 44 100% 90%;
+
+    --destructive: 0 72% 48%;
+    --destructive-dark: 0 72% 36%;
+    --destructive-light: 0 100% 95%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Accent/Purple — used sparingly (e.g. clay-card-purple, clay-badge-purple) */
-    --purple: 262 45% 58%;
-    --purple-light: 262 40% 14%;
+    --purple: 275 70% 48%;
+    --purple-light: 275 100% 95%;
 
-    /* Shadcn Aliases */
-    --card: 228 28% 12%;
-    --card-foreground: 220 24% 97%;
-    --popover: 228 28% 12%;
-    --popover-foreground: 220 24% 97%;
-    --muted: 228 24% 18%;
-    --muted-foreground: 228 14% 62%;
-    --accent: 228 24% 18%;
-    --accent-foreground: 220 24% 97%;
-    --border: 228 20% 22%;
-    --input: 228 24% 18%;
-    --ring: 38 92% 50%;
-    --radius: 0.75rem;
+    /* Shadcn aliases */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 24%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 24%;
+    --muted: 150 32% 91%;
+    --muted-foreground: 0 0% 41%;
+    --accent: 150 32% 91%;
+    --accent-foreground: 0 0% 24%;
+    --border: 150 18% 84%;
+    --input: 150 14% 78%;
+    --ring: 199 93% 54%;
+    --radius: 1rem;
 
     /* Sidebar */
-    --sidebar-background: 228 30% 9%;
-    --sidebar-foreground: 220 24% 97%;
-    --sidebar-primary: 38 92% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 24%;
+    --sidebar-muted: 0 0% 41%;
+    --sidebar-primary: 96 100% 27%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 228 24% 18%;
-    --sidebar-accent-foreground: 220 24% 97%;
-    --sidebar-border: 228 20% 20%;
-    --sidebar-ring: 38 92% 50%;
+    --sidebar-accent: 203 100% 95%;
+    --sidebar-accent-foreground: 203 100% 32%;
+    --sidebar-border: 150 18% 86%;
+    --sidebar-ring: 199 93% 54%;
 
-    /* Clay shadow colors */
-    --clay-indigo: 217, 119, 6;
-    --clay-green: 34, 197, 94;
-    --clay-violet: 6, 182, 212;
-    --clay-orange: 245, 158, 11;
+    /* Code surfaces stay dark */
+    --code-bg: 210 18% 12%;
+    --code-fg: 210 20% 88%;
+    --code-border: 210 14% 20%;
   }
 }
 
@@ -89,374 +98,391 @@
   }
 
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-weight: 600;
     background-color: hsl(var(--background));
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Baloo 2', sans-serif;
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-weight: 800;
     color: hsl(var(--foreground));
   }
 
   code, pre, .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  :focus-visible {
+    outline: 3px solid hsl(var(--blue-bright) / 0.6);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: hsl(var(--blue-bright) / 0.3);
   }
 }
 
 /* ============================================================
-   CLAYMORPHISM COMPONENT LIBRARY
+   COMPONENT LIBRARY
+   Every tile has a thick bottom edge. Pressing it pushes it down into the edge.
    ============================================================ */
 @layer components {
 
-  /* ── Clay Cards ── */
-  .clay-card {
-    background: hsl(var(--card));
-    border-radius: 20px;
-    border: 2.5px solid hsl(var(--border));
-    box-shadow:
-      0 4px 0 0 hsl(var(--border)),
-      0 8px 20px rgba(0, 0, 0, 0.4);
-    transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+  /* ── Label: small, bold, uppercase, grey ── */
+  .silk {
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: hsl(var(--foreground-muted));
   }
 
-  .clay-card:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 6px 0 0 hsl(var(--border)),
-      0 12px 24px rgba(0, 0, 0, 0.5);
+  /* ── Cards ── */
+  .clay-card {
+    background: hsl(var(--card));
+    border-radius: 16px;
+    border: 2px solid hsl(var(--border));
+    border-bottom-width: 4px;
+    transition: background-color 120ms ease-out;
   }
+  .clay-card:hover { background: hsl(var(--background-hover) / 0.6); }
 
   .clay-card-primary {
     background: hsl(var(--primary));
-    border-radius: 20px;
-    border: 2.5px solid hsl(var(--primary-dark));
-    box-shadow:
-      0 4px 0 0 hsl(var(--primary-dark)),
-      0 8px 20px rgba(99, 102, 241, 0.25);
-    transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+    color: hsl(var(--primary-foreground));
+    border-radius: 16px;
+    border: 2px solid hsl(var(--primary-dark));
+    border-bottom-width: 4px;
   }
-
-  .clay-card-primary:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 6px 0 0 hsl(var(--primary-dark)),
-      0 12px 24px rgba(99, 102, 241, 0.3);
-  }
-
   .clay-card-success {
     background: hsl(var(--success-light));
-    border-radius: 20px;
-    border: 2.5px solid hsl(var(--success));
-    box-shadow:
-      0 4px 0 0 hsl(var(--success-dark)),
-      0 8px 20px rgba(34, 197, 94, 0.15);
+    border-radius: 16px;
+    border: 2px solid hsl(var(--green-bright));
+    border-bottom-width: 4px;
   }
-
   .clay-card-warning {
     background: hsl(var(--warning-light));
-    border-radius: 20px;
-    border: 2.5px solid hsl(var(--warning));
-    box-shadow:
-      0 4px 0 0 hsl(var(--warning-dark)),
-      0 8px 20px rgba(245, 158, 11, 0.15);
+    border-radius: 16px;
+    border: 2px solid hsl(var(--gold-bright));
+    border-bottom-width: 4px;
   }
-
   .clay-card-purple {
     background: hsl(var(--purple-light));
-    border-radius: 20px;
-    border: 2.5px solid hsl(var(--purple));
-    box-shadow:
-      0 4px 0 0 hsl(var(--purple-light)),
-      0 8px 20px rgba(168, 85, 247, 0.15);
+    border-radius: 16px;
+    border: 2px solid hsl(var(--purple) / 0.5);
+    border-bottom-width: 4px;
   }
 
-  /* ── Clay Buttons ── */
+  /* ── Buttons ── */
   .clay-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 24px;
-    border-radius: 100px;
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 700;
-    font-size: 0.9rem;
-    letter-spacing: 0.01em;
+    padding: 12px 20px;
+    border-radius: 16px;
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    line-height: 1.2;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     cursor: pointer;
-    transition: transform 100ms ease-out, box-shadow 100ms ease-out;
+    transition: background-color 100ms ease-out, filter 100ms ease-out;
     -webkit-user-select: none;
     user-select: none;
-    border: none;
-    outline: none;
+    border: 2px solid transparent;
+    border-bottom-width: 4px;
   }
-
   .clay-btn:active {
-    transform: translateY(3px);
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+    margin-bottom: 2px;
   }
+  .clay-btn:disabled { opacity: 0.5; pointer-events: none; }
 
   .clay-btn-primary {
     background: hsl(var(--primary));
-    color: white;
-    box-shadow: 0 4px 0 0 hsl(var(--primary-dark));
-    border: 2px solid hsl(var(--primary-dark));
+    color: hsl(var(--primary-foreground));
+    border-color: hsl(var(--primary-dark));
   }
-
-  .clay-btn-primary:hover {
-    background: hsl(var(--primary-dark));
-    box-shadow: 0 5px 0 0 hsl(var(--primary-dark));
-  }
-
-  .clay-btn-primary:active {
-    box-shadow: 0 1px 0 0 hsl(var(--primary-dark));
-  }
+  .clay-btn-primary:hover { filter: brightness(1.08); }
 
   .clay-btn-success {
-    background: hsl(var(--success));
-    color: white;
-    box-shadow: 0 4px 0 0 hsl(var(--success-dark));
-    border: 2px solid hsl(var(--success-dark));
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-color: hsl(var(--primary-dark));
   }
-
-  .clay-btn-success:hover {
-    background: hsl(var(--success-dark));
-    box-shadow: 0 5px 0 0 hsl(var(--success-dark));
-  }
-
-  .clay-btn-success:active {
-    box-shadow: 0 1px 0 0 hsl(var(--success-dark));
-  }
+  .clay-btn-success:hover { filter: brightness(1.08); }
 
   .clay-btn-ghost {
     background: hsl(var(--card));
-    color: hsl(var(--primary));
-    box-shadow: 0 4px 0 0 hsl(var(--border));
-    border: 2.5px solid hsl(var(--border));
+    color: hsl(var(--secondary));
+    border-color: hsl(var(--border));
   }
-
-  .clay-btn-ghost:hover {
-    background: hsl(var(--background-hover));
-    box-shadow: 0 5px 0 0 hsl(var(--border));
-  }
-
-  .clay-btn-ghost:active {
-    box-shadow: 0 1px 0 0 hsl(var(--border));
-  }
+  .clay-btn-ghost:hover { background: hsl(var(--background-hover)); }
 
   .clay-btn-danger {
     background: hsl(var(--destructive));
-    color: white;
-    box-shadow: 0 4px 0 0 hsl(var(--destructive-dark));
-    border: 2px solid hsl(var(--destructive-dark));
+    color: #fff;
+    border-color: hsl(var(--destructive-dark));
   }
+  .clay-btn-danger:hover { filter: brightness(1.08); }
 
-  .clay-btn-sm {
-    padding: 8px 16px;
-    font-size: 0.8rem;
-    border-radius: 100px;
-  }
+  .clay-btn-sm { padding: 8px 14px; font-size: 0.75rem; border-radius: 12px; }
+  .clay-btn-lg { padding: 15px 28px; font-size: 0.95rem; border-radius: 16px; }
 
-  .clay-btn-lg {
-    padding: 16px 36px;
-    font-size: 1.05rem;
-    border-radius: 100px;
-  }
-
-  /* ── Clay Badges / Pills ── */
+  /* ── Badges ── */
   .clay-badge {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 4px 12px;
-    border-radius: 100px;
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 700;
-    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     border: 2px solid transparent;
   }
+  .clay-badge-primary { background: hsl(var(--secondary-light)); color: hsl(var(--secondary)); border-color: hsl(var(--blue-bright) / 0.4); }
+  .clay-badge-success { background: hsl(var(--success-light)); color: hsl(var(--success-dark)); border-color: hsl(var(--green-bright) / 0.5); }
+  .clay-badge-warning { background: hsl(var(--warning-light)); color: hsl(var(--warning-dark)); border-color: hsl(var(--gold-bright) / 0.7); }
+  .clay-badge-danger  { background: hsl(var(--destructive-light)); color: hsl(var(--destructive-dark)); border-color: hsl(var(--destructive) / 0.4); }
+  .clay-badge-purple  { background: hsl(var(--purple-light)); color: hsl(var(--purple)); border-color: hsl(var(--purple) / 0.4); }
 
-  .clay-badge-primary {
-    background: hsl(241, 100%, 93%);
-    color: hsl(243, 75%, 59%);
-    border-color: hsl(241, 89%, 85%);
-  }
-
-  .clay-badge-success {
-    background: hsl(142, 77%, 94%);
-    color: hsl(142, 72%, 37%);
-    border-color: hsl(142, 71%, 80%);
-  }
-
-  .clay-badge-warning {
-    background: hsl(48, 100%, 94%);
-    color: hsl(38, 92%, 38%);
-    border-color: hsl(38, 92%, 78%);
-  }
-
-  .clay-badge-danger {
-    background: hsl(0, 86%, 97%);
-    color: hsl(0, 84%, 50%);
-    border-color: hsl(0, 84%, 85%);
-  }
-
-  .clay-badge-purple {
-    background: hsl(270, 100%, 97%);
-    color: hsl(265, 89%, 55%);
-    border-color: hsl(265, 89%, 85%);
-  }
-
-  /* ── Clay Progress Bar ── */
+  /* ── Progress bar: fat, green, with the highlight stripe ── */
   .clay-progress-track {
     width: 100%;
     height: 16px;
-    background: hsl(238, 80%, 95%);
-    border-radius: 100px;
-    border: 2px solid hsl(238, 45%, 88%);
+    background: hsl(var(--border));
+    border-radius: 999px;
     overflow: hidden;
     position: relative;
   }
-
   .clay-progress-fill {
     height: 100%;
-    border-radius: 100px;
-    background: linear-gradient(90deg, hsl(142, 71%, 45%), hsl(142, 71%, 55%));
+    border-radius: 999px;
+    background: hsl(var(--green-bright));
     position: relative;
-    transition: width 800ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: width 600ms cubic-bezier(0.34, 1.3, 0.64, 1);
   }
-
   .clay-progress-fill::after {
     content: '';
     position: absolute;
-    top: 2px;
-    left: 6px;
-    right: 6px;
+    top: 4px;
+    left: 8px;
+    right: 8px;
     height: 4px;
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
   }
 
-  /* ── Stat Pill (top bar) ── */
+  /* ── Top-bar stat: icon + bold coloured number, no box ── */
   .stat-pill {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
-    background: hsl(var(--background-hover) / 0.6);
-    border-radius: 10px;
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 700;
-    font-size: 0.85rem;
+    padding: 6px 10px;
+    border-radius: 12px;
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
     color: hsl(var(--foreground));
     cursor: default;
-    transition: background-color 150ms ease-out;
+    transition: background-color 120ms;
   }
+  .stat-pill:hover { background: hsl(var(--background-hover)); }
 
-  .stat-pill:hover {
-    background: hsl(var(--background-hover));
-  }
-
-  /* ── Nav Items — flat rows, no bubble chrome. Hierarchy via fill + weight. ── */
+  /* ── Sidebar nav rows ── */
   .duo-nav-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 9px 12px;
-    border-radius: 10px;
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: hsl(var(--foreground-muted));
+    gap: 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: hsl(var(--sidebar-muted));
     cursor: pointer;
-    transition: background-color 120ms ease-out, color 120ms ease-out;
+    transition: background-color 100ms ease-out;
     text-decoration: none;
     background: transparent;
-    border: none;
+    border: 2px solid transparent;
     margin-bottom: 2px;
   }
-
-  .duo-nav-item:hover {
-    background: hsl(var(--background-hover));
-    color: hsl(var(--foreground));
-  }
-
+  .duo-nav-item:hover { background: hsl(var(--background-hover)); }
   .duo-nav-item.active {
-    background: hsl(var(--primary-light));
-    color: hsl(var(--primary));
-    font-weight: 700;
+    background: hsl(var(--sidebar-accent));
+    color: hsl(var(--sidebar-accent-foreground));
+    border-color: hsl(var(--blue-bright) / 0.55);
   }
 
-  /* ── Lesson Node (skill map) ── */
+  /* ── Lesson node (skill path): fat circle on a thick edge ── */
   .lesson-node {
     position: relative;
-    width: 64px;
-    height: 64px;
+    width: 72px;
+    height: 66px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 150ms ease;
-    font-size: 1.5rem;
-    border: 3px solid transparent;
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 800;
+    transition: transform 100ms ease-out, box-shadow 100ms ease-out;
+    font-size: 1.4rem;
+    border: 0;
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-weight: 900;
+    margin-bottom: 8px;
   }
-
-  .lesson-node:hover {
-    transform: scale(1.1);
-  }
-
-  .lesson-node:active {
-    transform: scale(0.96);
-  }
+  .lesson-node:active { transform: translateY(6px); box-shadow: 0 2px 0 0 var(--node-edge) !important; }
 
   .lesson-node-available {
-    background: hsl(243, 75%, 59%);
-    border-color: hsl(244, 61%, 45%);
-    box-shadow:
-      0 5px 0 0 hsl(244, 61%, 38%),
-      0 8px 20px rgba(99, 102, 241, 0.35);
-    color: white;
-    animation: nodeFloat 3s ease-in-out infinite;
+    --node-edge: hsl(var(--green-bright-edge));
+    background: hsl(var(--green-bright));
+    box-shadow: 0 8px 0 0 var(--node-edge);
+    color: #fff;
   }
-
   .lesson-node-completed {
-    background: hsl(142, 71%, 45%);
-    border-color: hsl(142, 72%, 35%);
-    box-shadow:
-      0 5px 0 0 hsl(142, 72%, 28%),
-      0 8px 16px rgba(34, 197, 94, 0.3);
-    color: white;
+    --node-edge: hsl(var(--gold-edge));
+    background: hsl(var(--gold-bright));
+    box-shadow: 0 8px 0 0 var(--node-edge);
+    color: #fff;
   }
-
   .lesson-node-locked {
-    background: hsl(240, 14%, 85%);
-    border-color: hsl(240, 14%, 78%);
-    box-shadow: 0 4px 0 0 hsl(240, 14%, 72%);
-    color: hsl(240, 14%, 60%);
+    --node-edge: hsl(0 0% 72%);
+    background: hsl(0 0% 90%);
+    box-shadow: 0 8px 0 0 var(--node-edge);
+    color: hsl(0 0% 60%);
     cursor: not-allowed;
   }
 
-  /* ── Code Editor ── */
+  /* "START" bubble hovering over the current node */
+  .node-start-bubble {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    background: #fff;
+    color: hsl(var(--primary));
+    border: 2px solid hsl(var(--border));
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    animation: startBounce 1.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .node-start-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border-right: 2px solid hsl(var(--border));
+    border-bottom: 2px solid hsl(var(--border));
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  /* ── Code editor ── */
   .code-editor {
-    font-family: 'JetBrains Mono', monospace;
-    background: hsl(244, 61%, 15%);
-    color: hsl(228, 100%, 90%);
-    border: 2px solid hsl(238, 45%, 88%);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    background: hsl(var(--code-bg));
+    color: hsl(var(--code-fg));
+    border: 2px solid hsl(var(--code-border));
     border-radius: 16px;
   }
 
+  /* ── Page surface: soft mint with a faint solder-pad dot grid ── */
+  .page-dots {
+    background-color: hsl(var(--background));
+    background-image: radial-gradient(hsl(150 28% 84%) 1.5px, transparent 1.5px);
+    background-size: 28px 28px;
+  }
+
+  /* ── IDE toolbar pieces (dark surface) ── */
+  .ide-icon-btn {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: hsl(210 14% 76%);
+    transition: background-color 120ms ease-out, color 120ms ease-out;
+  }
+  .ide-icon-btn:hover { background: rgba(255,255,255,0.09); color: #fff; }
+  .ide-icon-btn[aria-pressed="true"] { background: hsl(var(--blue-bright) / 0.18); color: hsl(var(--blue-bright)); }
+
+  .ide-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    border: 2px solid hsl(210 14% 26%);
+    color: hsl(210 18% 86%);
+    font-size: 0.8rem;
+    font-weight: 800;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background-color 120ms ease-out, border-color 120ms ease-out;
+  }
+  .ide-chip:hover { background: rgba(255,255,255,0.08); border-color: hsl(210 14% 40%); }
+  .ide-chip:disabled { opacity: 0.5; pointer-events: none; }
+  .ide-chip-on { background: hsl(var(--green-bright) / 0.16); border-color: hsl(var(--green-bright) / 0.6); color: hsl(96 80% 72%); }
+
+  .ide-select {
+    background: transparent;
+    border: 2px solid hsl(210 14% 26%);
+    border-radius: 12px;
+    padding: 7px 12px;
+    color: hsl(210 18% 86%);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .ide-select:focus-visible { outline: 3px solid hsl(var(--blue-bright) / 0.6); outline-offset: 2px; }
+
+  .ide-view-tabs { background: rgba(255,255,255,0.07); }
+  .ide-view-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: hsl(210 14% 76%);
+    transition: background-color 120ms ease-out, color 120ms ease-out;
+  }
+  .ide-view-tab:hover { color: #fff; }
+  .ide-view-tab[aria-selected="true"] { background: #fff; color: hsl(var(--primary)); }
+
   /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: hsl(238, 80%, 95%); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb { background: hsl(238, 45%, 80%); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: hsl(243, 75%, 70%); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(0 0% 80%); border-radius: 999px; border: 2px solid #fff; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(0 0% 68%); }
 }
 
 /* ============================================================
@@ -464,344 +490,194 @@
    ============================================================ */
 
 @keyframes bounceIn {
-  0%   { transform: scale(0.3); opacity: 0; }
-  50%  { transform: scale(1.12); opacity: 1; }
-  70%  { transform: scale(0.9); }
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
   100% { transform: scale(1); }
 }
-
 @keyframes xpFloat {
   0%   { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-40px) scale(0.8); opacity: 0; }
+  100% { transform: translateY(-40px) scale(0.9); opacity: 0; }
 }
-
 @keyframes heartBeat {
   0%, 100% { transform: scale(1); }
-  14%  { transform: scale(1.2); }
-  28%  { transform: scale(1); }
-  42%  { transform: scale(1.15); }
-  70%  { transform: scale(1); }
+  30%  { transform: scale(1.25); }
+  60%  { transform: scale(1); }
 }
-
-@keyframes nodeFloat {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-5px); }
-}
-
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes slideInRight {
   from { transform: translateX(100%); opacity: 0; }
   to   { transform: translateX(0);    opacity: 1; }
 }
-
 @keyframes shimmerProgress {
   0%   { background-position: -200% center; }
   100% { background-position:  200% center; }
 }
-
 @keyframes popIn {
   0%   { transform: scale(0.8); opacity: 0; }
   100% { transform: scale(1);   opacity: 1; }
 }
-
 @keyframes celebrationBounce {
   0%, 100% { transform: scale(1) rotate(0deg); }
-  25%  { transform: scale(1.15) rotate(-3deg); }
-  75%  { transform: scale(1.1)  rotate(3deg); }
+  25%  { transform: scale(1.12) rotate(-3deg); }
+  75%  { transform: scale(1.08) rotate(3deg); }
+}
+@keyframes startBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(-5px); }
+}
+@keyframes mascotBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@keyframes mascotBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  96%           { transform: scaleY(0.1); }
+}
+@keyframes tracePulse {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -48; }
 }
 
-/* ── Native page transitions (View Transitions API) ──
-   Pure stationary opacity crossfade: no vertical movement or translateY shift.
-   The persistent layout (sidebar, top header, content container) stays 100% grounded and stable. */
-@keyframes vt-fade-out {
-  to { opacity: 0; }
-}
-@keyframes vt-fade-in {
-  from { opacity: 0; }
-}
-::view-transition-group(root) {
-  animation: none;
-}
+/* ── Native page transitions: stationary crossfade ── */
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in  { from { opacity: 0; } }
+::view-transition-group(root) { animation: none; }
 ::view-transition-old(root),
 ::view-transition-new(root) {
   width: 100%;
   height: 100%;
   mix-blend-mode: normal;
 }
-::view-transition-old(root) {
-  animation: 120ms ease-out both vt-fade-out;
-}
-::view-transition-new(root) {
-  animation: 180ms ease-in both vt-fade-in;
-}
+::view-transition-old(root) { animation: 100ms ease-out both vt-fade-out; }
+::view-transition-new(root) { animation: 160ms ease-out both vt-fade-in; }
 
-/* ── Utility animation classes ── */
-.animate-bounce-in    { animation: bounceIn 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-.animate-fade-in-up   { animation: fadeInUp 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.animate-pop-in       { animation: popIn 200ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-.animate-heart-beat   { animation: heartBeat 800ms ease-in-out; }
-.animate-celebration  { animation: celebrationBounce 600ms ease-in-out; }
+.animate-bounce-in      { animation: bounceIn 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-fade-in-up     { animation: fadeInUp 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-pop-in         { animation: popIn 200ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-heart-beat     { animation: heartBeat 800ms ease-in-out; }
+.animate-celebration    { animation: celebrationBounce 600ms ease-in-out; }
 .animate-slide-in-right { animation: slideInRight 0.2s ease-out; }
+.mascot-bob             { animation: mascotBob 3s ease-in-out infinite; }
+.mascot-eye             { transform-box: fill-box; transform-origin: center; animation: mascotBlink 5s infinite; }
 
-/* ── Stagger delays ── */
 .delay-75  { animation-delay: 75ms; }
 .delay-150 { animation-delay: 150ms; }
 .delay-225 { animation-delay: 225ms; }
 .delay-300 { animation-delay: 300ms; }
 
-/* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .lesson-node-available { animation: none; }
   ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation-duration: 0.01ms !important;
-  }
+  ::view-transition-new(*) { animation-duration: 0.01ms !important; }
 }
 
-/* ── Gradient utilities ── */
-.gradient-text-indigo {
-  color: hsl(var(--primary));
-}
+.gradient-text-indigo { color: hsl(var(--primary)); }
+.gradient-text-hero   { color: hsl(var(--foreground)); }
 
-.gradient-text-hero {
-  color: hsl(var(--foreground));
-}
-
-/* ── Dotted path connector for skill tree ── */
 .skill-path-connector {
   flex: 1;
   height: 4px;
-  border-top: 3px dashed hsl(var(--border));
+  border-top: 4px dotted hsl(var(--border));
   margin: 0 4px;
   align-self: center;
 }
-
 .skill-path-connector.completed {
-  border-top-color: hsl(var(--success));
+  border-top-color: hsl(var(--gold-bright));
   border-top-style: solid;
 }
 
-/* ── Tailwind utility overrides for global dark compatibility ── */
+/* ── Legacy Tailwind palette fallbacks → tokens ── */
 @layer utilities {
-  .bg-white {
-    background-color: hsl(var(--card)) !important;
-  }
-  .bg-slate-50 {
-    background-color: hsl(var(--background-hover)) !important;
-  }
-  .bg-slate-100 {
-    background-color: hsl(var(--background-hover)) !important;
-  }
-  .border-slate-100 {
-    border-color: hsl(var(--border)) !important;
-  }
-  .border-slate-200 {
-    border-color: hsl(var(--border)) !important;
-  }
-  .text-slate-800 {
-    color: hsl(var(--foreground)) !important;
-  }
-  .text-slate-600 {
-    color: hsl(var(--foreground-muted)) !important;
-  }
-  .text-slate-500 {
-    color: hsl(var(--foreground-muted)) !important;
-  }
-  .text-slate-400 {
-    color: hsl(var(--foreground-muted)) !important;
-  }
-  .text-indigo-950 {
-    color: hsl(var(--foreground)) !important;
-  }
-  .focus\:bg-white:focus {
-    background-color: hsl(var(--card)) !important;
-  }
-  .hover\:bg-slate-50:hover {
-    background-color: hsl(var(--background-hover)) !important;
-  }
+  .bg-white            { background-color: hsl(var(--card)) !important; }
+  .bg-slate-50,
+  .bg-slate-100        { background-color: hsl(var(--background-hover)) !important; }
+  .border-slate-100,
+  .border-slate-200    { border-color: hsl(var(--border)) !important; }
+  .text-slate-800,
+  .text-indigo-950     { color: hsl(var(--foreground)) !important; }
+  .text-slate-600,
+  .text-slate-500,
+  .text-slate-400      { color: hsl(var(--foreground-muted)) !important; }
+  .focus\:bg-white:focus   { background-color: hsl(var(--card)) !important; }
+  .hover\:bg-slate-50:hover { background-color: hsl(var(--background-hover)) !important; }
 }
 
-/* ── EXTERNAL CLASSES TO ELIMINATE TSX INLINE STYLES ── */
+/* ── Hooks used by TSX ── */
 
 /* Sidebar */
 .sidebar-aside {
-  width: 240px !important;
-  background: var(--sidebar-background) !important;
-  border-right: 2.5px solid var(--sidebar-border) !important;
+  width: 256px !important;
+  background: hsl(var(--sidebar-background)) !important;
+  border-right: 2px solid hsl(var(--sidebar-border)) !important;
 }
-.sidebar-header {
-  border-bottom: 2px solid var(--sidebar-border) !important;
-}
-.sidebar-logo-icon {
-  background: hsl(var(--primary)) !important;
-  box-shadow: 0 3px 0 hsl(var(--primary-dark)) !important;
-  border: 2px solid hsl(var(--primary-dark)) !important;
-}
+.sidebar-header { border-bottom: 0 !important; }
 .sidebar-logo-text {
-  font-family: 'Baloo 2', sans-serif !important;
-  color: hsl(var(--foreground)) !important;
+  font-family: 'Nunito', sans-serif !important;
+  font-weight: 900 !important;
+  color: hsl(var(--green-bright)) !important;
+  letter-spacing: -0.02em;
 }
-.sidebar-logo-sub {
-  color: hsl(var(--foreground-muted)) !important;
-}
+.sidebar-logo-sub { color: hsl(var(--sidebar-muted)) !important; }
 .sidebar-close-btn {
-  background: var(--background-hover) !important;
-  color: hsl(var(--foreground-muted)) !important;
+  background: hsl(var(--background-hover)) !important;
+  color: hsl(var(--sidebar-muted)) !important;
 }
-.sidebar-mascot-txt-primary {
-  color: hsl(var(--primary)) !important;
-  font-family: 'Baloo 2', sans-serif !important;
-}
-.sidebar-mascot-txt-muted {
-  color: hsl(var(--foreground-muted)) !important;
-  font-family: 'Baloo 2', sans-serif !important;
-}
-.sidebar-section-label {
-  color: hsl(var(--foreground-muted)) !important;
-  font-family: 'Baloo 2', sans-serif !important;
-}
-.sidebar-signout-btn {
-  color: hsl(var(--destructive)) !important;
-}
-.sidebar-signin-btn {
-  border-radius: 12px !important;
-  padding: 10px 16px !important;
-  font-size: 0.85rem !important;
-}
+.sidebar-section-label { color: hsl(var(--sidebar-muted)) !important; }
+.sidebar-signout-btn { color: hsl(var(--destructive)) !important; }
+.sidebar-signin-btn { width: 100%; }
 
-/* Profile Page */
-.profile-avatar-gradient {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary))) !important;
-}
-.profile-xp-fill {
-  background-color: hsl(var(--primary)) !important;
-}
+/* Profile */
+.profile-avatar-gradient { background: hsl(var(--blue-bright)) !important; }
+.profile-xp-fill         { background-color: hsl(var(--gold-bright)) !important; }
 
-/* IDE Page */
-.ide-top-bar {
-  background: hsl(232, 48%, 6%) !important;
-  border-color: hsl(232, 40%, 16%) !important;
-}
-.ide-top-back-btn {
-  background: rgba(255,255,255,0.06) !important;
-  color: hsl(228, 25%, 70%) !important;
-}
-.ide-title-text {
-  color: #FFFFFF !important;
-}
-.ide-subtitle-text {
-  color: hsl(228, 25%, 60%) !important;
-}
-.ide-instructions-header-icon {
-  color: #8B5CF6 !important;
-}
-.ide-instructions-header-text {
-  color: #FFFFFF !important;
-}
-.ide-instructions-step-pin {
-  color: #3B82F6 !important;
-}
-.ide-wokwi-simulator-header-text {
-  color: #FFFFFF !important;
-}
-.ide-top-btn-divider {
-  background: hsl(232, 40%, 20%) !important;
-}
+/* IDE — dark panels */
+.ide-top-bar { background: hsl(210 22% 9%) !important; border-color: hsl(210 14% 18%) !important; }
+.ide-top-back-btn { background: rgba(255,255,255,0.07) !important; color: hsl(210 14% 75%) !important; }
+.ide-title-text { color: #FFFFFF !important; }
+.ide-subtitle-text { color: hsl(210 12% 64%) !important; }
+.ide-instructions-header-icon { color: hsl(var(--gold-bright)) !important; }
+.ide-instructions-header-text { color: #FFFFFF !important; }
+.ide-instructions-step-pin { color: hsl(var(--blue-bright)) !important; }
+.ide-wokwi-simulator-header-text { color: #FFFFFF !important; }
+.ide-top-btn-divider { background: hsl(210 14% 22%) !important; }
 .ide-btn-reset {
-  background: rgba(255,69,0,0.15) !important;
-  color: #FF4500 !important;
-  border: 1px solid rgba(255,69,0,0.3) !important;
+  background: hsl(0 100% 64% / 0.15) !important;
+  color: hsl(0 100% 74%) !important;
+  border: 1px solid hsl(0 100% 64% / 0.35) !important;
 }
-.ide-workflow-indicator {
-  background: hsl(232, 42%, 11%) !important;
-  border-color: hsl(232, 40%, 16%) !important;
-}
-.ide-instructions-panel {
-  border-color: rgba(255,255,255,0.05) !important;
-}
-.ide-instructions-panel-title {
-  border-color: hsl(232, 40%, 16%) !important;
-}
-.ide-code-header {
-  background: hsl(232, 48%, 6%) !important;
-  border-color: hsl(232, 40%, 16%) !important;
-  color: hsl(228, 25%, 60%) !important;
-}
-.ide-wokwi-simulator-panel {
-  background: hsl(232, 42%, 11%) !important;
-  border-color: hsl(232, 40%, 16%) !important;
-}
-.ide-wokwi-simulator-panel-header {
-  border-color: hsl(232, 40%, 16%) !important;
-}
-.ide-library-manager-panel {
-  border-color: hsl(232, 40%, 16%) !important;
-}
-.ide-library-manager-header {
-  border-color: hsl(232, 40%, 16%) !important;
-}
-.ide-library-manager-search {
-  border-color: hsl(232, 40%, 16%) !important;
-}
-.ide-serial-console {
-  border-color: hsl(232, 40%, 16%) !important;
-}
-.ide-serial-console-header {
-  border-color: hsl(232, 40%, 16%) !important;
-  color: hsl(228, 25%, 60%) !important;
-}
+.ide-workflow-indicator { background: hsl(210 18% 12%) !important; border-color: hsl(210 14% 18%) !important; }
+.ide-instructions-panel { border-color: rgba(255,255,255,0.07) !important; }
+.ide-instructions-panel-title { border-color: hsl(210 14% 18%) !important; }
+.ide-code-header { background: hsl(210 22% 9%) !important; border-color: hsl(210 14% 18%) !important; color: hsl(210 12% 64%) !important; }
+.ide-wokwi-simulator-panel { background: hsl(210 18% 12%) !important; border-color: hsl(210 14% 18%) !important; }
+.ide-wokwi-simulator-panel-header { border-color: hsl(210 14% 18%) !important; }
+.ide-library-manager-panel,
+.ide-library-manager-header,
+.ide-library-manager-search,
+.ide-serial-console { border-color: hsl(210 14% 18%) !important; }
+.ide-serial-console-header { border-color: hsl(210 14% 18%) !important; color: hsl(210 12% 64%) !important; }
 
-/* Skill Badges & Bars */
-.skill-badge-electronics-basics {
-  background: rgba(59, 130, 246, 0.15) !important;
-  color: #3B82F6 !important;
-  border-color: rgba(59, 130, 246, 0.3) !important;
-}
-.skill-bar-electronics-basics {
-  background: #3B82F6 !important;
-}
-
-.skill-badge-programming {
-  background: rgba(16, 185, 129, 0.15) !important;
-  color: #10B981 !important;
-  border-color: rgba(16, 185, 129, 0.3) !important;
-}
-.skill-bar-programming {
-  background: #10B981 !important;
-}
-
-.skill-badge-sensors-actuators {
-  background: rgba(245, 158, 11, 0.15) !important;
-  color: #F59E0B !important;
-  border-color: rgba(245, 158, 11, 0.3) !important;
-}
-.skill-bar-sensors-actuators {
-  background: #F59E0B !important;
-}
-
-.skill-badge-iot-connectivity {
-  background: rgba(139, 92, 246, 0.15) !important;
-  color: #8B5CF6 !important;
-  border-color: rgba(139, 92, 246, 0.3) !important;
-}
-.skill-bar-iot-connectivity {
-  background: #8B5CF6 !important;
-}
-
+/* Skill badges & bars */
+.skill-badge-electronics-basics,
+.skill-badge-programming,
+.skill-badge-sensors-actuators,
+.skill-badge-iot-connectivity,
 .skill-badge-robotics {
-  background: rgba(236, 72, 153, 0.15) !important;
-  color: #EC4899 !important;
-  border-color: rgba(236, 72, 153, 0.3) !important;
+  background: hsl(var(--secondary-light)) !important;
+  color: hsl(var(--secondary)) !important;
+  border-color: hsl(var(--blue-bright) / 0.4) !important;
 }
+.skill-bar-electronics-basics,
+.skill-bar-programming,
+.skill-bar-sensors-actuators,
+.skill-bar-iot-connectivity,
 .skill-bar-robotics {
-  background: #EC4899 !important;
+  background: hsl(var(--green-bright)) !important;
 }

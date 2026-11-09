@@ -14,14 +14,14 @@ ArduinoLab is a learning platform for electronics and Arduino: structured lesson
 
 ## Brand Personality
 
-Modern and minimal, still playful. Clean, restrained, hierarchy-driven UI — not the loud neobrutalist/Duolingo bubble-and-neon look it launched with — but not a cold enterprise tool either. It's for learners, so it should still carry warmth and a sense of momentum (progress, streaks, leveling up) without leaning on saturated rainbow colors or heavy drop-shadow "clay" chrome to do it. Confidence and clarity over cuteness.
+Playful, lively and game-like, in the Duolingo mould (updated Nov 2026 at the owner's request, replacing the earlier "minimal dark" direction). Light surface, chunky pressable tiles, bright green progress, a friendly mascot (Volt), and visible XP / streak / levels. Warmth and momentum first; clarity still beats cuteness.
 
 ## Anti-references
 
-- The current per-item "bubble" nav pills (thick borders, offset box-shadow per row) — reads busy/heavy, not clean.
-- Neon/saturated hue-per-icon coloring (a different vivid color for every nav icon) — reads like a rainbow, not a considered palette.
-- Flat, dull, low-contrast grays used as a default filler color in muted text/borders/hover states — reads unfinished rather than restrained.
-- Generic default-Bootstrap or generic-SaaS look — the app should still feel like a distinct product, just a quieter one.
+- The previous dark slate + amber look — dull for a learning app.
+- Plain white pages with no colour or personality.
+- Generic default-Bootstrap or generic-SaaS look.
+- Emoji as UI chrome; colour used without meaning (each colour maps to one concept: green go, gold XP, orange streak, blue secondary).
 
 ## Design Principles
 
